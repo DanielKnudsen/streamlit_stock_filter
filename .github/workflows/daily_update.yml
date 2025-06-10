@@ -37,7 +37,19 @@ jobs:
         sudo ldconfig 
     # SLUT: Nytt TA-Lib-steg
     - name: Install dependencies
+      # --- START: Ändringar här ---
+      env:
+        # Peka mot var TA-Lib headers finns
+        TA_INCLUDE_PATH: /usr/include
+        # Peka mot var TA-Lib biblioteksfilerna finns
+        TA_LIBRARY_PATH: /usr/lib
+        # Säkerställ att ld hittar bibliotek under kompilering
+        LD_LIBRARY_PATH: /usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+        # Alternativt för GCC, även om TA_LIBRARY_PATH brukar räcka
+        # LDFLAGS: -L/usr/lib
+        # CFLAGS: -I/usr/include
       run: uv pip install --system -r requirements.txt
+      # --- SLUT: Ändringar här ---
 
     - name: Create data directory
       run: mkdir -p data
