@@ -16,40 +16,46 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'uv'
+        cache-dependency-path: requirements.txt
 
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    # START: Ersätt ditt gamla TA-Lib-steg med detta
     - name: Install TA-Lib C Library from source
       run: |
-        # Download and extract TA-Lib source code
+        # Kontrollera var vi är och vad som finns
+        pwd
+        ls -l
+        echo "Current user: $(whoami)"
+        echo "PATH: $PATH"
+
+        # Ladda ner och packa upp TA-Lib
         wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
         tar -xzf ta-lib-0.4.0-src.tar.gz
         cd ta-lib/
 
-        # Configure, build, and install the library
-        # --prefix=/usr ensures it's installed to a standard location
-        # where Python's ta-lib package can find it.
-        ./configure --prefix=/usr
+        # Konfigurera, bygg och installera biblioteket
+        # VIKTIGT: ändra prefix till /usr/local. Detta är ofta mer pålitligt på CI
+        ./configure --prefix=/usr/local
         make
         sudo make install
-        sudo ldconfig 
-    # SLUT: Nytt TA-Lib-steg
+        sudo ldconfig # Uppdatera länkarens cache
+
+        # Lägg till diagnostik efter installation
+        echo "TA-Lib installation done. Checking libs:"
+        ls -l /usr/local/lib/libta-lib.so* || echo "libta-lib.so not found in /usr/local/lib"
+        ls -l /usr/lib/libta-lib.so* || echo "libta-lib.so not found in /usr/lib"
+        
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
     - name: Install dependencies
-      # --- START: Ändringar här ---
       env:
-        # Peka mot var TA-Lib headers finns
-        TA_INCLUDE_PATH: /usr/include
-        # Peka mot var TA-Lib biblioteksfilerna finns
-        TA_LIBRARY_PATH: /usr/lib
-        # Säkerställ att ld hittar bibliotek under kompilering
-        LD_LIBRARY_PATH: /usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
-        # Alternativt för GCC, även om TA_LIBRARY_PATH brukar räcka
-        # LDFLAGS: -L/usr/lib
-        # CFLAGS: -I/usr/include
+        # Peka mot var TA-Lib headers finns - nu i /usr/local/include
+        TA_INCLUDE_PATH: /usr/local/include
+        # Peka mot var TA-Lib biblioteksfilerna finns - nu i /usr/local/lib
+        TA_LIBRARY_PATH: /usr/local/lib
+        # Inkludera både /usr/lib och /usr/local/lib för länkaren
+        LD_LIBRARY_PATH: /usr/local/lib:/usr/lib:$LD_LIBRARY_PATH
       run: uv pip install --system -r requirements.txt
-      # --- SLUT: Ändringar här ---
 
     - name: Create data directory
       run: mkdir -p data
@@ -57,7 +63,7 @@ jobs:
     - name: Run stock analyzer
       run: uv run python stock_analyzer.py
       env:
-        PYTHONUNBUFFERED: 1  # Ensure logs are printed in real-time
+        PYTHONUNBUFFERED: 1
 
     - name: Commit and push changes
       run: |
@@ -66,4 +72,4 @@ jobs:
         git add data/*
         git diff --quiet && git diff --staged --quiet || git commit -m "Update stock data $(date +%Y%m%d)"
         git push
-      continue-on-error: true  # Continue even if no changes to commit
+      continue-on-error: true
