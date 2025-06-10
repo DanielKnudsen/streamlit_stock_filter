@@ -1,0 +1,43 @@
+```yaml
+name: Daily Stock Data Update
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Run at 06:00 UTC every day (07:00 CET)
+  workflow_dispatch:  # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Install dependencies
+      run: uv pip install --system -r requirements.txt
+
+    - name: Create data directory
+      run: mkdir -p data
+
+    - name: Run stock analyzer
+      run: uv run python stock_analyzer.py
+      env:
+        PYTHONUNBUFFERED: 1  # Ensure logs are printed in real-time
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/*
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update stock data $(date +%Y%m%d)"
+        git push
+      continue-on-error: true  # Continue even if no changes to commit
+```
