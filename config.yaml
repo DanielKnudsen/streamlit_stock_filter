@@ -1,6 +1,6 @@
 data:
-  history_period: "1y"  # Period for historical data from yfinance
-  display_period: "6mo"  # Period to display in graphs
+  history_period: "3y"  # Period for historical data from yfinance
+  display_period: "30mo"  # Period to display in graphs
 tickers_file: "tickers.csv"
 indicators:
   - name: "SMA_20"
@@ -18,8 +18,3 @@ indicators:
     type: "rsi"
     period: 14
     rank: true
-  - name: "MACD"
-    type: "macd"
-    fast_period: 12
-    slow_period: 26
-    signal_period: 9

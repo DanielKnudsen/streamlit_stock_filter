@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Optional
 import pandas as pd
 import yfinance as yf
-import pandas_ta as ta
+from finta import TA
 import yaml
 from datetime import datetime
 
@@ -48,44 +48,55 @@ class StockAnalyzer:
 
     def _load_tickers(self) -> List[str]:
         df = pd.read_csv(self.config.tickers_file)
-        # Ensure tickers end with .ST for Stockholm Stock Exchange
-        df['ticker'] = df['ticker'].apply(lambda x: x if x.endswith('.ST') else f"{x}.ST")
         return df['ticker'].tolist()
 
     def fetch_data(self):
         for ticker in self.tickers:
-            stock = yf.Ticker(ticker)
-            self.data[ticker] = stock.history(period=self.config.history_period)
+            try:
+                # Dynamically append .ST for Stockholm Stock Exchange
+                yf_ticker = f"{ticker}.ST"
+                stock = yf.Ticker(yf_ticker)
+                self.data[ticker] = stock.history(period=self.config.history_period)
+                if self.data[ticker].empty:
+                    print(f"No data retrieved for {yf_ticker}")
+            except Exception as e:
+                print(f"Error fetching data for {yf_ticker}: {str(e)}")
 
     def calculate_indicators(self):
         for ticker in self.tickers:
+            if ticker not in self.data or self.data[ticker].empty:
+                print(f"Skipping indicator calculation for {ticker} due to missing data")
+                continue
             df = self.data[ticker].copy()
             self.indicators_data[ticker] = {}
             
             for indicator in self.config.indicators:
-                if indicator.type == "sma":
-                    self.indicators_data[ticker][indicator.name] = ta.sma(
-                        df['Close'], length=indicator.period
-                    )
-                elif indicator.type == "sma_diff":
-                    short = self.indicators_data[ticker][indicator.short_sma]
-                    long = self.indicators_data[ticker][indicator.long_sma]
-                    self.indicators_data[ticker][indicator.name] = (
-                        (short - long) / long * 100
-                    )
-                elif indicator.type == "rsi":
-                    self.indicators_data[ticker][indicator.name] = ta.rsi(
-                        df['Close'], length=indicator.period
-                    )
-                elif indicator.type == "macd":
-                    macd = ta.macd(
-                        df['Close'],
-                        fast=indicator.fast_period,
-                        slow=indicator.slow_period,
-                        signal=indicator.signal_period
-                    )
-                    # pandas_ta returns a DataFrame with 'MACD', 'MACDh', 'MACDs'
-                    self.indicators_data[ticker][indicator.name] = macd[f"MACD_{indicator.fast_period}_{indicator.slow_period}_{indicator.signal_period}"]
+                try:
+                    if indicator.type == "sma":
+                        self.indicators_data[ticker][indicator.name] = TA.SMA(
+                            df, period=indicator.period
+                        )
+                    elif indicator.type == "sma_diff":
+                        short = self.indicators_data[ticker][indicator.short_sma]
+                        long = self.indicators_data[ticker][indicator.long_sma]
+                        self.indicators_data[ticker][indicator.name] = (
+                            (short - long) / long * 100
+                        )
+                    elif indicator.type == "rsi":
+                        self.indicators_data[ticker][indicator.name] = TA.RSI(
+                            df, period=indicator.period
+                        )
+                    elif indicator.type == "macd":
+                        macd = TA.MACD(
+                            df,
+                            period_fast=indicator.fast_period,
+                            period_slow=indicator.slow_period,
+                            period_signal=indicator.signal_period
+                        )
+                        # Finta returns a DataFrame with 'MACD' and 'SIGNAL'
+                        self.indicators_data[ticker][indicator.name] = macd['MACD']
+                except Exception as e:
+                    print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
 
     def calculate_ranking(self):
         for indicator in self.config.indicators:
@@ -93,9 +104,14 @@ class StockAnalyzer:
                 continue
             values = []
             for ticker in self.tickers:
-                last_value = self.indicators_data[ticker][indicator.name].iloc[-1]
-                if pd.notna(last_value):
-                    values.append((ticker, last_value))
+                if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
+                    last_value = self.indicators_data[ticker][indicator.name].iloc[-1]
+                    if pd.notna(last_value):
+                        values.append((ticker, last_value))
+            
+            if not values:
+                print(f"No valid data for ranking {indicator.name}")
+                continue
             
             # Sort and normalize to 0-100
             values.sort(key=lambda x: x[1])
@@ -111,10 +127,18 @@ class StockAnalyzer:
     def save_data(self):
         timestamp = datetime.now().strftime("%Y%m%d")
         for ticker in self.tickers:
+            if ticker not in self.data or self.data[ticker].empty:
+                print(f"Skipping save for {ticker} due to missing data")
+                continue
             df = self.data[ticker].copy()
             for indicator in self.config.indicators:
-                df[indicator.name] = self.indicators_data[ticker][indicator.name]
-            df.to_csv(f"data/{ticker}_{timestamp}.csv")
+                if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
+                    df[indicator.name] = self.indicators_data[ticker][indicator.name]
+            try:
+                # Explicitly save the index (Date) to ensure it's preserved
+                df.to_csv(f"data/{ticker}_{timestamp}.csv", index=True, index_label='Date')
+            except Exception as e:
+                print(f"Error saving data for {ticker}: {str(e)}")
 
 if __name__ == "__main__":
     analyzer = StockAnalyzer("config.yaml")
