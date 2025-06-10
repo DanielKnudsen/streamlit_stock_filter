@@ -34,6 +34,7 @@ jobs:
         ./configure --prefix=/usr
         make
         sudo make install
+        sudo ldconfig 
     # SLUT: Nytt TA-Lib-steg
     - name: Install dependencies
       run: uv pip install --system -r requirements.txt
