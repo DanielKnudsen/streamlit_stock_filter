@@ -57,6 +57,9 @@ class StockAnalyzer:
                 yf_ticker = f"{ticker}.ST"
                 stock = yf.Ticker(yf_ticker)
                 self.data[ticker] = stock.history(period=self.config.history_period)
+                # Ensure timezone-naive index
+                if self.data[ticker].index.tz is not None:
+                    self.data[ticker].index = self.data[ticker].index.tz_localize(None)
                 if self.data[ticker].empty:
                     print(f"No data retrieved for {yf_ticker}")
             except Exception as e:
@@ -135,7 +138,9 @@ class StockAnalyzer:
                 if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
                     df[indicator.name] = self.indicators_data[ticker][indicator.name]
             try:
-                # Explicitly save the index (Date) to ensure it's preserved
+                # Save with timezone-naive index
+                if df.index.tz is not None:
+                    df.index = df.index.tz_localize(None)
                 df.to_csv(f"data/{ticker}_{timestamp}.csv", index=True, index_label='Date')
             except Exception as e:
                 print(f"Error saving data for {ticker}: {str(e)}")

@@ -13,6 +13,23 @@ class Filter:
     min_value: float
     max_value: float
 
+def convert_to_pandas_offset(period: str) -> str:
+    """Convert yfinance-style period (e.g., '6mo') to Pandas offset (e.g., '6M')."""
+    period_map = {
+        "1d": "1D",
+        "5d": "5D",
+        "1mo": "1M",
+        "3mo": "3M",
+        "6mo": "6M",
+        "1y": "1Y",
+        "2y": "2Y",
+        "5y": "5Y",
+        "10y": "10Y",
+        "ytd": "YTD",
+        "max": "max"
+    }
+    return period_map.get(period, period)
+
 @st.cache_data
 def load_latest_data(ticker: str) -> pd.DataFrame:
     files = glob.glob(f"data/{ticker}_*.csv")
@@ -21,9 +38,12 @@ def load_latest_data(ticker: str) -> pd.DataFrame:
         return None
     latest_file = max(files, key=os.path.getctime)
     try:
-        # Ensure Date is parsed as datetime and set as index
+        # Parse Date as datetime and set as index
         df = pd.read_csv(latest_file, index_col='Date', parse_dates=['Date'])
-        # Verify or convert index to DatetimeIndex
+        # Ensure timezone-naive DatetimeIndex
+        if df.index.tz is not None:
+            df.index = df.index.tz_localize(None)
+        # Verify index is DatetimeIndex
         if not isinstance(df.index, pd.DatetimeIndex):
             df.index = pd.to_datetime(df.index)
         return df
@@ -44,7 +64,7 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         if indicator.name in data.columns:
             fig.add_trace(go.Scatter(
                 x=data.index,
-                y=data[indicator.name],  # Fixed: Correctly reference indicator.name
+                y=data[indicator.name],
                 name=indicator.name,
                 yaxis='y2' if indicator.type in ['rsi', 'macd'] else 'y'
             ))
@@ -96,8 +116,8 @@ def main():
             max_val = st.sidebar.number_input(
                 f"Max {indicator.name}", value=100.0, step=0.1, key=f"max_{indicator.name}"
             )
-            filters.append(Filter(indicator.name, min_val, max_val))
-    
+            filters.append(Filter(indicator=indicator.name, min_value=min_val, max_value=max_val))
+            
     # Apply filters
     filtered_tickers = []
     for ticker in analyzer.tickers:
@@ -111,7 +131,7 @@ def main():
             filtered_tickers.append(ticker)
     
     if not filtered_tickers:
-        st.warning("No tickers match the filter criteria. Adjust filters and try again.")
+        st.warning("No tickers match the filter criteria. Adjust the filters or try again.")
         return
     
     # Ticker selection
@@ -122,7 +142,9 @@ def main():
         data = load_latest_data(selected_ticker)
         if data is not None:
             try:
-                data = data.last(analyzer.config.display_period)
+                # Convert display_period to Pandas offset
+                pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
+                data = data.last(pandas_offset)
                 fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
                                 analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)

@@ -1,6 +1,6 @@
 data:
-  history_period: "3y"  # Period for historical data from yfinance
-  display_period: "30mo"  # Period to display in graphs
+  history_period: "2y"  # Period for historical data from yfinance
+  display_period: "1y"  # Period to display in graphs
 tickers_file: "tickers.csv"
 indicators:
   - name: "SMA_20"
