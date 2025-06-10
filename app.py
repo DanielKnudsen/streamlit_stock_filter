@@ -6,25 +6,12 @@ import plotly.graph_objects as go
 from stock_analyzer import StockAnalyzer, IndicatorConfig
 import glob
 import os
-from datetime import datetime, timedelta
 
 @dataclass
 class Filter:
     indicator: str
     min_value: float
     max_value: float
-
-def parse_period(period: str) -> timedelta:
-    """Convert a period string (e.g., '6mo', '1y') to a timedelta."""
-    period = period.lower()
-    if period.endswith('mo'):
-        months = int(period[:-2])
-        return timedelta(days=months * 30)  # Approximate months to days
-    elif period.endswith('y'):
-        years = int(period[:-1])
-        return timedelta(days=years * 365)
-    else:
-        raise ValueError(f"Invalid period format: {period}")
 
 @st.cache_data
 def load_latest_data(ticker: str) -> pd.DataFrame:
@@ -35,9 +22,6 @@ def load_latest_data(ticker: str) -> pd.DataFrame:
     latest_file = max(files, key=os.path.getctime)
     try:
         df = pd.read_csv(latest_file, index_col='Date', parse_dates=True)
-        # Ensure index is DatetimeIndex and handle timezone
-        if not isinstance(df.index, pd.DatetimeIndex):
-            df.index = pd.to_datetime(df.index, utc=True).tz_convert('UTC')
         return df
     except Exception as e:
         st.error(f"Error loading data for {ticker}: {str(e)}")
@@ -133,23 +117,16 @@ def main():
     if selected_ticker:
         data = load_latest_data(selected_ticker)
         if data is not None:
-            try:
-                # Filter data to the display period
-                period_delta = parse_period(analyzer.config.display_period)
-                cutoff_date = data.index.max() - period_delta
-                data = data[data.index >= cutoff_date]
-                
-                fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
-                               analyzer.config.display_period)
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Display rankings
-                st.subheader("Rankings")
-                rank_data = {ind.name: analyzer.ranking.get(ind.name, {}).get(selected_ticker, 0)
-                            for ind in analyzer.config.indicators if ind.rank}
-                st.table(pd.DataFrame([rank_data], index=[selected_ticker]))
-            except Exception as e:
-                st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
+            data = data.last(analyzer.config.display_period)
+            fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
+                           analyzer.config.display_period)
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Display rankings
+            st.subheader("Rankings")
+            rank_data = {ind.name: analyzer.ranking.get(ind.name, {}).get(selected_ticker, 0)
+                        for ind in analyzer.config.indicators if ind.rank}
+            st.table(pd.DataFrame([rank_data], index=[selected_ticker]))
 
 if __name__ == "__main__":
     main()
