@@ -11,4 +11,3 @@ font = "sans serif"
 [server]
 enableCORS = false
 enableXsrfProtection = false
-pythonVersion = "3.11"
