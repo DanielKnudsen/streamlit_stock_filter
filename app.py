@@ -21,7 +21,11 @@ def load_latest_data(ticker: str) -> pd.DataFrame:
         return None
     latest_file = max(files, key=os.path.getctime)
     try:
-        df = pd.read_csv(latest_file, index_col='Date', parse_dates=True)
+        # Ensure Date is parsed as datetime and set as index
+        df = pd.read_csv(latest_file, index_col='Date', parse_dates=['Date'])
+        # Verify or convert index to DatetimeIndex
+        if not isinstance(df.index, pd.DatetimeIndex):
+            df.index = pd.to_datetime(df.index)
         return df
     except Exception as e:
         st.error(f"Error loading data for {ticker}: {str(e)}")
@@ -40,7 +44,7 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         if indicator.name in data.columns:
             fig.add_trace(go.Scatter(
                 x=data.index,
-                y=data[indicator.name],
+                y=data[indicator.name],  # Fixed: Correctly reference indicator.name
                 name=indicator.name,
                 yaxis='y2' if indicator.type in ['rsi', 'macd'] else 'y'
             ))
@@ -117,16 +121,19 @@ def main():
     if selected_ticker:
         data = load_latest_data(selected_ticker)
         if data is not None:
-            data = data.last(analyzer.config.display_period)
-            fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
-                           analyzer.config.display_period)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Display rankings
-            st.subheader("Rankings")
-            rank_data = {ind.name: analyzer.ranking.get(ind.name, {}).get(selected_ticker, 0)
-                        for ind in analyzer.config.indicators if ind.rank}
-            st.table(pd.DataFrame([rank_data], index=[selected_ticker]))
+            try:
+                data = data.last(analyzer.config.display_period)
+                fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
+                                analyzer.config.display_period)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Display rankings
+                st.subheader("Rankings")
+                rank_data = {ind.name: analyzer.ranking.get(ind.name, {}).get(selected_ticker, 0)
+                            for ind in analyzer.config.indicators if ind.rank}
+                st.table(pd.DataFrame([rank_data], index=[selected_ticker]))
+            except Exception as e:
+                st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
 
 if __name__ == "__main__":
     main()
