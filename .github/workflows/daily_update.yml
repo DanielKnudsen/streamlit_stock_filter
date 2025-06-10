@@ -20,14 +20,25 @@ jobs:
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
     
+    - name: Create virtual environment
+      run: uv venv
+    
     - name: Install dependencies
-      run: uv pip install --system -r requirements.txt
+      run: uv pip install -r requirements.txt
+    
+    - name: Verify dependencies
+      run: |
+        source .venv/bin/activate
+        pip list
+        python -c "import pandas; print('pandas version:', pandas.__version__)"
     
     - name: Create data directory
       run: mkdir -p data
     
     - name: Run stock analyzer
-      run: uv run python stock_analyzer.py
+      run: |
+        source .venv/bin/activate
+        uv run python stock_analyzer.py
     
     - name: Commit and push changes
       run: |
