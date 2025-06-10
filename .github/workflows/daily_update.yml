@@ -20,13 +20,21 @@ jobs:
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    # START: Lägg till detta steg för att installera TA-Lib C-biblioteket
-    - name: Install TA-Lib C Library
+    # START: Ersätt ditt gamla TA-Lib-steg med detta
+    - name: Install TA-Lib C Library from source
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ta-lib
-    # SLUT: Lägg till detta steg
+        # Download and extract TA-Lib source code
+        wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+        tar -xzf ta-lib-0.4.0-src.tar.gz
+        cd ta-lib/
 
+        # Configure, build, and install the library
+        # --prefix=/usr ensures it's installed to a standard location
+        # where Python's ta-lib package can find it.
+        ./configure --prefix=/usr
+        make
+        sudo make install
+    # SLUT: Nytt TA-Lib-steg
     - name: Install dependencies
       run: uv pip install --system -r requirements.txt
 
