@@ -2,79 +2,37 @@ name: Daily Stock Data Update
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Run at 06:00 UTC every day (07:00 CET)
-  workflow_dispatch:  # Allow manual trigger from GitHub Actions UI
+    - cron: '0 6 * * *'  # Run at 06:00 UTC every day
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v4
+    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-
-    # --- NYTT STEG: Installera bygg-beroenden ---
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libtool autoconf pkg-config wget
-    # --- SLUT NYTT STEG ---
-
-    - name: Install TA-Lib C Library from source
-      run: |
-        # Kontrollera var vi är och vad som finns
-        pwd
-        ls -l
-        echo "Current user: $(whoami)"
-        echo "PATH: $PATH"
-
-        # Ladda ner och packa upp TA-Lib
-        wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-        tar -xzf ta-lib-0.4.0-src.tar.gz
-        cd ta-lib/
-
-        # Konfigurera, bygg och installera biblioteket
-        # VIKTIGT: ändra prefix till /usr/local. Detta är ofta mer pålitligt på CI
-        ./configure --prefix=/usr/local
-        make
-        sudo make install
-        sudo ldconfig # Uppdatera länkarens cache
-
-        # Lägg till diagnostik efter installation
-        echo "TA-Lib installation done. Checking libs:"
-        ls -l /usr/local/lib/libta-lib.so* || echo "libta-lib.so not found in /usr/local/lib"
-        ls -l /usr/lib/libta-lib.so* || echo "libta-lib.so not found in /usr/lib"
-        
+    
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
+    
     - name: Install dependencies
-      env:
-        # Peka mot var TA-Lib headers finns - nu i /usr/local/include
-        TA_INCLUDE_PATH: /usr/local/include
-        # Peka mot var TA-Lib biblioteksfilerna finns - nu i /usr/local/lib
-        TA_LIBRARY_PATH: /usr/local/lib
-        # Inkludera både /usr/lib och /usr/local/lib för länkaren
-        LD_LIBRARY_PATH: /usr/local/lib:/usr/lib:$LD_LIBRARY_PATH
       run: uv pip install --system -r requirements.txt
-
+    
     - name: Create data directory
       run: mkdir -p data
-
+    
     - name: Run stock analyzer
       run: uv run python stock_analyzer.py
-      env:
-        PYTHONUNBUFFERED: 1
-
+    
     - name: Commit and push changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add data/*
-        git diff --quiet && git diff --staged --quiet || git commit -m "Update stock data $(date +%Y%m%d)"
+        git commit -m "Update stock data $(date +%Y%m%d)" || echo "No changes to commit"
         git push
-      continue-on-error: true
