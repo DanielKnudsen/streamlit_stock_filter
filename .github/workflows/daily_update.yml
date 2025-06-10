@@ -17,6 +17,13 @@ jobs:
       with:
         python-version: '3.11'
 
+    # --- NYTT STEG: Installera bygg-beroenden ---
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libtool autoconf pkg-config wget
+    # --- SLUT NYTT STEG ---
+
     - name: Install TA-Lib C Library from source
       run: |
         # Kontrollera var vi är och vad som finns
