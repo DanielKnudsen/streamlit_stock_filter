@@ -102,32 +102,6 @@ class StockAnalyzer:
                 except Exception as e:
                     print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
 
-    def calculate_ranking(self):
-        for indicator in self.config.indicators:
-            if not indicator.rank:
-                continue
-            values = []
-            for ticker in self.tickers:
-                if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
-                    last_value = self.indicators_data[ticker][indicator.name].iloc[-1]
-                    if pd.notna(last_value):
-                        values.append((ticker, last_value))
-            
-            if not values:
-                print(f"No valid data for ranking {indicator.name}")
-                continue
-            
-            # Sort and normalize to 0-100
-            values.sort(key=lambda x: x[1])
-            min_val = values[0][1]
-            max_val = values[-1][1]
-            range_val = max_val - min_val if max_val != min_val else 1
-            
-            self.ranking[indicator.name] = {
-                ticker: ((val - min_val) / range_val) * 100
-                for ticker, val in values
-            }
-
     def save_data(self):
         timestamp = datetime.now().strftime("%Y%m%d")
         for ticker in self.tickers:
@@ -150,5 +124,4 @@ if __name__ == "__main__":
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
-    analyzer.calculate_ranking()
     analyzer.save_data()
