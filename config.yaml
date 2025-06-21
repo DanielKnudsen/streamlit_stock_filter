@@ -18,7 +18,7 @@ indicators:
     short_sma: "SMA_20"
     long_sma: "SMA_50"
     filter: true
-    panel: lower
+    panel: middle
   - name: "RSI"
     type: "rsi"
     period: 14

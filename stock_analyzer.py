@@ -142,7 +142,7 @@ class StockAnalyzer:
                 # Save with timezone-naive index
                 if df.index.tz is not None:
                     df.index = df.index.tz_localize(None)
-                df.to_csv(f"data/{ticker}_{timestamp}.csv", index=True, index_label='Date')
+                df.to_csv(f"data/{ticker}.csv", index=True, index_label='Date')
             except Exception as e:
                 print(f"Error saving data for {ticker}: {str(e)}")
 
