@@ -5,6 +5,7 @@ import yfinance as yf
 from finta import TA
 import yaml
 from datetime import datetime
+import os
 
 @dataclass
 class IndicatorConfig:
@@ -121,6 +122,7 @@ class StockAnalyzer:
                 print(f"Error saving data for {ticker}: {str(e)}")
 
 if __name__ == "__main__":
+    os.makedirs("data", exist_ok=True)
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
