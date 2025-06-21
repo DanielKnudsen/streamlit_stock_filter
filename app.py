@@ -41,14 +41,13 @@ def convert_to_pandas_offset(period: str) -> str:
 
 @st.cache_data
 def load_latest_data(ticker: str) -> pd.DataFrame:
-    files = glob.glob(f"data/{ticker}_*.csv")
-    if not files:
+    file_path = f"data/{ticker}.csv"
+    if not os.path.exists(file_path):
         st.error(f"No data found for ticker {ticker}. Run stock_analyzer.py to generate data.")
         return None
-    latest_file = max(files, key=os.path.getctime)
     try:
         # Parse Date as datetime and set as index
-        df = pd.read_csv(latest_file, index_col='Date', parse_dates=['Date'])
+        df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
         # Ensure timezone-naive DatetimeIndex
         if df.index.tz is not None:
             df.index = df.index.tz_localize(None)
@@ -61,19 +60,34 @@ def load_latest_data(ticker: str) -> pd.DataFrame:
         return None
 
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
-    # Check if any indicator should go in the lower panel
+    # Determine which panels are needed
+    has_middle = any(getattr(ind, "panel", "price") == "middle" for ind in config)
     has_lower = any(getattr(ind, "panel", "price") == "lower" for ind in config)
 
-    if has_lower:
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                            row_heights=[0.7, 0.3],
-                            vertical_spacing=0.05,
-                            subplot_titles=("Price Panel", "Lower Panel"))
+    # Decide number of rows
+    if has_middle and has_lower:
+        rows = 3
+        row_heights = [0.5, 0.25, 0.25]
+        subplot_titles = ("Price Panel", "Middle Panel", "Lower Panel")
+    elif has_middle:
+        rows = 2
+        row_heights = [0.7, 0.3]
+        subplot_titles = ("Price Panel", "Middle Panel")
+    elif has_lower:
+        rows = 2
+        row_heights = [0.7, 0.3]
+        subplot_titles = ("Price Panel", "Lower Panel")
     else:
-        fig = make_subplots(rows=1, cols=1, shared_xaxes=True, 
-                            row_heights=[1.0],
-                            vertical_spacing=0.05,
-                            subplot_titles=("Price Panel",))
+        rows = 1
+        row_heights = [1.0]
+        subplot_titles = ("Price Panel",)
+
+    fig = make_subplots(
+        rows=rows, cols=1, shared_xaxes=True,
+        row_heights=row_heights,
+        vertical_spacing=0.05,
+        subplot_titles=subplot_titles
+    )
 
     # Price panel (main)
     fig.add_trace(
@@ -97,17 +111,23 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
             )
             if panel == "price":
                 fig.add_trace(trace, row=1, col=1)
-            elif has_lower:
-                fig.add_trace(trace, row=2, col=1)
+            elif panel == "middle" and has_middle:
+                fig.add_trace(trace, row=2 if not has_lower else 2, col=1)
+            elif panel == "lower" and has_lower:
+                fig.add_trace(trace, row=3 if has_middle and has_lower else 2, col=1)
+
+    # Update y-axis titles
+    fig.update_yaxes(title_text="Price", row=1, col=1)
+    if has_middle:
+        fig.update_yaxes(title_text="Middle Indicators", row=2 if not has_lower else 2, col=1)
+    if has_lower:
+        fig.update_yaxes(title_text="Lower Indicators", row=3 if has_middle and has_lower else 2, col=1)
 
     fig.update_layout(
-        height=700,
+        height=900 if has_middle and has_lower else 700,
         legend=dict(orientation="h"),
         xaxis=dict(title="Date"),
-        yaxis=dict(title="Price"),
     )
-    if has_lower:
-        fig.update_yaxes(title_text="Indicators", row=2, col=1)
 
     return fig
 
@@ -154,13 +174,15 @@ def main():
                 min_val = -100.0
                 max_val = 100.0
 
-            min_input = st.sidebar.number_input(
-                f"Min {indicator.name}", value=min_val, step=0.1, key=f"min_{indicator.name}"
+            slider_min, slider_max = st.sidebar.slider(
+                f"{indicator.name} range",
+                min_value=min_val,
+                max_value=max_val,
+                value=(min_val, max_val),
+                step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+                key=f"slider_{indicator.name}"
             )
-            max_input = st.sidebar.number_input(
-                f"Max {indicator.name}", value=max_val, step=0.1, key=f"max_{indicator.name}"
-            )
-            filters.append(Filter(indicator=indicator.name, min_value=min_input, max_value=max_input))
+            filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
             
     # Apply filters (no ranking, just filter on indicator values)
     filtered_tickers = []
