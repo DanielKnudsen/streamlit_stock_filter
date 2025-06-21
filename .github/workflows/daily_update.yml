@@ -36,8 +36,10 @@ jobs:
     
     - name: Create data directory
       run: mkdir -p data
-    
+      working-directory: ${{ github.workspace }}/streamlit_stock_filter
+
     - name: Run stock analyzer
       run: |
         source .venv/bin/activate
         uv run python stock_analyzer.py
+      working-directory: ${{ github.workspace }}/streamlit_stock_filter
