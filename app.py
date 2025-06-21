@@ -3,9 +3,11 @@ from typing import List, Dict
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from stock_analyzer import StockAnalyzer, IndicatorConfig
 import glob
 import os
+import re
 
 @dataclass
 class Filter:
@@ -14,21 +16,28 @@ class Filter:
     max_value: float
 
 def convert_to_pandas_offset(period: str) -> str:
-    """Convert yfinance-style period (e.g., '6mo') to Pandas offset (e.g., '6M')."""
-    period_map = {
-        "1d": "1D",
-        "5d": "5D",
-        "1mo": "1M",
-        "3mo": "3M",
-        "6mo": "6M",
-        "1y": "1Y",
-        "2y": "2Y",
-        "5y": "5Y",
-        "10y": "10Y",
-        "ytd": "YTD",
-        "max": "max"
-    }
-    return period_map.get(period, period)
+    """
+    Convert yfinance-style period (e.g., '6mo', '7d', '12y') to Pandas offset (e.g., '6M', '7D', '12Y').
+    Handles 'ytd' and 'max' as special cases.
+    """
+    period = period.lower()
+    if period in ("ytd", "max"):
+        return period.upper()
+    match = re.match(r"(\d+)([a-z]+)", period)
+    if match:
+        num, unit = match.groups()
+        unit_map = {
+            "d": "D",
+            "w": "W",
+            "mo": "M",
+            "y": "Y"
+        }
+        # Find the longest matching unit
+        for k in sorted(unit_map, key=len, reverse=True):
+            if unit.startswith(k):
+                return f"{num}{unit_map[k]}"
+    # Fallback: return as is
+    return period.upper()
 
 @st.cache_data
 def load_latest_data(ticker: str) -> pd.DataFrame:
@@ -52,30 +61,54 @@ def load_latest_data(ticker: str) -> pd.DataFrame:
         return None
 
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=data.index,
-        y=data['Close'],
-        name='Close Price',
-        line=dict(color='blue')
-    ))
-    
+    # Check if any indicator should go in the lower panel
+    has_lower = any(getattr(ind, "panel", "price") == "lower" for ind in config)
+
+    if has_lower:
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
+                            row_heights=[0.7, 0.3],
+                            vertical_spacing=0.05,
+                            subplot_titles=("Price Panel", "Lower Panel"))
+    else:
+        fig = make_subplots(rows=1, cols=1, shared_xaxes=True, 
+                            row_heights=[1.0],
+                            vertical_spacing=0.05,
+                            subplot_titles=("Price Panel",))
+
+    # Price panel (main)
+    fig.add_trace(
+        go.Scatter(
+            x=data.index,
+            y=data['Close'],
+            name='Close Price',
+            line=dict(color='blue')
+        ),
+        row=1, col=1
+    )
+
+    # Add indicators to the correct panel
     for indicator in config:
         if indicator.name in data.columns:
-            fig.add_trace(go.Scatter(
+            panel = getattr(indicator, "panel", "price")
+            trace = go.Scatter(
                 x=data.index,
                 y=data[indicator.name],
-                name=indicator.name,
-                yaxis='y2' if indicator.type in ['rsi', 'macd'] else 'y'
-            ))
-    
+                name=indicator.name
+            )
+            if panel == "price":
+                fig.add_trace(trace, row=1, col=1)
+            elif has_lower:
+                fig.add_trace(trace, row=2, col=1)
+
     fig.update_layout(
-        title=f"{ticker} Stock Data",
-        xaxis=dict(title='Date'),
-        yaxis=dict(title='Price'),
-        yaxis2=dict(title='Indicator', overlaying='y', side='right'),
-        showlegend=True
+        height=700,
+        legend=dict(orientation="h"),
+        xaxis=dict(title="Date"),
+        yaxis=dict(title="Price"),
     )
+    if has_lower:
+        fig.update_yaxes(title_text="Indicators", row=2, col=1)
+
     return fig
 
 def main():
@@ -88,43 +121,62 @@ def main():
         st.error(f"Error initializing StockAnalyzer: {str(e)}")
         return
     
-    # Ensure analyzer has loaded tickers
     if not analyzer.tickers:
         st.error("No tickers found in tickers.csv.")
         return
     
-    # Run data fetch and calculations if not already done
-    if not analyzer.ranking:
-        try:
-            analyzer.fetch_data()
-            analyzer.calculate_indicators()
-            analyzer.calculate_ranking()
-            analyzer.save_data()
-            st.success("Data fetched and processed successfully.")
-        except Exception as e:
-            st.error(f"Error processing data: {str(e)}")
-            return
+    # Remove ranking calculations
+    try:
+        analyzer.fetch_data()
+        analyzer.calculate_indicators()
+        analyzer.save_data()
+        st.success("Data fetched and processed successfully.")
+    except Exception as e:
+        st.error(f"Error processing data: {str(e)}")
+        return
     
-    # Filters
     st.sidebar.header("Filters")
     filters = []
     for indicator in analyzer.config.indicators:
-        if indicator.rank:
-            min_val = st.sidebar.number_input(
-                f"Min {indicator.name}", value=-100.0, step=0.1, key=f"min_{indicator.name}"
+        if getattr(indicator, "filter", False):  # Only show if filter: true
+            # Gather all last values for this indicator across tickers
+            values = []
+            for ticker in analyzer.tickers:
+                data = load_latest_data(ticker)
+                if data is not None and indicator.name in data.columns:
+                    series = data[indicator.name].dropna()
+                    if not series.empty:
+                        values.append(series.iloc[-1])
+            if values:
+                min_val = float(min(values))
+                max_val = float(max(values))
+            else:
+                min_val = -100.0
+                max_val = 100.0
+
+            min_input = st.sidebar.number_input(
+                f"Min {indicator.name}", value=min_val, step=0.1, key=f"min_{indicator.name}"
             )
-            max_val = st.sidebar.number_input(
-                f"Max {indicator.name}", value=100.0, step=0.1, key=f"max_{indicator.name}"
+            max_input = st.sidebar.number_input(
+                f"Max {indicator.name}", value=max_val, step=0.1, key=f"max_{indicator.name}"
             )
-            filters.append(Filter(indicator=indicator.name, min_value=min_val, max_value=max_val))
+            filters.append(Filter(indicator=indicator.name, min_value=min_input, max_value=max_input))
             
-    # Apply filters
+    # Apply filters (no ranking, just filter on indicator values)
     filtered_tickers = []
     for ticker in analyzer.tickers:
         include = True
+        data = load_latest_data(ticker)
+        if data is None:
+            continue
         for f in filters:
-            rank = analyzer.ranking.get(f.indicator, {}).get(ticker, 0)
-            if not (f.min_value <= rank <= f.max_value):
+            # Use the last value of the indicator for filtering
+            if f.indicator in data.columns:
+                value = data[f.indicator].dropna().iloc[-1] if not data[f.indicator].dropna().empty else None
+                if value is None or not (f.min_value <= value <= f.max_value):
+                    include = False
+                    break
+            else:
                 include = False
                 break
         if include:
@@ -133,27 +185,55 @@ def main():
     if not filtered_tickers:
         st.warning("No tickers match the filter criteria. Adjust the filters or try again.")
         return
-    
-    # Ticker selection
-    selected_ticker = st.selectbox("Select Ticker", filtered_tickers)
-    
-    # Plot
-    if selected_ticker:
+
+    # Prepare table data (no ranking columns)
+    table_data = []
+    for ticker in filtered_tickers:
+        row = {"Ticker": ticker}
+        data = load_latest_data(ticker)
+        if data is not None:
+            for ind in analyzer.config.indicators:
+                if ind.name in data.columns:
+                    row[ind.name] = data[ind.name].dropna().iloc[-1] if not data[ind.name].dropna().empty else None
+        table_data.append(row)
+    df_table = pd.DataFrame(table_data)
+
+    st.subheader("Filtered Stocks")
+
+    # Add a Select column for checkboxes
+    df_table["Select"] = False
+    df_table = df_table.set_index("Ticker")
+
+    # Use session state to persist selection
+    if "selection_df" not in st.session_state or not st.session_state.selection_df.index.equals(df_table.index):
+        st.session_state.selection_df = df_table.copy()
+
+    edited_df = st.data_editor(
+        st.session_state.selection_df,
+        use_container_width=True,
+        hide_index=False,
+        column_config={
+            "Select": st.column_config.CheckboxColumn("Select")
+        },
+        key="filtered_stocks_editor"
+    )
+
+    st.session_state.selection_df = edited_df
+
+    selected_tickers = edited_df[edited_df["Select"]].index.tolist()
+
+    if not selected_tickers:
+        st.info("Select at least one stock to visualize.")
+        return
+
+    for selected_ticker in selected_tickers:
         data = load_latest_data(selected_ticker)
         if data is not None:
             try:
-                # Convert display_period to Pandas offset
                 pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
                 data = data.last(pandas_offset)
-                fig = plot_stock(selected_ticker, data, analyzer.config.indicators, 
-                                analyzer.config.display_period)
+                fig = plot_stock(selected_ticker, data, analyzer.config.indicators, analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)
-                
-                # Display rankings
-                st.subheader("Rankings")
-                rank_data = {ind.name: analyzer.ranking.get(ind.name, {}).get(selected_ticker, 0)
-                            for ind in analyzer.config.indicators if ind.rank}
-                st.table(pd.DataFrame([rank_data], index=[selected_ticker]))
             except Exception as e:
                 st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
 
