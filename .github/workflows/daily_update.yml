@@ -41,13 +41,3 @@ jobs:
       run: |
         source .venv/bin/activate
         uv run python stock_analyzer.py
-    
-    - name: Commit and push changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add data/*
-        git commit -m "Update stock data $(date +%Y%m%d)" || echo "No changes to commit"
-        git push origin main
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT }}  # Use PAT for push
