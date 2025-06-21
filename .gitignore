@@ -11,3 +11,6 @@ wheels/
 .venv
 uv.lock
 pyproject.toml
+
+# data
+/data
