@@ -1,20 +1,26 @@
 data:
-  history_period: "2y"  # Period for historical data from yfinance
-  display_period: "1y"  # Period to display in graphs
+  history_period: "2y"
+  display_period: "1y"
 tickers_file: "tickers.csv"
 indicators:
   - name: "SMA_20"
     type: "sma"
     period: 20
+    filter: false
+    panel: price
   - name: "SMA_50"
     type: "sma"
     period: 50
+    filter: false
+    panel: price
   - name: "SMA_DIFF"
     type: "sma_diff"
     short_sma: "SMA_20"
     long_sma: "SMA_50"
-    rank: true  # Include in ranking
+    filter: true
+    panel: lower
   - name: "RSI"
     type: "rsi"
     period: 14
-    rank: true
+    filter: true
+    panel: lower

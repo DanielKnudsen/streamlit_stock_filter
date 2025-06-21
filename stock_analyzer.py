@@ -16,7 +16,8 @@ class IndicatorConfig:
     fast_period: Optional[int] = None
     slow_period: Optional[int] = None
     signal_period: Optional[int] = None
-    rank: bool = False
+    filter: bool = False
+    panel: str = "price"  # <-- Add this line
 
 @dataclass
 class DataConfig:
