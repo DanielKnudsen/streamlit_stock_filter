@@ -127,6 +127,7 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         height=900 if has_middle and has_lower else 700,
         legend=dict(orientation="h"),
         xaxis=dict(title="Date"),
+        title=f"{ticker} Stock Chart"  # <-- Add this line
     )
 
     return fig
