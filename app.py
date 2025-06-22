@@ -220,7 +220,7 @@ def main():
             # Remove outliers
             if values:
                 values = np.array(values)
-                values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
+                values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad_filter", 5))
                 values = values.tolist()
             else:
                 values = []
@@ -251,17 +251,18 @@ def main():
                     orientation='h',
                     marker_color='lightblue',
                     name="",
-                    hoverinfo="skip"
+                    #hoverinfo="skip"
                 ))
                 fig.update_layout(
                     margin=dict(l=10, r=10, t=10, b=10),
-                    height=80,
+                    height=160,
                     showlegend=False,
                     xaxis_title=None,
                     yaxis_title=None,
                 )
                 fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
-                st.sidebar.plotly_chart(fig, use_container_width=True, config={"staticPlot": True})
+                st.sidebar.plotly_chart(fig, use_container_width=True, #config={"staticPlot": True}
+                                        )
 
             # Add a horizontal rule between indicators
             st.sidebar.markdown("---")
@@ -307,7 +308,7 @@ def main():
         # Remove outliers
         if values:
             values = np.array(values)
-            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
+            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad_filter", 5))
             values = values.tolist()
         else:
             values = []
@@ -338,17 +339,18 @@ def main():
                 orientation='h',
                 marker_color='lightblue',
                 name="",
-                hoverinfo="skip"
+                #hoverinfo="skip"
             ))
             fig.update_layout(
                 margin=dict(l=10, r=10, t=10, b=10),
-                height=80,
+                height=160,
                 showlegend=False,
                 xaxis_title=None,
                 yaxis_title=None,
             )
             fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
-            st.sidebar.plotly_chart(fig, use_container_width=True, config={"staticPlot": True})
+            st.sidebar.plotly_chart(fig, use_container_width=True, #config={"staticPlot": True}
+                                    )
 
         # Add a horizontal rule between indicators
         st.sidebar.markdown("---")
