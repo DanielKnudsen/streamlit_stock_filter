@@ -6,7 +6,10 @@ fundamentals:
   - earningsGrowth
   - revenueGrowth
   - profitMargins
+  - grossMargins
   - returnOnAssets
+  - returnOnEquity
+  - debtToEquity
   - priceToBook
   - forwardPE
 extra_fundamental_fields:
