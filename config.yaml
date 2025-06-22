@@ -2,6 +2,17 @@ data:
   history_period: "3y"
   display_period: "2y"
 tickers_file: "tickers.csv"
+fundamentals:
+  - earningsGrowth
+  - revenueGrowth
+  - profitMargins
+  - returnOnAssets
+  - priceToBook
+  - forwardPE
+extra_fundamental_fields:
+  - longName
+  - sector
+  - longBusinessSummary
 indicators:
   - name: "Close"
     type: "sma"
@@ -23,19 +34,19 @@ indicators:
     period: 120
     filter: false
     panel: price
-  - name: "Close_10_%_DIFF"
+  - name: "Close_10_%_D"
     type: "sma_diff"
     short_sma: "Close"
     long_sma: "SMA_10"
     filter: true
     panel: middle
-  - name: "10_40_%_DIFF_SMA"
+  - name: "10_40_%_D"
     type: "sma_diff"
     short_sma: "SMA_10"
     long_sma: "SMA_40"
     filter: true
     panel: middle
-  - name: "40_120_%_DIFF_SMA"
+  - name: "40_120_%_D"
     type: "sma_diff"
     short_sma: "SMA_40"
     long_sma: "SMA_120"
