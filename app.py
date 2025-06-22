@@ -135,6 +135,16 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
 
     return fig
 
+# Define explanations for each fundamental
+FUNDAMENTAL_EXPLANATIONS = {
+    "earningsGrowth": "Year-over-year earnings growth rate.",
+    "revenueGrowth": "Year-over-year revenue growth rate.",
+    "profitMargins": "Net profit as a percentage of revenue.",
+    "returnOnAssets": "Net income divided by total assets.",
+    "priceToBook": "Share price divided by book value per share.",
+    "forwardPE": "Forward price-to-earnings ratio."
+}
+
 def main():
     st.set_page_config(page_title="Stock Analyzer", layout="wide")
     st.title("Stock Technical Analysis Dashboard")
@@ -153,6 +163,7 @@ def main():
     try:
         analyzer.fetch_data()
         analyzer.calculate_indicators()
+        analyzer.fetch_fundamentals() 
         analyzer.save_data()
         st.success("Data fetched and processed successfully.")
     except Exception as e:
@@ -188,6 +199,33 @@ def main():
             )
             filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
             
+    # Fundamental filters
+    for field in getattr(analyzer.config, "fundamentals", []):
+        values = []
+        for ticker in analyzer.tickers:
+            data = load_latest_data(ticker)
+            if data is not None and field in data.columns:
+                series = data[field].dropna()
+                if not series.empty:
+                    values.append(series.iloc[-1])
+        if values:
+            min_val = float(min(values))
+            max_val = float(max(values))
+        else:
+            min_val = -100.0
+            max_val = 100.0
+
+        slider_min, slider_max = st.sidebar.slider(
+            f"{field} range",
+            min_value=min_val,
+            max_value=max_val,
+            value=(min_val, max_val),
+            step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+            key=f"slider_{field}",
+            help=FUNDAMENTAL_EXPLANATIONS.get(field, "")
+        )
+        filters.append(Filter(indicator=field, min_value=slider_min, max_value=slider_max))
+    
     # Apply filters (no ranking, just filter on indicator values)
     filtered_tickers = []
     for ticker in analyzer.tickers:
@@ -198,10 +236,13 @@ def main():
         for f in filters:
             # Use the last value of the indicator for filtering
             if f.indicator in data.columns:
-                value = data[f.indicator].dropna().iloc[-1] if not data[f.indicator].dropna().empty else None
-                if value is None or not (f.min_value <= value <= f.max_value):
+                series = data[f.indicator].dropna()
+                value = series.iloc[-1] if not series.empty else None
+                # Only filter if value is present
+                if value is not None and not (f.min_value <= value <= f.max_value):
                     include = False
                     break
+                # If value is None, skip filtering for this field
             else:
                 include = False
                 break
@@ -218,9 +259,14 @@ def main():
         row = {"Ticker": ticker}
         data = load_latest_data(ticker)
         if data is not None:
+            # Add indicator values
             for ind in analyzer.config.indicators:
                 if ind.name in data.columns:
                     row[ind.name] = data[ind.name].dropna().iloc[-1] if not data[ind.name].dropna().empty else None
+            # Add fundamental values
+            for field in getattr(analyzer.config, "fundamentals", []):
+                if field in data.columns:
+                    row[field] = data[field].dropna().iloc[-1] if not data[field].dropna().empty else None
         table_data.append(row)
     df_table = pd.DataFrame(table_data)
 
@@ -260,6 +306,13 @@ def main():
                 data = data.last(pandas_offset)
                 fig = plot_stock(selected_ticker, data, analyzer.config.indicators, analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)
+
+                # Display extra company info
+                info = analyzer.fundamentals_data.get(selected_ticker, {})
+                for field in getattr(analyzer.config, "extra_fundamental_fields", []):
+                    value = info.get(field, "N/A")
+                    st.markdown(f"**{field}:** {value}")
+
             except Exception as e:
                 st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
 
