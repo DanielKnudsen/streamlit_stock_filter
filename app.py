@@ -255,7 +255,7 @@ def main():
                 ))
                 fig.update_layout(
                     margin=dict(l=10, r=10, t=10, b=10),
-                    height=160,
+                    height=180,
                     showlegend=False,
                     xaxis_title=None,
                     yaxis_title=None,
@@ -343,7 +343,7 @@ def main():
             ))
             fig.update_layout(
                 margin=dict(l=10, r=10, t=10, b=10),
-                height=160,
+                height=180,
                 showlegend=False,
                 xaxis_title=None,
                 yaxis_title=None,
