@@ -104,7 +104,7 @@ class StockAnalyzer:
                     print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
 
     def save_data(self):
-        timestamp = datetime.now().strftime("%Y%m%d")
+        os.makedirs("data", exist_ok=True)  # <-- Ensure the data directory exists
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
                 print(f"Skipping save for {ticker} due to missing data")
