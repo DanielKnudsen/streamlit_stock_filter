@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Dict
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from stock_analyzer import StockAnalyzer, IndicatorConfig
@@ -42,25 +43,23 @@ def convert_to_pandas_offset(period: str) -> str:
     # Fallback: return as is
     return period.upper()
 
+
 @st.cache_data
-def load_latest_data(ticker: str) -> pd.DataFrame:
-    file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
-    if not os.path.exists(file_path):
-        st.error(f"No data found for ticker {ticker}. Run stock_analyzer.py to generate data.")
-        return None
-    try:
-        # Parse Date as datetime and set as index
-        df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
-        # Ensure timezone-naive DatetimeIndex
-        if df.index.tz is not None:
-            df.index = df.index.tz_localize(None)
-        # Verify index is DatetimeIndex
-        if not isinstance(df.index, pd.DatetimeIndex):
-            df.index = pd.to_datetime(df.index)
-        return df
-    except Exception as e:
-        st.error(f"Error loading data for {ticker}: {str(e)}")
-        return None
+def load_all_data(tickers):
+    all_data = {}
+    for ticker in tickers:
+        file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
+        if os.path.exists(file_path):
+            try:
+                df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
+                if df.index.tz is not None:
+                    df.index = df.index.tz_localize(None)
+                if not isinstance(df.index, pd.DatetimeIndex):
+                    df.index = pd.to_datetime(df.index)
+                all_data[ticker] = df
+            except Exception as e:
+                st.error(f"Error loading data for {ticker}: {str(e)}")
+    return all_data
 
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
     # Determine which panels are needed
@@ -158,6 +157,9 @@ def main():
     if not analyzer.tickers:
         st.error("No tickers found in tickers.csv.")
         return
+
+    # Load all ticker data into memory ONCE
+    all_data = load_all_data(analyzer.tickers)
     
     # Remove ranking calculations
     try:
@@ -170,14 +172,14 @@ def main():
         st.error(f"Error processing data: {str(e)}")
         return
     
-    st.sidebar.header("Filters")
+    st.sidebar.header("TA Filters")
     filters = []
     for indicator in analyzer.config.indicators:
         if getattr(indicator, "filter", False):  # Only show if filter: true
             # Gather all last values for this indicator across tickers
             values = []
             for ticker in analyzer.tickers:
-                data = load_latest_data(ticker)
+                data = all_data.get(ticker)
                 if data is not None and indicator.name in data.columns:
                     series = data[indicator.name].dropna()
                     if not series.empty:
@@ -198,12 +200,13 @@ def main():
                 key=f"slider_{indicator.name}"
             )
             filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
-            
+    
+    st.sidebar.header("Fundamental Filters")
     # Fundamental filters
     for field in getattr(analyzer.config, "fundamentals", []):
         values = []
         for ticker in analyzer.tickers:
-            data = load_latest_data(ticker)
+            data = all_data.get(ticker)
             if data is not None and field in data.columns:
                 series = data[field].dropna()
                 if not series.empty:
@@ -230,7 +233,7 @@ def main():
     filtered_tickers = []
     for ticker in analyzer.tickers:
         include = True
-        data = load_latest_data(ticker)
+        data = all_data.get(ticker)
         if data is None:
             continue
         for f in filters:
@@ -257,7 +260,7 @@ def main():
     table_data = []
     for ticker in filtered_tickers:
         row = {"Ticker": ticker}
-        data = load_latest_data(ticker)
+        data = all_data.get(ticker)
         if data is not None:
             # Add indicator values
             for ind in analyzer.config.indicators:
@@ -299,7 +302,7 @@ def main():
         return
 
     for selected_ticker in selected_tickers:
-        data = load_latest_data(selected_ticker)
+        data = all_data.get(selected_ticker)
         if data is not None:
             try:
                 pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
@@ -313,20 +316,55 @@ def main():
                     value = info.get(field, "N/A")
                     st.markdown(f"**{field}:** {value}")
 
+                for field in getattr(analyzer.config, "fundamentals", []):
+                    # Gather all values for this fundamental (across all tickers)
+                    values = []
+                    for ticker in filtered_tickers:
+                        data = all_data.get(ticker)
+                        if data is not None and field in data.columns:
+                            series = data[field].dropna()
+                            if not series.empty:
+                                v = series.iloc[-1]
+                                if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
+                                    values.append(v)
+                    # Value for the selected stock
+                    data_selected = all_data.get(selected_ticker)
+                    selected_value = None
+                    if data_selected is not None and field in data_selected.columns:
+                        series_selected = data_selected[field].dropna()
+                        if not series_selected.empty:
+                            selected_value = series_selected.iloc[-1]
+
+                    if len(values) > 1 and selected_value is not None:
+                        fig = go.Figure()
+                        fig.add_trace(go.Box(
+                            x=values,
+                            name=field,
+                            boxpoints='outliers',
+                            orientation='h',
+                            marker_color='lightblue'
+                        ))
+                        # Highlight the selected stock's value
+                        fig.add_trace(go.Scatter(
+                            x=[selected_value],
+                            y=[field],
+                            mode='markers',
+                            marker=dict(color='red', size=14, symbol='diamond'),
+                            name=f"{selected_ticker}"
+                        ))
+                        fig.update_layout(
+                            title=f"Distribution of {field} (red = {selected_ticker})",
+                            xaxis_title=field,
+                            showlegend=False,
+                            height=300
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    elif selected_value is not None:
+                        st.info(f"Not enough data to show a box plot for {field}.")
+
             except Exception as e:
                 st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
 
-    # Choose columns to allow coloring (e.g., all indicators and fundamentals)
-    color_columns = []
-    for ind in analyzer.config.indicators:
-        color_columns.append(ind.name)
-    for field in getattr(analyzer.config, "fundamentals", []):
-        color_columns.append(field)
-
-    # Sidebar toggles
-    color_toggles = {}
-    for col in color_columns:
-        color_toggles[col] = st.sidebar.checkbox(f"Color code {col}", value=False)
 
 if __name__ == "__main__":
     main()
