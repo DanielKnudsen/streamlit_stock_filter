@@ -316,5 +316,17 @@ def main():
             except Exception as e:
                 st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
 
+    # Choose columns to allow coloring (e.g., all indicators and fundamentals)
+    color_columns = []
+    for ind in analyzer.config.indicators:
+        color_columns.append(ind.name)
+    for field in getattr(analyzer.config, "fundamentals", []):
+        color_columns.append(field)
+
+    # Sidebar toggles
+    color_toggles = {}
+    for col in color_columns:
+        color_toggles[col] = st.sidebar.checkbox(f"Color code {col}", value=False)
+
 if __name__ == "__main__":
     main()
