@@ -9,6 +9,9 @@ import glob
 import os
 import re
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
 @dataclass
 class Filter:
     indicator: str
@@ -41,7 +44,7 @@ def convert_to_pandas_offset(period: str) -> str:
 
 @st.cache_data
 def load_latest_data(ticker: str) -> pd.DataFrame:
-    file_path = f"data/{ticker}.csv"
+    file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
     if not os.path.exists(file_path):
         st.error(f"No data found for ticker {ticker}. Run stock_analyzer.py to generate data.")
         return None

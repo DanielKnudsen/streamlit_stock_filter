@@ -7,6 +7,9 @@ import yaml
 from datetime import datetime
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
 @dataclass
 class IndicatorConfig:
     name: str
@@ -104,7 +107,7 @@ class StockAnalyzer:
                     print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
 
     def save_data(self):
-        os.makedirs("data", exist_ok=True)  # <-- Ensure the data directory exists
+        os.makedirs("data", exist_ok=True)
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
                 print(f"Skipping save for {ticker} due to missing data")
@@ -114,15 +117,14 @@ class StockAnalyzer:
                 if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
                     df[indicator.name] = self.indicators_data[ticker][indicator.name]
             try:
-                # Save with timezone-naive index
                 if df.index.tz is not None:
                     df.index = df.index.tz_localize(None)
-                df.to_csv(f"data/{ticker}.csv", index=True, index_label='Date')
+                df.to_csv(os.path.join("data", f"{ticker}.csv"), index=True, index_label='Date')
             except Exception as e:
                 print(f"Error saving data for {ticker}: {str(e)}")
 
 if __name__ == "__main__":
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
