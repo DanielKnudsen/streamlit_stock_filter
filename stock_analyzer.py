@@ -29,8 +29,9 @@ class DataConfig:
     display_period: str
     tickers_file: str
     indicators: List[IndicatorConfig]
+    n_mad: int = 5
     fundamentals: List[str] = None
-    extra_fundamental_fields: List[str] = None  # <-- Add this line
+    extra_fundamental_fields: List[str] = None
 
 class StockAnalyzer:
     def __init__(self, config_path: str):
@@ -49,6 +50,7 @@ class StockAnalyzer:
         return DataConfig(
             history_period=config_data['data']['history_period'],
             display_period=config_data['data']['display_period'],
+            n_mad=config_data['data'].get('n_mad', 5),  # <--- Add this line
             tickers_file=config_data['tickers_file'],
             indicators=indicators,
             fundamentals=config_data.get('fundamentals', []),
