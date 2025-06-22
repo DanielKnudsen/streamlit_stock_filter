@@ -29,6 +29,8 @@ class DataConfig:
     display_period: str
     tickers_file: str
     indicators: List[IndicatorConfig]
+    fundamentals: List[str] = None
+    extra_fundamental_fields: List[str] = None  # <-- Add this line
 
 class StockAnalyzer:
     def __init__(self, config_path: str):
@@ -48,7 +50,9 @@ class StockAnalyzer:
             history_period=config_data['data']['history_period'],
             display_period=config_data['data']['display_period'],
             tickers_file=config_data['tickers_file'],
-            indicators=indicators
+            indicators=indicators,
+            fundamentals=config_data.get('fundamentals', []),
+            extra_fundamental_fields=config_data.get('extra_fundamental_fields', [])  # <-- Add this line
         )
 
     def _load_tickers(self) -> List[str]:
@@ -106,20 +110,41 @@ class StockAnalyzer:
                 except Exception as e:
                     print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
 
+    def fetch_fundamentals(self):
+        self.fundamentals_data = {}
+        for ticker in self.tickers:
+            try:
+                yf_ticker = yf.Ticker(f"{ticker}.ST")
+                info = yf_ticker.info
+                self.fundamentals_data[ticker] = {}
+                for field in getattr(self.config, "fundamentals", []):
+                    self.fundamentals_data[ticker][field] = info.get(field, None)
+                # Add extra info fields
+                for field in getattr(self.config, "extra_fundamental_fields", []):
+                    self.fundamentals_data[ticker][field] = info.get(field, None)
+            except Exception as e:
+                print(f"Error fetching fundamentals for {ticker}: {str(e)}")
+
     def save_data(self):
-        os.makedirs("data", exist_ok=True)
+        os.makedirs(DATA_DIR, exist_ok=True)
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
                 print(f"Skipping save for {ticker} due to missing data")
                 continue
             df = self.data[ticker].copy()
+            # Add indicators
             for indicator in self.config.indicators:
                 if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
                     df[indicator.name] = self.indicators_data[ticker][indicator.name]
+            # Add fundamentals as columns (same value for all rows)
+            if hasattr(self, "fundamentals_data"):
+                for field in getattr(self.config, "fundamentals", []):
+                    value = self.fundamentals_data.get(ticker, {}).get(field, None)
+                    df[field] = value
             try:
                 if df.index.tz is not None:
                     df.index = df.index.tz_localize(None)
-                df.to_csv(os.path.join("data", f"{ticker}.csv"), index=True, index_label='Date')
+                df.to_csv(os.path.join(DATA_DIR, f"{ticker}.csv"), index=True, index_label='Date')
             except Exception as e:
                 print(f"Error saving data for {ticker}: {str(e)}")
 
@@ -128,4 +153,5 @@ if __name__ == "__main__":
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
+    analyzer.fetch_fundamentals()  # <-- Add this line
     analyzer.save_data()
