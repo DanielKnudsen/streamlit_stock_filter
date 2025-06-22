@@ -1,22 +1,44 @@
 data:
-  history_period: "2y"
-  display_period: "1y"
+  history_period: "3y"
+  display_period: "2y"
 tickers_file: "tickers.csv"
 indicators:
-  - name: "SMA_20"
+  - name: "Close"
     type: "sma"
-    period: 20
+    period: 1
     filter: false
     panel: price
-  - name: "SMA_50"
+  - name: "SMA_10"
     type: "sma"
-    period: 50
+    period: 10
     filter: false
     panel: price
-  - name: "SMA_DIFF"
+  - name: "SMA_40"
+    type: "sma"
+    period: 40
+    filter: false
+    panel: price
+  - name: "SMA_120"
+    type: "sma"
+    period: 120
+    filter: false
+    panel: price
+  - name: "Close_10_%_DIFF"
     type: "sma_diff"
-    short_sma: "SMA_20"
-    long_sma: "SMA_50"
+    short_sma: "Close"
+    long_sma: "SMA_10"
+    filter: true
+    panel: middle
+  - name: "10_40_%_DIFF_SMA"
+    type: "sma_diff"
+    short_sma: "SMA_10"
+    long_sma: "SMA_40"
+    filter: true
+    panel: middle
+  - name: "40_120_%_DIFF_SMA"
+    type: "sma_diff"
+    short_sma: "SMA_40"
+    long_sma: "SMA_120"
     filter: true
     panel: middle
   - name: "RSI"
