@@ -9,6 +9,7 @@ from stock_analyzer import StockAnalyzer, IndicatorConfig
 import glob
 import os
 import re
+from scipy.stats import median_abs_deviation
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -144,6 +145,14 @@ FUNDAMENTAL_EXPLANATIONS = {
     "forwardPE": "Forward price-to-earnings ratio."
 }
 
+def remove_outliers(series, n_mad=5):
+    median = np.median(series)
+    mad = median_abs_deviation(series, nan_policy='omit')
+    if mad == 0:
+        return series  # Avoid division by zero
+    mask = np.abs(series - median) < n_mad * mad
+    return series[mask]
+
 def main():
     st.set_page_config(page_title="Stock Analyzer", layout="wide")
     st.title("Stock Technical Analysis Dashboard")
@@ -175,15 +184,47 @@ def main():
     st.sidebar.header("TA Filters")
     filters = []
     for indicator in analyzer.config.indicators:
-        if getattr(indicator, "filter", False):  # Only show if filter: true
-            # Gather all last values for this indicator across tickers
-            values = []
+        if getattr(indicator, "filter", False):
+            # Build a list of filters except the current one
+            other_filters = [f for f in filters if f.indicator != indicator.name]
+            # Find tickers that match all other filters
+            tickers_for_boxplot = []
             for ticker in analyzer.tickers:
+                data = all_data.get(ticker)
+                if data is None:
+                    continue
+                include = True
+                for f in other_filters:
+                    if f.indicator in data.columns:
+                        series = data[f.indicator].dropna()
+                        value = series.iloc[-1] if not series.empty else None
+                        if value is not None and not (f.min_value <= value <= f.max_value):
+                            include = False
+                            break
+                    else:
+                        include = False
+                        break
+                if include:
+                    tickers_for_boxplot.append(ticker)
+
+            # Now build the values for the boxplot using these tickers
+            values = []
+            for ticker in tickers_for_boxplot:
                 data = all_data.get(ticker)
                 if data is not None and indicator.name in data.columns:
                     series = data[indicator.name].dropna()
                     if not series.empty:
-                        values.append(series.iloc[-1])
+                        v = series.iloc[-1]
+                        if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
+                            values.append(v)
+            # Remove outliers
+            if values:
+                values = np.array(values)
+                values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
+                values = values.tolist()
+            else:
+                values = []
+
             if values:
                 min_val = float(min(values))
                 max_val = float(max(values))
@@ -197,20 +238,80 @@ def main():
                 max_value=max_val,
                 value=(min_val, max_val),
                 step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-                key=f"slider_{indicator.name}"
+                key=f"slider_{indicator.name}",
+                help=getattr(indicator, "description", "")
             )
+
+            # --- Add boxplot below the slider ---
+            if len(values) > 1:
+                fig = go.Figure()
+                fig.add_trace(go.Box(
+                    x=values,
+                    boxpoints='outliers',
+                    orientation='h',
+                    marker_color='lightblue',
+                    name="",
+                    hoverinfo="skip"
+                ))
+                fig.update_layout(
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    height=80,
+                    showlegend=False,
+                    xaxis_title=None,
+                    yaxis_title=None,
+                )
+                fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
+                st.sidebar.plotly_chart(fig, use_container_width=True, config={"staticPlot": True})
+
+            # Add a horizontal rule between indicators
+            st.sidebar.markdown("---")
+
+            # Add the filter for this indicator (after the slider)
             filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
     
     st.sidebar.header("Fundamental Filters")
     # Fundamental filters
     for field in getattr(analyzer.config, "fundamentals", []):
-        values = []
+        # Build a list of filters except the current one
+        other_filters = [f for f in filters if f.indicator != field]
+        # Find tickers that match all other filters
+        tickers_for_boxplot = []
         for ticker in analyzer.tickers:
+            data = all_data.get(ticker)
+            if data is None:
+                continue
+            include = True
+            for f in other_filters:
+                if f.indicator in data.columns:
+                    series = data[f.indicator].dropna()
+                    value = series.iloc[-1] if not series.empty else None
+                    if value is not None and not (f.min_value <= value <= f.max_value):
+                        include = False
+                        break
+                else:
+                    include = False
+                    break
+            if include:
+                tickers_for_boxplot.append(ticker)
+
+        # Now build the values for the boxplot using these tickers
+        values = []
+        for ticker in tickers_for_boxplot:
             data = all_data.get(ticker)
             if data is not None and field in data.columns:
                 series = data[field].dropna()
                 if not series.empty:
-                    values.append(series.iloc[-1])
+                    v = series.iloc[-1]
+                    if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
+                        values.append(v)
+        # Remove outliers
+        if values:
+            values = np.array(values)
+            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
+            values = values.tolist()
+        else:
+            values = []
+
         if values:
             min_val = float(min(values))
             max_val = float(max(values))
@@ -227,6 +328,32 @@ def main():
             key=f"slider_{field}",
             help=FUNDAMENTAL_EXPLANATIONS.get(field, "")
         )
+
+        # --- Add boxplot below the slider ---
+        if len(values) > 1:
+            fig = go.Figure()
+            fig.add_trace(go.Box(
+                x=values,
+                boxpoints='outliers',
+                orientation='h',
+                marker_color='lightblue',
+                name="",
+                hoverinfo="skip"
+            ))
+            fig.update_layout(
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=80,
+                showlegend=False,
+                xaxis_title=None,
+                yaxis_title=None,
+            )
+            fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
+            st.sidebar.plotly_chart(fig, use_container_width=True, config={"staticPlot": True})
+
+        # Add a horizontal rule between indicators
+        st.sidebar.markdown("---")
+
+        # Add the filter for this field (after the slider)
         filters.append(Filter(indicator=field, min_value=slider_min, max_value=slider_max))
     
     # Apply filters (no ranking, just filter on indicator values)
@@ -273,7 +400,7 @@ def main():
         table_data.append(row)
     df_table = pd.DataFrame(table_data)
 
-    st.subheader("Filtered Stocks")
+    st.subheader(f"Filtered Stocks ({len(filtered_tickers)})")
 
     # Add a Select column for checkboxes
     df_table["Select"] = False
@@ -327,6 +454,12 @@ def main():
                                 v = series.iloc[-1]
                                 if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
                                     values.append(v)
+                        # Remove outliers
+                        if values:
+                            values = np.array(values)
+                            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
+                            values = values.tolist()
+                            
                     # Value for the selected stock
                     data_selected = all_data.get(selected_ticker)
                     selected_value = None

@@ -1,13 +1,13 @@
 data:
   history_period: "3y"
   display_period: "2y"
+  n_mad: 20
 tickers_file: "tickers.csv"
 fundamentals:
   - earningsGrowth
   - revenueGrowth
   - profitMargins
   - grossMargins
-  - returnOnAssets
   - returnOnEquity
   - debtToEquity
   - priceToBook
