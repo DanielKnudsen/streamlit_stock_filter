@@ -4,7 +4,6 @@ import pandas as pd
 import yfinance as yf
 from finta import TA
 import yaml
-from datetime import datetime
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +20,7 @@ class IndicatorConfig:
     slow_period: Optional[int] = None
     signal_period: Optional[int] = None
     filter: bool = False
-    panel: str = "price"  # <-- Add this line
+    panel: str = "price"
 
 @dataclass
 class DataConfig:
@@ -39,22 +38,20 @@ class StockAnalyzer:
         self.tickers = self._load_tickers()
         self.data = {}
         self.indicators_data = {}
-        self.ranking = {}
+        self.fundamentals_data = {}
 
     def _load_config(self, config_path: str) -> DataConfig:
         with open(config_path, 'r') as file:
             config_data = yaml.safe_load(file)
-        indicators = [
-            IndicatorConfig(**ind) for ind in config_data['indicators']
-        ]
+        indicators = [IndicatorConfig(**ind) for ind in config_data['indicators']]
         return DataConfig(
             history_period=config_data['data']['history_period'],
             display_period=config_data['data']['display_period'],
-            n_mad=config_data['data'].get('n_mad', 5),  # <--- Add this line
+            n_mad=config_data['data'].get('n_mad', 5),
             tickers_file=config_data['tickers_file'],
             indicators=indicators,
             fundamentals=config_data.get('fundamentals', []),
-            extra_fundamental_fields=config_data.get('extra_fundamental_fields', [])  # <-- Add this line
+            extra_fundamental_fields=config_data.get('extra_fundamental_fields', [])
         )
 
     def _load_tickers(self) -> List[str]:
@@ -64,53 +61,38 @@ class StockAnalyzer:
     def fetch_data(self):
         for ticker in self.tickers:
             try:
-                # Dynamically append .ST for Stockholm Stock Exchange
                 yf_ticker = f"{ticker}.ST"
                 stock = yf.Ticker(yf_ticker)
                 self.data[ticker] = stock.history(period=self.config.history_period)
-                # Ensure timezone-naive index
                 if self.data[ticker].index.tz is not None:
                     self.data[ticker].index = self.data[ticker].index.tz_localize(None)
                 if self.data[ticker].empty:
-                    print(f"No data retrieved for {yf_ticker}")
+                    print(f"Ingen data hämtad för {yf_ticker}")
             except Exception as e:
-                print(f"Error fetching data for {yf_ticker}: {str(e)}")
+                print(f"Fel vid hämtning av data för {yf_ticker}: {str(e)}")
 
     def calculate_indicators(self):
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
-                print(f"Skipping indicator calculation for {ticker} due to missing data")
+                print(f"Hoppar över indikatorberäkning för {ticker} p.g.a. saknad data")
                 continue
             df = self.data[ticker].copy()
             self.indicators_data[ticker] = {}
-            
             for indicator in self.config.indicators:
                 try:
                     if indicator.type == "sma":
-                        self.indicators_data[ticker][indicator.name] = TA.SMA(
-                            df, period=indicator.period
-                        )
+                        self.indicators_data[ticker][indicator.name] = TA.SMA(df, period=indicator.period)
                     elif indicator.type == "sma_diff":
                         short = self.indicators_data[ticker][indicator.short_sma]
                         long = self.indicators_data[ticker][indicator.long_sma]
-                        self.indicators_data[ticker][indicator.name] = (
-                            (short - long) / long * 100
-                        )
+                        self.indicators_data[ticker][indicator.name] = ((short - long) / long * 100)
                     elif indicator.type == "rsi":
-                        self.indicators_data[ticker][indicator.name] = TA.RSI(
-                            df, period=indicator.period
-                        )
+                        self.indicators_data[ticker][indicator.name] = TA.RSI(df, period=indicator.period)
                     elif indicator.type == "macd":
-                        macd = TA.MACD(
-                            df,
-                            period_fast=indicator.fast_period,
-                            period_slow=indicator.slow_period,
-                            period_signal=indicator.signal_period
-                        )
-                        # Finta returns a DataFrame with 'MACD' and 'SIGNAL'
+                        macd = TA.MACD(df, period_fast=indicator.fast_period, period_slow=indicator.slow_period, period_signal=indicator.signal_period)
                         self.indicators_data[ticker][indicator.name] = macd['MACD']
                 except Exception as e:
-                    print(f"Error calculating {indicator.name} for {ticker}: {str(e)}")
+                    print(f"Fel vid beräkning av {indicator.name} för {ticker}: {str(e)}")
 
     def fetch_fundamentals(self):
         self.fundamentals_data = {}
@@ -121,39 +103,40 @@ class StockAnalyzer:
                 self.fundamentals_data[ticker] = {}
                 for field in getattr(self.config, "fundamentals", []):
                     self.fundamentals_data[ticker][field] = info.get(field, None)
-                # Add extra info fields
                 for field in getattr(self.config, "extra_fundamental_fields", []):
-                    self.fundamentals_data[ticker][field] = info.get(field, None)
+                    # Använd "Unknown" för 'sector' om det saknas
+                    self.fundamentals_data[ticker][field] = info.get(field, "Unknown" if field == "sector" else None)
             except Exception as e:
-                print(f"Error fetching fundamentals for {ticker}: {str(e)}")
+                print(f"Fel vid hämtning av fundamentala data för {ticker}: {str(e)}")
 
     def save_data(self):
         os.makedirs(DATA_DIR, exist_ok=True)
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
-                print(f"Skipping save for {ticker} due to missing data")
+                print(f"Hoppar över sparande för {ticker} p.g.a. saknad data")
                 continue
             df = self.data[ticker].copy()
-            # Add indicators
             for indicator in self.config.indicators:
                 if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
                     df[indicator.name] = self.indicators_data[ticker][indicator.name]
-            # Add fundamentals as columns (same value for all rows)
             if hasattr(self, "fundamentals_data"):
                 for field in getattr(self.config, "fundamentals", []):
                     value = self.fundamentals_data.get(ticker, {}).get(field, None)
+                    df[field] = value
+                for field in getattr(self.config, "extra_fundamental_fields", []):
+                    value = self.fundamentals_data.get(ticker, {}).get(field, "Unknown" if field == "sector" else None)
                     df[field] = value
             try:
                 if df.index.tz is not None:
                     df.index = df.index.tz_localize(None)
                 df.to_csv(os.path.join(DATA_DIR, f"{ticker}.csv"), index=True, index_label='Date')
             except Exception as e:
-                print(f"Error saving data for {ticker}: {str(e)}")
+                print(f"Fel vid sparande av data för {ticker}: {str(e)}")
 
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
-    analyzer.fetch_fundamentals()  # <-- Add this line
+    analyzer.fetch_fundamentals()
     analyzer.save_data()
