@@ -59,6 +59,7 @@ class StockAnalyzer:
         return df['ticker'].tolist()
 
     def fetch_data(self):
+        print("Hämtar data för tickers:", self.tickers)
         for ticker in self.tickers:
             try:
                 yf_ticker = f"{ticker}.ST"
@@ -72,6 +73,7 @@ class StockAnalyzer:
                 print(f"Fel vid hämtning av data för {yf_ticker}: {str(e)}")
 
     def calculate_indicators(self):
+        print("Beräknar indikatorer för tickers:", self.tickers)
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
                 print(f"Hoppar över indikatorberäkning för {ticker} p.g.a. saknad data")
@@ -95,6 +97,7 @@ class StockAnalyzer:
                     print(f"Fel vid beräkning av {indicator.name} för {ticker}: {str(e)}")
 
     def fetch_fundamentals(self):
+        print("Hämtar fundamentala data för tickers:", self.tickers)
         self.fundamentals_data = {}
         for ticker in self.tickers:
             try:
@@ -110,6 +113,7 @@ class StockAnalyzer:
                 print(f"Fel vid hämtning av fundamentala data för {ticker}: {str(e)}")
 
     def save_data(self):
+        print("Sparar data för tickers:", self.tickers)
         os.makedirs(DATA_DIR, exist_ok=True)
         for ticker in self.tickers:
             if ticker not in self.data or self.data[ticker].empty:
