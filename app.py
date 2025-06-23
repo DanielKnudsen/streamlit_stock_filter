@@ -6,7 +6,6 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from stock_analyzer import StockAnalyzer, IndicatorConfig
-import glob
 import os
 import re
 from scipy.stats import median_abs_deviation
@@ -21,485 +20,292 @@ class Filter:
     max_value: float
 
 def convert_to_pandas_offset(period: str) -> str:
-    """
-    Convert yfinance-style period (e.g., '6mo', '7d', '12y') to Pandas offset (e.g., '6M', '7D', '12Y').
-    Handles 'ytd' and 'max' as special cases.
-    """
+    """Konverterar yfinance-period (t.ex. '6mo') till Pandas offset (t.ex. '6M')."""
     period = period.lower()
     if period in ("ytd", "max"):
         return period.upper()
     match = re.match(r"(\d+)([a-z]+)", period)
     if match:
         num, unit = match.groups()
-        unit_map = {
-            "d": "D",
-            "w": "W",
-            "mo": "M",
-            "y": "Y"
-        }
-        # Find the longest matching unit
+        unit_map = {"d": "D", "w": "W", "mo": "M", "y": "Y"}
         for k in sorted(unit_map, key=len, reverse=True):
             if unit.startswith(k):
                 return f"{num}{unit_map[k]}"
-    # Fallback: return as is
     return period.upper()
 
-
 @st.cache_data
-def load_all_data(tickers):
-    all_data = {}
+def load_summary_data(tickers):
+    """Laddar den senaste raden för varje ticker för filtrering och boxplot."""
+    summary = {}
     for ticker in tickers:
         file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
         if os.path.exists(file_path):
             try:
                 df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
-                if df.index.tz is not None:
-                    df.index = df.index.tz_localize(None)
-                if not isinstance(df.index, pd.DatetimeIndex):
-                    df.index = pd.to_datetime(df.index)
-                all_data[ticker] = df
+                if not df.empty:
+                    last_row = df.iloc[-1]
+                    # Säkerställ att 'sector' finns, annars sätt "Unknown"
+                    if 'sector' not in last_row:
+                        last_row['sector'] = "Unknown"
+                    summary[ticker] = last_row
             except Exception as e:
-                st.error(f"Error loading data for {ticker}: {str(e)}")
-    return all_data
+                st.error(f"Fel vid laddning av sammanfattning för {ticker}: {str(e)}")
+    summary_df = pd.DataFrame(summary).T
+    return summary_df
+
+@st.cache_data
+def load_full_data(ticker):
+    """Laddar fullständig data för en specifik ticker vid behov."""
+    file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
+    if os.path.exists(file_path):
+        try:
+            df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
+            if df.index.tz is not None:
+                df.index = df.index.tz_localize(None)
+            return df
+        except Exception as e:
+            st.error(f"Fel vid laddning av full data för {ticker}: {str(e)}")
+            return None
+    return None
 
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
-    # Determine which panels are needed
+    """Skapar ett diagram för en given ticker med angivna indikatorer."""
     has_middle = any(getattr(ind, "panel", "price") == "middle" for ind in config)
     has_lower = any(getattr(ind, "panel", "price") == "lower" for ind in config)
-
-    # Decide number of rows
     if has_middle and has_lower:
-        rows = 3
-        row_heights = [0.5, 0.25, 0.25]
-        subplot_titles = ("Price Panel", "Middle Panel", "Lower Panel")
+        rows, row_heights = 3, [0.5, 0.25, 0.25]
+        subplot_titles = ("Prispanel", "Mellanpanel", "Nedre panel")
     elif has_middle:
-        rows = 2
-        row_heights = [0.7, 0.3]
-        subplot_titles = ("Price Panel", "Middle Panel")
+        rows, row_heights = 2, [0.7, 0.3]
+        subplot_titles = ("Prispanel", "Mellanpanel")
     elif has_lower:
-        rows = 2
-        row_heights = [0.7, 0.3]
-        subplot_titles = ("Price Panel", "Lower Panel")
+        rows, row_heights = 2, [0.7, 0.3]
+        subplot_titles = ("Prispanel", "Nedre panel")
     else:
-        rows = 1
-        row_heights = [1.0]
-        subplot_titles = ("Price Panel",)
-
-    fig = make_subplots(
-        rows=rows, cols=1, shared_xaxes=True,
-        row_heights=row_heights,
-        vertical_spacing=0.05,
-        subplot_titles=subplot_titles
-    )
-
-    # Price panel (main)
-    fig.add_trace(
-        go.Scatter(
-            x=data.index,
-            y=data['Close'],
-            name='Close Price',
-            line=dict(color='blue')
-        ),
-        row=1, col=1
-    )
-
-    # Add indicators to the correct panel
+        rows, row_heights = 1, [1.0]
+        subplot_titles = ("Prispanel",)
+    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, row_heights=row_heights, vertical_spacing=0.05, subplot_titles=subplot_titles)
+    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name='Stängningspris', line=dict(color='blue')), row=1, col=1)
     for indicator in config:
         if indicator.name in data.columns:
             panel = getattr(indicator, "panel", "price")
-            trace = go.Scatter(
-                x=data.index,
-                y=data[indicator.name],
-                name=indicator.name
-            )
+            trace = go.Scatter(x=data.index, y=data[indicator.name], name=indicator.name)
             if panel == "price":
                 fig.add_trace(trace, row=1, col=1)
             elif panel == "middle" and has_middle:
                 fig.add_trace(trace, row=2 if not has_lower else 2, col=1)
             elif panel == "lower" and has_lower:
-                fig.add_trace(trace, row=3 if has_middle and has_lower else 2, col=1)
-
-    # Update y-axis titles
-    fig.update_yaxes(title_text="Price", row=1, col=1)
+                fig.add_trace(trace, row=3 if has_middle else 2, col=1)
+    fig.update_yaxes(title_text="Pris", row=1, col=1)
     if has_middle:
-        fig.update_yaxes(title_text="Middle Indicators", row=2 if not has_lower else 2, col=1)
+        fig.update_yaxes(title_text="Mellanindikatorer", row=2 if not has_lower else 2, col=1)
     if has_lower:
-        fig.update_yaxes(title_text="Lower Indicators", row=3 if has_middle and has_lower else 2, col=1)
-
-    fig.update_layout(
-        height=900 if has_middle and has_lower else 700,
-        legend=dict(orientation="h"),
-        xaxis=dict(title="Date"),
-        title=f"{ticker} Stock Chart"  # <-- Add this line
-    )
-
+        fig.update_yaxes(title_text="Nedre indikatorer", row=3 if has_middle else 2, col=1)
+    fig.update_layout(height=900 if has_middle and has_lower else 700, legend=dict(orientation="h"), xaxis=dict(title="Datum"), title=f"{ticker} Aktiediagram")
     return fig
 
-# Define explanations for each fundamental
 FUNDAMENTAL_EXPLANATIONS = {
-    "earningsGrowth": "Year-over-year earnings growth rate.",
-    "revenueGrowth": "Year-over-year revenue growth rate.",
-    "profitMargins": "Net profit as a percentage of revenue.",
-    "returnOnAssets": "Net income divided by total assets.",
-    "priceToBook": "Share price divided by book value per share.",
-    "forwardPE": "Forward price-to-earnings ratio."
+    "earningsGrowth": "Årlig vinsttillväxt.",
+    "revenueGrowth": "Årlig intäktstillväxt.",
+    "profitMargins": "Nettovinst som procent av intäkter.",
+    "returnOnAssets": "Nettoinkomst dividerat med totala tillgångar.",
+    "priceToBook": "Aktiepris dividerat med bokfört värde per aktie.",
+    "forwardPE": "Framtida pris/vinst-förhållande."
 }
 
 def remove_outliers(series, n_mad=5):
+    """Tar bort extremvärden baserat på median absolut avvikelse."""
     median = np.median(series)
     mad = median_abs_deviation(series, nan_policy='omit')
     if mad == 0:
-        return series  # Avoid division by zero
+        return series
     mask = np.abs(series - median) < n_mad * mad
     return series[mask]
 
 def main():
     st.set_page_config(page_title="Stock Analyzer", layout="wide")
-    st.title("Stock Technical Analysis Dashboard")
+    st.title("Dashboard för Aktieanalys")
     
     try:
         analyzer = StockAnalyzer("config.yaml")
     except Exception as e:
-        st.error(f"Error initializing StockAnalyzer: {str(e)}")
+        st.error(f"Fel vid initiering av StockAnalyzer: {str(e)}")
         return
     
     if not analyzer.tickers:
-        st.error("No tickers found in tickers.csv.")
-        return
-
-    # Load all ticker data into memory ONCE
-    all_data = load_all_data(analyzer.tickers)
-    
-    # Remove ranking calculations
-    try:
-        analyzer.fetch_data()
-        analyzer.calculate_indicators()
-        analyzer.fetch_fundamentals() 
-        analyzer.save_data()
-        st.success("Data fetched and processed successfully.")
-    except Exception as e:
-        st.error(f"Error processing data: {str(e)}")
+        st.error("Inga tickers hittades i tickers.csv.")
         return
     
-    st.sidebar.header("TA Filters")
+    # Lägg till knapp för att uppdatera data
+    # if st.button("Uppdatera data"):
+    #     try:
+    #         analyzer.fetch_data()
+    #         analyzer.calculate_indicators()
+    #         analyzer.fetch_fundamentals()
+    #         analyzer.save_data()
+    #         st.success("Data uppdaterad!")
+    #         st.cache_data.clear()  # Rensa cachen för att ladda nya data
+    #     except Exception as e:
+    #         st.error(f"Fel vid uppdatering av data: {str(e)}")
+    
+    summary_df = load_summary_data(analyzer.tickers)
+    if summary_df.empty:
+        st.error("Ingen data tillgänglig. Säkerställ att data är hämtad och sparad.")
+        return
+    
+    all_sectors = sorted(set(summary_df['sector'].dropna().unique())) if 'sector' in summary_df.columns else ["Unknown"]
+    selected_sectors = st.sidebar.multiselect("Affärssektor", options=all_sectors, default=all_sectors)
+    
+    st.sidebar.header("Tekniska Filter")
     filters = []
+    
+    # Funktion för att få filtrerade tickers exklusive ett specifikt filter
+    def get_filtered_tickers(exclude_filter=None):
+        sector_mask = summary_df['sector'].isin(selected_sectors) if 'sector' in summary_df.columns else pd.Series(True, index=summary_df.index)
+        filter_masks = {
+            f.indicator: summary_df[f.indicator].astype(float).between(f.min_value, f.max_value)
+            if f.indicator in summary_df.columns else pd.Series(False, index=summary_df.index)
+            for f in filters if f != exclude_filter
+        }
+        all_masks = [sector_mask] + list(filter_masks.values())
+        final_mask = np.logical_and.reduce(all_masks) if all_masks else pd.Series(True, index=summary_df.index)
+        return summary_df.index[final_mask].tolist()
+    
     for indicator in analyzer.config.indicators:
         if getattr(indicator, "filter", False):
-            # Build a list of filters except the current one
-            other_filters = [f for f in filters if f.indicator != indicator.name]
-            # Find tickers that match all other filters
-            tickers_for_boxplot = []
-            for ticker in analyzer.tickers:
-                data = all_data.get(ticker)
-                if data is None:
-                    continue
-                include = True
-                for f in other_filters:
-                    if f.indicator in data.columns:
-                        series = data[f.indicator].dropna()
-                        value = series.iloc[-1] if not series.empty else None
-                        if value is not None and not (f.min_value <= value <= f.max_value):
-                            include = False
-                            break
-                    else:
-                        include = False
-                        break
-                if include:
-                    tickers_for_boxplot.append(ticker)
-
-            # Now build the values for the boxplot using these tickers
-            values = []
-            for ticker in tickers_for_boxplot:
-                data = all_data.get(ticker)
-                if data is not None and indicator.name in data.columns:
-                    series = data[indicator.name].dropna()
-                    if not series.empty:
-                        v = series.iloc[-1]
-                        if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
-                            values.append(v)
-            # Remove outliers
-            if values:
-                values = np.array(values)
-                values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad_filter", 5))
-                values = values.tolist()
+            # Använd alla tickers om filter inte är bekräftade, annars exkludera detta filter
+            if st.session_state.get("filters_confirmed", False):
+                filtered_tickers = get_filtered_tickers()
+                values = summary_df.loc[filtered_tickers, indicator.name].dropna().astype(float)
             else:
-                values = []
-
-            if values:
-                min_val = float(min(values))
-                max_val = float(max(values))
-            else:
-                min_val = -100.0
-                max_val = 100.0
-
+                values = summary_df[indicator.name].dropna().astype(float)
+            
+            min_val, max_val = float(values.min()) if not values.empty else -100.0, float(values.max()) if not values.empty else 100.0
             slider_min, slider_max = st.sidebar.slider(
-                f"{indicator.name} range",
-                min_value=min_val,
-                max_value=max_val,
-                value=(min_val, max_val),
-                step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-                key=f"slider_{indicator.name}",
-                help=getattr(indicator, "description", "")
+                f"{indicator.name} intervall", min_value=min_val, max_value=max_val,
+                value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+                key=f"slider_{indicator.name}", help=getattr(indicator, "description", "")
             )
-
-            # --- Add boxplot below the slider ---
-            if len(values) > 1:
-                fig = go.Figure()
-                fig.add_trace(go.Box(
-                    x=values,
-                    boxpoints='outliers',
-                    orientation='h',
-                    marker_color='lightblue',
-                    name="",
-                    #hoverinfo="skip"
-                ))
-                fig.update_layout(
-                    margin=dict(l=10, r=10, t=10, b=10),
-                    height=180,
-                    showlegend=False,
-                    xaxis_title=None,
-                    yaxis_title=None,
-                )
-                fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
-                st.sidebar.plotly_chart(fig, use_container_width=True, #config={"staticPlot": True}
-                                        )
-
-            # Add a horizontal rule between indicators
+            
+            if not values.empty:
+                fig = go.Figure(go.Violin(x=values, points=False, orientation='h', marker_color='lightblue', name=""))
+                fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
+                st.sidebar.plotly_chart(fig, use_container_width=True)
             st.sidebar.markdown("---")
-
-            # Add the filter for this indicator (after the slider)
             filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
     
-    st.sidebar.header("Fundamental Filters")
-    # Fundamental filters
+    st.sidebar.header("Fundamentala Filter")
     for field in getattr(analyzer.config, "fundamentals", []):
-        # Build a list of filters except the current one
-        other_filters = [f for f in filters if f.indicator != field]
-        # Find tickers that match all other filters
-        tickers_for_boxplot = []
-        for ticker in analyzer.tickers:
-            data = all_data.get(ticker)
-            if data is None:
-                continue
-            include = True
-            for f in other_filters:
-                if f.indicator in data.columns:
-                    series = data[f.indicator].dropna()
-                    value = series.iloc[-1] if not series.empty else None
-                    if value is not None and not (f.min_value <= value <= f.max_value):
-                        include = False
-                        break
-                else:
-                    include = False
-                    break
-            if include:
-                tickers_for_boxplot.append(ticker)
-
-        # Now build the values for the boxplot using these tickers
-        values = []
-        for ticker in tickers_for_boxplot:
-            data = all_data.get(ticker)
-            if data is not None and field in data.columns:
-                series = data[field].dropna()
-                if not series.empty:
-                    v = series.iloc[-1]
-                    if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
-                        values.append(v)
-        # Remove outliers
-        if values:
-            values = np.array(values)
-            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad_filter", 5))
-            values = values.tolist()
+        if st.session_state.get("filters_confirmed", False):
+            filtered_tickers = get_filtered_tickers()
+            values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
         else:
-            values = []
-
-        if values:
-            min_val = float(min(values))
-            max_val = float(max(values))
-        else:
-            min_val = -100.0
-            max_val = 100.0
-
+            values = summary_df[field].dropna().astype(float)
+        
+        min_val, max_val = float(values.min()) if not values.empty else -100.0, float(values.max()) if not values.empty else 100.0
         slider_min, slider_max = st.sidebar.slider(
-            f"{field} range",
-            min_value=min_val,
-            max_value=max_val,
-            value=(min_val, max_val),
-            step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-            key=f"slider_{field}",
-            help=FUNDAMENTAL_EXPLANATIONS.get(field, "")
+            f"{field} intervall", min_value=min_val, max_value=max_val,
+            value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+            key=f"slider_{field}", help=FUNDAMENTAL_EXPLANATIONS.get(field, "")
         )
-
-        # --- Add boxplot below the slider ---
-        if len(values) > 1:
-            fig = go.Figure()
-            fig.add_trace(go.Box(
-                x=values,
-                boxpoints='outliers',
-                orientation='h',
-                marker_color='lightblue',
-                name="",
-                #hoverinfo="skip"
-            ))
-            fig.update_layout(
-                margin=dict(l=10, r=10, t=10, b=10),
-                height=180,
-                showlegend=False,
-                xaxis_title=None,
-                yaxis_title=None,
-            )
-            fig.update_traces(hoverinfo="skip", selector=dict(type="box"))
-            st.sidebar.plotly_chart(fig, use_container_width=True, #config={"staticPlot": True}
-                                    )
-
-        # Add a horizontal rule between indicators
+        
+        if not values.empty:
+            fig = go.Figure(go.Violin(x=values, points=False, orientation='h', marker_color='lightblue', name=""))
+            fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
+            st.sidebar.plotly_chart(fig, use_container_width=True)
         st.sidebar.markdown("---")
-
-        # Add the filter for this field (after the slider)
         filters.append(Filter(indicator=field, min_value=slider_min, max_value=slider_max))
     
-    # Apply filters (no ranking, just filter on indicator values)
-    filtered_tickers = []
-    for ticker in analyzer.tickers:
-        include = True
-        data = all_data.get(ticker)
-        if data is None:
-            continue
-        for f in filters:
-            # Use the last value of the indicator for filtering
-            if f.indicator in data.columns:
-                series = data[f.indicator].dropna()
-                value = series.iloc[-1] if not series.empty else None
-                # Only filter if value is present
-                if value is not None and not (f.min_value <= value <= f.max_value):
-                    include = False
-                    break
-                # If value is None, skip filtering for this field
-            else:
-                include = False
-                break
-        if include:
-            filtered_tickers.append(ticker)
-    
-    if not filtered_tickers:
-        st.warning("No tickers match the filter criteria. Adjust the filters or try again.")
-        return
-
-    # Prepare table data (no ranking columns)
-    table_data = []
-    for ticker in filtered_tickers:
-        row = {"Ticker": ticker}
-        data = all_data.get(ticker)
-        if data is not None:
-            # Add indicator values
-            for ind in analyzer.config.indicators:
-                if ind.name in data.columns:
-                    row[ind.name] = data[ind.name].dropna().iloc[-1] if not data[ind.name].dropna().empty else None
-            # Add fundamental values
+    # Lägg till knapparna "Bekräfta filter" och "Nollställ filter" bredvid varandra
+    col1, col2 = st.sidebar.columns(2)
+    with col1:
+        if st.button("Bekräfta filter", key="confirm_filters"):
+            st.session_state["filters_confirmed"] = True
+    with col2:
+        if st.button("Nollställ filter", key="reset_filters"):
+            # Rensa filter-relaterade session state-värden
+            st.session_state["filters_confirmed"] = False
+            st.session_state["selected_sectors"] = all_sectors
+            for indicator in analyzer.config.indicators:
+                if getattr(indicator, "filter", False):
+                    if f"slider_{indicator.name}" in st.session_state:
+                        del st.session_state[f"slider_{indicator.name}"]
             for field in getattr(analyzer.config, "fundamentals", []):
-                if field in data.columns:
-                    row[field] = data[field].dropna().iloc[-1] if not data[field].dropna().empty else None
-        table_data.append(row)
-    df_table = pd.DataFrame(table_data)
-
-    st.subheader(f"Filtered Stocks ({len(filtered_tickers)})")
-
-    # Add a Select column for checkboxes
-    df_table["Select"] = False
-    df_table = df_table.set_index("Ticker")
-
-    # Use session state to persist selection
-    if "selection_df" not in st.session_state or not st.session_state.selection_df.index.equals(df_table.index):
-        st.session_state.selection_df = df_table.copy()
-
-    edited_df = st.data_editor(
-        st.session_state.selection_df,
-        use_container_width=True,
-        hide_index=False,
-        column_config={
-            "Select": st.column_config.CheckboxColumn("Select")
-        },
-        key="filtered_stocks_editor"
-    )
-
-    st.session_state.selection_df = edited_df
-
-    selected_tickers = edited_df[edited_df["Select"]].index.tolist()
-
-    if not selected_tickers:
-        st.info("Select at least one stock to visualize.")
+                if f"slider_{field}" in st.session_state:
+                    del st.session_state[f"slider_{field}"]
+            st.success("Filter nollställda!")
+    
+    if not st.session_state.get("filters_confirmed"):
+        st.info("Ställ in dina filter och tryck på 'Bekräfta filter' för att tillämpa.")
         return
+    
+    # Tillämpa filter för tabellen och visualiseringarna
+    filtered_tickers = get_filtered_tickers()
+    if not filtered_tickers:
+        st.warning("Inga tickers matchar filterkriterierna. Justera filtren och försök igen.")
+        return
+    # Visa antalet filtrerade aktier
+    st.subheader(f"Filtrerade aktier ({len(filtered_tickers)})")
+    st.markdown(f"**Antal filtrerade aktier:** {len(filtered_tickers)}")
+    st.markdown(f"**Valda sektorer:** {', '.join(selected_sectors)}")
+    st.markdown("---")
 
+    table_data = summary_df.loc[filtered_tickers].copy()
+    table_data["Välj"] = False
+    table_data.drop(columns=['Open','High','Low','Dividends','Volume','Stock Splits','longBusinessSummary'], inplace=True, errors='ignore')
+    edited_df = st.data_editor(
+        table_data, use_container_width=True, hide_index=False,
+        column_config={"Välj": st.column_config.CheckboxColumn("Välj")}
+    )
+    
+    selected_tickers = edited_df[edited_df["Välj"]].index.tolist()
+    if not selected_tickers:
+        st.info("Välj minst en aktie att visualisera.")
+        return
+    
     for selected_ticker in selected_tickers:
-        data = all_data.get(selected_ticker)
+        data = load_full_data(selected_ticker)
         if data is not None:
             try:
                 pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
                 data = data.last(pandas_offset)
                 fig = plot_stock(selected_ticker, data, analyzer.config.indicators, analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)
-
-                # Display extra company info
-                info = analyzer.fundamentals_data.get(selected_ticker, {})
+                
+                info = summary_df.loc[selected_ticker]
                 for field in getattr(analyzer.config, "extra_fundamental_fields", []):
-                    value = info.get(field, "N/A")
-                    st.markdown(f"**{field}:** {value}")
-
+                    st.markdown(f"**{field}:** {info.get(field, 'N/A')}")
+                
                 for field in getattr(analyzer.config, "fundamentals", []):
-                    # Gather all values for this fundamental (across all tickers)
-                    values = []
-                    for ticker in filtered_tickers:
-                        data = all_data.get(ticker)
-                        if data is not None and field in data.columns:
-                            series = data[field].dropna()
-                            if not series.empty:
-                                v = series.iloc[-1]
-                                if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v):
-                                    values.append(v)
-                        # Remove outliers
-                        if values:
-                            values = np.array(values)
-                            values = remove_outliers(values, n_mad=getattr(analyzer.config, "n_mad", 5))
-                            values = values.tolist()
-                            
-                    # Value for the selected stock
-                    data_selected = all_data.get(selected_ticker)
-                    selected_value = None
-                    if data_selected is not None and field in data_selected.columns:
-                        series_selected = data_selected[field].dropna()
-                        if not series_selected.empty:
-                            selected_value = series_selected.iloc[-1]
-
-                    if len(values) > 1 and selected_value is not None:
+                    # Använd endast filtrerade tickers för violinplots vid visualisering
+                    values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
+                    selected_value = info.get(field)
+                    if not values.empty and selected_value is not None:
                         fig = go.Figure()
-                        fig.add_trace(go.Box(
+                        fig.add_trace(go.Violin(
                             x=values,
-                            name=field,
-                            boxpoints='outliers',
+                            y=[field]*len(values),
                             orientation='h',
-                            marker_color='lightblue'
+                            marker_color='lightblue',
+                            name="Distribution"
                         ))
-                        # Highlight the selected stock's value
                         fig.add_trace(go.Scatter(
                             x=[selected_value],
                             y=[field],
                             mode='markers',
                             marker=dict(color='red', size=14, symbol='diamond'),
-                            name=f"{selected_ticker}"
+                            name=selected_ticker
                         ))
                         fig.update_layout(
-                            title=f"Distribution of {field} (red = {selected_ticker})",
-                            xaxis_title=field,
-                            showlegend=False,
-                            height=300
+                            title=f"Distribution av {field} (röd = {selected_ticker})",
+                            height=300,
+                            showlegend=False
                         )
+                        # Ensure scatter is on top
+                        fig.data = (fig.data[0], fig.data[1])  # Violin first, scatter second
                         st.plotly_chart(fig, use_container_width=True)
-                    elif selected_value is not None:
-                        st.info(f"Not enough data to show a box plot for {field}.")
-
             except Exception as e:
-                st.error(f"Error plotting data for {selected_ticker}: {str(e)}")
-
+                st.error(f"Fel vid plotting av {selected_ticker}: {str(e)}")
 
 if __name__ == "__main__":
     main()
