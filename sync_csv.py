@@ -72,7 +72,7 @@ class GitSync:
             if files:
                 print("Spårade CSV-filer i data- och tickers-mapparna:")
                 for file in files.splitlines():
-                    print("  {file}")
+                    print(f"  {file}")
             else:
                 print("Inga CSV-filer hittades i data- eller tickers-mapparna i repot.")
         except RuntimeError as e:
