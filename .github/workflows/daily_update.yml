@@ -2,7 +2,7 @@ name: Daily Stock Data Update
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Run at 06:00 UTC every day
+    - cron: '0 5 * * *'  # Run at 05:00 UTC every day
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
@@ -35,10 +35,17 @@ jobs:
       run: |
         source .venv/bin/activate
         pip list
-        python -c "import pandas; import yfinance; import finta; import yaml; print('Dependencies verified')"
+        python -c "import pandas; import yfinance; import finta; import yaml; import requests; import bs4; print('Dependencies verified')"
     
-    - name: Create data directory
-      run: mkdir -p data
+    - name: Create data and tickers directories
+      run: |
+        mkdir -p data
+        mkdir -p tickers
+    
+    - name: Run ticker scraper
+      run: |
+        source .venv/bin/activate
+        uv run python scrape_tickers.py > scrape_tickers.log 2>&1
     
     - name: Run stock analyzer
       run: |
@@ -49,15 +56,17 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
-        git add data/*.csv
-        git diff --staged --quiet || git commit -m "Update stock data $(date -u +%Y-%m-%d)"
+        git add data/*.csv tickers/tickers_lists.csv
+        git diff --staged --quiet || git commit -m "Update stock data and tickers $(date -u +%Y-%m-%d)"
         git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
     
-    - name: Upload log on failure
+    - name: Upload logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: stock-analyzer-log
-        path: stock_analyzer.log
+        name: workflow-logs
+        path: |
+          scrape_tickers.log
+          stock_analyzer.log
