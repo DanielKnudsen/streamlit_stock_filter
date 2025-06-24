@@ -56,7 +56,8 @@ class StockAnalyzer:
 
     def _load_tickers(self) -> List[str]:
         df = pd.read_csv(self.config.tickers_file)
-        return df['ticker'].tolist()
+        self.tickers_df = df  # Save the full DataFrame for later use
+        return df['Instrument'].tolist()
 
     def fetch_data(self):
         print("Hämtar data för tickers:", self.tickers)
