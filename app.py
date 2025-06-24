@@ -152,7 +152,13 @@ def main():
     if summary_df.empty:
         st.error("Ingen data tillgänglig. Säkerställ att data är hämtad och sparad.")
         return
-    
+    all_markets = sorted(analyzer.tickers_df['Lista'].dropna().unique())
+    selected_markets = st.sidebar.multiselect(
+    "Market",
+    options=all_markets,
+    default=all_markets,
+    )
+
     all_sectors = sorted(set(summary_df['sector'].dropna().unique())) if 'sector' in summary_df.columns else ["Unknown"]
     selected_sectors = st.sidebar.multiselect("Affärssektor", options=all_sectors, default=all_sectors)
     
@@ -161,13 +167,19 @@ def main():
     
     # Funktion för att få filtrerade tickers exklusive ett specifikt filter
     def get_filtered_tickers(exclude_filter=None):
+        # Market mask
+        market_mask = summary_df.index.isin(
+            analyzer.tickers_df[analyzer.tickers_df['Lista'].isin(selected_markets)]['Instrument']
+        )
+        # Sector mask
         sector_mask = summary_df['sector'].isin(selected_sectors) if 'sector' in summary_df.columns else pd.Series(True, index=summary_df.index)
+        # Other filters
         filter_masks = {
             f.indicator: summary_df[f.indicator].astype(float).between(f.min_value, f.max_value)
             if f.indicator in summary_df.columns else pd.Series(False, index=summary_df.index)
             for f in filters if f != exclude_filter
         }
-        all_masks = [sector_mask] + list(filter_masks.values())
+        all_masks = [market_mask, sector_mask] + list(filter_masks.values())
         final_mask = np.logical_and.reduce(all_masks) if all_masks else pd.Series(True, index=summary_df.index)
         return summary_df.index[final_mask].tolist()
     
@@ -180,7 +192,16 @@ def main():
             else:
                 values = summary_df[indicator.name].dropna().astype(float)
             
-            min_val, max_val = float(values.min()) if not values.empty else -100.0, float(values.max()) if not values.empty else 100.0
+            if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
+                min_val = float(values.min())
+                max_val = float(values.max())
+                if min_val == max_val:
+                    min_val -= 1.0
+                    max_val += 1.0
+            else:
+                min_val = 0.0
+                max_val = 1.0
+
             slider_min, slider_max = st.sidebar.slider(
                 f"{indicator.name} intervall", min_value=min_val, max_value=max_val,
                 value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
@@ -202,7 +223,16 @@ def main():
         else:
             values = summary_df[field].dropna().astype(float)
         
-        min_val, max_val = float(values.min()) if not values.empty else -100.0, float(values.max()) if not values.empty else 100.0
+        if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
+            min_val = float(values.min())
+            max_val = float(values.max())
+            if min_val == max_val:
+                min_val -= 1.0
+                max_val += 1.0
+        else:
+            min_val = 0.0
+            max_val = 1.0
+
         slider_min, slider_max = st.sidebar.slider(
             f"{field} intervall", min_value=min_val, max_value=max_val,
             value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
@@ -252,7 +282,15 @@ def main():
 
     table_data = summary_df.loc[filtered_tickers].copy()
     table_data["Välj"] = False
-    table_data.drop(columns=['Open','High','Low','Dividends','Volume','Stock Splits','longBusinessSummary'], inplace=True, errors='ignore')
+
+    # Add market info from tickers_df
+    market_info = analyzer.tickers_df.set_index('Instrument')['Lista']
+    table_data['Market'] = table_data.index.map(market_info)
+
+    table_data.drop(
+        columns=['Open','High','Low','Dividends','Volume','Stock Splits','longBusinessSummary','Capital Gains'],
+        inplace=True, errors='ignore'
+    )
     edited_df = st.data_editor(
         table_data, use_container_width=True, hide_index=False,
         column_config={"Välj": st.column_config.CheckboxColumn("Välj")}
