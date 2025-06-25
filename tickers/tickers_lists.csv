@@ -137,6 +137,7 @@ VOLCAR-B,Volvo Car B,LargeCap
 ANOD-B,Addnode Group B,LargeCap
 BETCO,Better Collective,LargeCap
 FNOX,Fortnox,LargeCap
+HACK,Hacksaw,LargeCap
 HEXA-B,Hexagon B,LargeCap
 LAGR-B,Lagercrantz Group B,LargeCap
 MYCR,Mycronic,LargeCap
@@ -458,7 +459,6 @@ ACAST,Acast,FirstNorth
 ADVE,Advenica,FirstNorth
 AVEN,Avensia,FirstNorth
 BRIGHT,BrightBid Group,FirstNorth
-BRIGHT-BTA,BrightBid Group AB BTA,FirstNorth
 CAG,CAG Group,FirstNorth
 CX,Combinedx,FirstNorth
 DEVP-B,DevPort,FirstNorth
@@ -541,7 +541,6 @@ COMBI,Combigene,FirstNorthPremier
 CLBIO,Corline Biomedical,FirstNorthPremier
 DMYD-B,Diamyd Medical B,FirstNorthPremier
 DICOT,Dicot Pharma,FirstNorthPremier
-DIGN,Dignitana,FirstNorthPremier
 ELIC,Elicera Therapeutics,FirstNorthPremier
 ELN,Ellen,FirstNorthPremier
 ERMA,Enorama Pharma,FirstNorthPremier
@@ -560,6 +559,8 @@ INTEG-B,Integrum B,FirstNorthPremier
 IVACC,Intervacc,FirstNorthPremier
 IZAFE-B,iZafe Group B,FirstNorthPremier
 KLAR,Klaria Pharma Holding,FirstNorthPremier
+KLAR-BTA,Klaria Pharma Holding AB BTA,FirstNorthPremier
+KLAR-TR,Klaria Pharma Holding AB TR,FirstNorthPremier
 KONT,Kontigo Care,FirstNorthPremier
 LIDDS,LIDDS,FirstNorthPremier
 LPGO,Lipigon Pharmaceuticals,FirstNorthPremier
@@ -667,6 +668,7 @@ TRIBO-B,Tribox Group B,FirstNorthPremier
 CIRCHE,CirChem,FirstNorthPremier
 CIRCHE-BTA,CirChem AB BTA,FirstNorthPremier
 DE,Dala Energi,FirstNorthPremier
+DE-IL,Dala Energi AB IL,FirstNorthPremier
 GIGA,Gigasun,FirstNorthPremier
 MASHUP,Mashup Ireland,FirstNorthPremier
 ARCT,Arctic Minerals,FirstNorthPremier
@@ -739,7 +741,6 @@ DIAH,Diadrom Holding,FirstNorthPremier
 DIVIO-B,Divio Technologies B,FirstNorthPremier
 DONE,Done.ai Group,FirstNorthPremier
 ENERS,Enersize,FirstNorthPremier
-ENERS-BTU,Enersize Oyj BTU,FirstNorthPremier
 EXS,Exsitec,FirstNorthPremier
 FLEXM,Flexion Mobile,FirstNorthPremier
 FLOWS,Flowscape Technology,FirstNorthPremier
