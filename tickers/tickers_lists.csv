@@ -537,7 +537,6 @@ CRNO-B,Cereno Scientific B,FirstNorthPremier
 CMH,Chordate Medical Holding,FirstNorthPremier
 CMH-PREF,Chordate Medical Holding Pref,FirstNorthPremier
 CLS-B,Clinical Laserthermia Systems B,FirstNorthPremier
-COMBI,Combigene,FirstNorthPremier
 CLBIO,Corline Biomedical,FirstNorthPremier
 DMYD-B,Diamyd Medical B,FirstNorthPremier
 DICOT,Dicot Pharma,FirstNorthPremier
@@ -565,6 +564,7 @@ KONT,Kontigo Care,FirstNorthPremier
 LIDDS,LIDDS,FirstNorthPremier
 LPGO,Lipigon Pharmaceuticals,FirstNorthPremier
 LIPUM,Lipum,FirstNorthPremier
+LARK,Lärkberget,FirstNorthPremier
 MAGLE,Magle Chemoswed,FirstNorthPremier
 MAGNA,Magnasense,FirstNorthPremier
 MEDHLP,MedHelp Care,FirstNorthPremier
@@ -585,7 +585,6 @@ PILA,Pila Pharma,FirstNorthPremier
 PRO,Promimic,FirstNorthPremier
 PLUN,ProstaLund,FirstNorthPremier
 PROGEN,Prostatype Genomics,FirstNorthPremier
-PROGEN-BTU,Prostatype Genomics AB BTU,FirstNorthPremier
 QLIFE,Qlife Holding,FirstNorthPremier
 QUIA,QUIA PHARMA,FirstNorthPremier
 S2M,S2Medical B,FirstNorthPremier
@@ -611,6 +610,8 @@ BAWAT,Bawat Water Technologies,FirstNorthPremier
 BOMILL,BoMill,FirstNorthPremier
 CARE,Careium,FirstNorthPremier
 CI,Cell Impact,FirstNorthPremier
+CI-BTA,Cell Impact AB BTA,FirstNorthPremier
+CI-TR,Cell Impact AB TR,FirstNorthPremier
 DLAB,Dlaboratory Sweden,FirstNorthPremier
 ESGR-B,ES Energy Save Holding B,FirstNorthPremier
 FERRO,Ferroamp,FirstNorthPremier
