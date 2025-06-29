@@ -52,11 +52,9 @@ def load_summary_data(tickers):
                 df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
                 if not df.empty:
                     last_row = df.iloc[-1].copy()
-                    # Lägg till fundamental data från fundamentals_df om den finns
                     if fundamentals_df is not None and ticker in fundamentals_df.index:
                         for col in fundamentals_df.columns:
                             last_row[col] = fundamentals_df.loc[ticker, col]
-                    # Säkerställ att 'sector' finns, annars sätt "Unknown"
                     if 'sector' not in last_row or pd.isna(last_row['sector']):
                         last_row['sector'] = "Unknown"
                     summary[ticker] = last_row
@@ -133,6 +131,88 @@ def remove_outliers(series, n_mad=5):
         return series
     mask = np.abs(series - median) < n_mad * mad
     return series[mask]
+
+def create_bubble_plot(data: pd.DataFrame, x_col: str, y_col: str, size_col: str, color_col: str):
+    """Skapar en bubbelplot baserat på valda kolumner för filtrerade aktier."""
+    plot_data = data.copy()
+    
+    # Konvertera kolumner till numeriska värden för x och y
+    for col in [x_col, y_col]:
+        if col in plot_data.columns:
+            plot_data[col] = pd.to_numeric(plot_data[col], errors='coerce')
+    
+    # Hantera storlekskolumn
+    if size_col != "Fast storlek":
+        plot_data[size_col] = pd.to_numeric(plot_data[size_col], errors='coerce')
+    
+    # Ta bort rader med NaN i de valda kolumnerna
+    required_cols = [x_col, y_col, color_col]
+    if size_col != "Fast storlek":
+        required_cols.append(size_col)
+    plot_data = plot_data.dropna(subset=required_cols)
+    
+    if plot_data.empty:
+        return None
+    
+    # Hantera färgkolumn (endast kategoriska värden) efter dropna
+    if color_col in plot_data.columns:
+        unique_values = plot_data[color_col].dropna().unique()
+        color_map = {val: idx for idx, val in enumerate(unique_values)}
+        plot_data['color_numeric'] = plot_data[color_col].map(color_map)
+        color_values = plot_data['color_numeric']
+        colorbar_title = color_col
+        hover_color = plot_data[color_col]
+    else:
+        return None  # Ingen giltig färgkolumn
+    
+    # Hantera storlek och säkerställ att size och hover_color har samma längd
+    if size_col == "Fast storlek":
+        size = np.full(len(plot_data), 20)  # Fast storlek på 20 för alla bubblor
+        size_label = "Fast storlek"
+        size_data = size  # Använd fast storlek för customdata
+    else:
+        size_data = plot_data[size_col]  # Använd storlekskolumnen
+        size_label = size_col
+        # Skala om storleken för att göra bubblorna hanterbara
+        size_max = size_data.max()
+        if size_max > 0:
+            size = size_data / size_max * 50  # Skala till max 50
+        else:
+            size = np.full(len(plot_data), 20)  # Använd fast storlek om alla värden är 0
+    
+    # Skapa bubbelplot
+    fig = go.Figure()
+    
+    # Skapa scatter plot
+    fig.add_trace(go.Scatter(
+        x=plot_data[x_col],
+        y=plot_data[y_col],
+        mode='markers',
+        marker=dict(
+            size=size,
+            color=color_values,
+            colorscale='Viridis',
+            showscale=False,
+            colorbar=dict(title=colorbar_title)
+        ),
+        text=plot_data.index,
+        hovertemplate='<b>%{text}</b><br>' +
+                     f'{x_col}: %{{x:.2f}}<br>' +
+                     f'{y_col}: %{{y:.2f}}<br>' +
+                     f'{size_label}: %{{customdata[0]:.2f}}<br>' +
+                     f'{color_col}: %{{customdata[1]}}',
+        customdata=np.vstack((size_data, hover_color)).T  # Använd size_data för att säkerställa matchning
+    ))
+    
+    fig.update_layout(
+        title="Bubbelplot för filtrerade aktier",
+        xaxis_title=x_col,
+        yaxis_title=y_col,
+        height=600,
+        showlegend=False
+    )
+    
+    return fig
 
 def main():
     st.set_page_config(page_title="Stock Analyzer", layout="wide")
@@ -254,11 +334,45 @@ def main():
         columns=['Open','High','Low','Dividends','Volume','Stock Splits','longBusinessSummary','Capital Gains'],
         inplace=True, errors='ignore'
     )
+
+    
+    # Lägg till bubbelplot-konfiguration
+    st.subheader("Bubbelplot för filtrerade aktier")
+    # Identifiera numeriska och kategoriska kolumner
+    numeric_cols = [col for col in table_data.columns 
+                    if col != 'Välj' and pd.to_numeric(table_data[col], errors='coerce').notna().any()]
+    size_cols = ["Fast storlek"] + [col for col in numeric_cols 
+                                    if pd.to_numeric(table_data[col], errors='coerce').min() > 0]
+    color_cols = [col for col in table_data.columns 
+                  if col != 'Välj' and pd.to_numeric(table_data[col], errors='coerce').isna().all()]
+    
+    # Skapa kolumner för dropdown-menyer
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        x_col = st.selectbox("X-axel", options=numeric_cols, index=0 if numeric_cols else None, key="bubble_x")
+    with col2:
+        y_col = st.selectbox("Y-axel", options=numeric_cols, index=1 if len(numeric_cols) > 1 else 0, key="bubble_y")
+    with col3:
+        size_col = st.selectbox("Bubbelstorlek", options=size_cols, index=0, key="bubble_size")
+    with col4:
+        color_col = st.selectbox("Färgskala", options=color_cols, index=0 if color_cols else None, key="bubble_color")
+    
+    # Skapa och visa bubbelplot om alla val är gjorda
+    if x_col and y_col and size_col and color_col:
+        bubble_fig = create_bubble_plot(table_data, x_col, y_col, size_col, color_col)
+        if bubble_fig:
+            st.plotly_chart(bubble_fig, use_container_width=True)
+        else:
+            st.warning("Ingen data tillgänglig för bubbelplot med de valda parametrarna.")
+    else:
+        st.warning("Välj en kategorisk kolumn för färgskala för att visa bubbelplot.")
+    
+    st.markdown("---")
     edited_df = st.data_editor(
         table_data, use_container_width=True, hide_index=False,
         column_config={"Välj": st.column_config.CheckboxColumn("Välj")}
     )
-    
     selected_tickers = edited_df[edited_df["Välj"]].index.tolist()
     if not selected_tickers:
         st.info("Välj minst en aktie att visualisera.")
