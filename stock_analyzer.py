@@ -108,10 +108,23 @@ class StockAnalyzer:
                 for field in getattr(self.config, "fundamentals", []):
                     self.fundamentals_data[ticker][field] = info.get(field, None)
                 for field in getattr(self.config, "extra_fundamental_fields", []):
-                    # Använd "Unknown" för 'sector' om det saknas
                     self.fundamentals_data[ticker][field] = info.get(field, "Unknown" if field == "sector" else None)
             except Exception as e:
                 print(f"Fel vid hämtning av fundamentala data för {ticker}: {str(e)}")
+
+    def save_fundamentals(self):
+        """Sparar fundamental data i en separat CSV-fil med en rad per ticker."""
+        print("Sparar fundamental data till fundamentals.csv")
+        if not self.fundamentals_data:
+            print("Ingen fundamental data att spara")
+            return
+        try:
+            fundamentals_df = pd.DataFrame(self.fundamentals_data).T
+            fundamentals_df.index.name = 'Instrument'
+            os.makedirs(DATA_DIR, exist_ok=True)
+            fundamentals_df.to_csv(os.path.join(DATA_DIR, "fundamentals.csv"))
+        except Exception as e:
+            print(f"Fel vid sparande av fundamental data: {str(e)}")
 
     def save_data(self):
         print("Sparar data för tickers:", self.tickers)
@@ -124,13 +137,6 @@ class StockAnalyzer:
             for indicator in self.config.indicators:
                 if ticker in self.indicators_data and indicator.name in self.indicators_data[ticker]:
                     df[indicator.name] = self.indicators_data[ticker][indicator.name]
-            if hasattr(self, "fundamentals_data"):
-                for field in getattr(self.config, "fundamentals", []):
-                    value = self.fundamentals_data.get(ticker, {}).get(field, None)
-                    df[field] = value
-                for field in getattr(self.config, "extra_fundamental_fields", []):
-                    value = self.fundamentals_data.get(ticker, {}).get(field, "Unknown" if field == "sector" else None)
-                    df[field] = value
             try:
                 if df.index.tz is not None:
                     df.index = df.index.tz_localize(None)
@@ -145,3 +151,4 @@ if __name__ == "__main__":
     analyzer.calculate_indicators()
     analyzer.fetch_fundamentals()
     analyzer.save_data()
+    analyzer.save_fundamentals()
