@@ -37,15 +37,27 @@ def convert_to_pandas_offset(period: str) -> str:
 def load_summary_data(tickers):
     """Laddar den senaste raden för varje ticker för filtrering och boxplot."""
     summary = {}
+    fundamentals_file = os.path.join(DATA_DIR, "fundamentals.csv")
+    fundamentals_df = None
+    if os.path.exists(fundamentals_file):
+        try:
+            fundamentals_df = pd.read_csv(fundamentals_file, index_col='Instrument')
+        except Exception as e:
+            st.error(f"Fel vid laddning av fundamentals.csv: {str(e)}")
+    
     for ticker in tickers:
         file_path = os.path.join(DATA_DIR, f"{ticker}.csv")
         if os.path.exists(file_path):
             try:
                 df = pd.read_csv(file_path, index_col='Date', parse_dates=['Date'])
                 if not df.empty:
-                    last_row = df.iloc[-1]
+                    last_row = df.iloc[-1].copy()
+                    # Lägg till fundamental data från fundamentals_df om den finns
+                    if fundamentals_df is not None and ticker in fundamentals_df.index:
+                        for col in fundamentals_df.columns:
+                            last_row[col] = fundamentals_df.loc[ticker, col]
                     # Säkerställ att 'sector' finns, annars sätt "Unknown"
-                    if 'sector' not in last_row:
+                    if 'sector' not in last_row or pd.isna(last_row['sector']):
                         last_row['sector'] = "Unknown"
                     summary[ticker] = last_row
             except Exception as e:
@@ -136,27 +148,15 @@ def main():
         st.error("Inga tickers hittades i tickers.csv.")
         return
     
-    # Lägg till knapp för att uppdatera data
-    # if st.button("Uppdatera data"):
-    #     try:
-    #         analyzer.fetch_data()
-    #         analyzer.calculate_indicators()
-    #         analyzer.fetch_fundamentals()
-    #         analyzer.save_data()
-    #         st.success("Data uppdaterad!")
-    #         st.cache_data.clear()  # Rensa cachen för att ladda nya data
-    #     except Exception as e:
-    #         st.error(f"Fel vid uppdatering av data: {str(e)}")
-    
     summary_df = load_summary_data(analyzer.tickers)
     if summary_df.empty:
         st.error("Ingen data tillgänglig. Säkerställ att data är hämtad och sparad.")
         return
     all_markets = sorted(analyzer.tickers_df['Lista'].dropna().unique())
     selected_markets = st.sidebar.multiselect(
-    "Market",
-    options=all_markets,
-    default=all_markets,
+        "Market",
+        options=all_markets,
+        default=all_markets,
     )
 
     all_sectors = sorted(set(summary_df['sector'].dropna().unique())) if 'sector' in summary_df.columns else ["Unknown"]
@@ -165,15 +165,11 @@ def main():
     st.sidebar.header("Tekniska Filter")
     filters = []
     
-    # Funktion för att få filtrerade tickers exklusive ett specifikt filter
     def get_filtered_tickers(exclude_filter=None):
-        # Market mask
         market_mask = summary_df.index.isin(
             analyzer.tickers_df[analyzer.tickers_df['Lista'].isin(selected_markets)]['Instrument']
         )
-        # Sector mask
         sector_mask = summary_df['sector'].isin(selected_sectors) if 'sector' in summary_df.columns else pd.Series(True, index=summary_df.index)
-        # Other filters
         filter_masks = {
             f.indicator: summary_df[f.indicator].astype(float).between(f.min_value, f.max_value)
             if f.indicator in summary_df.columns else pd.Series(False, index=summary_df.index)
@@ -185,12 +181,8 @@ def main():
     
     for indicator in analyzer.config.indicators:
         if getattr(indicator, "filter", False):
-            # Använd alla tickers om filter inte är bekräftade, annars exkludera detta filter
-            if st.session_state.get("filters_confirmed", False):
-                filtered_tickers = get_filtered_tickers()
-                values = summary_df.loc[filtered_tickers, indicator.name].dropna().astype(float)
-            else:
-                values = summary_df[indicator.name].dropna().astype(float)
+            filtered_tickers = get_filtered_tickers()
+            values = summary_df.loc[filtered_tickers, indicator.name].dropna().astype(float)
             
             if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
                 min_val = float(values.min())
@@ -217,11 +209,8 @@ def main():
     
     st.sidebar.header("Fundamentala Filter")
     for field in getattr(analyzer.config, "fundamentals", []):
-        if st.session_state.get("filters_confirmed", False):
-            filtered_tickers = get_filtered_tickers()
-            values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
-        else:
-            values = summary_df[field].dropna().astype(float)
+        filtered_tickers = get_filtered_tickers()
+        values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
         
         if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
             min_val = float(values.min())
@@ -246,35 +235,10 @@ def main():
         st.sidebar.markdown("---")
         filters.append(Filter(indicator=field, min_value=slider_min, max_value=slider_max))
     
-    # Lägg till knapparna "Bekräfta filter" och "Nollställ filter" bredvid varandra
-    col1, col2 = st.sidebar.columns(2)
-    with col1:
-        if st.button("Bekräfta filter", key="confirm_filters"):
-            st.session_state["filters_confirmed"] = True
-    with col2:
-        if st.button("Nollställ filter", key="reset_filters"):
-            # Rensa filter-relaterade session state-värden
-            st.session_state["filters_confirmed"] = False
-            st.session_state["selected_sectors"] = all_sectors
-            for indicator in analyzer.config.indicators:
-                if getattr(indicator, "filter", False):
-                    if f"slider_{indicator.name}" in st.session_state:
-                        del st.session_state[f"slider_{indicator.name}"]
-            for field in getattr(analyzer.config, "fundamentals", []):
-                if f"slider_{field}" in st.session_state:
-                    del st.session_state[f"slider_{field}"]
-            st.success("Filter nollställda!")
-    
-    if not st.session_state.get("filters_confirmed"):
-        st.info("Ställ in dina filter och tryck på 'Bekräfta filter' för att tillämpa.")
-        return
-    
-    # Tillämpa filter för tabellen och visualiseringarna
     filtered_tickers = get_filtered_tickers()
     if not filtered_tickers:
         st.warning("Inga tickers matchar filterkriterierna. Justera filtren och försök igen.")
         return
-    # Visa antalet filtrerade aktier
     st.subheader(f"Filtrerade aktier ({len(filtered_tickers)})")
     st.markdown(f"**Antal filtrerade aktier:** {len(filtered_tickers)}")
     st.markdown(f"**Valda sektorer:** {', '.join(selected_sectors)}")
@@ -283,7 +247,6 @@ def main():
     table_data = summary_df.loc[filtered_tickers].copy()
     table_data["Välj"] = False
 
-    # Add market info from tickers_df
     market_info = analyzer.tickers_df.set_index('Instrument')['Lista']
     table_data['Market'] = table_data.index.map(market_info)
 
@@ -315,7 +278,6 @@ def main():
                     st.markdown(f"**{field}:** {info.get(field, 'N/A')}")
                 
                 for field in getattr(analyzer.config, "fundamentals", []):
-                    # Använd endast filtrerade tickers för violinplots vid visualisering
                     values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
                     selected_value = info.get(field)
                     if not values.empty and selected_value is not None:
@@ -339,8 +301,7 @@ def main():
                             height=300,
                             showlegend=False
                         )
-                        # Ensure scatter is on top
-                        fig.data = (fig.data[0], fig.data[1])  # Violin first, scatter second
+                        fig.data = (fig.data[0], fig.data[1])
                         st.plotly_chart(fig, use_container_width=True)
             except Exception as e:
                 st.error(f"Fel vid plotting av {selected_ticker}: {str(e)}")
