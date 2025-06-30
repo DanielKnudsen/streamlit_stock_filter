@@ -398,11 +398,14 @@ def main():
     rank_filters = []
     filters = []
     for cluster in clusters_in_config:
+
+        
         cluster_ranks = cluster_to_ranks.get(cluster, [])
         cluster_rank_col = cluster_to_cluster_rank.get(cluster)
         # --- Add overall_rank slider before the first cluster_rank slider ---
         if cluster == clusters_in_config[0] and "overall_rank" in summary_df.columns:
             values = summary_df["overall_rank"].dropna().astype(float)
+            st.sidebar.markdown(f"### Overall Rank")
             if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
                 min_val = float(values.min())
                 max_val = float(values.max())
@@ -420,6 +423,8 @@ def main():
             rank_filters.append(("overall_rank", slider_min, slider_max))
             st.sidebar.markdown("---")
         # Cluster rank slider
+        # Add cluster heading
+        st.sidebar.markdown(f"### {cluster} rank summary")
         if cluster_rank_col:
             values = summary_df[cluster_rank_col].dropna().astype(float)
             if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
@@ -439,6 +444,7 @@ def main():
             cluster_rank_filters.append((cluster_rank_col, slider_min, slider_max))
             st.sidebar.markdown("---")
         # Underlying ranks (fundamental/technical)
+        st.sidebar.markdown(f"### {cluster} rank components")
         for rank_col in cluster_ranks:
             if rank_col not in summary_df.columns:
                 continue
