@@ -92,8 +92,7 @@ def Create_df_tickers():
 
                     time.sleep(1)
     df_tickers = pd.concat(list_of_dfs, ignore_index=True) 
-
-    df_tickers = df_tickers[~df_tickers['Instrument'].str.contains('-TO')]
+    df_tickers = df_tickers[~df_tickers['Instrument'].str.contains('-TO|-BTA|-TR')]
 
     df_tickers.to_csv('tickers/tickers_lists.csv', index=False, encoding='utf-8-sig')
 

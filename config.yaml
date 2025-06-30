@@ -5,14 +5,36 @@ data:
   n_mad_filter: 5
 tickers_file: "tickers/tickers_lists.csv"
 fundamentals:
-  - earningsGrowth
-  - revenueGrowth
-  - profitMargins
-  - grossMargins
-  - returnOnEquity
-  - debtToEquity
-  - priceToBook
-  - forwardPE
+  - name: earningsGrowth
+    cluster: Growth
+    order: High
+  - name: revenueGrowth
+    cluster: Growth
+    order: High
+  - name: profitMargins
+    cluster: Quality
+    order: High
+  - name: grossMargins
+    cluster: Quality
+    order: High
+  - name: returnOnEquity
+    cluster: Quality
+    order: High
+  - name: returnOnAssets
+    cluster: Quality
+    order: High
+  - name: debtToEquity
+    cluster: Value
+    order: Low
+  - name: priceToBook
+    cluster: Value
+    order: Low
+  - name: forwardPE
+    cluster: Value
+    order: Low
+  - name: dividendYield
+    cluster: Value
+    order: High
 extra_fundamental_fields:
   - longName
   - sector
@@ -23,44 +45,60 @@ indicators:
     period: 1
     filter: false
     panel: price
+    cluster: null
+    order: null
   - name: "SMA_10"
     type: "sma"
     period: 10
     filter: false
     panel: price
+    cluster: null
+    order: null
   - name: "SMA_40"
     type: "sma"
     period: 40
     filter: false
     panel: price
+    cluster: null
+    order: null
   - name: "SMA_120"
     type: "sma"
     period: 120
     filter: false
     panel: price
+    cluster: null
+    order: null
   - name: "Close_10_%_D"
     type: "sma_diff"
     short_sma: "Close"
     long_sma: "SMA_10"
     filter: true
     panel: middle
+    cluster: Momentum
+    order: High
   - name: "10_40_%_D"
     type: "sma_diff"
     short_sma: "SMA_10"
     long_sma: "SMA_40"
     filter: true
     panel: middle
+    cluster: Momentum
+    order: High
   - name: "40_120_%_D"
     type: "sma_diff"
     short_sma: "SMA_40"
     long_sma: "SMA_120"
     filter: true
     panel: middle
-  - name: "RSI"
+    cluster: Momentum
+    order: High
+  - name: "RSI_3_months"
     type: "rsi"
-    period: 14
+    period: 90
     filter: true
     panel: lower
+    cluster: Momentum
+    order: High
 explanations:
   fundamentals:
     earningsGrowth: "Year-over-year earnings growth rate."
@@ -79,4 +117,4 @@ explanations:
     Close_10_%_D: "Percent difference between Close and SMA_10."
     10_40_%_D: "Percent difference between SMA_10 and SMA_40."
     40_120_%_D: "Percent difference between SMA_40 and SMA_120."
-    RSI: "Relative Strength Index (14 days)."
+    RSI: "Relative Strength Index (6 months)."
