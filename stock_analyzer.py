@@ -271,7 +271,7 @@ class StockAnalyzer:
         # Calculate overall rank as the average of cluster ranks
         cluster_rank_cols = [c for c in cluster_ranks_df.columns if c.endswith("_cluster_rank")]
         if cluster_rank_cols:
-            cluster_ranks_df['overall_rank'] = cluster_ranks_df[cluster_rank_cols].mean(axis=1, skipna=True)
+            cluster_ranks_df['overall_rank'] = cluster_ranks_df[cluster_rank_cols].mean(axis=1, skipna=False)
             # Scale overall rank to 0-100 (100=best) if there are valid values
             if cluster_ranks_df['overall_rank'].nunique(dropna=True) > 1:
                 cluster_ranks_df['overall_rank'] = (
