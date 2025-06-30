@@ -84,9 +84,13 @@ def load_config(path):
         config = yaml.safe_load(f)
     return config
 
-config = load_config("config.yaml")
-fundamental_explanations = config.get("explanations", {}).get("fundamentals", {})
-indicator_explanations = config.get("explanations", {}).get("indicators", {})
+with open("config.yaml") as f:
+    config = yaml.safe_load(f)
+
+fundamentals = config["fundamentals"]
+fundamental_names = [f["name"] for f in fundamentals]
+
+indicators = config["indicators"]
 
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
     """Skapar ett diagram för en given ticker med angivna indikatorer."""
@@ -123,15 +127,6 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         fig.update_yaxes(title_text="Nedre indikatorer", row=3 if has_middle else 2, col=1)
     fig.update_layout(height=900 if has_middle and has_lower else 700, legend=dict(orientation="h"), xaxis=dict(title="Datum"), title=f"{ticker} Aktiediagram")
     return fig
-
-"""FUNDAMENTAL_EXPLANATIONS = {
-    "earningsGrowth": "Årlig vinsttillväxt.",
-    "revenueGrowth": "Årlig intäktstillväxt.",
-    "profitMargins": "Nettovinst som procent av intäkter.",
-    "returnOnAssets": "Nettoinkomst dividerat med totala tillgångar.",
-    "priceToBook": "Aktiepris dividerat med bokfört värde per aktie.",
-    "forwardPE": "Framtida pris/vinst-förhållande."
-}"""
 
 def remove_outliers(series, n_mad=5):
     """Tar bort extremvärden baserat på median absolut avvikelse."""
@@ -224,6 +219,30 @@ def create_bubble_plot(data: pd.DataFrame, x_col: str, y_col: str, size_col: str
     
     return fig
 
+@st.cache_data
+def load_ranks_data():
+    ranks_file = os.path.join(DATA_DIR, "ranks.csv")
+    if os.path.exists(ranks_file):
+        try:
+            ranks_df = pd.read_csv(ranks_file, index_col='Instrument')
+            return ranks_df
+        except Exception as e:
+            st.error(f"Fel vid laddning av ranks.csv: {str(e)}")
+            return pd.DataFrame()
+    return pd.DataFrame()
+
+@st.cache_data
+def load_cluster_ranks_data():
+    cluster_ranks_file = os.path.join(DATA_DIR, "cluster_ranks.csv")
+    if os.path.exists(cluster_ranks_file):
+        try:
+            cluster_ranks_df = pd.read_csv(cluster_ranks_file, index_col='Instrument')
+            return cluster_ranks_df
+        except Exception as e:
+            st.error(f"Fel vid laddning av cluster_ranks.csv: {str(e)}")
+            return pd.DataFrame()
+    return pd.DataFrame()
+
 def main():
     st.set_page_config(page_title="Stock Analyzer", layout="wide")
     st.title("Dashboard för Aktieanalys")
@@ -239,9 +258,93 @@ def main():
         return
     
     summary_df = load_summary_data(analyzer.tickers)
+    #st.write(f"Antal tickers i summary_df: {len(summary_df)}")
     if summary_df.empty:
         st.error("Ingen data tillgänglig. Säkerställ att data är hämtad och sparad.")
         return
+
+    #st.write(f"Antal tickers utan sektor: {summary_df['sector'].isna().sum()}")
+    ranks_df = load_ranks_data()
+    #st.write(f"Antal tickers i ranks.csv: {len(ranks_df)}")
+    if not ranks_df.empty:
+        summary_df = summary_df.merge(ranks_df, left_index=True, right_index=True, how="left")
+
+    cluster_ranks_df = load_cluster_ranks_data()
+    #st.write(f"Antal tickers i cluster_ranks.csv: {len(cluster_ranks_df)}")
+    if not cluster_ranks_df.empty:
+        summary_df = summary_df.merge(cluster_ranks_df, left_index=True, right_index=True, how="left")
+
+    # --- Define get_filtered_tickers before using it in filter sections ---
+    def get_filtered_tickers(exclude_filter=None):
+        market_mask = summary_df.index.isin(
+            analyzer.tickers_df[analyzer.tickers_df['Lista'].isin(selected_markets)]['Instrument']
+        )
+        #st.write(f"Antal tickers efter marknadsfilter: {market_mask.sum()}")
+        sector_mask = summary_df['sector'].isin(selected_sectors) | summary_df['sector'].isna() if 'sector' in summary_df.columns else pd.Series(True, index=summary_df.index)
+        #st.write(f"Antal tickers efter sektorsfilter: {sector_mask.sum()}")
+
+        filter_masks = {}
+        for f in filters:
+            if f == exclude_filter or f.indicator not in summary_df.columns:
+                filter_masks[f.indicator] = pd.Series(True, index=summary_df.index)
+                continue
+            col = summary_df[f.indicator].astype(float)
+            slider = st.session_state.get(f"slider_{f.indicator}")
+            if slider is not None:
+                slider_min, slider_max = slider
+            else:
+                slider_min, slider_max = f.min_value, f.max_value
+            col_min = col.min(skipna=True)
+            col_max = col.max(skipna=True)
+            # Inkludera alltid NaN-värden för forwardPE
+            if f.indicator in ['forwardPE','dividendYield'] or pd.isna(col_min) or pd.isna(col_max) or (slider_min <= col_min and slider_max >= col_max):
+                filter_masks[f.indicator] = pd.Series(True, index=summary_df.index)
+            else:
+                filter_masks[f.indicator] = (col.between(slider_min, slider_max) | summary_df[f.indicator].isna())
+            #st.write(f"Antal tickers efter filter {f.indicator}: {filter_masks[f.indicator].sum()}")
+
+        for rank_col, slider_min, slider_max in rank_filters:
+            if rank_col in summary_df.columns:
+                col = summary_df[rank_col].astype(float)
+                slider = st.session_state.get(f"slider_{rank_col}")
+                if slider is not None:
+                    s_min, s_max = slider
+                else:
+                    s_min, s_max = slider_min, slider_max
+                col_min = col.min(skipna=True)
+                col_max = col.max(skipna=True)
+                if pd.isna(col_min) or pd.isna(col_max) or (s_min <= col_min and s_max >= col_max):
+                    filter_masks[rank_col] = pd.Series(True, index=summary_df.index)
+                else:
+                    filter_masks[rank_col] = (col.between(s_min, s_max) | summary_df[rank_col].isna())
+                #st.write(f"Antal tickers efter rank-filter {rank_col}: {filter_masks[rank_col].sum()}")
+            else:
+                filter_masks[rank_col] = pd.Series(True, index=summary_df.index)
+
+        for cluster_col, slider_min, slider_max in cluster_rank_filters:
+            if cluster_col in summary_df.columns:
+                col = summary_df[cluster_col].astype(float)
+                slider = st.session_state.get(f"cluster_slider_{cluster_col}")
+                if slider is not None:
+                    s_min, s_max = slider
+                else:
+                    s_min, s_max = slider_min, slider_max
+                col_min = col.min(skipna=True)
+                col_max = col.max(skipna=True)
+                if pd.isna(col_min) or pd.isna(col_max) or (s_min <= col_min and s_max >= col_max):
+                    filter_masks[cluster_col] = pd.Series(True, index=summary_df.index)
+                else:
+                    filter_masks[cluster_col] = (col.between(s_min, s_max) | summary_df[cluster_col].isna())
+                #st.write(f"Antal tickers efter cluster-rank-filter {cluster_col}: {filter_masks[cluster_col].sum()}")
+            else:
+                filter_masks[cluster_col] = pd.Series(True, index=summary_df.index)
+
+        all_masks = [market_mask, sector_mask] + list(filter_masks.values())
+        final_mask = np.logical_and.reduce(all_masks) if all_masks else pd.Series(True, index=summary_df.index)
+        #st.write(f"Antal tickers efter alla filter: {final_mask.sum()}")
+        return summary_df.index[final_mask].tolist()
+
+    # --- Market filter ---
     all_markets = sorted(analyzer.tickers_df['Lista'].dropna().unique())
     selected_markets = st.sidebar.multiselect(
         "Market",
@@ -249,31 +352,61 @@ def main():
         default=all_markets,
     )
 
+    # --- Sector filter ---
     all_sectors = sorted(set(summary_df['sector'].dropna().unique())) if 'sector' in summary_df.columns else ["Unknown"]
     selected_sectors = st.sidebar.multiselect("Affärssektor", options=all_sectors, default=all_sectors)
-    
-    st.sidebar.header("Tekniska Filter")
+
+    # --- Prepare cluster and rank mapping from config ---
+    # Extract unique cluster names from config.yaml (preserving order of appearance)
+    clusters_in_config = []
+    for ind in config.get("indicators", []):
+        cluster = ind.get("cluster")
+        if cluster and cluster not in clusters_in_config:
+            clusters_in_config.append(cluster)
+    for fund in config.get("fundamentals", []):
+        cluster = fund.get("cluster")
+        if cluster and cluster not in clusters_in_config:
+            clusters_in_config.append(cluster)
+
+    # Use all columns from summary_df for cluster and rank columns
+    cluster_rank_cols = [col for col in summary_df.columns if col.endswith("_cluster_rank")]
+    rank_cols = [col for col in summary_df.columns if col.endswith("_rank") and not col.endswith("_cluster_rank")]
+
+    # Build mapping: cluster -> [rank columns]
+    cluster_to_ranks = {c: [] for c in clusters_in_config}
+    for ind in config.get("indicators", []):
+        cluster = ind.get("cluster")
+        col = f"{ind['name']}_rank"
+        if cluster in cluster_to_ranks and col in rank_cols:
+            cluster_to_ranks[cluster].append(col)
+    for fund in config.get("fundamentals", []):
+        cluster = fund.get("cluster")
+        col = f"{fund['name']}_rank"
+        if cluster in cluster_to_ranks and col in rank_cols:
+            cluster_to_ranks[cluster].append(col)
+    # Do NOT remove clusters with no ranks, so we always show the cluster header if a cluster_rank exists
+
+    # Map cluster name to cluster_rank column
+    cluster_to_cluster_rank = {}
+    for c in clusters_in_config:
+        col = f"{c}_cluster_rank"
+        if col in cluster_rank_cols:
+            cluster_to_cluster_rank[c] = col
+
+    # --- Cluster filter sections ---
+    cluster_rank_filters = []
+    rank_filters = []
     filters = []
-    
-    def get_filtered_tickers(exclude_filter=None):
-        market_mask = summary_df.index.isin(
-            analyzer.tickers_df[analyzer.tickers_df['Lista'].isin(selected_markets)]['Instrument']
-        )
-        sector_mask = summary_df['sector'].isin(selected_sectors) if 'sector' in summary_df.columns else pd.Series(True, index=summary_df.index)
-        filter_masks = {
-            f.indicator: summary_df[f.indicator].astype(float).between(f.min_value, f.max_value)
-            if f.indicator in summary_df.columns else pd.Series(False, index=summary_df.index)
-            for f in filters if f != exclude_filter
-        }
-        all_masks = [market_mask, sector_mask] + list(filter_masks.values())
-        final_mask = np.logical_and.reduce(all_masks) if all_masks else pd.Series(True, index=summary_df.index)
-        return summary_df.index[final_mask].tolist()
-    
-    for indicator in analyzer.config.indicators:
-        if getattr(indicator, "filter", False):
-            filtered_tickers = get_filtered_tickers()
-            values = summary_df.loc[filtered_tickers, indicator.name].dropna().astype(float)
-            
+    for cluster in clusters_in_config:
+        cluster_ranks = cluster_to_ranks.get(cluster, [])
+        cluster_rank_col = cluster_to_cluster_rank.get(cluster)
+        # Show the cluster section if there is a cluster_rank_col or any underlying ranks
+        if not cluster_rank_col and not cluster_ranks:
+            continue
+        st.sidebar.markdown(f"### {cluster.capitalize()}")
+        # Cluster rank slider
+        if cluster_rank_col:
+            values = summary_df[cluster_rank_col].dropna().astype(float)
             if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
                 min_val = float(values.min())
                 max_val = float(values.max())
@@ -282,50 +415,95 @@ def main():
                     max_val += 1.0
             else:
                 min_val = 0.0
-                max_val = 1.0
-
+                max_val = 100.0
             slider_min, slider_max = st.sidebar.slider(
-                f"{indicator.name} intervall", min_value=min_val, max_value=max_val,
+                f"{cluster_rank_col} intervall", min_value=min_val, max_value=max_val,
                 value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-                key=f"slider_{indicator.name}", 
-                help=indicator_explanations.get(indicator.name, "")
+                key=f"cluster_slider_{cluster_rank_col}"
             )
-            
-            if not values.empty:
-                fig = go.Figure(go.Violin(x=values, points=False, orientation='h', marker_color='lightblue', name=""))
-                fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
-                st.sidebar.plotly_chart(fig, use_container_width=True)
+            cluster_rank_filters.append((cluster_rank_col, slider_min, slider_max))
             st.sidebar.markdown("---")
-            filters.append(Filter(indicator=indicator.name, min_value=slider_min, max_value=slider_max))
-    
-    st.sidebar.header("Fundamentala Filter")
-    for field in getattr(analyzer.config, "fundamentals", []):
-        filtered_tickers = get_filtered_tickers()
-        values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
-        
-        if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
-            min_val = float(values.min())
-            max_val = float(values.max())
-            if min_val == max_val:
-                min_val -= 1.0
-                max_val += 1.0
-        else:
-            min_val = 0.0
-            max_val = 1.0
+        # Underlying ranks (fundamental/technical)
+        for rank_col in cluster_ranks:
+            if rank_col not in summary_df.columns:
+                continue
+            # Find the original indicator/fundamental name for this rank_col
+            orig_name = rank_col[:-5]  # remove "_rank"
+            # Try to find if it's an indicator or fundamental
+            indicator_obj = next((ind for ind in config.get("indicators", []) if ind["name"] == orig_name), None)
+            fundamental_obj = next((f for f in config.get("fundamentals", []) if f["name"] == orig_name), None)
+            # If indicator/fundamental, show the actual value filter as well
+            if indicator_obj and getattr(indicator_obj, "filter", True):
+                # Value filter for indicator
+                filtered_tickers = get_filtered_tickers()
+                values_actual = summary_df.loc[filtered_tickers, orig_name].dropna().astype(float)
+                if not values_actual.empty and np.isfinite(values_actual.min()) and np.isfinite(values_actual.max()):
+                    min_val_actual = float(values_actual.min())
+                    max_val_actual = float(values_actual.max())
+                    if min_val_actual == max_val_actual:
+                        min_val_actual -= 1.0
+                        max_val_actual += 1.0
+                else:
+                    min_val_actual = 0.0
+                    max_val_actual = 1.0
+                indicator_explanations = {ind["name"]: ind.get("explanation", "") for ind in config.get("indicators", [])}
+                slider_min_actual, slider_max_actual = st.sidebar.slider(
+                    f"{orig_name} intervall", min_value=min_val_actual, max_value=max_val_actual,
+                    value=(min_val_actual, max_val_actual), step=(max_val_actual - min_val_actual) / 100 if max_val_actual > min_val_actual else 1.0,
+                    key=f"slider_{orig_name}", 
+                    help=indicator_explanations.get(orig_name, "")
+                )
+                if not values_actual.empty:
+                    fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
+                    st.sidebar.plotly_chart(fig, use_container_width=True)
+                #st.sidebar.markdown("---")
+                filters.append(Filter(indicator=orig_name, min_value=slider_min_actual, max_value=slider_max_actual))
+            elif fundamental_obj:
+                # Value filter for fundamental
+                filtered_tickers = get_filtered_tickers()
+                values_actual = summary_df.loc[filtered_tickers, orig_name].dropna().astype(float)
+                if not values_actual.empty and np.isfinite(values_actual.min()) and np.isfinite(values_actual.max()):
+                    min_val_actual = float(values_actual.min())
+                    max_val_actual = float(values_actual.max())
+                    if min_val_actual == max_val_actual:
+                        min_val_actual -= 1.0
+                        max_val_actual += 1.0
+                else:
+                    min_val_actual = 0.0
+                    max_val_actual = 1.0
+                fundamental_explanations = {f["name"]: f.get("explanation", "") for f in config.get("fundamentals", [])}
+                slider_min_actual, slider_max_actual = st.sidebar.slider(
+                    f"{orig_name} intervall", min_value=min_val_actual, max_value=max_val_actual,
+                    value=(min_val_actual, max_val_actual), step=(max_val_actual - min_val_actual) / 100 if max_val_actual > min_val_actual else 1.0,
+                    key=f"slider_{orig_name}", 
+                    help=fundamental_explanations.get(orig_name, "")
+                )
+                if not values_actual.empty:
+                    fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
+                    st.sidebar.plotly_chart(fig, use_container_width=True)
+                #st.sidebar.markdown("---")
+                filters.append(Filter(indicator=orig_name, min_value=slider_min_actual, max_value=slider_max_actual))
+            # Always add the rank filter
+            values = summary_df[rank_col].dropna().astype(float)
+            if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
+                min_val = float(values.min())
+                max_val = float(values.max())
+                if min_val == max_val:
+                    min_val -= 1.0
+                    max_val += 1.0
+            else:
+                min_val = 0.0
+                max_val = 100.0
+            slider_min, slider_max = st.sidebar.slider(
+                f"{rank_col} intervall", min_value=min_val, max_value=max_val,
+                value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+                key=f"slider_{rank_col}"
+            )
+            rank_filters.append((rank_col, slider_min, slider_max))
+            st.sidebar.markdown("---")
 
-        slider_min, slider_max = st.sidebar.slider(
-            f"{field} intervall", min_value=min_val, max_value=max_val,
-            value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-            key=f"slider_{field}", 
-             help=fundamental_explanations.get(field, "")
-        )
-        
-        if not values.empty:
-            fig = go.Figure(go.Violin(x=values, points=False, orientation='h', marker_color='lightblue', name=""))
-            fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
-            st.sidebar.plotly_chart(fig, use_container_width=True)
-        st.sidebar.markdown("---")
-        filters.append(Filter(indicator=field, min_value=slider_min, max_value=slider_max))
     
     filtered_tickers = get_filtered_tickers()
     if not filtered_tickers:
@@ -362,13 +540,13 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        x_col = st.selectbox("X-axel", options=numeric_cols, index=0 if numeric_cols else None, key="bubble_x")
+        x_col = st.selectbox("X-axel", options=numeric_cols, index=numeric_cols.index('Momentum_cluster_rank') if 'Momentum_cluster_rank' in numeric_cols else 0, key="bubble_x")
     with col2:
-        y_col = st.selectbox("Y-axel", options=numeric_cols, index=1 if len(numeric_cols) > 1 else 0, key="bubble_y")
+        y_col = st.selectbox("Y-axel", options=numeric_cols, index=numeric_cols.index('Growth_cluster_rank') if 'Growth_cluster_rank' in numeric_cols else 0, key="bubble_y")
     with col3:
-        size_col = st.selectbox("Bubbelstorlek", options=size_cols, index=0, key="bubble_size")
+        size_col = st.selectbox("Bubbelstorlek", options=size_cols, index=size_cols.index('Quality_cluster_rank') if 'Quality_cluster_rank' in size_cols else 0, key="bubble_size")
     with col4:
-        color_col = st.selectbox("Färgskala", options=color_cols, index=0 if color_cols else None, key="bubble_color")
+        color_col = st.selectbox("Färgskala", options=color_cols, index=color_cols.index('Market') if 'Market' in color_cols else 0, key="bubble_color")
     
     # Skapa och visa bubbelplot om alla val är gjorda
     if x_col and y_col and size_col and color_col:
@@ -403,7 +581,7 @@ def main():
                 for field in getattr(analyzer.config, "extra_fundamental_fields", []):
                     st.markdown(f"**{field}:** {info.get(field, 'N/A')}")
                 
-                for field in getattr(analyzer.config, "fundamentals", []):
+                for field in fundamental_names:
                     values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
                     selected_value = info.get(field)
                     if not values.empty and selected_value is not None:
