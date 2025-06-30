@@ -196,7 +196,7 @@ class StockAnalyzer:
                     ranks = df[col].rank(method='dense',ascending=False, na_option="keep", pct=True) * 100
                 else:
                     ranks = df[col].rank(method='dense',ascending=True, na_option="keep", pct=True) * 100
-                df[f"{col}_rank"] = ranks.round(1)
+                df[f"{col}_rank"] = ranks.round(0)
             else:
                 df[f"{col}_rank"] = np.nan
             rank_cols.append(f"{col}_rank")
@@ -208,7 +208,7 @@ class StockAnalyzer:
                     ranks = df[col].rank(method='dense',ascending=False, na_option="keep", pct=True) * 100
                 else:
                     ranks = df[col].rank(method='dense',ascending=True, na_option="keep", pct=True) * 100
-                df[f"{col}_rank"] = ranks.round(1)
+                df[f"{col}_rank"] = ranks.round(0)
             else:
                 df[f"{col}_rank"] = np.nan
             rank_cols.append(f"{col}_rank")
@@ -264,7 +264,7 @@ class StockAnalyzer:
             col = cluster
             if cluster_ranks_df[col].nunique(dropna=True) > 1:
                 ranks = cluster_ranks_df[col].rank(ascending=True, na_option="keep", pct=True) * 100
-                cluster_ranks_df[f"{col}_cluster_rank"] = ranks.round(1)
+                cluster_ranks_df[f"{col}_cluster_rank"] = ranks.round(0)
             else:
                 cluster_ranks_df[f"{col}_cluster_rank"] = np.nan
 
@@ -276,7 +276,7 @@ class StockAnalyzer:
             if cluster_ranks_df['overall_rank'].nunique(dropna=True) > 1:
                 cluster_ranks_df['overall_rank'] = (
                     cluster_ranks_df['overall_rank'].rank(ascending=True, na_option="keep", pct=True) * 100
-                ).round(1)
+                ).round(0)
             else:
                 cluster_ranks_df['overall_rank'] = np.nan
         else:
