@@ -400,10 +400,25 @@ def main():
     for cluster in clusters_in_config:
         cluster_ranks = cluster_to_ranks.get(cluster, [])
         cluster_rank_col = cluster_to_cluster_rank.get(cluster)
-        # Show the cluster section if there is a cluster_rank_col or any underlying ranks
-        if not cluster_rank_col and not cluster_ranks:
-            continue
-        st.sidebar.markdown(f"### {cluster.capitalize()}")
+        # --- Add overall_rank slider before the first cluster_rank slider ---
+        if cluster == clusters_in_config[0] and "overall_rank" in summary_df.columns:
+            values = summary_df["overall_rank"].dropna().astype(float)
+            if not values.empty and np.isfinite(values.min()) and np.isfinite(values.max()):
+                min_val = float(values.min())
+                max_val = float(values.max())
+                if min_val == max_val:
+                    min_val -= 1.0
+                    max_val += 1.0
+            else:
+                min_val = 0.0
+                max_val = 100.0
+            slider_min, slider_max = st.sidebar.slider(
+                "overall_rank intervall", min_value=min_val, max_value=max_val,
+                value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
+                key="slider_overall_rank"
+            )
+            rank_filters.append(("overall_rank", slider_min, slider_max))
+            st.sidebar.markdown("---")
         # Cluster rank slider
         if cluster_rank_col:
             values = summary_df[cluster_rank_col].dropna().astype(float)
@@ -454,7 +469,8 @@ def main():
                     help=indicator_explanations.get(orig_name, "")
                 )
                 if not values_actual.empty:
-                    fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    #fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    fig = go.Figure(go.Histogram(x=values_actual, marker_color='lightblue', nbinsx=20, name=""))
                     fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
                     st.sidebar.plotly_chart(fig, use_container_width=True)
                 #st.sidebar.markdown("---")
@@ -480,7 +496,8 @@ def main():
                     help=fundamental_explanations.get(orig_name, "")
                 )
                 if not values_actual.empty:
-                    fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    #fig = go.Figure(go.Violin(x=values_actual, points=False, orientation='h', marker_color='lightblue', name=""))
+                    fig = go.Figure(go.Histogram(x=values_actual, marker_color='lightblue', nbinsx=20, name=""))
                     fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=180, showlegend=False)
                     st.sidebar.plotly_chart(fig, use_container_width=True)
                 #st.sidebar.markdown("---")
@@ -572,40 +589,105 @@ def main():
         data = load_full_data(selected_ticker)
         if data is not None:
             try:
+                info = summary_df.loc[selected_ticker]
+                st.subheader(f"{info.get('longName', 'N/A')}")
                 pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
                 data = data.last(pandas_offset)
                 fig = plot_stock(selected_ticker, data, analyzer.config.indicators, analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)
                 
-                info = summary_df.loc[selected_ticker]
+                
                 for field in getattr(analyzer.config, "extra_fundamental_fields", []):
                     st.markdown(f"**{field}:** {info.get(field, 'N/A')}")
-                
+
+                # --- Add cluster_rank gauges (with overall_rank as left-most) ---
+                gauge_cols = []
+                if "overall_rank" in summary_df.columns:
+                    gauge_cols.append("overall_rank")
+                gauge_cols += [col for col in summary_df.columns if col.endswith("_cluster_rank")]
+
+                if gauge_cols:
+                    gauges = []
+                    for col in gauge_cols:
+                        val = info.get(col)
+                        if val is not None and not pd.isna(val):
+                            gauge = go.Indicator(
+                                mode="gauge+number",
+                                value=val,
+                                title={'text': col.replace("_cluster_rank", "").replace("overall_rank", "Overall").capitalize()},
+                                gauge={
+                                    'axis': {'range': [0, 100]},
+                                    'bar': {'color': "royalblue"},
+                                    'bgcolor': "white"
+                                },
+                                domain={'row': 0, 'column': len(gauges)}
+                            )
+                        else:
+                            gauge = go.Indicator(
+                                mode="gauge+number",
+                                value=0,
+                                title={'text': col.replace("_cluster_rank", "").replace("overall_rank", "Overall").capitalize()},
+                                gauge={
+                                    'axis': {'range': [0, 100]},
+                                    'bar': {'color': "lightgray"},
+                                    'bgcolor': "white"
+                                },
+                                number={'prefix': "NA"},
+                                domain={'row': 0, 'column': len(gauges)}
+                            )
+                        gauges.append(gauge)
+                    fig_gauges = make_subplots(rows=1, cols=len(gauges), specs=[[{'type': 'indicator'}]*len(gauges)])
+                    for i, g in enumerate(gauges):
+                        fig_gauges.add_trace(g, row=1, col=i+1)
+                    fig_gauges.update_layout(height=220, margin=dict(t=30, b=10))
+                    st.plotly_chart(fig_gauges, use_container_width=True)
+                # --- End cluster_rank gauges ---
+
                 for field in fundamental_names:
                     values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
+                    values = values[np.isfinite(values)]
                     selected_value = info.get(field)
-                    if not values.empty and selected_value is not None:
+                    if not values.empty:
                         fig = go.Figure()
-                        fig.add_trace(go.Violin(
+                        # Histogram for distribution
+                        fig.add_trace(go.Histogram(
                             x=values,
-                            y=[field]*len(values),
-                            orientation='h',
                             marker_color='lightblue',
+                            nbinsx=20,
                             name="Distribution"
                         ))
-                        fig.add_trace(go.Scatter(
-                            x=[selected_value],
-                            y=[field],
-                            mode='markers',
-                            marker=dict(color='red', size=14, symbol='diamond'),
-                            name=selected_ticker
-                        ))
+                        if selected_value is not None and not pd.isna(selected_value):
+                            # Compute histogram and ensure finite y-value for the vertical line
+                            hist_counts, _ = np.histogram(values, bins=20)
+                            max_count = np.max(hist_counts) if len(hist_counts) > 0 else 1
+                            if not np.isfinite(max_count) or max_count <= 0:
+                                max_count = 1
+                            # Vertical line for selected stock
+                            fig.add_trace(go.Scatter(
+                                x=[selected_value, selected_value],
+                                y=[0, max_count],
+                                mode='lines',
+                                line=dict(color='red', width=3, dash='dash'),
+                                name=selected_ticker,
+                                showlegend=True
+                            ))
+                            fig_title = f"Distribution av {field} (röd linje = {selected_ticker})"
+                        else:
+                            # Add annotation for NA
+                            fig.add_annotation(
+                                text=f"{selected_ticker}: NA",
+                                xref="paper", yref="paper",
+                                x=0.5, y=0.95, showarrow=False,
+                                font=dict(color="red", size=14)
+                            )
+                            fig_title = f"Distribution av {field} (värde saknas för {selected_ticker})"
                         fig.update_layout(
-                            title=f"Distribution av {field} (röd = {selected_ticker})",
+                            title=fig_title,
                             height=300,
-                            showlegend=False
+                            showlegend=False,
+                            xaxis_title=field,
+                            yaxis_title="Antal"
                         )
-                        fig.data = (fig.data[0], fig.data[1])
                         st.plotly_chart(fig, use_container_width=True)
             except Exception as e:
                 st.error(f"Fel vid plotting av {selected_ticker}: {str(e)}")

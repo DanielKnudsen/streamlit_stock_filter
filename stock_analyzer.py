@@ -156,10 +156,8 @@ class StockAnalyzer:
         Results are stored in ranks.csv (one row per ticker, one column per rank).
         """
         # Prepare rank targets from config
-        # Load config.yaml directly to get cluster/order for both indicators and fundamentals
         with open("config.yaml", "r") as f:
             config_data = yaml.safe_load(f)
-        # Fundamentals: list of dicts with name, cluster, order
         fundamentals = [f for f in config_data["fundamentals"] if f.get("cluster") is not None]
         indicators = [i for i in config_data["indicators"] if i.get("cluster") is not None]
 
@@ -193,7 +191,6 @@ class StockAnalyzer:
         for f in fundamentals:
             col = f["name"]
             order = f.get("order", "High")
-            # Only rank if there is more than one unique non-NaN value
             if df[col].nunique(dropna=True) > 1:
                 if order == "Low":
                     ranks = df[col].rank(method='dense',ascending=False, na_option="keep", pct=True) * 100
@@ -224,7 +221,8 @@ class StockAnalyzer:
     def calculate_cluster_rank(self):
         """
         Summarizes the ranks per cluster and calculates a cluster rank (0-100, 100=best) for each ticker.
-        Results are saved in cluster_ranks.csv (one row per ticker, one column per cluster rank).
+        Also calculates an overall rank as the average of cluster ranks, scaled 0-100.
+        Results are saved in cluster_ranks.csv (one row per ticker, one column per cluster rank plus overall rank).
         """
         # Load config to get clusters
         with open("config.yaml", "r") as f:
@@ -264,16 +262,29 @@ class StockAnalyzer:
         # Rank within each cluster (0-100, 100=best)
         for cluster in cluster_ranks_df.columns:
             col = cluster
-            # Higher mean rank is better
             if cluster_ranks_df[col].nunique(dropna=True) > 1:
                 ranks = cluster_ranks_df[col].rank(ascending=True, na_option="keep", pct=True) * 100
                 cluster_ranks_df[f"{col}_cluster_rank"] = ranks.round(1)
             else:
                 cluster_ranks_df[f"{col}_cluster_rank"] = np.nan
 
-        # Save only cluster_rank columns
+        # Calculate overall rank as the average of cluster ranks
         cluster_rank_cols = [c for c in cluster_ranks_df.columns if c.endswith("_cluster_rank")]
-        out_df = cluster_ranks_df[cluster_rank_cols]
+        if cluster_rank_cols:
+            cluster_ranks_df['overall_rank'] = cluster_ranks_df[cluster_rank_cols].mean(axis=1, skipna=True)
+            # Scale overall rank to 0-100 (100=best) if there are valid values
+            if cluster_ranks_df['overall_rank'].nunique(dropna=True) > 1:
+                cluster_ranks_df['overall_rank'] = (
+                    cluster_ranks_df['overall_rank'].rank(ascending=True, na_option="keep", pct=True) * 100
+                ).round(1)
+            else:
+                cluster_ranks_df['overall_rank'] = np.nan
+        else:
+            cluster_ranks_df['overall_rank'] = np.nan
+
+        # Save only cluster_rank and overall_rank columns
+        output_cols = [c for c in cluster_ranks_df.columns if c.endswith("_cluster_rank") or c == "overall_rank"]
+        out_df = cluster_ranks_df[output_cols]
         out_df.index.name = "Instrument"
         out_df.to_csv(os.path.join(DATA_DIR, "cluster_ranks.csv"))
 
