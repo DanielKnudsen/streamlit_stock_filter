@@ -61,3 +61,22 @@ indicators:
     period: 14
     filter: true
     panel: lower
+explanations:
+  fundamentals:
+    earningsGrowth: "Year-over-year earnings growth rate."
+    revenueGrowth: "Year-over-year revenue growth rate."
+    profitMargins: "Net profit as a percentage of revenue."
+    grossMargins: "Gross profit as a percentage of revenue."
+    returnOnEquity: "Net income divided by shareholders' equity."
+    debtToEquity: "Total debt divided by shareholders' equity."
+    priceToBook: "Share price divided by book value per share."
+    forwardPE: "Forward price-to-earnings ratio."
+  indicators:
+    Close: "Closing price."
+    SMA_10: "Simple Moving Average over 10 days."
+    SMA_40: "Simple Moving Average over 40 days."
+    SMA_120: "Simple Moving Average over 120 days."
+    Close_10_%_D: "Percent difference between Close and SMA_10."
+    10_40_%_D: "Percent difference between SMA_10 and SMA_40."
+    40_120_%_D: "Percent difference between SMA_40 and SMA_120."
+    RSI: "Relative Strength Index (14 days)."
