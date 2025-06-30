@@ -9,6 +9,7 @@ from stock_analyzer import StockAnalyzer, IndicatorConfig
 import os
 import re
 from scipy.stats import median_abs_deviation
+import yaml
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -78,6 +79,15 @@ def load_full_data(ticker):
             return None
     return None
 
+def load_config(path):
+    with open(path, "r") as f:
+        config = yaml.safe_load(f)
+    return config
+
+config = load_config("config.yaml")
+fundamental_explanations = config.get("explanations", {}).get("fundamentals", {})
+indicator_explanations = config.get("explanations", {}).get("indicators", {})
+
 def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
     """Skapar ett diagram för en given ticker med angivna indikatorer."""
     has_middle = any(getattr(ind, "panel", "price") == "middle" for ind in config)
@@ -114,14 +124,14 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
     fig.update_layout(height=900 if has_middle and has_lower else 700, legend=dict(orientation="h"), xaxis=dict(title="Datum"), title=f"{ticker} Aktiediagram")
     return fig
 
-FUNDAMENTAL_EXPLANATIONS = {
+"""FUNDAMENTAL_EXPLANATIONS = {
     "earningsGrowth": "Årlig vinsttillväxt.",
     "revenueGrowth": "Årlig intäktstillväxt.",
     "profitMargins": "Nettovinst som procent av intäkter.",
     "returnOnAssets": "Nettoinkomst dividerat med totala tillgångar.",
     "priceToBook": "Aktiepris dividerat med bokfört värde per aktie.",
     "forwardPE": "Framtida pris/vinst-förhållande."
-}
+}"""
 
 def remove_outliers(series, n_mad=5):
     """Tar bort extremvärden baserat på median absolut avvikelse."""
@@ -277,7 +287,8 @@ def main():
             slider_min, slider_max = st.sidebar.slider(
                 f"{indicator.name} intervall", min_value=min_val, max_value=max_val,
                 value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-                key=f"slider_{indicator.name}", help=getattr(indicator, "description", "")
+                key=f"slider_{indicator.name}", 
+                help=indicator_explanations.get(indicator.name, "")
             )
             
             if not values.empty:
@@ -305,7 +316,8 @@ def main():
         slider_min, slider_max = st.sidebar.slider(
             f"{field} intervall", min_value=min_val, max_value=max_val,
             value=(min_val, max_val), step=(max_val - min_val) / 100 if max_val > min_val else 1.0,
-            key=f"slider_{field}", help=FUNDAMENTAL_EXPLANATIONS.get(field, "")
+            key=f"slider_{field}", 
+             help=fundamental_explanations.get(field, "")
         )
         
         if not values.empty:
