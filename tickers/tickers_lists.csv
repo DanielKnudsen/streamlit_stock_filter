@@ -471,7 +471,6 @@ GIG-SDB,GiG Software,FirstNorth
 MNTC,Mentice,FirstNorth
 ONEF,Oneflow,FirstNorth
 PRCO-B,Precio Fishbone B,FirstNorth
-TERRNT-BTU-B,Terranet AB BTU B,FirstNorth
 TERRNT-B,Terranet B,FirstNorth
 AAC,AAC Clyde Space,FirstNorth
 GOMX,GomSpace Group,FirstNorth
@@ -576,6 +575,8 @@ OSSD,OssDsign,FirstNorthPremier
 PAX,Paxman,FirstNorthPremier
 PERP-B,Perpetua Medical B,FirstNorthPremier
 PILA,Pila Pharma,FirstNorthPremier
+PILA-BTU,PILA PHARMA AB BTU,FirstNorthPremier
+PILA-UR,PILA PHARMA AB UR,FirstNorthPremier
 PRO,Promimic,FirstNorthPremier
 PLUN,ProstaLund,FirstNorthPremier
 PROGEN,Prostatype Genomics,FirstNorthPremier
