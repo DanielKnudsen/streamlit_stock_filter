@@ -41,6 +41,8 @@ jobs:
       run: |
         mkdir -p data
         mkdir -p tickers
+        mkdir -p fundamentals
+        mkdir -p ranks
     
     - name: Run ticker scraper
       run: |
