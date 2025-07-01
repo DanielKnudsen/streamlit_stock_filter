@@ -9,6 +9,11 @@ import numpy as np
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+FUNDAMENTALS_DIR = os.path.join(BASE_DIR, "fundamentals")
+INCOME_DIR = os.path.join(BASE_DIR, "income")
+BALANCE_DIR = os.path.join(BASE_DIR, "balance")
+CASHFLOW_DIR = os.path.join(BASE_DIR, "cashflow")
+RANKS_DIR = os.path.join(BASE_DIR, "ranks")
 
 @dataclass
 class IndicatorConfig:
@@ -41,7 +46,7 @@ class StockAnalyzer:
         self.tickers = self._load_tickers()
         self.data = {}
         self.indicators_data = {}
-        self.fundamentals_data = {}
+        self.filter_data = {}
 
     def _load_config(self, config_path: str) -> DataConfig:
         with open(config_path, 'r') as file:
@@ -102,34 +107,47 @@ class StockAnalyzer:
                 except Exception as e:
                     print(f"Fel vid beräkning av {indicator.name} för {ticker}: {str(e)}")
 
-    def fetch_fundamentals(self):
+    def fetch_filter_data(self):
         print(f"Hämtar fundamentala data för tickers: {len(self.tickers)} tickers. Exempel: {self.tickers[:5]}")
-        self.fundamentals_data = {}
+        self.filter_data = {}
+        os.makedirs(FUNDAMENTALS_DIR, exist_ok=True)  # Ensure the directory exists
+        os.makedirs(INCOME_DIR, exist_ok=True)
+        os.makedirs(BALANCE_DIR, exist_ok=True)
+        os.makedirs(CASHFLOW_DIR, exist_ok=True)
         for ticker in self.tickers:
             try:
                 yf_ticker = yf.Ticker(f"{ticker}.ST")
                 info = yf_ticker.info
-                self.fundamentals_data[ticker] = {}
+                income_statement = yf_ticker.financials
+                income_statement.to_csv(os.path.join(INCOME_DIR, f"{ticker}.csv"))
+                balance_sheet = yf_ticker.balance_sheet
+                balance_sheet.to_csv(os.path.join(BALANCE_DIR, f"{ticker}.csv"))
+                cash_flow = yf_ticker.cashflow
+                cash_flow.to_csv(os.path.join(CASHFLOW_DIR, f"{ticker}.csv"))
+                # Save all fundamental data for this ticker
+                pd.DataFrame([info]).to_csv(os.path.join(FUNDAMENTALS_DIR, f"{ticker}.csv"), index=False)
+                # Save only selected fields for filtering
+                self.filter_data[ticker] = {}
                 for field in getattr(self.config, "fundamentals", []):
-                    self.fundamentals_data[ticker][field] = info.get(field, None)
+                    self.filter_data[ticker][field] = info.get(field, None)
                 for field in getattr(self.config, "extra_fundamental_fields", []):
-                    self.fundamentals_data[ticker][field] = info.get(field, "Unknown" if field == "sector" else None)
+                    self.filter_data[ticker][field] = info.get(field, "Unknown" if field == "sector" else None)
             except Exception as e:
                 print(f"Fel vid hämtning av fundamentala data för {ticker}: {str(e)}")
 
-    def save_fundamentals(self):
-        """Sparar fundamental data i en separat CSV-fil med en rad per ticker."""
+    def save_filter_data(self):
+        """Sparar fundamental data som ska användas till filtering i en separat CSV-fil med en rad per ticker."""
         print("Sparar fundamental data till fundamentals.csv")
-        if not self.fundamentals_data:
+        if not self.filter_data:
             print("Ingen fundamental data att spara")
             return
         try:
-            fundamentals_df = pd.DataFrame(self.fundamentals_data).T
+            fundamentals_df = pd.DataFrame(self.filter_data).T
             fundamentals_df.index.name = 'Instrument'
             os.makedirs(DATA_DIR, exist_ok=True)
-            fundamentals_df.to_csv(os.path.join(DATA_DIR, "fundamentals.csv"))
+            fundamentals_df.to_csv(os.path.join(DATA_DIR, "filter_data.csv"))
         except Exception as e:
-            print(f"Fel vid sparande av fundamental data: {str(e)}")
+            print(f"Fel vid sparande av filter data: {str(e)}")
 
     def save_data(self):
         print(f"Sparar data för tickers:{len(self.tickers)} tickers. Exempel: {self.tickers[:5]}")
@@ -167,7 +185,7 @@ class StockAnalyzer:
             rank_data[ticker] = {}
             # Fundamentals
             for f in fundamentals:
-                val = self.fundamentals_data.get(ticker, {}).get(f["name"], np.nan)
+                val = self.filter_data.get(ticker, {}).get(f["name"], np.nan)
                 rank_data[ticker][f["name"]] = val
             # Indicators (use last available value)
             for i in indicators:
@@ -216,7 +234,7 @@ class StockAnalyzer:
         # Save only rank columns
         df_ranks = df[rank_cols]
         df_ranks.index.name = "Instrument"
-        df_ranks.to_csv(os.path.join(DATA_DIR, "ranks.csv"))
+        df_ranks.to_csv(os.path.join(RANKS_DIR, "ranks.csv"))
 
     def calculate_cluster_rank(self):
         """
@@ -242,7 +260,7 @@ class StockAnalyzer:
                 cluster_fields.setdefault(cluster, []).append(f"{i['name']}_rank")
 
         # Load ranks.csv
-        ranks_path = os.path.join(DATA_DIR, "ranks.csv")
+        ranks_path = os.path.join(RANKS_DIR, "ranks.csv")
         if not os.path.exists(ranks_path):
             print("ranks.csv not found, run calculate_rank() first.")
             return
@@ -286,15 +304,20 @@ class StockAnalyzer:
         output_cols = [c for c in cluster_ranks_df.columns if c.endswith("_cluster_rank") or c == "overall_rank"]
         out_df = cluster_ranks_df[output_cols]
         out_df.index.name = "Instrument"
-        out_df.to_csv(os.path.join(DATA_DIR, "cluster_ranks.csv"))
+        out_df.to_csv(os.path.join(RANKS_DIR, "cluster_ranks.csv"))
 
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(FUNDAMENTALS_DIR, exist_ok=True)
+    os.makedirs(INCOME_DIR, exist_ok=True)
+    os.makedirs(BALANCE_DIR, exist_ok=True)
+    os.makedirs(CASHFLOW_DIR, exist_ok=True)
+    os.makedirs(RANKS_DIR, exist_ok=True)
     analyzer = StockAnalyzer("config.yaml")
     analyzer.fetch_data()
     analyzer.calculate_indicators()
-    analyzer.fetch_fundamentals()
+    analyzer.fetch_filter_data()
     analyzer.save_data()
-    analyzer.save_fundamentals()
+    analyzer.save_filter_data()
     analyzer.calculate_rank()
     analyzer.calculate_cluster_rank()
