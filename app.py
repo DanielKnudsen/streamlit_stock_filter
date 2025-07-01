@@ -13,6 +13,8 @@ import yaml
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+FUNDAMENTALS_DIR = os.path.join(BASE_DIR, "fundamentals")
+RANKS_DIR = os.path.join(BASE_DIR, "ranks")
 
 @dataclass
 class Filter:
@@ -38,13 +40,13 @@ def convert_to_pandas_offset(period: str) -> str:
 def load_summary_data(tickers):
     """Laddar den senaste raden för varje ticker för filtrering och boxplot."""
     summary = {}
-    fundamentals_file = os.path.join(DATA_DIR, "fundamentals.csv")
+    fundamentals_file = os.path.join(DATA_DIR, "filter_data.csv")
     fundamentals_df = None
     if os.path.exists(fundamentals_file):
         try:
             fundamentals_df = pd.read_csv(fundamentals_file, index_col='Instrument')
         except Exception as e:
-            st.error(f"Fel vid laddning av fundamentals.csv: {str(e)}")
+            st.error(f"Fel vid laddning av filter_data.csv: {str(e)}")
     
     for ticker in tickers:
         file_path = os.path.join(DATA_DIR, f"{ticker}.csv")

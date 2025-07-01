@@ -1,6 +1,6 @@
 data:
-  history_period: "3y"
-  display_period: "2y"
+  history_period: "5y"
+  display_period: "5y"
   n_mad: 20
   n_mad_filter: 5
 tickers_file: "tickers/tickers_lists.csv"
