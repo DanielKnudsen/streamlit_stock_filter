@@ -10,6 +10,7 @@ import os
 import re
 from scipy.stats import median_abs_deviation
 import yaml
+import pwlf
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -94,7 +95,42 @@ fundamental_names = [f["name"] for f in fundamentals]
 
 indicators = config["indicators"]
 
-def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], period: str):
+def segmented_trendline(x_numeric, y, std_dev_threshold=50.0, max_breakpoints=6):
+    """
+    Fit a piecewise linear trendline with as few breakpoints as possible
+    to get below the std_dev_threshold.
+    Returns the fitted y-values and the number of breakpoints used.
+    """
+    optimal_breakpoints = 0
+    achieved_std_dev = float('inf')
+    for num_breakpoints_current in range(0, max_breakpoints + 1):
+        num_segments = num_breakpoints_current + 1
+        try:
+            my_pwlf = pwlf.PiecewiseLinFit(x_numeric, y)
+            my_pwlf.fit(num_segments)
+            y_fitted = my_pwlf.predict(x_numeric)
+            residuals = y - y_fitted
+            current_std_dev = np.std(residuals)
+            if current_std_dev <= std_dev_threshold:
+                optimal_breakpoints = num_breakpoints_current
+                achieved_std_dev = current_std_dev
+                return y_fitted, optimal_breakpoints, achieved_std_dev
+            elif num_breakpoints_current == max_breakpoints:
+                optimal_breakpoints = num_breakpoints_current
+                achieved_std_dev = current_std_dev
+                return y_fitted, optimal_breakpoints, achieved_std_dev
+        except Exception:
+            if num_breakpoints_current > 0:
+                optimal_breakpoints = num_breakpoints_current - 1
+            else:
+                optimal_breakpoints = 0
+            break
+    # fallback: linear fit
+    coeffs = np.polyfit(x_numeric, y, 1)
+    y_fitted = np.polyval(coeffs, x_numeric)
+    return y_fitted, 0, np.std(y - y_fitted)
+
+def plot_stock(ticker: str, data: pd.DataFrame, std_dev_threshold: float, config: List[IndicatorConfig], period: str):
     """Skapar ett diagram för en given ticker med angivna indikatorer."""
     has_middle = any(getattr(ind, "panel", "price") == "middle" for ind in config)
     has_lower = any(getattr(ind, "panel", "price") == "lower" for ind in config)
@@ -112,6 +148,90 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         subplot_titles = ("Prispanel",)
     fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, row_heights=row_heights, vertical_spacing=0.05, subplot_titles=subplot_titles)
     fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name='Stängningspris', line=dict(color='blue')), row=1, col=1)
+    
+    # Add segmented trendline for closing price with CAGR tags and parallel std-dev lines
+    try:
+        x_numeric = np.arange(len(data['Close']))
+        y = data['Close'].values
+        if len(y) > 2 and np.isfinite(y).all():
+            y_fitted, n_breaks, achieved_std = segmented_trendline(x_numeric, y, std_dev_threshold=std_dev_threshold)
+            fig.add_trace(go.Scatter(
+                x=data.index,
+                y=y_fitted,
+                mode='lines',
+                line=dict(color='red', width=2, dash='dash'),
+                name=f'Trendlinje ({n_breaks} brytpunkter)',
+                showlegend=True
+            ), row=1, col=1)
+
+            # --- Add parallel std-dev lines ---
+            std = np.std(y - y_fitted)
+            for k in [1, 2, 3, -1, -2, -3]:
+                fig.add_trace(go.Scatter(
+                    x=data.index,
+                    y=y_fitted + k * std,
+                    mode='lines',
+                    line=dict(color='red', width=1, dash='dot'),
+                    name=f'Trend ±{abs(k)}σ' if k > 0 else f'Trend -{abs(k)}σ',
+                    showlegend=True
+                ), row=1, col=1)
+            # --- End parallel std-dev lines ---
+
+            # Add CAGR annotation for each segment
+            my_pwlf = pwlf.PiecewiseLinFit(x_numeric, y)
+            my_pwlf.fit(n_breaks + 1)
+            breaks = my_pwlf.fit_breaks  # x indices of breakpoints
+
+            if len(breaks) > 1:
+                for i in range(len(breaks) - 1):
+                    x_start = int(round(breaks[i]))
+                    x_end = int(round(breaks[i+1]))
+                    y_start = y_fitted[x_start]
+                    y_end = y_fitted[x_end-1] if x_end > x_start else y_fitted[x_end]
+                    # Calculate years using actual dates
+                    date_start = data.index[x_start]
+                    date_end = data.index[x_end-1] if x_end > x_start else data.index[x_end]
+                    n_years = (date_end - date_start).days / 365.25
+                    if y_start > 0 and y_end > 0 and n_years > 0:
+                        cagr_seg = (y_end / y_start) ** (1 / n_years) - 1
+                        x_mid = int((x_start + x_end) / 2)
+                        fig.add_annotation(
+                            x=data.index[x_mid],
+                            y=y_fitted[x_mid],
+                            text=f"CAGR {cagr_seg*100:+.1f}%",
+                            showarrow=True,
+                            arrowhead=1,
+                            font=dict(color="red", size=12),
+                            yshift=10,
+                            bgcolor="white",
+                            bordercolor="red",
+                            borderwidth=1,
+                            row=1, col=1
+                        )
+            # Fallback: If only one segment (no breaks), show CAGR for the whole period
+            elif len(y_fitted) > 1 and y_fitted[0] > 0 and y_fitted[-1] > 0:
+                date_start = data.index[0]
+                date_end = data.index[-1]
+                n_years = (date_end - date_start).days / 365.25
+                if n_years > 0:
+                    cagr_seg = (y_fitted[-1] / y_fitted[0]) ** (1 / n_years) - 1
+                    x_mid = int((0 + len(y_fitted) - 1) / 2)
+                    fig.add_annotation(
+                        x=data.index[x_mid],
+                        y=y_fitted[x_mid],
+                        text=f"CAGR {cagr_seg*100:+.1f}%",
+                        showarrow=True,
+                        arrowhead=1,
+                        font=dict(color="red", size=12),
+                        yshift=10,
+                        bgcolor="white",
+                        bordercolor="red",
+                        borderwidth=1,
+                        row=1, col=1
+                    )
+    except Exception as e:
+        pass
+
     for indicator in config:
         if indicator.name in data.columns:
             panel = getattr(indicator, "panel", "price")
@@ -127,8 +247,9 @@ def plot_stock(ticker: str, data: pd.DataFrame, config: List[IndicatorConfig], p
         fig.update_yaxes(title_text="Mellanindikatorer", row=2 if not has_lower else 2, col=1)
     if has_lower:
         fig.update_yaxes(title_text="Nedre indikatorer", row=3 if has_middle else 2, col=1)
-    fig.update_layout(height=900 if has_middle and has_lower else 700, legend=dict(orientation="h"), xaxis=dict(title="Datum"), title=f"{ticker} Aktiediagram")
-    return fig
+    fig.update_layout(height=900 if has_middle and has_lower else 700, legend=dict(orientation="h"), xaxis=dict(title="Datum"), title=f"{ticker}")
+
+    return fig, std_dev_threshold, n_breaks, achieved_std
 
 def remove_outliers(series, n_mad=5):
     """Tar bort extremvärden baserat på median absolut avvikelse."""
@@ -223,7 +344,7 @@ def create_bubble_plot(data: pd.DataFrame, x_col: str, y_col: str, size_col: str
 
 @st.cache_data
 def load_ranks_data():
-    ranks_file = os.path.join(DATA_DIR, "ranks.csv")
+    ranks_file = os.path.join(RANKS_DIR, "ranks.csv")
     if os.path.exists(ranks_file):
         try:
             ranks_df = pd.read_csv(ranks_file, index_col='Instrument')
@@ -235,7 +356,7 @@ def load_ranks_data():
 
 @st.cache_data
 def load_cluster_ranks_data():
-    cluster_ranks_file = os.path.join(DATA_DIR, "cluster_ranks.csv")
+    cluster_ranks_file = os.path.join(RANKS_DIR, "cluster_ranks.csv")
     if os.path.exists(cluster_ranks_file):
         try:
             cluster_ranks_df = pd.read_csv(cluster_ranks_file, index_col='Instrument')
@@ -469,7 +590,7 @@ def main():
                 else:
                     min_val_actual = 0.0
                     max_val_actual = 1.0
-                indicator_explanations = {ind["name"]: ind.get("explanation", "") for ind in config.get("indicators", [])}
+                indicator_explanations = config.get("explanations", {}).get("indicators", {})
                 slider_min_actual, slider_max_actual = st.sidebar.slider(
                     f"{orig_name} intervall", min_value=min_val_actual, max_value=max_val_actual,
                     value=(min_val_actual, max_val_actual), step=(max_val_actual - min_val_actual) / 100 if max_val_actual > min_val_actual else 1.0,
@@ -496,7 +617,7 @@ def main():
                 else:
                     min_val_actual = 0.0
                     max_val_actual = 1.0
-                fundamental_explanations = {f["name"]: f.get("explanation", "") for f in config.get("fundamentals", [])}
+                fundamental_explanations = config.get("explanations", {}).get("fundamentals", {})
                 slider_min_actual, slider_max_actual = st.sidebar.slider(
                     f"{orig_name} intervall", min_value=min_val_actual, max_value=max_val_actual,
                     value=(min_val_actual, max_val_actual), step=(max_val_actual - min_val_actual) / 100 if max_val_actual > min_val_actual else 1.0,
@@ -534,10 +655,7 @@ def main():
     if not filtered_tickers:
         st.warning("Inga tickers matchar filterkriterierna. Justera filtren och försök igen.")
         return
-    st.subheader(f"Filtrerade aktier ({len(filtered_tickers)})")
-    st.markdown(f"**Antal filtrerade aktier:** {len(filtered_tickers)}")
-    st.markdown(f"**Valda sektorer:** {', '.join(selected_sectors)}")
-    st.markdown("---")
+
 
     table_data = summary_df.loc[filtered_tickers].copy()
     table_data["Välj"] = False
@@ -552,7 +670,9 @@ def main():
 
     
     # Lägg till bubbelplot-konfiguration
-    st.subheader("Bubbelplot för filtrerade aktier")
+    st.subheader(f"Bubbelplot för filtrerade {len(filtered_tickers)} aktierna")
+    st.markdown(f"**Valda sektorer:** {', '.join(selected_sectors)}")
+    st.markdown(f"**Valda marknader:** {', '.join(selected_markets)}")
     # Identifiera numeriska och kategoriska kolumner
     numeric_cols = [col for col in table_data.columns 
                     if col != 'Välj' and pd.to_numeric(table_data[col], errors='coerce').notna().any()]
@@ -583,7 +703,8 @@ def main():
     else:
         st.warning("Välj en kategorisk kolumn för färgskala för att visa bubbelplot.")
     
-    st.markdown("---")
+
+    st.subheader("Tabell med filtrerade aktier")
     edited_df = st.data_editor(
         table_data, use_container_width=True, hide_index=False,
         column_config={"Välj": st.column_config.CheckboxColumn("Välj")}
@@ -599,16 +720,28 @@ def main():
             try:
                 info = summary_df.loc[selected_ticker]
                 st.subheader(f"{info.get('longName', 'N/A')}")
+                # Load trendline config from config.yaml, fallback to defaults if missing
+                trendline_cfg = config.get("trendline", {})
+                std_dev_min = float(trendline_cfg.get("std_dev_min", 0.01))
+                std_dev_max = float(trendline_cfg.get("std_dev_max", 20.0))
+                std_dev_default = float(trendline_cfg.get("std_dev_default", 20.0))
+                std_dev_step = float(trendline_cfg.get("std_dev_step", 1.0))
+                std_dev_threshold = st.slider(
+                    "Trendlinje: Standardavvikelse-tröskel",
+                    min_value=std_dev_min, max_value=std_dev_max, value=std_dev_default, step=std_dev_step
+                )
                 pandas_offset = convert_to_pandas_offset(analyzer.config.display_period)
                 data = data.last(pandas_offset)
-                fig = plot_stock(selected_ticker, data, analyzer.config.indicators, analyzer.config.display_period)
+                fig,std_dev_threshold,n_breaks,achieved_std = plot_stock(selected_ticker, data, std_dev_threshold, analyzer.config.indicators, analyzer.config.display_period)
                 st.plotly_chart(fig, use_container_width=True)
-                
-                
-                for field in getattr(analyzer.config, "extra_fundamental_fields", []):
-                    st.markdown(f"**{field}:** {info.get(field, 'N/A')}")
+                st.write(f"Trendlinje: Standardavvikelse-tröskel: {std_dev_threshold}, Brytpunkter: {n_breaks}, Uppnådd standardavvikelse: {achieved_std:.2f}")
+    
+                st.subheader(f"Fakta om {info.get('longName', 'N/A')}")
+                st.markdown(f"**Sector:** {info.get('sector', 'N/A')}")
+                st.markdown(f"{info.get('longBusinessSummary', 'N/A')}")
 
                 # --- Add cluster_rank gauges (with overall_rank as left-most) ---
+                st.subheader(f"Ranking för {info.get('longName', 'N/A')}")
                 gauge_cols = []
                 if "overall_rank" in summary_df.columns:
                     gauge_cols.append("overall_rank")
@@ -651,6 +784,84 @@ def main():
                     st.plotly_chart(fig_gauges, use_container_width=True)
                 # --- End cluster_rank gauges ---
 
+                # --- Fundamental Trend Plots (moved before histograms) ---
+                st.markdown("## Fundamental Trends")
+                # Load fundamentals trend data for the selected ticker
+                fundamentals_trend_path = os.path.join(BASE_DIR, "fundamentals_trend.csv")
+                if os.path.exists(fundamentals_trend_path):
+                    try:
+                        trend_df = pd.read_csv(fundamentals_trend_path)
+                        trend_df = trend_df[trend_df["Ticker"] == selected_ticker]
+                        trend_df = trend_df.sort_values("Year")
+                        # Convert Year to string for x-axis
+                        trend_df["Year"] = trend_df["Year"].astype(str)
+
+                        # Helper to plot a bar chart with regression line and CAGR in title, no legend
+                        def plot_fundamental_bar(title, y_col):
+                            if y_col in trend_df.columns:
+                                y_vals = trend_df[y_col].values.astype(float)
+                                x_vals = np.arange(len(y_vals))
+                                # Calculate CAGR if possible
+                                cagr_str = ""
+                                if len(y_vals) > 1 and y_vals[0] > 0 and y_vals[-1] > 0:
+                                    periods = len(y_vals) - 1
+                                    cagr = (y_vals[-1] / y_vals[0]) ** (1 / periods) - 1
+                                    cagr_str = f", CAGR {'+' if cagr >= 0 else ''}{cagr*100:.1f}%"
+                                fig = go.Figure(go.Bar(
+                                    x=trend_df["Year"],
+                                    y=y_vals,
+                                    marker_color="royalblue",
+                                    showlegend=False
+                                ))
+                                # Add linear regression line (red dashed)
+                                if len(y_vals) > 1 and np.isfinite(y_vals).all():
+                                    coeffs = np.polyfit(x_vals, y_vals, 1)
+                                    reg_line = np.polyval(coeffs, x_vals)
+                                    fig.add_trace(go.Scatter(
+                                        x=trend_df["Year"],
+                                        y=reg_line,
+                                        mode="lines",
+                                        line=dict(color="red", width=3, dash="dash"),
+                                        name="Trend (regression)",
+                                        showlegend=False
+                                    ))
+                                fig.update_layout(
+                                    title=title + cagr_str,
+                                    xaxis_title="Year",
+                                    yaxis_title=y_col,
+                                    height=250,
+                                    margin=dict(l=10, r=10, t=40, b=10),
+                                    showlegend=False
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
+
+                        # Total Revenue (always on top)
+                        plot_fundamental_bar("Total Revenue Trend", "Total Revenue")
+
+                        # Define categories and metrics
+                        categories = [
+                            ("Profitability", ["EBIT", "Net Income", "EBITDA"]),
+                            ("Return", ["ROIC", "ROE", "Net Margin"]),
+                            ("Balance", ["Stockholders Equity", "Net Debt", "Total Liabilities"]),
+                            ("Cashflow", ["Operating Cash Flow", "Free Cash Flow", "Capital Expenditure"]),
+                            ("Leverage", ["Debt/Equity Ratio", "Net Debt/EBITDA", "Interest Coverage"]),
+                        ]
+
+                        for cat, metrics in categories:
+                            st.markdown(f"### {cat}")
+                            cols = st.columns(len(metrics))
+                            for i, metric in enumerate(metrics):
+                                with cols[i]:
+                                    plot_fundamental_bar(metric, metric)
+                    except Exception as e:
+                        st.warning(f"Kunde inte ladda fundamental trend-data: {e}")
+                else:
+                    st.info("Ingen fundamental trend-data hittades för denna aktie.")
+                # --- End Fundamental Trend Plots ---
+                st.subheader(f"{info.get('longName', 'N/A')} i jämförelse med filtrerade aktier")
+                st.markdown(f"**Antal filtrerade aktier:** {len(filtered_tickers)}")
+                st.markdown(f"**Valda sektorer:** {', '.join(selected_sectors)}")
+                st.markdown(f"**Valda marknader:** {', '.join(selected_markets)}")
                 for field in fundamental_names:
                     values = summary_df.loc[filtered_tickers, field].dropna().astype(float)
                     values = values[np.isfinite(values)]
@@ -697,6 +908,7 @@ def main():
                             yaxis_title="Antal"
                         )
                         st.plotly_chart(fig, use_container_width=True)
+
             except Exception as e:
                 st.error(f"Fel vid plotting av {selected_ticker}: {str(e)}")
 
