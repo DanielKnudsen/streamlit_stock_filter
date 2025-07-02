@@ -48,7 +48,7 @@ class GitSync:
         try:
             # Ta bort alla lokala CSV-filer i data- och tickers-mapparna
             print("Tar bort lokala CSV-filer...")
-            for folder in ["data", "tickers"]:
+            for folder in ["data", "tickers","fundamentals", "balance", "cashflow", "income", "ranks"]:
                 csv_files = glob.glob(str(self.repo_dir / folder / "*.csv"))
                 for csv_file in csv_files:
                     os.remove(csv_file)
