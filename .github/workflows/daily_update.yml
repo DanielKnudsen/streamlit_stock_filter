@@ -43,6 +43,9 @@ jobs:
         mkdir -p tickers
         mkdir -p fundamentals
         mkdir -p ranks
+        mkdir -p balance
+        mkdir -p cashflow
+        mkdir -p income
     
     - name: Run ticker scraper
       run: |
