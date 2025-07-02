@@ -23,9 +23,6 @@ fundamentals:
   - name: returnOnAssets
     cluster: Quality
     order: High
-  - name: debtToEquity
-    cluster: Value
-    order: Low
   - name: priceToBook
     cluster: Value
     order: Low
@@ -44,7 +41,7 @@ indicators:
     type: "sma"
     period: 1
     filter: false
-    panel: price
+    panel: null
     cluster: null
     order: null
   - name: "SMA_10"
@@ -54,16 +51,16 @@ indicators:
     panel: price
     cluster: null
     order: null
-  - name: "SMA_40"
+  - name: "SMA_50"
     type: "sma"
-    period: 40
+    period: 50
     filter: false
     panel: price
     cluster: null
     order: null
-  - name: "SMA_120"
+  - name: "SMA_200"
     type: "sma"
-    period: 120
+    period: 200
     filter: false
     panel: price
     cluster: null
@@ -73,36 +70,29 @@ indicators:
     short_sma: "Close"
     long_sma: "SMA_10"
     filter: true
-    panel: middle
+    panel: null
     cluster: Momentum
     order: High
-  - name: "10_40_%_D"
+  - name: "10_50_%_D"
     type: "sma_diff"
     short_sma: "SMA_10"
-    long_sma: "SMA_40"
+    long_sma: "SMA_50"
     filter: true
-    panel: middle
+    panel: null
     cluster: Momentum
     order: High
-  - name: "40_120_%_D"
+  - name: "50_200_%_D"
     type: "sma_diff"
-    short_sma: "SMA_40"
-    long_sma: "SMA_120"
+    short_sma: "SMA_50"
+    long_sma: "SMA_200"
     filter: true
-    panel: middle
-    cluster: Momentum
-    order: High
-  - name: "RSI_3_months"
-    type: "rsi"
-    period: 90
-    filter: true
-    panel: lower
+    panel: null
     cluster: Momentum
     order: High
 explanations:
   fundamentals:
-    earningsGrowth: "Year-over-year earnings growth rate."
-    revenueGrowth: "Year-over-year revenue growth rate."
+    earningsGrowth: "Quarterly Earnings Growth (yoy)"
+    revenueGrowth: "Quarterly Revenue Growth (yoy)"
     profitMargins: "Net profit as a percentage of revenue."
     grossMargins: "Gross profit as a percentage of revenue."
     returnOnEquity: "Net income divided by shareholders' equity."
@@ -118,3 +108,8 @@ explanations:
     10_40_%_D: "Percent difference between SMA_10 and SMA_40."
     40_120_%_D: "Percent difference between SMA_40 and SMA_120."
     RSI: "Relative Strength Index (6 months)."
+trendline:
+  std_dev_min: 1.0
+  std_dev_max: 50.0
+  std_dev_default: 50.0
+  std_dev_step: 1.0
