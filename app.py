@@ -659,6 +659,7 @@ def main():
 
     table_data = summary_df.loc[filtered_tickers].copy()
     table_data["Välj"] = False
+    table_data['Shortlist'] = False
 
     market_info = analyzer.tickers_df.set_index('Instrument')['Lista']
     table_data['Market'] = table_data.index.map(market_info)
@@ -705,10 +706,32 @@ def main():
     
 
     st.subheader("Tabell med filtrerade aktier")
+
     edited_df = st.data_editor(
-        table_data, use_container_width=True, hide_index=False,
-        column_config={"Välj": st.column_config.CheckboxColumn("Välj")}
+        table_data,
+        use_container_width=True,
+        hide_index=False,
+        column_config={
+            "Shortlist": st.column_config.CheckboxColumn(
+                "Lägg till Shortlist", # Detta är rubriken som visas i appen
+                help="Markera för att lägga till aktien på din shortlist",
+                default=False # Standardvärde om inte användaren ändrar det
+            ),
+            # Om du redan har en "Välj"-kolumn, lägg till den här igen
+            "Välj": st.column_config.CheckboxColumn("Välj")
+        }
     )
+    st.markdown("---")
+    st.header("Din Shortlist")
+
+    # Filtrera DataFrame där 'Shortlist' är True
+    shortlist = edited_df[edited_df['Shortlist'] == True]
+
+    if not shortlist.empty:
+        # Visa din shortlist, exkludera 'Shortlist'-kolumnen från visningen om du vill
+        st.dataframe(shortlist.drop(columns=['Shortlist','Välj']), use_container_width=True)
+    else:
+        st.info("Inga aktier är markerade för din shortlist ännu.")
     selected_tickers = edited_df[edited_df["Välj"]].index.tolist()
     if not selected_tickers:
         st.info("Välj minst en aktie att visualisera.")
