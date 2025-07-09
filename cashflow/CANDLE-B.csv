@@ -1,40 +1,41 @@
-,2024-04-30,2023-04-30,2022-04-30,2021-04-30
-Free Cash Flow,11909168.0,-50752034.0,-37799084.0,3955339.0
-Repayment Of Debt,-2250000.0,0.0,,
-Issuance Of Debt,15000000.0,0.0,,
-Issuance Of Capital Stock,1108800.0,50719160.0,41851653.0,
-Capital Expenditure,-7615231.0,-21288770.0,-3124460.0,
-End Cash Position,18618521.0,38076886.0,4364728.0,378222.0
-Beginning Cash Position,38076886.0,4364728.0,378222.0,225.0
-Effect Of Exchange Rate Changes,,,0.0,0.0
-Changes In Cash,-19458365.0,33712158.0,3986506.0,377997.0
-Financing Cash Flow,-31641265.0,82841304.0,41627853.0,-886712.0
-Net Other Financing Charges,-45500065.0,32122144.0,-223800.0,
-Net Common Stock Issuance,1108800.0,50719160.0,41851653.0,
-Common Stock Issuance,1108800.0,50719160.0,41851653.0,
-Net Issuance Payments Of Debt,12750000.0,0.0,,
-Net Long Term Debt Issuance,12750000.0,0.0,,
-Long Term Debt Payments,-2250000.0,0.0,,
-Long Term Debt Issuance,15000000.0,0.0,,
-Investing Cash Flow,-7341499.0,-19665882.0,-2966723.0,-2690630.0
-Net Investment Purchase And Sale,-58176.0,1898127.0,0.0,
-Sale Of Investment,,1898127.0,0.0,
-Net Business Purchase And Sale,0.0,-275239.0,0.0,
-Purchase Of Business,0.0,-275239.0,0.0,
-Net Intangibles Purchase And Sale,-318997.0,-2511956.0,-1245075.0,
-Purchase Of Intangibles,-318997.0,-2511956.0,-1245075.0,
-Net PPE Purchase And Sale,-6964326.0,-18776814.0,-1721648.0,
-Sale Of PPE,331908.0,0.0,157737.0,
-Purchase Of PPE,-7296234.0,-18776814.0,-1879385.0,
-Operating Cash Flow,19524399.0,-29463264.0,-34674624.0,3955339.0
-Taxes Refund Paid,,-4978778.0,-966436.0,
-Change In Working Capital,31737305.0,-28581725.0,-19616840.0,-6856476.0
-Change In Other Current Liabilities,-7138672.0,-5471839.0,4391789.0,
-Change In Payable,458987.0,-7690790.0,8916286.0,
-Change In Inventory,37027608.0,-11540323.0,-25255907.0,
-Change In Receivables,1389382.0,-3878773.0,-7669008.0,
-Other Non Cash Items,,392103.0,557364.0,
-Deferred Tax,-237341.0,-4978778.0,-966436.0,10592.0
-Depreciation And Amortization,2474328.0,1910102.0,1752731.0,1176080.0
-Depreciation,2474328.0,1910102.0,1752731.0,1176080.0
-Net Income From Continuing Operations,-14449893.0,1795034.0,-16401443.0,9625143.0
+,2025-04-30,2024-04-30,2023-04-30,2022-04-30,2021-04-30
+Free Cash Flow,-2024210.0,19320142.0,-50752034.0,-37799084.0,
+Repayment Of Debt,,-2250000.0,0.0,,
+Issuance Of Debt,,15000000.0,0.0,,
+Issuance Of Capital Stock,,1108800.0,50719160.0,41851653.0,
+Capital Expenditure,,-7615231.0,-21288770.0,-3124460.0,
+End Cash Position,352990.0,18618521.0,38076886.0,4364728.0,
+Other Cash Adjustment Outside Changein Cash,,-1.0,,,
+Beginning Cash Position,18618521.0,38076886.0,4364728.0,378222.0,
+Effect Of Exchange Rate Changes,,,,0.0,0.0
+Changes In Cash,-18265531.0,-19458364.0,33712158.0,3986506.0,
+Financing Cash Flow,-4192671.0,-31641265.0,82841304.0,41627853.0,
+Net Other Financing Charges,,-45500065.0,32122144.0,-223800.0,
+Net Common Stock Issuance,,1108800.0,50719160.0,41851653.0,
+Common Stock Issuance,,1108800.0,50719160.0,41851653.0,
+Net Issuance Payments Of Debt,,12750000.0,0.0,,
+Net Long Term Debt Issuance,,12750000.0,0.0,,
+Long Term Debt Payments,,-2250000.0,0.0,,
+Long Term Debt Issuance,,15000000.0,0.0,,
+Investing Cash Flow,-12048650.0,-7137241.0,-19665882.0,-2966723.0,
+Net Investment Purchase And Sale,,-58176.0,1898127.0,0.0,
+Sale Of Investment,,,1898127.0,0.0,
+Net Business Purchase And Sale,,0.0,-275239.0,0.0,
+Purchase Of Business,,0.0,-275239.0,0.0,
+Net Intangibles Purchase And Sale,,-318997.0,-2511956.0,-1245075.0,
+Purchase Of Intangibles,,-318997.0,-2511956.0,-1245075.0,
+Net PPE Purchase And Sale,,-6964326.0,-18776814.0,-1721648.0,
+Sale Of PPE,,331908.0,0.0,157737.0,
+Purchase Of PPE,,-7296234.0,-18776814.0,-1879385.0,
+Operating Cash Flow,-2024210.0,19320142.0,-29463264.0,-34674624.0,
+Taxes Refund Paid,,,-4978778.0,-966436.0,
+Change In Working Capital,654308.0,33500932.0,-28581725.0,-19616840.0,
+Change In Other Current Liabilities,,-7138672.0,-5471839.0,4391789.0,
+Change In Payable,,458987.0,-7690790.0,8916286.0,
+Change In Inventory,,37027608.0,-11540323.0,-25255907.0,
+Change In Receivables,,1389382.0,-3878773.0,-7669008.0,
+Other Non Cash Items,,-1247810.0,392103.0,557364.0,
+Deferred Tax,1503977.0,-957415.0,-4978778.0,-966436.0,
+Depreciation And Amortization,3274786.0,2474328.0,1910102.0,1752731.0,
+Depreciation,3274786.0,2474328.0,1910102.0,1752731.0,
+Net Income From Continuing Operations,-7457281.0,-14449893.0,1795034.0,-16401443.0,

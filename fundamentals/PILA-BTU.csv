@@ -1,2 +1,2 @@
-quoteType,symbol,language,region,triggerable,customPriceAlertConfidence,corporateActions,messageBoardId,esgPopulated,hasPrePostMarketData,tradeable,cryptoTradeable,trailingPegRatio
-NONE,PILA-BTU.ST,en-US,US,False,NONE,[],finmb_329992468,False,False,False,False,
+quoteType,symbol,language,region,triggerable,customPriceAlertConfidence,messageBoardId,esgPopulated,corporateActions,tradeable,cryptoTradeable,hasPrePostMarketData,trailingPegRatio
+NONE,PILA-BTU.ST,en-US,US,False,NONE,finmb_329992468,False,[],False,False,False,
