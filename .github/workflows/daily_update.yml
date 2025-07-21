@@ -1,8 +1,8 @@
 name: Daily Stock Data Update
 
 on:
-  schedule:
-    - cron: '0 5 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
+  #schedule:
+  #  - cron: '0 5 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
