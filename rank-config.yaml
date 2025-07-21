@@ -1,0 +1,154 @@
+# Inställningar för in- och utdata
+output_path: "csv-data"
+input_ticker_file: "tickers/tickers_test.csv"
+output_file_path: "csv-data/stock_evaluation_results.csv"
+price_data_file: "price_data.csv"
+
+# Inställningar för datainhämtning
+data_fetch_years: 4
+
+# Inställningar för glidande medelvärden
+SMA_short: 10
+SMA_medium: 50
+SMA_long: 200
+
+# Definitioner av nyckeltal och deras källor/logik
+ratio_definitions:
+  ROE:
+    formula: "Net_Income / Stockholders_Equity"
+    source_income: ["Net Income"]
+    source_bs: ["Stockholders Equity"]
+    higher_is_better: True
+  ROIC:
+    formula: "(EBIT * (1 - (Tax_Provision / Pretax_Income))) / (Total_Debt + Stockholders_Equity)"
+    source_income: ["EBIT", "Tax Provision", "Pretax Income"]
+    source_bs: ["Total Debt", "Stockholders Equity"]
+    higher_is_better: True
+  Soliditet:
+    formula: "Stockholders_Equity / Total_Assets"
+    source_bs: ["Stockholders Equity", "Total Assets"]
+    higher_is_better: True
+  Skuldsättningsgrad:
+    formula: "Total_Debt / Stockholders_Equity"
+    source_bs: ["Total Debt", "Stockholders Equity"]
+    higher_is_better: False
+  Räntetäckningsgrad:
+    formula: "EBIT / Interest_Expense"
+    source_income: ["EBIT", "Interest Expense"]
+    higher_is_better: True
+  Bruttomarginal:
+    formula: "Gross_Profit / Total_Revenue"
+    source_income: ["Gross Profit", "Total Revenue"]
+    higher_is_better: True
+  Rörelsemarginal:
+    formula: "Operating_Income / Total_Revenue"
+    source_income: ["Operating Income", "Total Revenue"]
+    higher_is_better: True
+  Vinstmarginal:
+    formula: "Net_Income / Total_Revenue"
+    source_income: ["Net Income", "Total Revenue"]
+    higher_is_better: True
+  PE_tal:
+    formula: "currentPrice / Basic_EPS"
+    source_stock: ["currentPrice"]
+    source_income: ["Basic EPS"]
+    higher_is_better: False
+  PB_tal:
+    formula: "currentPrice / (Stockholders_Equity / sharesOutstanding)"
+    source_stock: ["currentPrice", "sharesOutstanding"]
+    source_bs: ["Stockholders Equity"]
+    higher_is_better: False
+  EV_EBITDA:
+    formula: "(currentPrice * sharesOutstanding + Total_Debt - Cash_And_Cash_Equivalents) / EBITDA"
+    source_stock: ["currentPrice", "sharesOutstanding"]
+    source_bs: ["Total Debt", "Cash And Cash Equivalents"]
+    source_income: ["EBITDA"]
+    higher_is_better: False
+  Rörelseflödesmarginal:
+    formula: "Operating_Cash_Flow / Total_Revenue"
+    source_cf: ["Operating Cash Flow"]
+    source_income: ["Total Revenue"]
+    higher_is_better: True
+  Fritt_Kassaflode_per_Aktie:
+    formula: "Free_Cash_Flow / sharesOutstanding"
+    source_cf: ["Free Cash Flow"]
+    source_stock: ["sharesOutstanding"]
+    higher_is_better: True
+  Kassaflode_till_Skuld:
+    formula: "Operating_Cash_Flow / Total_Debt"
+    source_cf: ["Operating Cash Flow"]
+    source_bs: ["Total Debt"]
+    higher_is_better: True
+
+# Konfiguration för rankningsmetoden
+ranking_method:
+  type: "percentile_hybrid_trend"
+  trend_zero_threshold: 0.001
+
+# Vikter för aggregering
+category_weights:
+  Kvalitet_latest_rank:
+    weight: 0.10
+    ROE_latest_rank: 1
+    ROIC_latest_rank: 1
+  Kvalitet_trend_rank:
+    weight: 0.10
+    ROE_trend_rank: 1
+    ROIC_trend_rank: 1
+  FinansiellHalsa_latest_rank:
+    weight: 0.10
+    Soliditet_latest_rank: 1
+    Skuldsättningsgrad_latest_rank: 1
+    Räntetäckningsgrad_latest_rank: 1
+  FinansiellHalsa_trend_rank:
+    weight: 0.10
+    Soliditet_trend_rank: 1
+    Skuldsättningsgrad_trend_rank: 1
+    Räntetäckningsgrad_trend_rank: 1
+  Lonsamhet_latest_rank:
+    weight: 0.10
+    Bruttomarginal_latest_rank: 1
+    Rörelsemarginal_latest_rank: 1
+    Vinstmarginal_latest_rank: 1
+  Lonsamhet_trend_rank:
+    weight: 0.10
+    Bruttomarginal_trend_rank: 1
+    Rörelsemarginal_trend_rank: 1
+    Vinstmarginal_trend_rank: 1
+  Vardering_latest_rank:
+    weight: 0.10
+    PE_tal_latest_rank: 1
+    PB_tal_latest_rank: 1
+    EV_EBITDA_latest_rank: 1
+  Vardering_trend_rank:
+    weight: 0.10
+    PE_tal_trend_rank: 1
+    PB_tal_trend_rank: 1
+    EV_EBITDA_trend_rank: 1
+  Kassaflode_latest_rank:
+    weight: 0.10
+    Rörelseflödesmarginal_latest_rank: 1
+    Fritt_Kassaflode_per_Aktie_latest_rank: 1
+    Kassaflode_till_Skuld_latest_rank: 1
+  Kassaflode_trend_rank:
+    weight: 0.10
+    Rörelseflödesmarginal_trend_rank: 1
+    Fritt_Kassaflode_per_Aktie_trend_rank: 1
+    Kassaflode_till_Skuld_trend_rank: 1
+
+# Hjälptexter för nyckeltal (endast _latest_rank)
+ratio_help_texts:
+  ROE_latest_rank: "Avkastning på eget kapital (ROE) visar hur effektivt bolaget genererar vinst på aktieägarnas kapital. Högre värde är bättre."
+  ROIC_latest_rank: "Avkastning på investerat kapital (ROIC) mäter hur väl bolaget använder sitt totala kapital för att skapa vinst. Högre värde är bättre."
+  Soliditet_latest_rank: "Soliditet visar hur stor andel av tillgångarna som är finansierade med eget kapital. Hög soliditet innebär lägre finansiell risk."
+  Skuldsättningsgrad_latest_rank: "Skuldsättningsgrad visar förhållandet mellan skulder och eget kapital. Lägre värde innebär lägre finansiell risk."
+  Räntetäckningsgrad_latest_rank: "Räntetäckningsgrad visar bolagets förmåga att betala sina räntekostnader. Högre värde är bättre."
+  Bruttomarginal_latest_rank: "Bruttomarginal visar hur stor andel av omsättningen som återstår efter produktionskostnader. Högre värde är bättre."
+  Rörelsemarginal_latest_rank: "Rörelsemarginal visar hur stor andel av omsättningen som återstår efter rörelsekostnader. Högre värde är bättre."
+  Vinstmarginal_latest_rank: "Vinstmarginal visar hur stor andel av omsättningen som blir kvar som vinst. Högre värde är bättre."
+  PE_tal_latest_rank: "P/E-tal visar hur aktien värderas i förhållande till vinsten. Lägre värde kan innebära att aktien är billigare."
+  PB_tal_latest_rank: "P/B-tal visar hur aktien värderas i förhållande till bolagets egna kapital. Lägre värde kan innebära att aktien är billigare."
+  EV_EBITDA_latest_rank: "EV/EBITDA visar bolagets värdering i förhållande till rörelseresultatet före avskrivningar. Lägre värde kan innebära att aktien är billigare."
+  Rörelseflödesmarginal_latest_rank: "Rörelseflödesmarginal visar hur stor andel av omsättningen som omvandlas till kassaflöde från rörelsen. Högre värde är bättre."
+  Fritt_Kassaflode_per_Aktie_latest_rank: "Fritt kassaflöde per aktie visar hur mycket kassaflöde som genereras per aktie. Högre värde är bättre."
+  Kassaflode_till_Skuld_latest_rank: "Kassaflöde till skuld visar bolagets förmåga att betala av sina skulder med kassaflödet. Högre värde är bättre."
