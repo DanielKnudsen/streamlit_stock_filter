@@ -536,7 +536,7 @@ def get_price_data(SMA_short, SMA_medium, SMA_long, tickers, data_fetch_years, p
             print(f"Fel vid hämtning av data för {yf_ticker}: {str(e)}")
     # Om df_complete är tom, skriv ut ett meddelande
     if df_complete.empty:
-        print(f"Ingen prisdata hämtad för några tickers.")
+        print("Ingen prisdata hämtad för några tickers.")
     df_complete.to_csv(price_data_file_path, index=True)
 
 def save_last_SMA_to_csv(read_from, save_to):
