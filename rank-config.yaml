@@ -18,6 +18,12 @@ pct_diff_medium: 5
 pct_diff_long: 20
 pct_diff_longest: 90
 
+# CAGR inställningar
+cagr_dimension:
+  - "Total Revenue"
+  - "EBITDA"
+  - "Basic EPS"
+
 
 # Definitioner av nyckeltal och deras källor/logik
 ratio_definitions:
