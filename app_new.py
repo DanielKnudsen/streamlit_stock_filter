@@ -15,7 +15,7 @@ CSV_FILE_NAME = "stock_evaluation_results.csv"
 full_csv_path = os.path.join(CSV_DATA_DIR, CSV_FILE_NAME)
 
 # --- Streamlit Application ---
-st.set_page_config(layout="centered", page_title="Stock Evaluation", page_icon="📈")
+st.set_page_config(layout="wide", page_title="Stock Evaluation", page_icon="📈")
 
 st.title("📈 Stock Evaluation Results")
 st.markdown("Here is an overview of stock information, filtered to include only columns with 'rank_Score'.")
@@ -58,7 +58,6 @@ try:
     # --- Unified Filtering Section ---
     st.subheader("Filter Stocks with Sliders")
     st.markdown("Use the sliders below to filter stocks based on total, 'latest', and 'trend' values from 'rank_Score' columns.")
-    st.write(df_new_ranks.columns)  # Display the columns for debugging --- IGNORE ---
     # --- Filter by SMA differences ---
     # pct_Close_vs_SMA_short,pct_SMA_short_vs_SMA_medium,pct_SMA_medium_vs_SMA_long
     st.markdown("##### Filter by SMA Differences")
@@ -512,6 +511,26 @@ try:
 
     else:
         st.info("Check a box under 'Välj' in the table above to display price development.")
+
+    # Bar plot for all cagr columns for selected_stock_ticker
+    cagr_cols = [col for col in df_new_ranks.columns if col.startswith('cagr')]
+    if cagr_cols and selected_stock_ticker:
+        cagr_values = df_new_ranks.loc[selected_stock_ticker, cagr_cols].astype(float)
+        fig_cagr = go.Figure(go.Bar(
+            x=cagr_cols,
+            y=cagr_values,
+            marker_color='royalblue',
+            text=[f"{v:.2f}" for v in cagr_values],
+            textposition='auto',
+        ))
+        fig_cagr.update_layout(
+            title=f"CAGR Metrics for {selected_stock_ticker}",
+            xaxis_title="Metric",
+            yaxis_title="Percentage",
+            height=350,
+            margin=dict(l=10, r=10, t=40, b=10)
+        )
+        st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
 
     # Bar plot for all pct_ columns for selected_stock_ticker
     pct_cols = [col for col in df_new_ranks.columns if col.startswith('pct_')]
