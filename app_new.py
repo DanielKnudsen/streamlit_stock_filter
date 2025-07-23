@@ -5,6 +5,7 @@ import yaml
 import plotly.graph_objects as go # Import Plotly
 import plotly.express as px # Import Plotly Express for bubble plot
 import numpy as np # For handling numerical operations
+from collections import OrderedDict
 
 # Define directories for CSV files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,32 +33,32 @@ try:
         except Exception:
             return "No summary available."
     df_new_ranks['hover_summary'] = df_new_ranks.index.map(get_truncated_summary)
-
-    # Filter columns that contain the string "rank_Score" for the main table
+    
+    # Filter columns that contain the string "catRank" for the main table
     # These columns will be displayed in the main table
-    rank_score_columns = [col for col in df_new_ranks.columns if "rank_Score_rank" in col]
+    rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Total_Trend_Score_rank', 'Total_Latest_Score_rank']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     # This DataFrame contains all columns from the original file, with Ticker as index
     df_filtered_by_sliders = df_new_ranks.copy()
 
-    # --- Load ranking categories from rank-config.yaml early so category_weights is available for filter UI ---
+    # --- Load ranking categories from rank-config.yaml early so category_ratios is available for filter UI ---
     rank_config_path = os.path.join(BASE_DIR, "rank-config.yaml")
     if os.path.exists(rank_config_path):
         with open(rank_config_path, "r") as f:
             config = yaml.safe_load(f)
-        category_weights = config.get("category_weights", {})
-        categories = list(category_weights.keys())
+        category_ratios = config.get("category_ratios", {})
+        categories = list(category_ratios.keys())
     else:
-        category_weights = {}
+        category_ratios = {}
         categories = []
 
     # --- Unified Filtering Section ---
     st.subheader("Filter Stocks with Sliders")
     st.markdown("Use the sliders below to filter stocks based on total, 'latest', and 'trend' values from 'rank_Score' columns.")
-
+    st.write(df_new_ranks.columns)  # Display the columns for debugging --- IGNORE ---
     # --- Filter by SMA differences ---
     # pct_Close_vs_SMA_short,pct_SMA_short_vs_SMA_medium,pct_SMA_medium_vs_SMA_long
     st.markdown("##### Filter by SMA Differences")
@@ -103,8 +104,8 @@ try:
     st.markdown('##### Filter by Total Scores')
     col_total_trend, col_total_latest = st.columns(2)
     with col_total_trend:
-        min_trend = float(df_new_ranks['Total_Trend_Score_rank'].min())
-        max_trend = float(df_new_ranks['Total_Trend_Score_rank'].max())
+        min_trend = float(df_new_ranks['Trend_clusterRank'].min())
+        max_trend = float(df_new_ranks['Trend_clusterRank'].max())
         trend_range = st.slider(
             'Total Trend Score',
             min_value=min_trend,
@@ -113,8 +114,8 @@ try:
             step=0.1
         )
     with col_total_latest:
-        min_latest = float(df_new_ranks['Total_Latest_Score_rank'].min())
-        max_latest = float(df_new_ranks['Total_Latest_Score_rank'].max())
+        min_latest = float(df_new_ranks['Latest_clusterRank'].min())
+        max_latest = float(df_new_ranks['Latest_clusterRank'].max())
         latest_range = st.slider(
             'Total Latest Score',
             min_value=min_latest,
@@ -124,14 +125,14 @@ try:
         )
     
     # Filter df_new_ranks for the rest of the app
-    df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Total_Trend_Score_rank'] >= trend_range[0]) & (df_filtered_by_sliders['Total_Trend_Score_rank'] <= trend_range[1]) &
-                                (df_filtered_by_sliders['Total_Latest_Score_rank'] >= latest_range[0]) & (df_filtered_by_sliders['Total_Latest_Score_rank'] <= latest_range[1])]
+    df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
+                                (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
 
     # --- Latest/Trend Sliders (below total sliders) ---
-    with st.expander('Filter by Category Scores', expanded=False):
+    with st.expander('Filter by Category Ranks', expanded=False):
         col_filter_left, col_filter_right = st.columns(2)
         with col_filter_left:
-            st.markdown("###### Filter for 'Trend' Values (from rank_Score columns)")
+            st.markdown("###### Filter for category Trend ranks")
             if trend_columns:
                 for col in trend_columns:
                     min_val = df_filtered_by_sliders[col].min()
@@ -141,7 +142,7 @@ try:
                     if slider_min == slider_max:
                         slider_max += 0.001
                     current_min, current_max = st.slider(
-                        f"{col}",
+                        f"{col.replace('_trend_catRank', ' trend Rank')}",
                         min_value=slider_min,
                         max_value=slider_max,
                         value=(slider_min, slider_max),
@@ -151,23 +152,24 @@ try:
                         (df_filtered_by_sliders[col] >= current_min) &
                         (df_filtered_by_sliders[col] <= current_max)
                     ]
-                    category_name = col.replace("_Score_rank", "")
+                    category_name = col.replace("catRank", "ratioRank")
                     # Dynamically add tabs for each trend category using ratio names
-                    ratio_name = [r for r in category_weights[category_name] if r != 'weight']
-                    ratio_name_display = [r.replace("_trend_rank", "") for r in ratio_name]  # Remove '_trend_rank' suffix
+                    ratio_name = [r for r in category_ratios[category_name]]
+                    ratio_name_display = [r.replace("_trend_ratioRank", "") for r in ratio_name] 
                     tab_labels = ['Info'] + ratio_name_display
                     tabs = st.tabs(tab_labels)
-                    tabs[0].write(f"Detailed filtering for {category_name} trend scores:")
+                    tabs[0].write(f"Detailed filtering for *ratios* in {category_name.replace('_trend_ratioRank', '')}:")
                     # Add a slider for each ratio tab (from index 1 and upwards) trend_slope
                     for i, r in enumerate(ratio_name):
                         with tabs[i+1]:
+                            #st.write(f"r: {r}")  # Debugging line to show current ratio
                             if r in df_filtered_by_sliders.columns:
                                 min_val = float(df_filtered_by_sliders[r].min())
                                 max_val = float(df_filtered_by_sliders[r].max())
                                 if min_val == max_val:
                                     max_val += 0.001
                                 slider_min, slider_max = st.slider(
-                                    f"Filter {r.replace('_trend_rank', '')} rank",
+                                    f"Filter {r.replace('_trend_ratioRank', ' trend Rank')} ",
                                     min_value=min_val,
                                     max_value=max_val,
                                     value=(min_val, max_val),
@@ -179,14 +181,14 @@ try:
                                 ]
                             else:
                                 st.info(f"Column {r} not found in data.")
-                            r_data = f"{r.replace('_trend_rank', '')}_trend_slope"
+                            r_data = f"{r.replace('_trend_ratioRank', '_ratio_trendSlope')}"
                             if r_data in df_filtered_by_sliders.columns:
                                 min_val = float(df_filtered_by_sliders[r_data].min())
                                 max_val = float(df_filtered_by_sliders[r_data].max())
                                 if min_val == max_val:
                                     max_val += 0.001
                                 slider_min, slider_max = st.slider(
-                                    f"Filter {r_data} value",
+                                    f"Filter {r_data.replace('_ratio_trendSlope', ' trend Slope')}",
                                     min_value=min_val,
                                     max_value=max_val,
                                     value=(min_val, max_val),
@@ -203,7 +205,7 @@ try:
             else:
                 st.info("No 'trend' columns found among 'rank_Score' columns for filtering.")
         with col_filter_right:
-            st.markdown("###### Filter for 'Latest' Values (from rank_Score columns)")
+            st.markdown("###### Filter for category Latest ranks")
             if latest_columns:
                 for col in latest_columns:
                     min_val = df_filtered_by_sliders[col].min()
@@ -213,7 +215,7 @@ try:
                     if slider_min == slider_max:
                         slider_max += 0.001
                     current_min, current_max = st.slider(
-                        f"{col}",
+                        f"{col.replace('_latest_catRank', ' latest Rank')}",
                         min_value=slider_min,
                         max_value=slider_max,
                         value=(slider_min, slider_max),
@@ -223,13 +225,13 @@ try:
                         (df_filtered_by_sliders[col] >= current_min) &
                         (df_filtered_by_sliders[col] <= current_max)
                     ]
-                    category_name = col.replace("_Score_rank", "")
+                    category_name = col.replace("catRank", "ratioRank")
                     # Dynamically add tabs for each latest category using ratio names
-                    ratio_name = [r for r in category_weights[category_name] if r != 'weight']
-                    ratio_name_display = [r.replace("_latest_rank", "") for r in ratio_name]  # Remove '_latest_rank' suffix
+                    ratio_name = [r for r in category_ratios[category_name]]
+                    ratio_name_display = [r.replace("_latest_ratioRank", "") for r in ratio_name] 
                     tab_labels = ['Info'] + ratio_name_display
                     tabs = st.tabs(tab_labels)
-                    tabs[0].write(f"Detailed filtering for {category_name} latest scores:")
+                    tabs[0].write(f"Detailed filtering for *ratios* in {category_name.replace('_latest_ratioRank', '')}:")
                     # Add a slider for each ratio tab (from index 1 and upwards)
                     for i, r in enumerate(ratio_name):
                         with tabs[i+1]:
@@ -239,7 +241,7 @@ try:
                                 if min_val == max_val:
                                     max_val += 0.001
                                 slider_min, slider_max = st.slider(
-                                    f"Filter {r.replace('_latest_rank', '')} rank",
+                                    f"Filter {r.replace('_latest_ratioRank', ' latest Rank')} ",
                                     min_value=min_val,
                                     max_value=max_val,
                                     value=(min_val, max_val),
@@ -251,14 +253,14 @@ try:
                                 ]
                             else:
                                 st.info(f"Column {r} not found in data.")
-                            r_data = f"{r.replace('_latest_rank', '')}_latest"
+                            r_data = f"{r.replace('_latest_ratioRank', '_ratio_latest')}"
                             if r_data in df_filtered_by_sliders.columns:
                                 min_val = float(df_filtered_by_sliders[r_data].min())
                                 max_val = float(df_filtered_by_sliders[r_data].max())
                                 if min_val == max_val:
                                     max_val += 0.001
                                 slider_min, slider_max = st.slider(
-                                    f"Filter {r_data} value",
+                                    f"Filter {r_data.replace('_ratio_latest', ' latest Value')}",
                                     min_value=min_val,
                                     max_value=max_val,
                                     value=(min_val, max_val),
@@ -279,7 +281,11 @@ try:
             pass
 
     # --- Bubble Plot: Total_Trend_Score vs Total_Latest_Score (filtered) ---
-    show_tickers = st.toggle('Show tickers in bubble plot', value=True)
+    col_ticker, col_hover = st.columns(2)
+    with col_ticker:
+        show_tickers = st.toggle('Show tickers in bubble plot', value=True)
+    with col_hover:
+        show_hover = st.toggle('Show full info in hover in bubble plot', value=True)
 
     # --- Lista toggles for bubble plot ---
     lista_values = []
@@ -303,25 +309,46 @@ try:
     if 'marketCap' in df_filtered_by_sliders.columns:
         df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype(int).map(lambda x: f"{x:,}".replace(",", " ") + " MSEK")
     if len(df_filtered_by_sliders) > 0:
+        # Assign fixed colors to Lista values using all possible values from the full dataset
+        lista_color_map = {
+            'Large Cap': '#1f77b4',
+            'Mid Cap': '#ff7f0e',
+            'Small Cap': '#2ca02c',
+            'First North': '#d62728',
+            'Other': '#9467bd'
+        }
+        if 'Lista' in df_new_ranks.columns:
+            # Get all unique Lista values from the full dataset for stable color mapping
+            all_lista = df_new_ranks['Lista'].dropna().unique().tolist()
+            plotly_colors = px.colors.qualitative.Plotly
+            for i, lista in enumerate(all_lista):
+                if lista not in lista_color_map:
+                    lista_color_map[lista] = plotly_colors[i % len(plotly_colors)]
+            # Use the full color map, but only show legend for filtered values
+            color_discrete_map = {k: v for k, v in lista_color_map.items()}
+        else:
+            color_discrete_map = None
+        # Define size_raw and size for bubble plot
         if 'marketCap' in df_filtered_by_sliders.columns:
             size_raw = df_filtered_by_sliders['marketCap'].copy()
         else:
-            size = [20]*len(df_filtered_by_sliders)
+            size = [20] * len(df_filtered_by_sliders)
         bubble_fig = px.scatter(
             df_filtered_by_sliders,
-            x='Total_Trend_Score_rank',
-            y='Total_Latest_Score_rank',
+            x='Trend_clusterRank',
+            y='Latest_clusterRank',
             color='Lista' if 'Lista' in df_filtered_by_sliders.columns else None,
+            color_discrete_map=color_discrete_map,
             hover_name=df_filtered_by_sliders.index if show_tickers else None,
             text=df_filtered_by_sliders.index if show_tickers else None,
             size=size_raw if 'marketCap' in df_filtered_by_sliders.columns else size,
             hover_data={
-            "hover_summary": True,
-            "marketCap_MSEK": True
-            },
+                "hover_summary": True,
+                "marketCap_MSEK": True
+            } if show_hover else {},
             labels={
-            'Total_Trend_Score_rank': 'Total Trend Score',
-            'Total_Latest_Score_rank': 'Total Latest Score',
+            'Trend_clusterRank': 'Total Trend Score',
+            'Latest_clusterRank': 'Total Latest Score',
             'Lista': '',
             'hover_summary': 'Summary',
             'marketCap_MSEK': 'Market Cap'
@@ -371,7 +398,7 @@ try:
     # Get the number of stocks after filtering by sliders
     num_filtered_stocks = len(df_display)
     st.subheader(f"Filtered Stock Information ({num_filtered_stocks} aktier)")
-    st.info("Check the box under 'Välj' to display price development. Check the box under 'Shortlist' to add the stock to your shortlist.")
+    st.info("Check the box under 'Välj' to display stock data. Check the box under 'Shortlist' to add the stock to your shortlist.")
 
     # Use st.data_editor to display the table with interactive checkboxes
     edited_df = st.data_editor(
@@ -485,6 +512,26 @@ try:
 
     else:
         st.info("Check a box under 'Välj' in the table above to display price development.")
+
+    # Bar plot for all pct_ columns for selected_stock_ticker
+    pct_cols = [col for col in df_new_ranks.columns if col.startswith('pct_')]
+    if pct_cols and selected_stock_ticker:
+        pct_values = df_new_ranks.loc[selected_stock_ticker, pct_cols].astype(float)
+        fig_pct = go.Figure(go.Bar(
+            x=pct_cols,
+            y=pct_values,
+            marker_color='royalblue',
+            text=[f"{v:.2f}" for v in pct_values],
+            textposition='auto',
+        ))
+        fig_pct.update_layout(
+            title=f"Percentage Metrics for {selected_stock_ticker}",
+            xaxis_title="Metric",
+            yaxis_title="Percentage",
+            height=350,
+            margin=dict(l=10, r=10, t=40, b=10)
+        )
+        st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
     
     if selected_stock_ticker is not None:
         longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
@@ -493,17 +540,16 @@ try:
 
     # get the ranking for each category of the selected stock
     st.subheader("Ranking for Selected Stock")
-
     if selected_stock_ticker and not df_filtered_by_sliders.empty and categories:
         # Prepare columns for display
         col_left, col_right = st.columns(2)
         # Find all latest and trend columns for the selected stock
         latest_rankings = {}
         trend_rankings = {}
-        # Find all columns containing "_rank_Score"
-        all_rank_score_columns = [col for col in df_new_ranks.columns if "_rank_Score" in col]
+        # Find all columns containing "_catRank"
+        all_rank_score_columns = [col for col in df_new_ranks.columns if "_catRank" in col]
         # For each category, try to find the correct "latest" and "trend" columns
-        for cat in categories:
+        for cat in all_rank_score_columns:
             # Find the latest column for this category
             latest_col = next((col for col in all_rank_score_columns if cat in col and "latest" in col.lower()), None)
             trend_col = next((col for col in all_rank_score_columns if cat in col and "trend" in col.lower()), None)
@@ -515,7 +561,6 @@ try:
                 latest_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, latest_col]
             if trend_col in df_new_ranks.columns:
                 trend_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, trend_col]
-
         with col_left:
             st.markdown(f"##### Latest Rankings for {selected_stock_ticker}")
             if latest_rankings:
@@ -528,7 +573,7 @@ try:
                 radar_fig = go.Figure()
                 radar_fig.add_trace(go.Scatterpolar(
                     r=radar_values,
-                    theta=[f"<b style='font-size:1.2em'>{cat.replace('_latest_rank', '').replace('_trend_rank', '').replace('_', ' ').title()}</b>" for cat in radar_categories],
+                    theta=[f"<b style='font-size:1.2em'>{cat.replace('_latest_catRank', '').replace('_latest_catRank', '').replace('_', ' ').title()}</b>" for cat in radar_categories],
                     fill='toself',
                     name='Latest Rankings',
                     line=dict(color='blue'),
@@ -575,7 +620,7 @@ try:
                 radar_fig = go.Figure()
                 radar_fig.add_trace(go.Scatterpolar(
                     r=radar_values,
-                    theta=[f"<b style='font-size:1.2em'>{cat.replace('_latest_rank', '').replace('_trend_rank', '').replace('_', ' ').title()}</b>" for cat in radar_categories],
+                    theta=[f"<b style='font-size:1.2em'>{cat.replace('_trend_catRank', '').replace('_trend_catRank', '').replace('_', ' ').title()}</b>" for cat in radar_categories],
                     fill='toself',
                     name='Trend Rankings',
                     line=dict(color='#888888'),
@@ -613,23 +658,24 @@ try:
         st.subheader('Trend Ratio Breakdown (Last 4 Years)')
         # Load help texts from config if available
         ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
-        for cat, cat_dict in category_weights.items():
-            if cat.endswith('_trend_rank'):
-                display_cat = cat.replace('_trend_rank', '')
+        #st.write("category_ratios:", category_ratios.items())  # Debugging line to show category_ratios
+        for cat, cat_dict in category_ratios.items():
+            if cat.endswith('trend_ratioRank'):
+                display_cat = cat.replace('_trend_ratioRank', '')
                 # Use a visually distinct box for each category, with extra margin for spacing
                 with st.container():
                     st.markdown(f"<div style='background-color:#f5f7fa; border-radius:10px; padding:18px 10px 10px 10px; margin-top:38px; margin-bottom:38px; border:1px solid #e0e0e0;'><span style='font-size:1.2em; font-weight:bold'>{display_cat}</span></div>", unsafe_allow_html=True)
-                    ratios = [ratio for ratio in cat_dict if ratio != 'weight']
+                    ratios = [ratio for ratio in cat_dict]
                     cols = st.columns(len(ratios)) if ratios else []
                     for idx, ratio in enumerate(ratios):
-                        base_ratio = ratio.replace('_trend_rank', '')
+                        base_ratio = ratio.replace('_trend_ratioRank', '')
                         year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio + '_year_')]
                         # Filter out columns where the value for the selected stock is NaN
                         year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
                         year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
                         year_cols_last4 = year_cols_sorted[-4:]
-                        latest_rank_col = f"{base_ratio}_latest_rank"
-                        trend_rank_col = f"{base_ratio}_trend_rank"
+                        latest_rank_col = f"{base_ratio}_latest_ratioRank"
+                        trend_rank_col = f"{base_ratio}_trend_ratioRank"
                         with cols[idx]:
                             if year_cols_last4:
                                 values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
@@ -724,3 +770,4 @@ st.markdown("---")
 st.subheader("About this application")
 st.info("To run this app locally: Save the code as a .py file (e.g., `app.py`) and run `streamlit run app.py` in your terminal.")
 st.caption("Make sure your CSV files are in the specified folders (`csv-data` for the main file and `data` for the price files).")
+
