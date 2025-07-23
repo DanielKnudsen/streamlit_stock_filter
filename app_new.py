@@ -14,7 +14,7 @@ CSV_FILE_NAME = "stock_evaluation_results.csv"
 full_csv_path = os.path.join(CSV_DATA_DIR, CSV_FILE_NAME)
 
 # --- Streamlit Application ---
-st.set_page_config(layout="wide", page_title="Stock Evaluation", page_icon="📈")
+st.set_page_config(layout="centered", page_title="Stock Evaluation", page_icon="📈")
 
 st.title("📈 Stock Evaluation Results")
 st.markdown("Here is an overview of stock information, filtered to include only columns with 'rank_Score'.")
@@ -278,6 +278,9 @@ try:
         with st.expander(f"Filter by Category: {cat}", expanded=False):
             pass
 
+    # --- Bubble Plot: Total_Trend_Score vs Total_Latest_Score (filtered) ---
+    show_tickers = st.toggle('Show tickers in bubble plot', value=True)
+
     # --- Lista toggles for bubble plot ---
     lista_values = []
     if 'Lista' in df_filtered_by_sliders.columns:
@@ -295,9 +298,6 @@ try:
             df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
         else:
             df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-
-    # --- Bubble Plot: Total_Trend_Score vs Total_Latest_Score (filtered) ---
-    show_tickers = st.toggle('Show tickers in bubble plot', value=True)
     
     # Format marketCap for hover (MSEK, rounded, with space as thousands separator)
     if 'marketCap' in df_filtered_by_sliders.columns:
@@ -316,19 +316,28 @@ try:
             text=df_filtered_by_sliders.index if show_tickers else None,
             size=size_raw if 'marketCap' in df_filtered_by_sliders.columns else size,
             hover_data={
-                "hover_summary": True,
-                "marketCap_MSEK": True
+            "hover_summary": True,
+            "marketCap_MSEK": True
             },
             labels={
-                'Total_Trend_Score_rank': 'Total Trend Score',
-                'Total_Latest_Score_rank': 'Total Latest Score',
-                'Lista': 'List',
-                'hover_summary': 'Summary',
-                'marketCap_MSEK': 'Market Cap'
+            'Total_Trend_Score_rank': 'Total Trend Score',
+            'Total_Latest_Score_rank': 'Total Latest Score',
+            'Lista': '',
+            'hover_summary': 'Summary',
+            'marketCap_MSEK': 'Market Cap'
             },
-            title='Bubble Plot: Total Trend Score vs Total Latest Score',
+            title='Total Trend Score vs Total Latest Score',
             width=900,
             height=600
+        )
+        bubble_fig.update_layout(
+            legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5
+            )
         )
         bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
         if show_tickers:
@@ -569,7 +578,7 @@ try:
                     theta=[f"<b style='font-size:1.2em'>{cat.replace('_latest_rank', '').replace('_trend_rank', '').replace('_', ' ').title()}</b>" for cat in radar_categories],
                     fill='toself',
                     name='Trend Rankings',
-                    line=dict(color='red'),
+                    line=dict(color='#888888'),
                     mode='lines+markers+text',
                     text=[f"<b style='font-size:1.3em'>{v:.1f}</b>" for v in radar_values],
                     textposition='middle center',
@@ -632,49 +641,76 @@ try:
                                 else:
                                     trend_vals = values
                                 fig = go.Figure()
-                                fig.add_trace(go.Bar(x=years, y=values, marker_color='royalblue', name=base_ratio, showlegend=False))
-                                fig.add_trace(go.Scatter(x=years, y=trend_vals, mode='lines', name='Trend',
-                                                         line=dict(color='red', dash='dot', width=4), showlegend=False))
-                                fig.update_layout(title=f"{base_ratio}", xaxis_title="Year", yaxis_title=base_ratio, height=250, margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
+                                colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                                fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio, showlegend=False))
+                                fig.add_trace(go.Scatter(
+                                    x=years, 
+                                    y=trend_vals, 
+                                    mode='lines', 
+                                    name='Trend',
+                                    line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
+                                    showlegend=False
+                                ))
+                                fig.update_layout(title=f"{base_ratio}", 
+                                                  height=250, 
+                                                  margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
                                 st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
                                 latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
                                 trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
                                 # Bullet plots for the two ranks in two columns: trend (left), latest (right)
-                                st.markdown('<div style="display:flex; justify-content:space-between; margin-bottom:4px;">'
-                                            '<span style="font-weight:bold;">Ratio Trend Rank</span>'
-                                            '<span style="font-weight:bold;">Ratio Latest Rank</span>'
-                                            '</div>', unsafe_allow_html=True)
+
                                 bullet_col_trend, bullet_col_latest = st.columns(2)
                                 with bullet_col_trend:
                                     if trend_rank != 'N/A':
-                                        st.markdown("<div style='text-align:center; font-size:0.93em; margin-bottom:-8px;'><b>Trend</b></div>", unsafe_allow_html=True)
+                                        st.metric(label='Trend Rank',value=f"{trend_rank:.1f}", delta=None, delta_color="normal", border=True)
                                         fig_trend = go.Figure(go.Indicator(
-                                            mode="gauge+number",
+                                            mode="gauge",
                                             value=float(trend_rank),
-                                            domain={'x': [0, 1], 'y': [0, 1]},
+                                            domain={'x': [0, 1 if len(ratios)==2 else 0.7], 'y': [0, 1]},
                                             gauge={
                                                 'shape': "bullet",
                                                 'axis': {'range': [0, 100]},
-                                                'bar': {'color': "red"}
+                                                'bar': {'color': "#888888"},
+                                                'steps': [
+                                                    {'range': [0, 20], 'color': '#ffcccc'},        # Light Red
+                                                    {'range': [20, 40], 'color': '#ffe5cc'},       # Light Orange
+                                                    {'range': [40, 60], 'color': '#ffffcc'},       # Light Yellow
+                                                    {'range': [60, 80], 'color': '#e6ffe6'},       # Very Light Green
+                                                    {'range': [80, 100], 'color': '#ccffcc'}       # Light Green
+                                                ]
                                             }
                                         ))
-                                        fig_trend.update_layout(height=60, margin=dict(l=10, r=10, t=10, b=10))
+                                        fig_trend.update_layout(height=70, margin=dict(l=5, r=5, t=10, b=10))
                                         st.plotly_chart(fig_trend, use_container_width=True, key=f"{cat}_{base_ratio}_trend_bullet_{selected_stock_ticker}")
+                                        
                                 with bullet_col_latest:
                                     if latest_rank != 'N/A':
-                                        st.markdown("<div style='text-align:center; font-size:0.93em; margin-bottom:-8px;'><b>Latest</b></div>", unsafe_allow_html=True)
+                                        st.metric(label='Latest Rank',value=f"{latest_rank:.1f}", delta=None, delta_color="normal", border=True)
                                         fig_latest = go.Figure(go.Indicator(
-                                            mode="gauge+number",
+                                            mode="gauge",  # Remove "number" to hide the value
                                             value=float(latest_rank),
-                                            domain={'x': [0, 1], 'y': [0, 1]},
+                                            domain={'x': [0, 1 if len(ratios)==2 else 0.7], 'y': [0, 1]},
                                             gauge={
                                                 'shape': "bullet",
                                                 'axis': {'range': [0, 100]},
-                                                'bar': {'color': "royalblue"}
+                                                'bar': {'color': "royalblue"},
+                                                'steps': [
+                                                    {'range': [0, 20], 'color': '#ffcccc'},        # Light Red
+                                                    {'range': [20, 40], 'color': '#ffe5cc'},       # Light Orange
+                                                    {'range': [40, 60], 'color': '#ffffcc'},       # Light Yellow
+                                                    {'range': [60, 80], 'color': '#e6ffe6'},       # Very Light Green
+                                                    {'range': [80, 100], 'color': '#ccffcc'}       # Light Green
+                                                ]
                                             }
                                         ))
-                                        fig_latest.update_layout(height=60, margin=dict(l=10, r=10, t=10, b=10))
+                                        fig_latest.update_layout(height=70, margin=dict(l=5, r=5, t=10, b=10))
                                         st.plotly_chart(fig_latest, use_container_width=True, key=f"{cat}_{base_ratio}_latest_bullet_{selected_stock_ticker}")
+                                # Show help text for this ratio if available
+                                # Show help text if available
+                                help_key = f"{base_ratio}_latest_rank"# if base_ratio in ratio_help_texts else f"{ratio}" if 'ratio' in locals() and ratio in ratio_help_texts else None
+                                if help_key and ratio_help_texts.get(help_key):
+                                    with st.expander(f"Förklaring av {base_ratio}", expanded=False):
+                                        st.write(ratio_help_texts[help_key])
                             else:
                                 st.info(f"No year data found for {base_ratio}.")
         # --- END: Show ratio bar charts for each _trend_rank category ---
