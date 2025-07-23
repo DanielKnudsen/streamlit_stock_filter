@@ -1,0 +1,3 @@
+lägg till cagr beräkning för värden så som revenue, profit, cashflow, dividend, stock price
+visalisera cagr i aktievyn som bar plots, borde kunna indikera om stock price är i fas med övrig tillväxt
+
