@@ -417,7 +417,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
 
     return df_agg.to_dict(orient='index')
 
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,cagr_results):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
@@ -425,13 +425,15 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_ranked = pd.DataFrame.from_dict(ranked_ratios, orient='index')
     df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')
+    df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
+
     # Load tickers file as defined in config
     tickers_file = config.get("input_ticker_file", "tickers/tickers_lists.csv")
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_last_SMA = pd.read_csv("csv-data/last_SMA.csv", index_col='Ticker')
 
-    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks], axis=1)
+    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
     return final_df#.sort_values(by='Total_Score', ascending=False)
 
 def save_results_to_csv(results_df, file_path):
@@ -541,12 +543,32 @@ def get_price_data(SMA_short, SMA_medium, SMA_long, pct_diff_short, pct_diff_med
 def save_last_SMA_to_csv(read_from, save_to):
     """
     Sparar den senaste SMA-data till en separat CSV-fil.
+    Beräknar även CAGR för 'Close' per ticker och lägger till det i resultatet.
     """
     try:
         df = pd.read_csv(read_from, index_col='Date', parse_dates=True)
-        if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns:
+        if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns and 'Close' in df.columns:
             # Get the latest row for each ticker
             last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long','pct_diff_short', 'pct_diff_medium', 'pct_diff_long', 'pct_diff_longest']]
+            # Calculate CAGR for each ticker
+            cagr_list = []
+            for ticker, group in df.groupby('Ticker'):
+                group = group.sort_index()
+                if len(group) > 1:
+                    start_price = group['Close'].iloc[0]
+                    end_price = group['Close'].iloc[-1]
+                    num_years = (group.index[-1] - group.index[0]).days / 365.25
+                    if start_price > 0 and num_years > 0:
+                        cagr = ((end_price / start_price) ** (1 / num_years)) - 1
+                        cagr_list.append({'Ticker': ticker, 'CAGR': cagr})
+                    else:
+                        cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
+                else:
+                    cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
+            df_cagr = pd.DataFrame(cagr_list).set_index('Ticker')
+            last_rows = last_rows.set_index('Ticker')
+            last_rows['cagr_close'] = df_cagr['CAGR']
+            last_rows.reset_index(inplace=True)
             last_rows.to_csv(save_to, index=False)
             print(f"Senaste SMA-data per ticker sparad i '{save_to}'")
         else:
@@ -577,6 +599,36 @@ def aggregate_cluster_ranks(category_ranks):
             ranks = df[col].rank(pct=True, ascending=True) * 100
             df[col_name] = ranks
     return df.set_index('Ticker').to_dict(orient='index')
+
+def calculate_cagr(cagr_dimension, raw_financial_data_file):
+    """
+    Beräknar CAGR (Compound Annual Growth Rate) för de angivna dimensionerna.
+    Dimensionerna finns i 'Metric'-kolumnen och datum i 'Date'-kolumnen.
+    Resultatnyckeln är 'cagr' + dimension med mellanslag ersatt av underscore.
+    """
+    cagr_results = {}
+    raw_financial_data = pd.read_csv(raw_financial_data_file, parse_dates=['Date'])
+    tickers = raw_financial_data['Ticker'].unique()
+    for ticker in tickers:
+        data_ticker = raw_financial_data[raw_financial_data['Ticker'] == ticker]
+        cagr_results[ticker] = {}
+        for dimension in cagr_dimension:
+            key = f"cagr{dimension.replace(' ', '_')}"
+            data_dim = data_ticker[data_ticker['Metric'] == dimension].sort_values('Date')
+            if not data_dim.empty:
+                start_value = data_dim['Value'].iloc[0]
+                end_value = data_dim['Value'].iloc[-1]
+                start_date = pd.to_datetime(data_dim['Date'].iloc[0])
+                end_date = pd.to_datetime(data_dim['Date'].iloc[-1])
+                num_years = (end_date - start_date).days / 365.25
+                if start_value > 0 and num_years > 0:
+                    cagr = ((end_value / start_value) ** (1 / num_years)) - 1
+                    cagr_results[ticker][key] = cagr
+                else:
+                    cagr_results[ticker][key] = np.nan
+            else:
+                cagr_results[ticker][key] = np.nan
+    return cagr_results
 
 # --- Huvudkörning ---
 
@@ -621,7 +673,7 @@ if __name__ == "__main__":
                 save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
                 save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
             print("läser in stock price data...")
-            get_price_data(config["SMA_short"], 
+            """get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
                            config["SMA_long"],
                            config["pct_diff_short"],
@@ -630,7 +682,7 @@ if __name__ == "__main__":
                            config["pct_diff_longest"],
                            tickers, 
                            config["data_fetch_years"], 
-                           os.path.join(output_dir, config["price_data_file"]))
+                           os.path.join(output_dir, config["price_data_file"]))"""
             save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
                                  save_to=os.path.join(output_dir, "last_SMA.csv"))
 
@@ -647,7 +699,9 @@ if __name__ == "__main__":
             cluster_ranks = aggregate_cluster_ranks(category_ranks)
             save_category_scores_to_csv(cluster_ranks, os.path.join(output_dir, "cluster_ranks.csv"))
 
-            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks)
+            cagr_results = calculate_cagr(config['cagr_dimension'], os.path.join(output_dir, "raw_financial_data.csv"))
+
+            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results)
             save_results_to_csv(final_results, config["output_file_path"])
             
             print("\nAktieutvärdering slutförd och sparad i " + config["output_file_path"])
