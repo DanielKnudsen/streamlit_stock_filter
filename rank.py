@@ -673,7 +673,7 @@ if __name__ == "__main__":
                 save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
                 save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
             print("läser in stock price data...")
-            """get_price_data(config["SMA_short"], 
+            get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
                            config["SMA_long"],
                            config["pct_diff_short"],
@@ -682,7 +682,7 @@ if __name__ == "__main__":
                            config["pct_diff_longest"],
                            tickers, 
                            config["data_fetch_years"], 
-                           os.path.join(output_dir, config["price_data_file"]))"""
+                           os.path.join(output_dir, config["price_data_file"]))
             save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
                                  save_to=os.path.join(output_dir, "last_SMA.csv"))
 
