@@ -113,7 +113,7 @@ try:
     # ENHETLIGT FILTERAVSNITT
     # =============================
     with st.container(border=True):
-        st.subheader("Filtrera aktier med reglage")
+        st.subheader("Aktiefilter")
         st.markdown(
             """
             Använd reglagen nedan för att filtrera aktier baserat på deras totala poäng samt detaljerade 'senaste' och 'trend'-rankningar inom finansiella kategorier.
@@ -167,7 +167,7 @@ try:
                                                           (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
                                                           (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])]
         # --- Reglage för totalrank (överst, nu i två kolumner) ---
-        st.markdown('##### Filtrera efter totalrank')
+        st.markdown('##### Filtrera efter Aggregerad rankn')
         col_total_trend, col_total_latest = st.columns(2,gap='medium',border=True)
         with col_total_trend:
             min_trend = float(df_new_ranks['Trend_clusterRank'].min())
@@ -470,7 +470,6 @@ try:
     cols.insert(0, cols.pop(cols.index('Shortlist'))) 
     cols.insert(0, cols.pop(cols.index('Välj')))  # Move 'Agg. Rank trend 4 år' to the front
     df_display = df_display[cols]  # Reorder columns
-    st.write(df_display.columns)
     # Update rank_score_columns to reflect the new names for shortlist display
     display_rank_score_columns = df_display.columns.tolist()
 
