@@ -334,6 +334,7 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             #ascending = not is_better
             ranked = df[column].rank(pct=True, ascending=is_better) * 100
+            ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
             for ticker, rank in ranked.items():
                 ranked_ratios[ticker][f'{ratio_name}_latest_ratioRank'] = rank if not pd.isna(rank) else np.nan
         
@@ -353,6 +354,7 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
 
             if not positive_trend_slopes.empty:
                 pos_ranks = positive_trend_slopes.rank(pct=True, ascending=True) * 50 + 50
+
                 for ticker, rank in pos_ranks.items():
                     ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank
             
@@ -531,7 +533,6 @@ def get_price_data(SMA_short, SMA_medium, SMA_long, pct_diff_short, pct_diff_med
             df_price_data['pct_diff_short'] = (df_price_data['Close'].pct_change(periods=pct_diff_short)* 100).fillna(0)
             df_price_data['pct_diff_medium'] = (df_price_data['Close'].pct_change(periods=pct_diff_medium)* 100).fillna(0)
             df_price_data['pct_diff_long'] = (df_price_data['Close'].pct_change(periods=pct_diff_long)* 100).fillna(0)
-            df_price_data['pct_diff_longest'] = (df_price_data['Close'].pct_change(periods=pct_diff_longest)* 100).fillna(0)
 
             df_complete = pd.concat([df_complete, df_price_data])
         except Exception as e:
@@ -674,7 +675,7 @@ if __name__ == "__main__":
                 save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
                 save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
             print("läser in stock price data...")
-            get_price_data(config["SMA_short"], 
+            """get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
                            config["SMA_long"],
                            config["pct_diff_short"],
@@ -685,7 +686,7 @@ if __name__ == "__main__":
                            config["data_fetch_years"], 
                            os.path.join(output_dir, config["price_data_file"]))
             save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
-                                 save_to=os.path.join(output_dir, "last_SMA.csv"))
+                                 save_to=os.path.join(output_dir, "last_SMA.csv"))"""
 
             # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
