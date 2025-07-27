@@ -413,6 +413,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
         if df_agg[col].dtype in [float, int]:
             # Rank so that higher is better (ascending=True)
             ranks = df_agg[col].rank(pct=True, ascending=True) * 100
+            ranks = ranks.fillna(50)
             df_agg[col_name] = ranks
 
     return df_agg.to_dict(orient='index')
