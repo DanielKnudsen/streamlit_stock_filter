@@ -13,10 +13,9 @@ SMA_medium: 50
 SMA_long: 200
 
 # Inställningar för pct diff från senaste slutkurs
-pct_diff_short: 1
-pct_diff_medium: 5
-pct_diff_long: 20
-pct_diff_longest: 90
+pct_diff_short: 20
+pct_diff_medium: 90
+pct_diff_long: 200
 
 # CAGR inställningar
 cagr_dimension:
@@ -201,10 +200,9 @@ display_names:
   pct_Close_vs_SMA_short: "Stängningskurs vs SMA 10 (%)"
   pct_SMA_short_vs_SMA_medium: "SMA 10 vs 50 (%)"
   pct_SMA_medium_vs_SMA_long: "SMA 50 vs 200 (%)"
-  pct_diff_short: "Delta 10 dagar (%)"
-  pct_diff_medium: "Delta 5 dagar (%)"
-  pct_diff_long: "Delta 20 dagar (%)"
-  pct_diff_longest: "Delta 90 dagar (%)"
+  pct_diff_short: "Delta 20 dagar (%)"
+  pct_diff_medium: "Delta 90 dagar (%)"
+  pct_diff_long: "Delta 200 dagar (%)"
   Kvalitet_trend_catRank: "Kvalitet trend 4 år"
   Kvalitet_latest_catRank: "Kvalitet sen. året"
   FinansiellHalsa_trend_catRank: "Finansiell Hälsa trend 4 år"
