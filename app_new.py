@@ -26,7 +26,7 @@ full_csv_path = os.path.join(CSV_DATA_DIR, CSV_FILE_NAME)
 # =============================
 # STREAMLIT APPLICATION
 # =============================
-st.set_page_config(layout="wide", page_title="Stock Evaluation", page_icon="📈")
+st.set_page_config(layout="centered", page_title="Stock Evaluation", page_icon="📈")
 
 st.title("📈 Stock Screening Tool for Swedish Markets")
 st.markdown(
@@ -53,6 +53,7 @@ def color_progress(val):
         if cr['range'][0] <= val <= cr['range'][1]:
             return f'background-color: {cr["color"]}'
     return ''
+
 
 # =============================
 # LOAD DATA
@@ -112,11 +113,11 @@ try:
     # ENHETLIGT FILTERAVSNITT
     # =============================
     with st.container(border=True):
-        st.subheader("Filtrera aktier med reglage")
+        st.subheader("Aktiefilter")
         st.markdown(
             """
             Använd reglagen nedan för att filtrera aktier baserat på deras totala poäng samt detaljerade 'senaste' och 'trend'-rankningar inom finansiella kategorier.
-            - **Reglage för totalpoäng:** Filtrera aktier efter deras övergripande 'Trend'- och 'Senaste'-poäng.
+            - **Reglage för totalrank:** Filtrera aktier efter deras övergripande 'Trend'- och 'Senaste'- Rank.
             - **Reglage för SMA-differenser:** Förfina urvalet med hjälp av glidande medelvärdesdifferenser.
             - **Kategorireglage:** Expandera för avancerad filtrering av specifika finansiella kategorier och nyckeltal.
             Justera reglagen för att begränsa aktielistan enligt dina investeringskriterier.
@@ -165,8 +166,8 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
                                                           (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
                                                           (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])]
-        # --- Reglage för totalpoäng (överst, nu i två kolumner) ---
-        st.markdown('##### Filtrera efter totalpoäng')
+        # --- Reglage för totalrank (överst, nu i två kolumner) ---
+        st.markdown('##### Filtrera efter Aggregerad rankn')
         col_total_trend, col_total_latest = st.columns(2,gap='medium',border=True)
         with col_total_trend:
             min_trend = float(df_new_ranks['Trend_clusterRank'].min())
@@ -451,13 +452,9 @@ try:
     df_display = df_filtered_by_sliders[rank_score_columns].copy() # Keep index
 
     # Rename the rank_Score columns for display
-    # Create a dictionary for renaming
-    rename_mapping = {col: col.replace("_rank_Score", "") for col in rank_score_columns}
+    # Create a dictionary for renaming using get_display_name
+    rename_mapping = {col: get_display_name(col) for col in rank_score_columns}
     df_display.rename(columns=rename_mapping, inplace=True)
-
-    # Update rank_score_columns to reflect the new names for shortlist display
-    display_rank_score_columns = [col.replace("_rank_Score", "") for col in rank_score_columns]
-
 
     # Add a "Välj" column for plotting the graph
     # Initialize all checkboxes to False
@@ -466,6 +463,15 @@ try:
     # Add a "Shortlist" column to save stocks
     # Initialize all checkboxes to False
     df_display['Shortlist'] = False
+
+    cols = df_display.columns.tolist()
+    cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
+    cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
+    cols.insert(0, cols.pop(cols.index('Shortlist'))) 
+    cols.insert(0, cols.pop(cols.index('Välj')))  # Move 'Agg. Rank trend 4 år' to the front
+    df_display = df_display[cols]  # Reorder columns
+    # Update rank_score_columns to reflect the new names for shortlist display
+    display_rank_score_columns = df_display.columns.tolist()
 
     # Get the number of stocks after filtering by sliders
     num_filtered_stocks = len(df_display)
@@ -482,13 +488,15 @@ try:
                 "Välj", # Header for the checkbox column to plot
                 help="Select a stock to display its price development",
                 default=False,
-                width="small"
+                width="small",
+                pinned=True
             ),
             "Shortlist": st.column_config.CheckboxColumn(
                 "Shortlist", # Header for the checkbox column for shortlist
                 help="Add the stock to your personal shortlist",
                 default=False,
-                width="small"
+                width="small",
+                pinned=True
             )
         },
         key="stock_selection_editor" # Unique key to manage state
@@ -507,6 +515,10 @@ try:
     else:
         selected_stock_ticker = None # No stock selected for plotting
 
+    # Create a dict for the selected stock's data for easy access
+    selected_stock_dict = None
+    if selected_stock_ticker is not None:
+        selected_stock_dict = df_new_ranks.loc[selected_stock_ticker].to_dict()
     # Logic to handle Shortlist
     shortlisted_stocks = edited_df[edited_df['Shortlist']]
 
@@ -526,10 +538,9 @@ try:
     st.markdown("---")
     st.subheader("Prisutveckling")
 
-    # Add slider for PWLF
-    num_segments = st.slider('Antal linjesegment för trendlinje', 1, 6, 1, key="pwlf_slider")
-
     if selected_stock_ticker:
+        # Add slider for PWLF
+        num_segments = st.slider('Antal linjesegment för trendlinje', 1, 6, 1, key="pwlf_slider")
         price_file_path = os.path.join(CSV_DATA_DIR, "price_data.csv")
         if os.path.exists(price_file_path):
             df_price_all = pd.read_csv(price_file_path)
@@ -595,7 +606,7 @@ try:
 
             # Update layout for the chart
             fig.update_layout(
-            title=f"Pris & Volym för {selected_stock_ticker}",
+            title=f"Pris & Volym för {selected_stock_dict['Name']} ({selected_stock_ticker})",
             xaxis_title="Datum",
             yaxis_title="Pris",
             hovermode="x unified",
@@ -613,254 +624,231 @@ try:
     else:
         st.info("Markera en ruta under 'Välj' i tabellen ovan för att visa prisutvecklingen.")
 
-    # Bar plot for all cagr columns for selected_stock_ticker
-    cagr_cols = [col for col in df_new_ranks.columns if col.startswith('cagr')]
-    if cagr_cols and selected_stock_ticker:
-        cagr_values = df_new_ranks.loc[selected_stock_ticker, cagr_cols].astype(float)
-        fig_cagr = go.Figure(go.Bar(
-            x=[get_display_name(col) for col in cagr_cols],
-            y=cagr_values * 100,  # Convert to percent
-            marker_color='royalblue',
-            text=[f"{v*100:.2f}%" for v in cagr_values],
-            textposition='auto',
-        ))
-        fig_cagr.update_layout(
-            title=f"CAGR Metrics for {selected_stock_ticker}",
-            xaxis_title="Metric",
-            yaxis_title="Percentage",
-            height=350,
-            margin=dict(l=10, r=10, t=40, b=10),
-            yaxis=dict(ticksuffix="%", tickformat=".0f")
-        )
-        st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
 
-    # Bar plot for all pct_ columns for selected_stock_ticker
-    pct_cols = [col for col in df_new_ranks.columns if col.startswith('pct_')]
-    if pct_cols and selected_stock_ticker:
-        pct_values = df_new_ranks.loc[selected_stock_ticker, pct_cols].astype(float)
-        fig_pct = go.Figure(go.Bar(
-            x=[get_display_name(col) for col in pct_cols],
-            y=pct_values,
-            marker_color='royalblue',
-            text=[f"{v:.2f}%" for v in pct_values],
-            textposition='auto',
-        ))
-        fig_pct.update_layout(
-            title=f"Percentage Metrics for {selected_stock_ticker}",
-            xaxis_title="Metric",
-            yaxis_title="Percentage",
-            height=350,
-            margin=dict(l=10, r=10, t=40, b=10),
-            yaxis=dict(ticksuffix="%", tickformat=".0f")
-        )
-        st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
-    
-    if selected_stock_ticker is not None:
+    # Only show the following sections if a stock is selected
+    if selected_stock_dict is not None and selected_stock_ticker is not None:
+        # Bar plot for all cagr columns for selected_stock_ticker using selected_stock_dict
+        cagr_cols = [col for col in selected_stock_dict.keys() if col.startswith('cagr')]
+        if cagr_cols:
+            cagr_values = [float(selected_stock_dict.get(col, float('nan'))) for col in cagr_cols]
+            fig_cagr = go.Figure(go.Bar(
+                x=[get_display_name(col) for col in cagr_cols],
+                y=[v * 100 for v in cagr_values],  # Convert to percent
+                marker_color='royalblue',
+                text=[f"{v*100:.2f}%" if not pd.isna(v) else "" for v in cagr_values],
+                textposition='auto',
+            ))
+            fig_cagr.update_layout(
+                title=f"CAGR Metrics for {selected_stock_dict['Name']} ({selected_stock_ticker})",
+                xaxis_title="Metric",
+                yaxis_title="Percentage",
+                height=350,
+                margin=dict(l=10, r=10, t=40, b=10),
+                yaxis=dict(ticksuffix="%", tickformat=".0f")
+            )
+            st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
+
+        # Bar plot for all pct_ columns for selected_stock_ticker
+        pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
+        if pct_cols:
+            pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
+            fig_pct = go.Figure(go.Bar(
+                x=[get_display_name(col) for col in pct_cols],
+                y=pct_values,
+                marker_color='royalblue',
+                text=[f"{v:.2f}%" for v in pct_values],
+                textposition='auto',
+            ))
+            fig_pct.update_layout(
+                title=f"Percentage Metrics for {selected_stock_ticker}",
+                xaxis_title="Metric",
+                yaxis_title="Percentage",
+                height=350,
+                margin=dict(l=10, r=10, t=40, b=10),
+                yaxis=dict(ticksuffix="%", tickformat=".0f")
+            )
+            st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
+        
         longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
         st.subheader(f"{selected_stock_ticker} - Business Summary")
         st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "No long business summary available for this stock.")
 
-    # =============================
-    # RANKING FOR SELECTED STOCK
-    # =============================
-    st.subheader("Ranking for Selected Stock")
-    if selected_stock_ticker and not df_filtered_by_sliders.empty and categories:
-        # -------------------------------------------------------------
-        # PROGRESS BARS: LATEST AND TREND RANKINGS
-        # -------------------------------------------------------------
-        col_left, col_right = st.columns(2, gap='medium', border=True)
-        # Find all latest and trend columns for the selected stock
-        latest_rankings = {}
-        trend_rankings = {}
-        # Find all columns containing "_catRank"
-        all_rank_score_columns = [col for col in df_new_ranks.columns if "_catRank" in col]
-        # For each category, try to find the correct "latest" and "trend" columns
-        for cat in all_rank_score_columns:
-            # Find the latest column for this category
-            latest_col = next((col for col in all_rank_score_columns if cat in col and "latest" in col.lower()), None)
-            trend_col = next((col for col in all_rank_score_columns if cat in col and "trend" in col.lower()), None)
-            if latest_col and latest_col in df_new_ranks.columns:
-                latest_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, latest_col]
-            if trend_col and trend_col in df_new_ranks.columns:
-                trend_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, trend_col]
-            if latest_col in df_new_ranks.columns:
-                latest_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, latest_col]
-            if trend_col in df_new_ranks.columns:
-                trend_rankings[cat] = df_new_ranks.loc[selected_stock_ticker, trend_col]
-        with col_left:
-            st.markdown(f"##### Trend Rankings for {selected_stock_ticker}")
-            if trend_rankings:
-                # Dataframe with progress bars for trend rankings
-                trend_categories = list(trend_rankings.keys())
-                trend_values = [float(trend_rankings[cat]) for cat in trend_categories]
+        # =============================
+        # RANKING FOR SELECTED STOCK
+        # =============================
+        st.subheader(f"Sammanvägd rank för: {selected_stock_dict['Name']} ({selected_stock_ticker})")
+        if not df_filtered_by_sliders.empty and categories:
+            clusterRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "trend" in col.lower()}
+            df_clusterRank_trend = pd.DataFrame.from_dict(clusterRank_trend_items, orient='index', columns=['Trend Rank'])
+            df_clusterRank_trend['Kategori']= 'AGGREGERAD RANK'
+            catRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "trend" in col.lower()}
+            df_catRank_trend = pd.DataFrame.from_dict(catRank_trend_items, orient='index', columns=['Trend Rank']).reset_index()
+            df_catRank_trend['Kategori'] = df_catRank_trend['index'].str.split('_', expand=True)[0]
+            df_trend_combined = pd.concat([df_catRank_trend, df_clusterRank_trend.reset_index()], ignore_index=True, sort=False)
 
-                # Function to color the progress bars based on value
-                df_temp = pd.DataFrame({
-                    'Kategori': [cat.replace('_trend_catRank', '').replace('_', ' ').title() for cat in trend_categories],
-                    'Ranking': trend_values
-                })
-                # Applicera stilar på Progress-kolumnen
-                df_trend_styled = df_temp.style.map(color_progress, subset=['Ranking'])
+            clusterRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "latest" in col.lower()}
+            df_clusterRank_latest = pd.DataFrame.from_dict(clusterRank_latest_items, orient='index', columns=['Latest Rank'])
+            df_clusterRank_latest['Kategori']= 'AGGREGERAD RANK'
+            catRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "latest" in col.lower()}
+            df_catRank_latest = pd.DataFrame.from_dict(catRank_latest_items, orient='index', columns=['Latest Rank']).reset_index()
+            df_catRank_latest['Kategori'] = df_catRank_latest['index'].str.split('_', expand=True)[0]
+            df_latest_combined = pd.concat([df_catRank_latest, df_clusterRank_latest.reset_index()], ignore_index=True, sort=False)
+            # Merge the trend and latest DataFrames on 'Kategori'
+            df_catRank_merged = pd.merge(df_trend_combined, df_latest_combined, on='Kategori', suffixes=('_trend', '_latest'))
+            # -------------------------------------------------------------
+            # PROGRESS BARS: LATEST AND TREND RANKINGS
+            # -------------------------------------------------------------
+            col_left, col_right = st.columns(2, gap='medium', border=False)
 
+            with col_left:
                 st.dataframe(
-                    df_trend_styled,
+                    df_catRank_merged[['Kategori', 'Trend Rank']] # Select columns first
+                    .style.map(color_progress, subset=['Trend Rank']), # Apply progress bar coloring
                     hide_index=True,
                     use_container_width=True,
                     column_config={
-                        "Ranking": st.column_config.ProgressColumn(
-                            "Ranking",
-                            help="Rankingvärde (0-100)",
-                            min_value=0,
-                            max_value=100,
-                            format="%.1f"
-                        )
+                        "Trend Rank": st.column_config.ProgressColumn(
+                                "Trend Rank",
+                                help="Rankingvärde (0-100)",
+                                min_value=0,
+                                max_value=100,
+                                format="%.1f"
+                            ),
                     }
                 )
-            else:
-                st.info("No 'trend' rankings found for this stock.")
 
-        with col_right:
-            st.markdown(f"##### Latest Rankings for {selected_stock_ticker}")
-            if latest_rankings:
-                # Dataframe with progress bars for latest rankings
-                latest_categories = list(latest_rankings.keys())
-                latest_values = [float(latest_rankings[cat]) for cat in latest_categories]
-                # Function to color the progress bars based on value
-                df_temp = pd.DataFrame({
-                    'Kategori': [cat.replace('_latest_catRank', '').replace('_', ' ').title() for cat in latest_categories],
-                    'Ranking': latest_values
-                })
-                # Applicera stilar på Progress-kolumnen
-                df_latest_styled = df_temp.style.map(color_progress, subset=['Ranking'])
-
+            with col_right:
                 st.dataframe(
-                    df_latest_styled,
+                    df_catRank_merged[['Kategori', 'Latest Rank']] # Select columns first
+                    .style.map(color_progress, subset=['Latest Rank']), # Apply progress bar coloring
                     hide_index=True,
                     use_container_width=True,
                     column_config={
-                        "Ranking": st.column_config.ProgressColumn(
-                            "Ranking",
-                            help="Rankingvärde (0-100)",
-                            min_value=0,
-                            max_value=100,
-                            format="%.1f"
-                        )
+                        "Latest Rank": st.column_config.ProgressColumn(
+                                "Latest Rank",
+                                help="Rankingvärde (0-100)",
+                                min_value=0,
+                                max_value=100,
+                                format="%.1f"
+                            ),
                     }
                 )
-            else:
-                st.info("No 'latest' rankings found for this stock.")
 
+            # -------------------------------------------------------------
+            # TREND RATIO BREAKDOWN BAR CHARTS
+            # -------------------------------------------------------------
+            st.markdown('---')
+            st.subheader('Category Trend Ratio Breakdown (Last 4 Years)')
+            # Create DataFrames for trend and latest ratio ranks
+            ratioRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "latest" in col.lower()}
+            df_ratioRank_latest = pd.DataFrame.from_dict(ratioRank_latest_items, orient='index', columns=['Rank']).reset_index()
+            df_ratioRank_latest['Ratio_name'] = df_ratioRank_latest['index'].str.split('_', expand=True)[0]
 
+            ratioRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "trend" in col.lower()}
+            df_ratioRank_trend = pd.DataFrame.from_dict(ratioRank_trend_items, orient='index', columns=['Rank']).reset_index()
+            df_ratioRank_trend['Ratio_name'] = df_ratioRank_trend['index'].str.split('_', expand=True)[0]
+            df_ratioRank_merged = pd.merge(df_ratioRank_trend, df_ratioRank_latest, on='Ratio_name', suffixes=('_trend', '_latest'))
+            df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank'}, inplace=True)
 
-        # -------------------------------------------------------------
-        # TREND RATIO BREAKDOWN BAR CHARTS
-        # -------------------------------------------------------------
-        st.markdown('---')
-        st.subheader('Trend Ratio Breakdown (Last 4 Years)')
-        # Load help texts from config if available
-        ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
-        #st.write("category_ratios:", category_ratios.items())  # Debugging line to show category_ratios
-        for cat, cat_dict in category_ratios.items():
-            if cat.endswith('trend_ratioRank'):
-                display_cat = cat.replace('_trend_ratioRank', '')
-                # Use a visually distinct box for each category, with extra margin for spacing
-                with st.container():
-                    st.markdown(f"<div style='background-color:#f5f7fa; border-radius:10px; padding:18px 10px 10px 10px; margin-top:38px; margin-bottom:38px; border:2px solid #888;'><span style='font-size:1.3em; font-weight:bold'>{display_cat}</span></div>", unsafe_allow_html=True)
-                    ratios = [ratio for ratio in cat_dict]
-                    cols = st.columns(len(ratios), border=True,gap="small") if ratios else []
-                    for idx, ratio in enumerate(ratios):
-                        base_ratio = ratio.replace('_trend_ratioRank', '')
-                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio + '_year_')]
-                        # Filter out columns where the value for the selected stock is NaN
-                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
-                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
-                        year_cols_last4 = year_cols_sorted[-4:]
-                        latest_rank_col = f"{base_ratio}_latest_ratioRank"
-                        trend_rank_col = f"{base_ratio}_trend_ratioRank"
-                        with cols[idx]:
-                            if year_cols_last4:
-                                values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
-                                years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                                # Linear regression for trend line
-                                if len(years) > 1:
-                                    coeffs = np.polyfit(years, values, 1)
-                                    trend_vals = np.polyval(coeffs, years)
-                                else:
-                                    trend_vals = values
-                                fig = go.Figure()
-                                colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
-                                fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio, showlegend=False))
-                                fig.add_trace(go.Scatter(
-                                    x=years, 
-                                    y=trend_vals, 
-                                    mode='lines', 
-                                    name='Trend',
-                                    line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
-                                    showlegend=False
-                                ))
-                                fig.update_layout(title=f"{base_ratio}", 
-                                                  height=250, 
-                                                  margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
-                                st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
-                                latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
-                                trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
-                                # Bullet plots for the two ranks in two columns: trend (left), latest (right)
+            # Load help texts from config if available
+            ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
+            #st.write("category_ratios:", category_ratios.items())  # Debugging line to show category_ratios
+            for cat, cat_dict in category_ratios.items():
 
-                                bullet_col_trend, bullet_col_latest = st.columns(2)
-                                with bullet_col_trend:
-                                    if trend_rank != 'N/A':
-                                        st.metric(label='Trend Rank',value=f"{trend_rank:.1f}", delta=None, delta_color="normal", border=True)
-                                        fig_trend = go.Figure(go.Indicator(
-                                            mode="gauge",
-                                            value=float(trend_rank),
-                                            domain={'x': [0, 1 if len(ratios)==2 else 0.7], 'y': [0, 1]},
-                                            gauge={
-                                                'shape': "bullet",
-                                                'axis': {'range': [0, 100]},
-                                                'bar': {'color': "#888888"},
-                                                'steps': [
-                                                    {'range': [0, 20], 'color': '#ffcccc'},        # Light Red
-                                                    {'range': [20, 40], 'color': '#ffe5cc'},       # Light Orange
-                                                    {'range': [40, 60], 'color': '#ffffcc'},       # Light Yellow
-                                                    {'range': [60, 80], 'color': '#e6ffe6'},       # Very Light Green
-                                                    {'range': [80, 100], 'color': '#ccffcc'}       # Light Green
-                                                ]
-                                            }
-                                        ))
-                                        fig_trend.update_layout(height=70, margin=dict(l=5, r=5, t=10, b=10))
-                                        st.plotly_chart(fig_trend, use_container_width=True, key=f"{cat}_{base_ratio}_trend_bullet_{selected_stock_ticker}")
-                                        
-                                with bullet_col_latest:
-                                    if latest_rank != 'N/A':
-                                        st.metric(label='Latest Rank',value=f"{latest_rank:.1f}", delta=None, delta_color="normal", border=True)
-                                        fig_latest = go.Figure(go.Indicator(
-                                            mode="gauge",  # Remove "number" to hide the value
-                                            value=float(latest_rank),
-                                            domain={'x': [0, 1 if len(ratios)==2 else 0.7], 'y': [0, 1]},
-                                            gauge={
-                                                'shape': "bullet",
-                                                'axis': {'range': [0, 100]},
-                                                'bar': {'color': "royalblue"},
-                                                'steps': [
-                                                    {'range': [0, 20], 'color': '#ffcccc'},        # Light Red
-                                                    {'range': [20, 40], 'color': '#ffe5cc'},       # Light Orange
-                                                    {'range': [40, 60], 'color': '#ffffcc'},       # Light Yellow
-                                                    {'range': [60, 80], 'color': '#e6ffe6'},       # Very Light Green
-                                                    {'range': [80, 100], 'color': '#ccffcc'}       # Light Green
-                                                ]
-                                            }
-                                        ))
-                                        fig_latest.update_layout(height=70, margin=dict(l=5, r=5, t=10, b=10))
-                                        st.plotly_chart(fig_latest, use_container_width=True, key=f"{cat}_{base_ratio}_latest_bullet_{selected_stock_ticker}")
-                                # Show help text for this ratio if available
-                                # Show help text if available
-                                help_key = f"{base_ratio}_latest_rank"# if base_ratio in ratio_help_texts else f"{ratio}" if 'ratio' in locals() and ratio in ratio_help_texts else None
-                                if help_key and ratio_help_texts.get(help_key):
-                                    with st.expander(f"Förklaring av {base_ratio}", expanded=False):
-                                        st.write(ratio_help_texts[help_key])
-                            else:
-                                st.info(f"No year data found for {base_ratio}.")
-        # --- END: Show ratio bar charts for each _trend_rank category ---
+                if cat.endswith('trend_ratioRank'):
+                    display_cat = cat.replace('_trend_ratioRank', '')
+                    # Use a visually distinct box for each category, with extra margin for spacing
+                    with st.container(border=True):
+                        st.dataframe(
+                            df_catRank_merged[df_catRank_merged['Kategori'] == display_cat][['Kategori', 'Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
+                            hide_index=True,
+                            use_container_width=True,
+                            column_config={
+                                "Latest Rank": st.column_config.ProgressColumn(
+                                        "Latest Rank",
+                                        help="Rankingvärde (0-100)",
+                                        min_value=0,
+                                        max_value=100,
+                                        format="%.1f"
+                                    ),
+                                "Trend Rank": st.column_config.ProgressColumn(
+                                        "Trend Rank",
+                                        help="Rankingvärde (0-100)",
+                                        min_value=0,
+                                        max_value=100,
+                                        format="%.1f"
+                                    )
+                            }
+                        )
+                        
+                        ratios = [ratio for ratio in cat_dict]
+                        cols = st.columns(len(ratios), border=True,gap="small") if ratios else []
+                        for idx, ratio in enumerate(ratios):
+                            
+                            base_ratio = ratio.replace('_trend_ratioRank', '')
+                            year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio + '_year_')]
+                            # Filter out columns where the value for the selected stock is NaN
+                            year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
+                            year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
+                            year_cols_last4 = year_cols_sorted[-4:]
+                            latest_rank_col = f"{base_ratio}_latest_ratioRank"
+                            trend_rank_col = f"{base_ratio}_trend_ratioRank"
+                            with cols[idx]:
+                                if year_cols_last4:
+                                    values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
+                                    years = [int(col.split('_')[-1]) for col in year_cols_last4]
+                                    # Linear regression for trend line
+                                    if len(years) > 1:
+                                        coeffs = np.polyfit(years, values, 1)
+                                        trend_vals = np.polyval(coeffs, years)
+                                    else:
+                                        trend_vals = values
+                                    fig = go.Figure()
+                                    colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                                    fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio, showlegend=False))
+                                    fig.add_trace(go.Scatter(
+                                        x=years, 
+                                        y=trend_vals, 
+                                        mode='lines', 
+                                        name='Trend',
+                                        line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
+                                        showlegend=False
+                                    ))
+                                    fig.update_layout(title=f"{base_ratio}", 
+                                                      height=250, 
+                                                      margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
+                                    st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
+                                    latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
+                                    trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
+                                    # Bullet plots for the two ranks in two columns: trend (left), latest (right)
+                                    st.write(f"**{ratio}**")
+                                    st.dataframe(
+                                        df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
+                                        hide_index=True,
+                                        use_container_width=True,
+                                        column_config={
+                                            "Latest Rank": st.column_config.ProgressColumn(
+                                                    "Latest Rank",
+                                                    help=ratio_help_texts.get(ratio),
+                                                    min_value=0,
+                                                    max_value=100,
+                                                    format="%.1f",
+                                                    width="small",
+                                                ),
+                                            "Trend Rank": st.column_config.ProgressColumn(
+                                                    "Trend Rank",
+                                                    help=ratio_help_texts.get(ratio),
+                                                    min_value=0,
+                                                    max_value=100,
+                                                    format="%.1f",
+                                                    width="small"
+                                                )
+                                        }
+                                    )
+
+                st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
+                # Clear the empty space before each category
+            # --- END: Show ratio bar charts for each _trend_rank category ---
 
 except FileNotFoundError:
     st.error(f"Error: Main file '{CSV_FILE_NAME}' not found in directory '{CSV_DATA_DIR}'. Check the path.")

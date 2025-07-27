@@ -1,3 +1,7 @@
-lägg till cagr beräkning för värden så som revenue, profit, cashflow, dividend, stock price
-visalisera cagr i aktievyn som bar plots, borde kunna indikera om stock price är i fas med övrig tillväxt
+lägg till ikoner till kategorier
 
+lägg till en kategori om utdelningar
+
+lägg till underliggande data om cagr datan
+
+skapa en dataframe med all data för en viss ticker som ska kunna visas när användaren klickar på en knapp
