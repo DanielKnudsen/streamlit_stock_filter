@@ -123,6 +123,17 @@ try:
             Justera reglagen för att begränsa aktielistan enligt dina investeringskriterier.
             """
         )
+
+        # --- NY: Manuell ticker-filtrering ---
+        ticker_input = st.text_input(
+            "Filtrera på tickers (kommaseparerade, t.ex. VOLV-A,ERIC-B,ATCO-A):",
+            value="",
+            help="Skriv in en eller flera tickers separerade med komma för att endast visa dessa aktier."
+        )
+        if ticker_input.strip():
+            tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
+            df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
+
         # --- Filtrera efter SMA-differenser ---
         st.markdown("##### Filtrera efter SMA-differenser")
         col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
@@ -194,7 +205,7 @@ try:
         
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
                                     (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
-
+        st.write("Antal kvarvarande aktier efter filtrering:", df_filtered_by_sliders.shape[0])
         # --- Senaste/Trend-reglage (under totalreglage) ---
         with st.expander('**Utökade filtermöjligheter**', expanded=False):
             col_filter_left, col_filter_right = st.columns(2,gap='medium',border=True)
@@ -248,10 +259,11 @@ try:
                                         ]
                                     else:
                                         st.info(f"Kolumn {r} saknas i data.")
+                                    # Add filter for trendSlope, but do NOT exclude NaN values (keep them in the filtered DataFrame)
                                     r_data = f"{r.replace('_trend_ratioRank', '_ratio_trendSlope')}"
                                     if r_data in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r_data].min())
-                                        max_val = float(df_filtered_by_sliders[r_data].max())
+                                        min_val = float(df_filtered_by_sliders[r_data].min(skipna=True))
+                                        max_val = float(df_filtered_by_sliders[r_data].max(skipna=True))
                                         if min_val == max_val:
                                             max_val += 0.001
                                         slider_min, slider_max = st.slider(
@@ -261,10 +273,11 @@ try:
                                             value=(min_val, max_val),
                                             key=f"slider_tab_latest_{r_data}"
                                         )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[
-                                            (df_filtered_by_sliders[r_data] >= slider_min) &
-                                            (df_filtered_by_sliders[r_data] <= slider_max)
-                                        ]
+                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                        )
+                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
                                     else:
                                         st.info(f"Kolumn {r_data} saknas i data.")
 
@@ -333,10 +346,11 @@ try:
                                             value=(min_val, max_val),
                                             key=f"slider_tab_latest_{r_data}"
                                         )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[
-                                            (df_filtered_by_sliders[r_data] >= slider_min) &
-                                            (df_filtered_by_sliders[r_data] <= slider_max)
-                                        ]
+                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                        )
+                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
                                     else:
                                         st.info(f"Kolumn {r_data} saknas i data.")
                 else:
@@ -345,6 +359,7 @@ try:
         for cat in categories:
             with st.expander(f"Filtrera efter kategori: {cat}", expanded=False):
                 pass
+        st.write("Antal kvarvarande aktier efter filtrering:", df_filtered_by_sliders.shape[0])
 
     # =============================
     # BUBBLE PLOT SECTION
@@ -377,7 +392,7 @@ try:
         
         # Format marketCap for hover (MSEK, rounded, with space as thousands separator)
         if 'marketCap' in df_filtered_by_sliders.columns:
-            df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype(int).map(lambda x: f"{x:,}".replace(",", " ") + " MSEK")
+            df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
         if len(df_filtered_by_sliders) > 0:
             # Assign fixed colors to Lista values using all possible values from the full dataset
             lista_color_map = {
@@ -398,48 +413,60 @@ try:
                 color_discrete_map = {k: v for k, v in lista_color_map.items()}
             else:
                 color_discrete_map = None
-            # Define size_raw and size for bubble plot
-            if 'marketCap' in df_filtered_by_sliders.columns:
-                size_raw = df_filtered_by_sliders['marketCap'].copy()
+
+            # --- Robust handling of NaN values for bubble plot ---
+            # Drop rows with NaN in required columns for the plot
+            required_cols = ['Trend_clusterRank', 'Latest_clusterRank']
+            if 'Lista' in df_filtered_by_sliders.columns:
+                required_cols.append('Lista')
+            plot_df = df_filtered_by_sliders.dropna(subset=required_cols, how='any').copy()
+            # Handle marketCap for size
+            if 'marketCap' in plot_df.columns:
+                size_raw = plot_df['marketCap'].fillna(20)
+                size = size_raw
             else:
-                size = [20] * len(df_filtered_by_sliders)
-            bubble_fig = px.scatter(
-                df_filtered_by_sliders,
-                x='Trend_clusterRank',
-                y='Latest_clusterRank',
-                color='Lista' if 'Lista' in df_filtered_by_sliders.columns else None,
-                color_discrete_map=color_discrete_map,
-                hover_name=df_filtered_by_sliders.index if show_tickers else None,
-                text=df_filtered_by_sliders.index if show_tickers else None,
-                size=size_raw if 'marketCap' in df_filtered_by_sliders.columns else size,
-                hover_data={
-                    "hover_summary": True,
-                    "marketCap_MSEK": True
-                } if show_hover else {},
-                labels={
-                'Trend_clusterRank': 'Total Trend Score',
-                'Latest_clusterRank': 'Total Latest Score',
-                'Lista': '',
-                'hover_summary': 'Summary',
-                'marketCap_MSEK': 'Market Cap'
-                },
-                title='Total Trend Score vs Total Latest Score',
-                width=900,
-                height=600
-            )
-            bubble_fig.update_layout(
-                legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="center",
-                x=0.5
+                size = [20] * len(plot_df)
+
+            if len(plot_df) > 0:
+                bubble_fig = px.scatter(
+                    plot_df,
+                    x='Trend_clusterRank',
+                    y='Latest_clusterRank',
+                    color='Lista' if 'Lista' in plot_df.columns else None,
+                    color_discrete_map=color_discrete_map,
+                    hover_name=plot_df.index if show_tickers else None,
+                    text=plot_df.index if show_tickers else None,
+                    size=size if 'marketCap' in plot_df.columns else [20]*len(plot_df),
+                    hover_data={
+                        "hover_summary": True,
+                        "marketCap_MSEK": True
+                    } if show_hover else {},
+                    labels={
+                        'Trend_clusterRank': 'Total Trend Score',
+                        'Latest_clusterRank': 'Total Latest Score',
+                        'Lista': '',
+                        'hover_summary': 'Summary',
+                        'marketCap_MSEK': 'Market Cap'
+                    },
+                    title='Total Trend Score vs Total Latest Score',
+                    width=900,
+                    height=600
                 )
-            )
-            bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
-            if show_tickers:
-                bubble_fig.update_traces(textposition='top center')
-            st.plotly_chart(bubble_fig, use_container_width=True)
+                bubble_fig.update_layout(
+                    legend=dict(
+                        orientation="h",
+                        yanchor="bottom",
+                        y=1.02,
+                        xanchor="center",
+                        x=0.5
+                    )
+                )
+                bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
+                if show_tickers:
+                    bubble_fig.update_traces(textposition='top center')
+                st.plotly_chart(bubble_fig, use_container_width=True)
+            else:
+                st.info('No stocks in the selected score range (after removing rows with saknade värden).')
         else:
             st.info('No stocks in the selected score range.')
 
@@ -535,8 +562,12 @@ try:
     else:
         st.info("Din bevakningslista är tom. Markera rutan under 'Shortlist' för att lägga till aktier.")
 
-    st.markdown("---")
-    st.subheader("Prisutveckling")
+    st.markdown("---")        
+    longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
+    st.subheader(f"{selected_stock_ticker} - Business Summary")
+    st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "No long business summary available for this stock.")
+
+    st.subheader("Kursutveckling och Trendlinje")
 
     if selected_stock_ticker:
         # Add slider for PWLF
@@ -550,19 +581,22 @@ try:
             # PWLF calculation
             x_hat = None
             y_hat = None
+            std_devs = None
             if len(df_price) > num_segments:
                 x = np.arange(len(df_price['Date']))
                 y = df_price['Close'].values
-                
+
                 my_pwlf = pwlf.PiecewiseLinFit(x, y)
-                
                 # fit the data for a given number of line segments
                 res = my_pwlf.fit(num_segments)
-                
                 # predict for the determined breaks
                 x_hat = np.linspace(x.min(), x.max(), 100)
                 y_hat = my_pwlf.predict(x_hat)
 
+                # Calculate standard deviation of residuals (difference between actual and fitted)
+                y_fitted = my_pwlf.predict(x)
+                residuals = y - y_fitted
+                std_devs = [np.std(residuals) * i for i in [1, 2, 3]]
 
             # Create Plotly figure
             fig = go.Figure()
@@ -570,50 +604,75 @@ try:
             # Add Close price
             if 'Close' in df_price.columns:
                 fig.add_trace(go.Scatter(x=df_price['Date'], y=df_price['Close'],
-                         mode='lines', name='Stängningskurs',
-                         line=dict(color='blue', width=2)))
+                    mode='lines', name='Stängningskurs',
+                    line=dict(color='blue', width=2)))
 
             # Add PWLF trendline to the plot
             if x_hat is not None and y_hat is not None:
                 # Create a new date range for the predicted values
                 date_range = pd.to_datetime(np.linspace(df_price['Date'].min().value, df_price['Date'].max().value, len(x_hat)))
                 fig.add_trace(go.Scatter(x=date_range, y=y_hat,
-                                         mode='lines', name='Trendlinje (PWLF)',
-                                         line=dict(color='orange', width=3, dash='dash')))
+                            mode='lines', name='Trendlinje',
+                            line=dict(color='orange', width=3, dash='dash')))
+                # Add dotted lines for +- 1, 2, 3 standard deviations from trendline
+                if std_devs is not None:
+                    for i, std in enumerate(std_devs, 1):
+                        fig.add_trace(go.Scatter(
+                            x=date_range, y=y_hat + std,
+                            mode='lines',
+                            name=f'+{i}σ',
+                            line=dict(color='gray', width=1, dash='dot'),
+                            showlegend=True
+                        ))
+                        fig.add_trace(go.Scatter(
+                            x=date_range, y=y_hat - std,
+                            mode='lines',
+                            name=f'-{i}σ',
+                            line=dict(color='gray', width=1, dash='dot'),
+                            showlegend=True
+                        ))
 
             # Add SMA_short
             if 'SMA_short' in df_price.columns:
                 fig.add_trace(go.Scatter(x=df_price['Date'], y=df_price['SMA_short'],
-                         mode='lines', name='SMA Kort',
-                         line=dict(color='red', width=1, dash='dot')))
+                    mode='lines', name='SMA Kort',
+                    line=dict(color='red', width=1, dash='dot')))
 
             # Add SMA_medium
             if 'SMA_medium' in df_price.columns:
                 fig.add_trace(go.Scatter(x=df_price['Date'], y=df_price['SMA_medium'],
-                         mode='lines', name='SMA Medel',
-                         line=dict(color='green', width=1, dash='dash')))
+                    mode='lines', name='SMA Medel',
+                    line=dict(color='green', width=1, dash='dash')))
 
             # Add SMA_long
             if 'SMA_long' in df_price.columns:
                 fig.add_trace(go.Scatter(x=df_price['Date'], y=df_price['SMA_long'],
-                         mode='lines', name='SMA Lång',
-                         line=dict(color='purple', width=1, dash='longdash')))
+                    mode='lines', name='SMA Lång',
+                    line=dict(color='purple', width=1, dash='longdash')))
 
             # Add Volume as a secondary y-axis
             if 'Volume' in df_price.columns:
                 fig.add_trace(go.Bar(x=df_price['Date'], y=df_price['Volume'],
-                         name='Volym', marker_color='gray', opacity=0.3, yaxis='y2'))
+                    name='Volym', marker_color='gray', opacity=0.3, yaxis='y2'))
 
             # Update layout for the chart
             fig.update_layout(
-            title=f"Pris & Volym för {selected_stock_dict['Name']} ({selected_stock_ticker})",
-            xaxis_title="Datum",
-            yaxis_title="Pris",
-            hovermode="x unified",
-            legend_title="Legend",
-            height=500,
-            yaxis=dict(title="Pris"),
-            yaxis2=dict(title="Volym", overlaying="y", side="right", showgrid=False)
+                title=f"Pris & Volym för {selected_stock_dict['Name']} ({selected_stock_ticker})",
+                xaxis_title="Datum",
+                yaxis_title="Pris",
+                hovermode="x unified",
+                legend_title="Legend",
+                height=500,
+                yaxis2=dict(title="Volym", overlaying="y", side="right", showgrid=False),
+                legend=dict(
+                    x=0.01,
+                    y=0.99,
+                    xanchor="left",
+                    yanchor="top",
+                    bgcolor="rgba(255,255,255,0.7)",
+                    bordercolor="rgba(0,0,0,0.1)",
+                    borderwidth=1
+                )
             )
 
             st.plotly_chart(fig, use_container_width=True)
@@ -624,6 +683,26 @@ try:
     else:
         st.info("Markera en ruta under 'Välj' i tabellen ovan för att visa prisutvecklingen.")
 
+    # Bar plot for all pct_ columns for selected_stock_ticker
+    pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
+    if pct_cols:
+        pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
+        fig_pct = go.Figure(go.Bar(
+            x=[get_display_name(col) for col in pct_cols],
+            y=pct_values,
+            marker_color='royalblue',
+            text=[f"{v:.2f}%" for v in pct_values],
+            textposition='auto',
+        ))
+        fig_pct.update_layout(
+            title=f"Kursutveckling for {selected_stock_ticker}",
+            xaxis_title="Metric",
+            yaxis_title="Percentage",
+            height=350,
+            margin=dict(l=10, r=10, t=40, b=10),
+            yaxis=dict(ticksuffix="%", tickformat=".0f")
+        )
+        st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
 
     # Only show the following sections if a stock is selected
     if selected_stock_dict is not None and selected_stock_ticker is not None:
@@ -639,39 +718,17 @@ try:
                 textposition='auto',
             ))
             fig_cagr.update_layout(
-                title=f"CAGR Metrics for {selected_stock_dict['Name']} ({selected_stock_ticker})",
-                xaxis_title="Metric",
-                yaxis_title="Percentage",
+                title=f"CAGR över 4 år för {selected_stock_dict['Name']} ({selected_stock_ticker})",
+                xaxis_title="Mått",
+                yaxis_title="Procent",
                 height=350,
                 margin=dict(l=10, r=10, t=40, b=10),
                 yaxis=dict(ticksuffix="%", tickformat=".0f")
             )
             st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
 
-        # Bar plot for all pct_ columns for selected_stock_ticker
-        pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
-        if pct_cols:
-            pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
-            fig_pct = go.Figure(go.Bar(
-                x=[get_display_name(col) for col in pct_cols],
-                y=pct_values,
-                marker_color='royalblue',
-                text=[f"{v:.2f}%" for v in pct_values],
-                textposition='auto',
-            ))
-            fig_pct.update_layout(
-                title=f"Percentage Metrics for {selected_stock_ticker}",
-                xaxis_title="Metric",
-                yaxis_title="Percentage",
-                height=350,
-                margin=dict(l=10, r=10, t=40, b=10),
-                yaxis=dict(ticksuffix="%", tickformat=".0f")
-            )
-            st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
+
         
-        longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
-        st.subheader(f"{selected_stock_ticker} - Business Summary")
-        st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "No long business summary available for this stock.")
 
         # =============================
         # RANKING FOR SELECTED STOCK
@@ -769,14 +826,16 @@ try:
                                         help="Rankingvärde (0-100)",
                                         min_value=0,
                                         max_value=100,
-                                        format="%.1f"
+                                        format="%.1f",
+                                        width="small",
                                     ),
                                 "Trend Rank": st.column_config.ProgressColumn(
                                         "Trend Rank",
                                         help="Rankingvärde (0-100)",
                                         min_value=0,
                                         max_value=100,
-                                        format="%.1f"
+                                        format="%.1f",
+                                        width="small"
                                     )
                             }
                         )
@@ -845,6 +904,8 @@ try:
                                                 )
                                         }
                                     )
+                                else:
+                                    st.warning(f"Ingen data för de senaste 4 åren för {base_ratio}.")
 
                 st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
                 # Clear the empty space before each category
