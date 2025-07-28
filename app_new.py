@@ -365,31 +365,54 @@ try:
     # BUBBLE PLOT SECTION
     # =============================
     with st.container(border=True):
+        st.subheader("Bubbelplot med filtrering")
         # --- Bubble Plot: Total_Trend_Score vs Total_Latest_Score (filtered) ---
-        col_ticker, col_hover = st.columns(2)
-        with col_ticker:
-            show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
-        with col_hover:
-            show_hover = st.toggle('Visa fullständig info vid hover i bubbelplotten', value=True)
+        with st.container(border=True, key="bubble_plot_container"):
+            col_ticker, col_hover = st.columns(2)
+            with col_ticker:
+                show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
+            with col_hover:
+                show_hover = st.toggle('Visa fullständig info vid hover i bubbelplotten', value=True)
 
         # --- Lista toggles for bubble plot ---
         lista_values = []
         if 'Lista' in df_filtered_by_sliders.columns:
-            lista_values = df_filtered_by_sliders['Lista'].dropna().unique().tolist()
-            lista_values = lista_values[:5]  # Limit to 5 unique values
-            col_lista = st.columns(len(lista_values)) if lista_values else []
-            lista_selected = []
-            for idx, lista in enumerate(lista_values):
-                with col_lista[idx]:
-                    show_lista = st.toggle(f"Visa {lista}", value=True, key=f"toggle_lista_{lista}")
-                    if show_lista:
-                        lista_selected.append(lista)
-            # Filter df_filtered_by_sliders by selected Lista values
-            if lista_selected:
-                df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
-            else:
-                df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-        
+            with st.container(border=True, key="lista_toggles"):
+                lista_values = df_filtered_by_sliders['Lista'].dropna().unique().tolist()
+                lista_values = lista_values[:5]  # Limit to 5 unique values
+                col_lista = st.columns(len(lista_values)) if lista_values else []
+                lista_selected = []
+                for idx, lista in enumerate(lista_values):
+                    with col_lista[idx]:
+                        show_lista = st.toggle(f"{lista}", value=True, key=f"toggle_lista_{lista}")
+                        if show_lista:
+                            lista_selected.append(lista)
+                # Filter df_filtered_by_sliders by selected Lista values
+                if lista_selected:
+                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
+                else:
+                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+        # --- Sektor toggles for bubble plot ---
+        sektor_values = []
+        if 'Sektor' in df_filtered_by_sliders.columns:
+            with st.container(border=True, key="sektor_toggles"):
+                sektor_values = df_filtered_by_sliders['Sektor'].dropna().unique().tolist()
+                max_cols = 5
+                num_rows = int(np.ceil(len(sektor_values) / max_cols))
+                sektor_selected = []
+                for row in range(num_rows):
+                    cols_in_row = sektor_values[row * max_cols : (row + 1) * max_cols]
+                    col_sektor = st.columns(len(cols_in_row)) if cols_in_row else []
+                    for idx, sektor in enumerate(cols_in_row):
+                        with col_sektor[idx]:
+                            show_sektor = st.toggle(f"{sektor}", value=True, key=f"toggle_sektor_{sektor}")
+                            if show_sektor:
+                                sektor_selected.append(sektor)
+                # Filter df_filtered_by_sliders by selected Sektor values
+                if sektor_selected:
+                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
+                else:
+                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         # Format marketCap for hover (MSEK, rounded, with space as thousands separator)
         if 'marketCap' in df_filtered_by_sliders.columns:
             df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
@@ -879,33 +902,34 @@ try:
                                     st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
                                     latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
                                     trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
-                                    # Bullet plots for the two ranks in two columns: trend (left), latest (right)
-                                    st.write(f"**{ratio}**")
-                                    st.dataframe(
-                                        df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
-                                        hide_index=True,
-                                        use_container_width=True,
-                                        column_config={
-                                            "Latest Rank": st.column_config.ProgressColumn(
-                                                    "Latest Rank",
-                                                    help=ratio_help_texts.get(ratio),
-                                                    min_value=0,
-                                                    max_value=100,
-                                                    format="%.1f",
-                                                    width="small",
-                                                ),
-                                            "Trend Rank": st.column_config.ProgressColumn(
-                                                    "Trend Rank",
-                                                    help=ratio_help_texts.get(ratio),
-                                                    min_value=0,
-                                                    max_value=100,
-                                                    format="%.1f",
-                                                    width="small"
-                                                )
-                                        }
-                                    )
                                 else:
-                                    st.warning(f"Ingen data för de senaste 4 åren för {base_ratio}.")
+                                    st.warning(f"Ingen data för de senaste 4 åren för {base_ratio}. Trend Rank och Latest Rank sätts till 50 (neutral).")
+                                # Bullet plots for the two ranks in two columns: trend (left), latest (right)
+                                #st.write(f"**{ratio}**")
+                                st.dataframe(
+                                    df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
+                                    hide_index=True,
+                                    use_container_width=True,
+                                    column_config={
+                                        "Latest Rank": st.column_config.ProgressColumn(
+                                                "Latest Rank",
+                                                help=ratio_help_texts.get(ratio),
+                                                min_value=0,
+                                                max_value=100,
+                                                format="%.1f",
+                                                width="small",
+                                            ),
+                                        "Trend Rank": st.column_config.ProgressColumn(
+                                                "Trend Rank",
+                                                help=ratio_help_texts.get(ratio),
+                                                min_value=0,
+                                                max_value=100,
+                                                format="%.1f",
+                                                width="small"
+                                            )
+                                    }
+                                )
+                                
 
                 st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
                 # Clear the empty space before each category

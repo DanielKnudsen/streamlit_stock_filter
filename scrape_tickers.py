@@ -85,7 +85,7 @@ def Create_df_tickers():
                     list_links = scraped_table['url']
                     tickers = get_tickers_from_list(list_links)
                     tickers_uppercase = [item.upper() for item in tickers]
-                    df = pd.DataFrame(data = {'Instrument': tickers_uppercase, 'Name': list_names})
+                    df = pd.DataFrame(data = {'Instrument': tickers_uppercase, 'Name': list_names,'Sektor': sector[0]})
                     df['Lista'] = market[0]
 
                     list_of_dfs.append(df)
