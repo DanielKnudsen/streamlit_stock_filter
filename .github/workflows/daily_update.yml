@@ -1,8 +1,8 @@
 name: Daily Stock Data Update
 
 on:
-  #schedule:
-  #  - cron: '0 5 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
+  schedule:
+    - cron: '0 5 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
@@ -39,13 +39,8 @@ jobs:
     
     - name: Create data and tickers directories
       run: |
-        mkdir -p data
+        mkdir -p csv-data
         mkdir -p tickers
-        mkdir -p fundamentals
-        mkdir -p ranks
-        mkdir -p balance
-        mkdir -p cashflow
-        mkdir -p income
     
     - name: Run ticker scraper
       run: |
@@ -55,13 +50,13 @@ jobs:
     - name: Run stock analyzer
       run: |
         source .venv/bin/activate
-        uv run python stock_analyzer.py > stock_analyzer.log 2>&1
+        uv run python rank.py > rank.log 2>&1
     
     - name: Commit and push updated data
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
-        git add data/*.csv tickers/tickers_lists.csv fundamentals/*.csv ranks/*.csv balance/*.csv cashflow/*.csv income/*.csv
+        git add csv-data/*.csv tickers/tickers_lists.csv
         git diff --staged --quiet || git commit -m "Update stock data and tickers $(date -u +%Y-%m-%d)"
         git push origin main
       env:
@@ -74,4 +69,4 @@ jobs:
         name: workflow-logs
         path: |
           scrape_tickers.log
-          stock_analyzer.log
+          rank.log
