@@ -644,7 +644,7 @@ if __name__ == "__main__":
             # 1. Hämta eller ladda data
             output_dir = config.get("output_path", "csv-data")
             #pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
-            """raw_financial_data = {}
+            raw_financial_data = {}
 
             for ticker in tickers:
                 raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
@@ -654,7 +654,7 @@ if __name__ == "__main__":
             raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
             
             save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
-            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))"""
+            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
             print("läser in stock price data...")
             get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
@@ -666,7 +666,7 @@ if __name__ == "__main__":
                                  save_to=os.path.join(output_dir, "last_SMA.csv"))
 
             # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
-            """calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
+            calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, os.path.join(output_dir, "calculated_ratios.csv"))
 
             ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"],config["ratio_definitions"])
@@ -683,6 +683,6 @@ if __name__ == "__main__":
             final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results)
             save_results_to_csv(final_results, config["output_file_path"])
 
-            print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")"""
+            print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")
     else:
         print("Kunde inte ladda konfigurationen. Avslutar.")
