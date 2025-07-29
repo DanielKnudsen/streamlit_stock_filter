@@ -643,39 +643,25 @@ if __name__ == "__main__":
         else:
             # 1. Hämta eller ladda data
             output_dir = config.get("output_path", "csv-data")
-            #output_dir = os.path.dirname(config["output_file_path"])
             pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
             raw_financial_data = {}
-            
-            if os.path.exists(pickle_file_path):
-                print("Laddar finansiell data från pickle-filen...")
-                try:
-                    with open(pickle_file_path, 'rb') as f:
-                        raw_financial_data = pickle.load(f)
-                except (IOError, pickle.PickleError) as e:
-                    print(f"Fel vid laddning av pickle-fil: {e}. Försöker hämta ny data.")
-                    os.remove(pickle_file_path) # Ta bort skadad fil
-                    # Fortsätter till datainsamling nedan
-            
-            # Om datan inte laddades från filen, hämta den nu
-            if not raw_financial_data:
-                print("Pickle-filen hittades inte eller var skadad. Hämtar ny data från yFinance...")
-                for ticker in tickers:
-                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
-                
-                # Filtrera bort tickers som inte har data 
-                # TODO: Hantera fall där data är None
-                raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
 
-                print("Datainsamling slutförd. Sparar till pickle-fil...")
-                os.makedirs(output_dir, exist_ok=True)
-                with open(pickle_file_path, 'wb') as f:
-                    pickle.dump(raw_financial_data, f)
-                
-                save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
-                save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
+            for ticker in tickers:
+                raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
+            
+            # Filtrera bort tickers som inte har data 
+            # TODO: Hantera fall där data är None
+            raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
+
+            print("Datainsamling slutförd. Sparar till pickle-fil...")
+            os.makedirs(output_dir, exist_ok=True)
+            with open(pickle_file_path, 'wb') as f:
+                pickle.dump(raw_financial_data, f)
+            
+            save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
+            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
             print("läser in stock price data...")
-            """get_price_data(config["SMA_short"], 
+            get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
                            config["SMA_long"],
                            config["pct_diff_short"],
@@ -686,7 +672,7 @@ if __name__ == "__main__":
                            config["data_fetch_years"], 
                            os.path.join(output_dir, config["price_data_file"]))
             save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
-                                 save_to=os.path.join(output_dir, "last_SMA.csv"))"""
+                                 save_to=os.path.join(output_dir, "last_SMA.csv"))
 
             # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
