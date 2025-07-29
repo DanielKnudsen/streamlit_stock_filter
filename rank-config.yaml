@@ -5,7 +5,7 @@ output_file_path: "csv-data/stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 
 # Inställningar för datainhämtning
-data_fetch_years: 4
+data_fetch_years: 3
 
 # Inställningar för glidande medelvärden
 SMA_short: 10
@@ -13,9 +13,9 @@ SMA_medium: 50
 SMA_long: 200
 
 # Inställningar för pct diff från senaste slutkurs
-pct_diff_short: 20
-pct_diff_medium: 90
-pct_diff_long: 200
+# pct_diff_short: 20
+# pct_diff_medium: 90
+# pct_diff_long: 200
 
 # CAGR inställningar
 cagr_dimension:

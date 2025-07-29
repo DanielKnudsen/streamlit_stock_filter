@@ -509,7 +509,7 @@ def save_category_scores_to_csv(category_scores, csv_file_path):
         df = pd.concat([df, df_temp], ignore_index=False)
     df.to_csv(csv_file_path, index=True)
 
-def get_price_data(SMA_short, SMA_medium, SMA_long, pct_diff_short, pct_diff_medium, pct_diff_long, pct_diff_longest, tickers, data_fetch_years, price_data_file_path):
+def get_price_data(SMA_short:int, SMA_medium:int, SMA_long:int, tickers:list, data_fetch_years:int, price_data_file_path:str):
     df_complete = pd.DataFrame()
     for ticker in tickers:
         try:
@@ -530,9 +530,9 @@ def get_price_data(SMA_short, SMA_medium, SMA_long, pct_diff_short, pct_diff_med
             df_price_data['pct_SMA_short_vs_SMA_medium'] = (((df_price_data['SMA_short'] - df_price_data['SMA_medium']) / df_price_data['SMA_medium']) * 100).fillna(0)
             df_price_data['pct_Close_vs_SMA_short'] = (((df_price_data['Close'] - df_price_data['SMA_short']) / df_price_data['SMA_short']) * 100).fillna(0)
             # Calculate percent differences for closing price
-            df_price_data['pct_diff_short'] = (df_price_data['Close'].pct_change(periods=pct_diff_short)* 100).fillna(0)
+            """df_price_data['pct_diff_short'] = (df_price_data['Close'].pct_change(periods=pct_diff_short)* 100).fillna(0)
             df_price_data['pct_diff_medium'] = (df_price_data['Close'].pct_change(periods=pct_diff_medium)* 100).fillna(0)
-            df_price_data['pct_diff_long'] = (df_price_data['Close'].pct_change(periods=pct_diff_long)* 100).fillna(0)
+            df_price_data['pct_diff_long'] = (df_price_data['Close'].pct_change(periods=pct_diff_long)* 100).fillna(0)"""
 
             df_complete = pd.concat([df_complete, df_price_data])
         except Exception as e:
@@ -551,7 +551,7 @@ def save_last_SMA_to_csv(read_from, save_to):
         df = pd.read_csv(read_from, index_col='Date', parse_dates=True)
         if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns and 'Close' in df.columns:
             # Get the latest row for each ticker
-            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long','pct_diff_short', 'pct_diff_medium', 'pct_diff_long', 'pct_diff_longest']]
+            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long']]
             # Calculate CAGR for each ticker
             cagr_list = []
             for ticker, group in df.groupby('Ticker'):
@@ -643,8 +643,8 @@ if __name__ == "__main__":
         else:
             # 1. Hämta eller ladda data
             output_dir = config.get("output_path", "csv-data")
-            pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
-            raw_financial_data = {}
+            #pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
+            """raw_financial_data = {}
 
             for ticker in tickers:
                 raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
@@ -652,22 +652,13 @@ if __name__ == "__main__":
             # Filtrera bort tickers som inte har data 
             # TODO: Hantera fall där data är None
             raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
-
-            print("Datainsamling slutförd. Sparar till pickle-fil...")
-            os.makedirs(output_dir, exist_ok=True)
-            with open(pickle_file_path, 'wb') as f:
-                pickle.dump(raw_financial_data, f)
             
             save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
-            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
+            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))"""
             print("läser in stock price data...")
             get_price_data(config["SMA_short"], 
                            config["SMA_medium"], 
                            config["SMA_long"],
-                           config["pct_diff_short"],
-                           config["pct_diff_medium"],
-                           config["pct_diff_long"],
-                           config["pct_diff_longest"],
                            tickers, 
                            config["data_fetch_years"], 
                            os.path.join(output_dir, config["price_data_file"]))
@@ -675,7 +666,7 @@ if __name__ == "__main__":
                                  save_to=os.path.join(output_dir, "last_SMA.csv"))
 
             # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
-            calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
+            """calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, os.path.join(output_dir, "calculated_ratios.csv"))
 
             ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"],config["ratio_definitions"])
@@ -691,7 +682,7 @@ if __name__ == "__main__":
 
             final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results)
             save_results_to_csv(final_results, config["output_file_path"])
-            
-            print("\nAktieutvärdering slutförd och sparad i " + config["output_file_path"])
+
+            print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")"""
     else:
         print("Kunde inte ladda konfigurationen. Avslutar.")
