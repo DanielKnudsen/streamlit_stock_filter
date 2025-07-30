@@ -1,783 +1,781 @@
-﻿Instrument,Name,Lista
-ARION-SDB,Arion Bank SDB,LargeCap
-AZA,Avanza Bank,LargeCap
-SHB-A,Handelsbanken A,LargeCap
-SHB-B,Handelsbanken B,LargeCap
-NDA-SE,Nordea Bank,LargeCap
-SEB-A,SEB A,LargeCap
-SEB-C,SEB C,LargeCap
-SWED-A,Swedbank A,LargeCap
-AAK,AAK,LargeCap
-AXFO,Axfood,LargeCap
-ESSITY-A,Essity A,LargeCap
-ESSITY-B,Essity B,LargeCap
-IPCO,International Petroleum Corp.,LargeCap
-ATRLJ-B,Atrium Ljungberg B,LargeCap
-BALD-B,Balder B,LargeCap
-CAST,Castellum,LargeCap
-CATE,Catena,LargeCap
-CORE-A,Corem Property Group A,LargeCap
-CORE-B,Corem Property Group B,LargeCap
-CORE-D,Corem Property Group D,LargeCap
-CORE-PREF,Corem Property Group Pref,LargeCap
-FABG,Fabege,LargeCap
-FPAR-A,Fastpartner A,LargeCap
-FPAR-D,Fastpartner D,LargeCap
-HEM,Hemnet Group,LargeCap
-HUFV-A,Hufvudstaden A,LargeCap
-NP3,NP3 Fastigheter,LargeCap
-NP3-PREF,NP3 Fastigheter Pref,LargeCap
-NYF,Nyfosa,LargeCap
-PNDX-B,Pandox B,LargeCap
-SAGA-A,Sagax A,LargeCap
-SAGA-B,Sagax B,LargeCap
-SAGA-D,Sagax D,LargeCap
-WALL-B,Wallenstam B,LargeCap
-WIHL,Wihlborgs Fastigheter,LargeCap
-BURE,Bure Equity,LargeCap
-EQT,EQT,LargeCap
-INDU-A,Industrivärden A,LargeCap
-INDU-C,Industrivärden C,LargeCap
-INVE-A,Investor A,LargeCap
-INVE-B,Investor B,LargeCap
-KINV-A,Kinnevik A,LargeCap
-KINV-B,Kinnevik B,LargeCap
-LATO-B,Latour B,LargeCap
-LUND-B,Lundberg B,LargeCap
-SAVE,Nordnet,LargeCap
-ROKO-B,Röko B,LargeCap
-STOR-B,Storskogen B,LargeCap
-SAMPO-SDB,Sampo A SDB,LargeCap
-ALIF-B,AddLife B,LargeCap
-ALVO-SDB,Alvotech SDB,LargeCap
-ASKER,Asker Healthcare,LargeCap
-AZN,Astra Zeneca,LargeCap
-BIOA-B,BioArctic B,LargeCap
-BIOT,Biotage,LargeCap
-BONEX,BONESUPPORT,LargeCap
-CAMX,Camurus,LargeCap
-EKTA-B,Elekta B,LargeCap
-GETI-B,Getinge B,LargeCap
-MCOV-B,Medicover B,LargeCap
-SECT-B,Sectra B,LargeCap
-SOBI,Swedish Orphan Biovitrum,LargeCap
-VIMIAN,Vimian Group,LargeCap
-VITR,Vitrolife,LargeCap
-ABB,ABB,LargeCap
-ADDT-B,Addtech B,LargeCap
-AFRY,AFRY,LargeCap
-ALFA,Alfa Laval,LargeCap
-ASSA-B,Assa Abloy B,LargeCap
-ATCO-A,Atlas Copco A,LargeCap
-ATCO-B,Atlas Copco B,LargeCap
-BEIJ-B,Beijer Ref B,LargeCap
-BRAV,Bravida Holding,LargeCap
-EPRO-B,Electrolux Professional B,LargeCap
-ENGCON-B,engcon B,LargeCap
-EPI-A,Epiroc A,LargeCap
-EPI-B,Epiroc B,LargeCap
-INDT,Indutrade,LargeCap
-LIFCO-B,Lifco B,LargeCap
-LIAB,Lindab International,LargeCap
-LOOMIS,Loomis,LargeCap
-MTRS,Munters Group AB,LargeCap
-NCC-A,NCC A,LargeCap
-NCC-B,NCC B,LargeCap
-NIBE-B,Nibe Industrier B,LargeCap
-NOLA-B,Nolato B,LargeCap
-OEM-B,OEM International B,LargeCap
-PEAB-B,Peab B,LargeCap
-SAAB-B,SAAB B,LargeCap
-SAND,Sandvik,LargeCap
-SECU-B,Securitas B,LargeCap
-SKA-B,Skanska B,LargeCap
-SWEC-A,Sweco A,LargeCap
-SWEC-B,Sweco B,LargeCap
-SYSR,Systemair,LargeCap
-8TRA,TRATON SE,LargeCap
-TREL-B,Trelleborg B,LargeCap
-VOLV-A,Volvo A,LargeCap
-VOLV-B,Volvo B,LargeCap
-ALLEI,Alleima,LargeCap
-BILL,Billerud,LargeCap
-BOL,Boliden,LargeCap
-GRNG,Gränges,LargeCap
-HPOL-B,Hexpol B,LargeCap
-HOLM-A,Holmen A,LargeCap
-HOLM-B,Holmen B,LargeCap
-LUG,Lundin Gold,LargeCap
-LUMI,Lundin Mining Corporation,LargeCap
-SCA-A,SCA A,LargeCap
-SCA-B,SCA B,LargeCap
-SKF-A,SKF A,LargeCap
-SKF-B,SKF B,LargeCap
-SSAB-A,SSAB A,LargeCap
-SSAB-B,SSAB B,LargeCap
-STE-A,Stora Enso A,LargeCap
-STE-R,Stora Enso R,LargeCap
-TROAX,Troax Group,LargeCap
-ASMDEE-B,Asmodee,LargeCap
-ALIV-SDB,Autoliv SDB,LargeCap
-BETS-B,Betsson B,LargeCap
-BILI-A,Bilia A,LargeCap
-DOM,Dometic Group,LargeCap
-ELUX-A,Electrolux A,LargeCap
-ELUX-B,Electrolux B,LargeCap
-EMBRAC-B,Embracer Group B,LargeCap
-EVO,Evolution,LargeCap
-FOI-B,Fenix Outdoor B,LargeCap
-HM-B,H&M B,LargeCap
-HUSQ-A,Husqvarna A,LargeCap
-HUSQ-B,Husqvarna B,LargeCap
-JM,JM,LargeCap
-MIPS,Mips,LargeCap
-NEWA-B,New Wave B,LargeCap
-THULE,Thule Group,LargeCap
-VOLCAR-B,Volvo Car B,LargeCap
-ANOD-B,Addnode Group B,LargeCap
-BETCO,Better Collective,LargeCap
-FNOX,Fortnox,LargeCap
-HACK,Hacksaw,LargeCap
-HEXA-B,Hexagon B,LargeCap
-LAGR-B,Lagercrantz Group B,LargeCap
-MYCR,Mycronic,LargeCap
-NCAB,NCAB Group,LargeCap
-SINCH,Sinch,LargeCap
-TIETOS,Tieto Evry,LargeCap
-TRUE-B,Truecaller,LargeCap
-VIT-B,Vitec Software Group B,LargeCap
-YUBICO,Yubico,LargeCap
-ERIC-A,Ericsson A,LargeCap
-ERIC-B,Ericsson B,LargeCap
-HMS,HMS Networks,LargeCap
-TEL2-A,Tele2 A,LargeCap
-TEL2-B,Tele2 B,LargeCap
-TELIA,Telia Company,LargeCap
-ENITY,Enity,MidCap
-NORION,Norion Bank,MidCap
-TFBANK,TF Bank,MidCap
-APOTEA,Apotea,MidCap
-CLA-B,Cloetta,MidCap
-DUNI,Duni,MidCap
-HUMBLE,Humble Group,MidCap
-SCST,Scandi Standard,MidCap
-EOLU-B,Eolus B,MidCap
-MER,Meren Energy,MidCap
-ORRON,Orrön Energy,MidCap
-BESQAB,Besqab,MidCap
-BESQAB-PREF-B,Besqab Pref B,MidCap
-BRIN-B,Brinova Fastigheter B,MidCap
-CIBUS,Cibus Nordic Real Estate,MidCap
-DIOS,Diös Fastigheter,MidCap
-EAST,Eastnine,MidCap
-EMIL-B,Emilshus B,MidCap
-EMIL-PREF,Emilshus Pref,MidCap
-GPG,Genova Property Group,MidCap
-HEBA-B,Heba B,MidCap
-INTEA-B,Intea Fastigheter B,MidCap
-INTEA-D,Intea Fastigheter D,MidCap
-JOMA,John Mattson,MidCap
-KFAST-B,K-Fast Holding B,MidCap
-KLARA-B,KlaraBo,MidCap
-LOGI-A,Logistea A,MidCap
-LOGI-B,Logistea B,MidCap
-NEOBO,Neobo Fastigheter,MidCap
-NIVI-B,Nivika,MidCap
-PLAZ-B,Platzer Fastigheter Holding B,MidCap
-PRISMA,Prisma Properties,MidCap
-SBB-B,SBB Norden B,MidCap
-SBB-D,SBB Norden D,MidCap
-STEF-B,Stendörren Fastigheter B,MidCap
-SFAST,Stenhus Fastigheter i Norden,MidCap
-SVEAF,Sveafastigheter,MidCap
-SLP-B,Swedish Logistic Property B,MidCap
-TRIAN-B,Trianon B,MidCap
-CAT-A,Catella A,MidCap
-CAT-B,Catella B,MidCap
-CS,CoinShares International Limited,MidCap
-CRED-A,Creades A,MidCap
-FLERIE,Flerie,MidCap
-HOFI,Hoist Finance,MidCap
-INTRUM,Intrum,MidCap
-LINC,Linc,MidCap
-RATO-A,Ratos A,MidCap
-RATO-B,Ratos B,MidCap
-RESURS,Resurs Holding,MidCap
-SVOL-A,Svolder A,MidCap
-SVOL-B,Svolder B,MidCap
-TRAC-B,Traction B,MidCap
-VEFAB,VEF,MidCap
-VNV,VNV Global,MidCap
-ORES,Öresund,MidCap
-AMBEA,Ambea,MidCap
-ARJO-B,Arjo,MidCap
-ATT,Attendo,MidCap
-BACTI-B,Bactiguard Holding B,MidCap
-BICO,BICO Group,MidCap
-BIOG-B,BioGaia B,MidCap
-BINV,BioInvent International,MidCap
-CEVI,CellaVision,MidCap
-CINPHA,Cinclus Pharma,MidCap
-HNSA,Hansa Biopharma,MidCap
-HUM,Humana,MidCap
-MCAP,MedCap,MidCap
-RAY-B,RaySearch Laboratories B,MidCap
-SEDANA,Sedana Medical,MidCap
-XVIVO,Xvivo Perfusion,MidCap
-ALIG,Alimak Group,MidCap
-AQ,AQ Group,MidCap
-BERG-B,Bergman & Beving B,MidCap
-BTS-B,BTS Group B,MidCap
-BUFAB,Bufab,MidCap
-AJA-B,Byggmästare Anders J Ahlström Holding B,MidCap
-CCCAB,Cavotec Group,MidCap
-CCC,Cavotec SA,MidCap
-COOR,Coor Service Management Holding,MidCap
-CTT,CTT Systems,MidCap
-ELAN-B,Elanders B,MidCap
-EPEN,Ependion,MidCap
-EWRK,Ework Group,MidCap
-FAG,Fagerhult Group,MidCap
-FG,Fasadgruppen,MidCap
-FMM-B,FM Mattsson B,MidCap
-GREEN,Green Landscaping Group,MidCap
-HANZA,HANZA,MidCap
-INSTAL,Instalco,MidCap
-IVSO,INVISIO,MidCap
-INWI,Inwido,MidCap
-ITAB,ITAB Shop Concept,MidCap
-KAR,Karnov Group,MidCap
-MILDEF,MilDef Group,MidCap
-MMGR-B,Momentum Group B,MidCap
-NMAN,Nederman Holding,MidCap
-NOTE,Note,MidCap
-PCELL,PowerCell Sweden,MidCap
-REJL-B,Rejlers B,MidCap
-SDIP-B,Sdiptech B,MidCap
-SDIP-PREF,Sdiptech Pref,MidCap
-VOLO,Volati,MidCap
-VOLO-PREF,Volati Pref,MidCap
-XANO-B,XANO Industri B,MidCap
-ARISE,Arise,MidCap
-ARP,Arctic Paper,MidCap
-BEIA-B,Beijer Alma B,MidCap
-NPAPER,Nordic Paper Holding AB,MidCap
-RROS,Rottneros,MidCap
-VISC,Viscaria,MidCap
-ACAD,AcadeMedia,MidCap
-ALLIGO-B,Alligo B,MidCap
-BHG,BHG Group,MidCap
-BONAV-A,Bonava A,MidCap
-BONAV-B,Bonava B,MidCap
-BOOZT,Boozt,MidCap
-BMAX,Byggmax Group,MidCap
-CLAS-B,Clas Ohlson B,MidCap
-G2M,Gentoo Media,MidCap
-KABE-B,KABE Group B,MidCap
-MEKO,MEKO,MidCap
-MTG-A,MTG A,MidCap
-MTG-B,MTG B,MidCap
-NOBI,Nobia,MidCap
-PRFO,Profoto Holding,MidCap
-RVRC,Revolutionrace,MidCap
-RUSTA,Rusta,MidCap
-SHOT,Scandic Hotels Group,MidCap
-SKIS-B,SkiStar B,MidCap
-SF,Stillfront Group,MidCap
-SYNSAM,Synsam,MidCap
-VBG-B,VBG Group B,MidCap
-VESTUM,Vestum,MidCap
-CINT,Cint Group,MidCap
-DUST,Dustin Group,MidCap
-DYVOX,Dynavox Group,MidCap
-ENEA,Enea,MidCap
-IAR-B,I.A.R Systems Group B,MidCap
-KNOW,Knowit,MidCap
-LIME,Lime Technologies,MidCap
-PRIC-B,Pricer B,MidCap
-PACT,Proact IT Group,MidCap
-HTRO,Hexatronic Group,MidCap
-NETI-B,Net Insight B,MidCap
-VPLAY-A,Viaplay Group A,MidCap
-VPLAY-B,Viaplay Group B,MidCap
-MSON-A,Midsona A,SmallCap
-MSON-B,Midsona B,SmallCap
-CTEK,CTEK,SmallCap
-MAHA-A,Maha Energy A,SmallCap
-ACRI-A,Acrinova A,SmallCap
-ACRI-B,Acrinova B,SmallCap
-ANNE-B,Annehem Fastigheter B,SmallCap
-FASTAT,Fastator,SmallCap
-K2A-B,K2A Knaust & Andersson Fastigheter B,SmallCap
-K2A-PREF,K2A Knaust & Andersson Fastigheter Pref,SmallCap
-HAV-B,Havsfrun Investment B,SmallCap
-MANG,Mangold,SmallCap
-NAXS,NAXS,SmallCap
-QLIRO,Qliro,SmallCap
-SEAF,Seafire,SmallCap
-STWK,Stockwik Förvaltning,SmallCap
-SFAB,Solid Försäkring,SmallCap
-ACTI,Active Biotech,SmallCap
-ATORX,Alligator Bioscience,SmallCap
-ACE,Ascelia Pharma,SmallCap
-BOUL,Boule Diagnostics,SmallCap
-CRAD-B,C-RAD B,SmallCap
-CANTA,Cantargia,SmallCap
-CARA,Carasent,SmallCap
-DEDI,Dedicare B,SmallCap
-EGTX,Egetis Therapeutics,SmallCap
-EPIS-B,Episurf Medical B,SmallCap
-EQL,EQL Pharma,SmallCap
-IMMNOV,Immunovia,SmallCap
-IBT-B,Infant Bacterial Therapeutics B,SmallCap
-IRLAB-A,IRLAB Therapeutics A,SmallCap
-ISOFOL,Isofol Medical,SmallCap
-KDEV,Karolinska Development B,SmallCap
-MVIR,Medivir,SmallCap
-IMMU,Mendus,SmallCap
-MOB,Moberg Pharma,SmallCap
-NICA,Nanologica,SmallCap
-ONCO,Oncopeptides,SmallCap
-ORX,Orexo,SmallCap
-QLINEA,Q-Linea,SmallCap
-SANION,Saniona,SmallCap
-SEZI,Senzime,SmallCap
-SYNACT,SynAct Pharma,SmallCap
-VICO,Vicore Pharma Holding,SmallCap
-VIVE,Vivesto,SmallCap
-XBRANE,Xbrane Biopharma,SmallCap
-XSPRAY,Xspray Pharma,SmallCap
-ARPL,Arla Plast,SmallCap
-BALCO,Balco Group,SmallCap
-BERNER-B,Berner Industrier B,SmallCap
-BONG,Bong,SmallCap
-CNCJO-B,Concejo B,SmallCap
-ELTEL,Eltel,SmallCap
-FNM,Ferronordic,SmallCap
-HAKI-A,HAKI Safety A,SmallCap
-HAKI-B,HAKI Safety B,SmallCap
-IS,Image Systems,SmallCap
-INFREA,Infrea,SmallCap
-INISS-B,Inission B,SmallCap
-KARNEL-B,Karnell,SmallCap
-MEAB-B,Malmbergs Elektriska B,SmallCap
-NETEL,Netel,SmallCap
-NGS,NGS Group,SmallCap
-PION-B,PION Group B,SmallCap
-PENG-B,Projektengagemang Sweden B,SmallCap
-RAIL,Railcare Group,SmallCap
-SINT,Sintercast,SmallCap
-SVIK,Studsvik,SmallCap
-SVED-B,Svedbergs Group B,SmallCap
-TRANS,Transtema Group,SmallCap
-WTW-A,Wall to Wall Group A,SmallCap
-WISE,Wise Group,SmallCap
-WBGR-B,Wästbygg,SmallCap
-BEGR,BE Group,SmallCap
-DURC-B,Duroc B,SmallCap
-NORB-B,Nordisk Bergteknik,SmallCap
-PROF-B,ProfilGruppen B,SmallCap
-ATIC,Actic Group,SmallCap
-BORG,Björn Borg,SmallCap
-BULTEN,Bulten,SmallCap
-CTM,Catena Media,SmallCap
-ELON,Elon,SmallCap
-EG7,Enad Global 7,SmallCap
-ENRO,Eniro Group,SmallCap
-G5EN,G5 Entertainment,SmallCap
-LAMM-B,Lammhults Design Group B,SmallCap
-MOMENT,Moment Group,SmallCap
-NELLY,Nelly Group,SmallCap
-NIL-B,Nilörngruppen B,SmallCap
-PIERCE,Pierce Group,SmallCap
-STAR-A,Starbreeze A,SmallCap
-STAR-B,Starbreeze B,SmallCap
-ANOT,Anoto Group,SmallCap
-B3,B3 Consulting Group,SmallCap
-FING-B,Fingerprint Cards B,SmallCap
-FPIP,Formpipe Software,SmallCap
-GARO,Garo,SmallCap
-MSAB-B,Micro Systemation B,SmallCap
-SAFETY-B,mySafety Group B,SmallCap
-NTEK-B,Novotek B,SmallCap
-PREC,Precise Biometrics,SmallCap
-PREV-B,Prevas B,SmallCap
-SGG,Sensys Gatso Group,SmallCap
-SIVE,Sivers Semiconductors,SmallCap
-SLEEP,Sleep Cycle,SmallCap
-SOF-B,Softronic B,SmallCap
-TOBII,Tobii,SmallCap
-TRAD,TradeDoubler,SmallCap
-DORO,Doro,SmallCap
-OVZON,Ovzon,SmallCap
-LEA,Lea Bank,FirstNorth
-CHEF,Cheffelo,FirstNorth
-VIVA,Viva Wine,FirstNorth
-CLIME-B,Climeon B,FirstNorth
-HEXI,Hexicon,FirstNorth
-MIDS,Midsummer,FirstNorth
-AGROUP,Arlandastad Group,FirstNorth
-FNOVA-B,Fortinova Fastigheter,FirstNorth
-STUDBO,Studentbostäder i Norden,FirstNorth
-NAVIGO-STAM,Navigo Invest,FirstNorth
-NAVIGO-PREF,Navigo Invest Pref,FirstNorth
-VER,Verve Group,FirstNorth
-ACARIX,Acarix,FirstNorth
-ADDV-A,ADDvise Group A,FirstNorth
-ADDV-B,ADDvise Group B,FirstNorth
-ALZCUR,AlzeCure Pharma,FirstNorth
-BIOVIC-B,Biovica International B,FirstNorth
-DVYSR,Devyser Diagnostics,FirstNorth
-IMP-A-SDB,Implantica,FirstNorth
-KAN,Kancera,FirstNorth
-NANOFS,Nanoform Finland,FirstNorth
-PTRK,Physitrack,FirstNorth
-SPEC,SpectraCure AB,FirstNorth
-SPRINT,Sprint Bioscience,FirstNorth
-BYGGP,ByggPartner Gruppen,FirstNorth
-KBC,KB Components,FirstNorth
-NYAB,NYAB,FirstNorth
-QBEN,Qben Infra,FirstNorth
-QAIR,QleanAir,FirstNorth
-QSYS,Qualisys,FirstNorth
-SALT-B,SaltX Technology Holding B,FirstNorth
-TAGM-B,TagMaster B,FirstNorth
-TSEC,Tempest Security,FirstNorth
-NEXAM,Nexam Chemical Holding,FirstNorth
-AGES-B,Ages Industri B,FirstNorth
-DRIL,Drillcon,FirstNorth
-GRANGX,GRANGEX,FirstNorth
-ACROUD,ACROUD,FirstNorth
-BOKUS,Bokusgruppen,FirstNorth
-EMBELL,Embellence Group,FirstNorth
-LYKO-A,Lyko Group A,FirstNorth
-MAGI,MAG Interactive,FirstNorth
-PDX,Paradox Interactive,FirstNorth
-RAKE,Raketech,FirstNorth
-RUG,RugVista Group,FirstNorth
-THUNDR,Thunderful Group,FirstNorth
-ZZ-B,Zinzino B,FirstNorth
-4C,4C Group,FirstNorth
-ACAST,Acast,FirstNorth
-ADVE,Advenica,FirstNorth
-AVEN,Avensia,FirstNorth
-BRIGHT,BrightBid Group,FirstNorth
-CAG,CAG Group,FirstNorth
-CX,Combinedx,FirstNorth
-DEVP-B,DevPort,FirstNorth
-DIST,DistIT,FirstNorth
-FRACTL,Fractal Gaming Group,FirstNorth
-FREJA,Freja eID Group,FirstNorth
-GIG-SDB,GiG Software,FirstNorth
-MNTC,Mentice,FirstNorth
-ONEF,Oneflow,FirstNorth
-PRCO-B,Precio Fishbone B,FirstNorth
-TERRNT-B,Terranet B,FirstNorth
-AAC,AAC Clyde Space,FirstNorth
-GOMX,GomSpace Group,FirstNorth
-AGTIRA-B,Agtira B,FirstNorthPremier
-ARCTIC,Arctic Blue Beverages,FirstNorthPremier
-DUG,DUG Foodtech,FirstNorthPremier
-HAYPP,Haypp Group,FirstNorthPremier
-HERNO-B,Hernö Gin B,FirstNorthPremier
-HIGHCO-B,High Coast Distillery B,FirstNorthPremier
-INT,Intellego Technologies,FirstNorthPremier
-NNH,New Nordic Healthbrands,FirstNorthPremier
-NICO,Nicoccino Holding,FirstNorthPremier
-SNX,Premium Snacks Nordic,FirstNorthPremier
-SIMRIS-B,Simris Group B,FirstNorthPremier
-SKMO,Skåne-möllan,FirstNorthPremier
-SECARE,Swedencare,FirstNorthPremier
-AEC,Africa Energy Corp,FirstNorthPremier
-CIRCLE-B,Circle Energy Sweden B,FirstNorthPremier
-META,Metacon,FirstNorthPremier
-MINEST,Minesto,FirstNorthPremier
-STW,SeaTwirl,FirstNorthPremier
-SNM,ShaMaran Petroleum,FirstNorthPremier
-SOLT,SolTech Energy Sweden,FirstNorthPremier
-ALM,ALM Equity,FirstNorthPremier
-ALM-PREF,ALM Equity Pref,FirstNorthPremier
-ATIN,Athanase Innovation,FirstNorthPremier
-BOHO,Boho Group,FirstNorthPremier
-BOHO-PREF,Boho Group Pref,FirstNorthPremier
-BONAS,Bonäsudden Holding,FirstNorthPremier
-DOXA,Doxa,FirstNorthPremier
-HEIM-PREF,Heimstaden Pref,FirstNorthPremier
-KAPIAB,Kallebäck Property Invest,FirstNorthPremier
-LINKAB,Link Prop Investment,FirstNorthPremier
-SOLNA,Solnaberg Property,FirstNorthPremier
-TINGS-A,Tingsvalvet Fastighets A,FirstNorthPremier
-TINGS-B,Tingsvalvet Fastighets B,FirstNorthPremier
-TINGS-PREF,Tingsvalvet Fastighets PREF,FirstNorthPremier
-TITA-B,Titania,FirstNorthPremier
-ALPCOT-B,Alpcot Holding B,FirstNorthPremier
-BMC,Brock Milton Capital,FirstNorthPremier
-CASE,Case,FirstNorthPremier
-FIRST-B,First Venture Sweden,FirstNorthPremier
-FLAT-B,Flat Capital,FirstNorthPremier
-MTI,MTI Investment,FirstNorthPremier
-NAIG-B,Nordic Asia Investment Group 1987,FirstNorthPremier
-NFGAB,Nordic Flanges Group,FirstNorthPremier
-SFL,Safello Group,FirstNorthPremier
-YIELD,SaveLend Group,FirstNorthPremier
-VH,Västra Hamnen Corporate Finance,FirstNorthPremier
-WRV,Webrock Ventures,FirstNorthPremier
-2CUREX,2cureX,FirstNorthPremier
-ACOU,AcouSort,FirstNorthPremier
-AINO,Aino Health,FirstNorthPremier
-ALZ,Alzinova,FirstNorthPremier
-ANNX,Annexin Pharmaceuticals,FirstNorthPremier
-ARCOMA,Arcoma,FirstNorthPremier
-BIOSGN,Biosergen,FirstNorthPremier
-BRAIN,BrainCool,FirstNorthPremier
-CRNO-B,Cereno Scientific B,FirstNorthPremier
-CMH,Chordate Medical Holding,FirstNorthPremier
-CMH-PREF,Chordate Medical Holding Pref,FirstNorthPremier
-CLS-B,Clinical Laserthermia Systems B,FirstNorthPremier
-CLBIO,Corline Biomedical,FirstNorthPremier
-DMYD-B,Diamyd Medical B,FirstNorthPremier
-DICOT,Dicot Pharma,FirstNorthPremier
-ELIC,Elicera Therapeutics,FirstNorthPremier
-ELN,Ellen,FirstNorthPremier
-ERMA,Enorama Pharma,FirstNorthPremier
-ENZY,Enzymatica,FirstNorthPremier
-EXPRS2,ExpreS2ion Biotech Holding,FirstNorthPremier
-FLUI,Fluicell,FirstNorthPremier
-FLUO,FluoGuide,FirstNorthPremier
-GABA,Gabather,FirstNorthPremier
-GENO,Genovis,FirstNorthPremier
-GUARD,Guard Therapeutics International,FirstNorthPremier
-ICO,Iconovo,FirstNorthPremier
-IDLDX,IDL Diagnostics,FirstNorthPremier
-INIT,Initiator Pharma,FirstNorthPremier
-INTEG-B,Integrum B,FirstNorthPremier
-IVACC,Intervacc,FirstNorthPremier
-IZAFE-B,iZafe Group B,FirstNorthPremier
-KLAR,Klaria Pharma Holding,FirstNorthPremier
-KONT,Kontigo Care,FirstNorthPremier
-LIDDS,LIDDS,FirstNorthPremier
-LPGO,Lipigon Pharmaceuticals,FirstNorthPremier
-LIPUM,Lipum,FirstNorthPremier
-LARK,Lärkberget,FirstNorthPremier
-MAGLE,Magle Chemoswed,FirstNorthPremier
-MAGNA,Magnasense,FirstNorthPremier
-MEDHLP,MedHelp Care,FirstNorthPremier
-MODTX,Modus Therapeutics,FirstNorthPremier
-NANEXA,Nanexa,FirstNorthPremier
-NANECH,NanoEcho,FirstNorthPremier
-NEOLA,Neola Medical,FirstNorthPremier
-NEWBRY,Newbury Pharmaceuticals,FirstNorthPremier
-NXTCL,NextCell Pharma AB,FirstNorthPremier
-ONCOZ,OncoZenge,FirstNorthPremier
-ORTI-A,Ortivus A,FirstNorthPremier
-ORTI-B,Ortivus B,FirstNorthPremier
-ORT-B,Ortoma B,FirstNorthPremier
-OSSD,OssDsign,FirstNorthPremier
-PAX,Paxman,FirstNorthPremier
-PERP-B,Perpetua Medical B,FirstNorthPremier
-PILA,Pila Pharma,FirstNorthPremier
-PILA-BTU,PILA PHARMA AB BTU,FirstNorthPremier
-PRO,Promimic,FirstNorthPremier
-PLUN,ProstaLund,FirstNorthPremier
-PROGEN,Prostatype Genomics,FirstNorthPremier
-QLIFE,Qlife Holding,FirstNorthPremier
-QUIA,QUIA PHARMA,FirstNorthPremier
-S2M,S2Medical B,FirstNorthPremier
-SDOS,ScandiDos,FirstNorthPremier
-CMOTEC-B,Scandinavian ChemoTech B,FirstNorthPremier
-HEART,Scandinavian Real Heart,FirstNorthPremier
-SCIB,Scibase Holding,FirstNorthPremier
-SENZA,Senzagen,FirstNorthPremier
-SPAGO,Spago Nanomedical,FirstNorthPremier
-STABL,Stayble Therapeutics,FirstNorthPremier
-STIL,Stille,FirstNorthPremier
-SUS,Surgical Science,FirstNorthPremier
-TOL,Toleranzia,FirstNorthPremier
-XINT,Xintela,FirstNorthPremier
-XPC,XP Chemistries,FirstNorthPremier
-ABSO,Absolent Air Care Group,FirstNorthPremier
-ACUVI,Acuvi,FirstNorthPremier
-AXOLOT,Axolot Solutions Holding,FirstNorthPremier
-BAWAT,Bawat Water Technologies,FirstNorthPremier
-BOMILL,BoMill,FirstNorthPremier
-CALVIK,Calviks,FirstNorthPremier
-CARE,Careium,FirstNorthPremier
-CI,Cell Impact,FirstNorthPremier
-DLAB,Dlaboratory Sweden,FirstNorthPremier
-ESGR-B,ES Energy Save Holding B,FirstNorthPremier
-FERRO,Ferroamp,FirstNorthPremier
-FIRE,Firefly,FirstNorthPremier
-FLEXQ,FlexQube,FirstNorthPremier
-FREEM,Freemelt,FirstNorthPremier
-GPX,Gasporox,FirstNorthPremier
-GOTL-A,Gotlandsbolaget A,FirstNorthPremier
-GOTL-B,Gotlandsbolaget B,FirstNorthPremier
-GGEO,Guideline Geo,FirstNorthPremier
-HEGR,Hedera Group,FirstNorthPremier
-HELIO,Heliospectra,FirstNorthPremier
-HILB-B,Hilbert Group,FirstNorthPremier
-IDUN-B,Idun Industrier B,FirstNorthPremier
-LXB,Luxbright,FirstNorthPremier
-LYGRD,Lyckegård,FirstNorthPremier
-MANTEX,Mantex,FirstNorthPremier
-NEPA,Nepa,FirstNorthPremier
-NJOB,NetJobs Group,FirstNorthPremier
-LEVEL,Nordic LEVEL Group,FirstNorthPremier
-NOTEK,Norditek,FirstNorthPremier
-OGUN-B,Ogunsen B,FirstNorthPremier
-OPTI,OptiCept Technologies,FirstNorthPremier
-OXE,OXE Marine,FirstNorthPremier
-PCOM-B,Precomp Solutions B,FirstNorthPremier
-RLOS-B,RanLOS,FirstNorthPremier
-RO,Rolling Optics Holding,FirstNorthPremier
-SAXG,Saxlund Group,FirstNorthPremier
-SES,Scandinavian Enviro Systems,FirstNorthPremier
-SERT,Serstech,FirstNorthPremier
-SIBEK,Sibek,FirstNorthPremier
-SILEON,Sileon,FirstNorthPremier
-SEYE,Smart Eye,FirstNorthPremier
-SUMMAS,Summa Defence,FirstNorthPremier
-TEQ,Teqnion,FirstNorthPremier
-TERNOR,Terranor Group,FirstNorthPremier
-TRAIN-B,Train Alliance B,FirstNorthPremier
-VSSAB-B,Viking Supply Ships B,FirstNorthPremier
-VIMAB,Vimab Group,FirstNorthPremier
-W5,W5 Solutions,FirstNorthPremier
-WPAY,Westpay,FirstNorthPremier
-AXIC-A,aXichem A,FirstNorthPremier
-CINIS,Cinis Fertilizer,FirstNorthPremier
-CLEM,Clemondo Group,FirstNorthPremier
-ITECH,I-tech,FirstNorthPremier
-IMPC,Impact Coatings,FirstNorthPremier
-LCLEAN,LifeClean International,FirstNorthPremier
-ORGC,OrganoClick,FirstNorthPremier
-PCAT,Photocat,FirstNorthPremier
-POLYG,Polygiene Group,FirstNorthPremier
-AERO,Svenska Aerogel Holding,FirstNorthPremier
-TRIBO-B,Tribox Group B,FirstNorthPremier
-CIRCHE,CirChem,FirstNorthPremier
-DE,Dala Energi,FirstNorthPremier
-GIGA,Gigasun,FirstNorthPremier
-MASHUP,Mashup Ireland,FirstNorthPremier
-ARCT,Arctic Minerals,FirstNorthPremier
-BIOEX,Bioextrax,FirstNorthPremier
-BOTX,Botnia Exploration Holding,FirstNorthPremier
-DMXSE-SDB,District Metals Corp SDB,FirstNorthPremier
-FNMC-SDB,First Nordic Metals,FirstNorthPremier
-LEMSE,Leading Edge Materials Corp.,FirstNorthPremier
-LUC,Lucara Diamond Corp,FirstNorthPremier
-NIO,Nordic Iron Ore,FirstNorthPremier
-ADVBOX,Adventure Box Technology,FirstNorthPremier
-BBROOM,Bubbleroom,FirstNorthPremier
-CANDLE-B,Candles Scandinavia,FirstNorthPremier
-CDON,CDON,FirstNorthPremier
-CEDER,Cedergrenska,FirstNorthPremier
-CLEMO,Clean Motion,FirstNorthPremier
-DSNO,Desenio,FirstNorthPremier
-ALBERT,eEducation Albert,FirstNorthPremier
-ELLWEE,Ellwee,FirstNorthPremier
-EMB,EMB Mission Bound,FirstNorthPremier
-ENVAR,Envar,FirstNorthPremier
-FRAG,Fragbite Group,FirstNorthPremier
-FSPORT,FSport,FirstNorthPremier
-GCOR,Gaming Corps,FirstNorthPremier
-GBK,Goodbye Kansas Group,FirstNorthPremier
-HOTEL,Hotel Fast SSE,FirstNorthPremier
-KAKEL,Kakel Max,FirstNorthPremier
-KAMBI,Kambi Group,FirstNorthPremier
-BRAVE,Kinda Brave,FirstNorthPremier
-KJELL,Kjell Group,FirstNorthPremier
-MOBA,M.O.B.A Network,FirstNorthPremier
-MAV,Mavshack,FirstNorthPremier
-MAXENT-B,Maximum Entertainment B,FirstNorthPremier
-NANOC-B,NanoCap Group B,FirstNorthPremier
-BOAT,Nimbus Group,FirstNorthPremier
-NITRO,Nitro Games,FirstNorthPremier
-NREST,Nordrest,FirstNorthPremier
-NBZ,Northbaze Group,FirstNorthPremier
-OBAB,Online Brands Nordic,FirstNorthPremier
-QIIWI,Qiiwi Games,FirstNorthPremier
-REALFI,RealFiction,FirstNorthPremier
-REFINE,Refine Group,FirstNorthPremier
-SBOK,ScandBook Holding,FirstNorthPremier
-SCOUT,Scout Gaming Group,FirstNorthPremier
-SKOLON,Skolon,FirstNorthPremier
-SOZAP,Sozap,FirstNorthPremier
-STORY-B,Storytel B,FirstNorthPremier
-BUY,Sweden Buyersclub,FirstNorthPremier
-SODER,Söder Sportfiske,FirstNorthPremier
-TELLUS,Tellusgruppen,FirstNorthPremier
-TOURN,Tourn International,FirstNorthPremier
-UTG,Unlimited Travel Group,FirstNorthPremier
-USWE,USWE Sports,FirstNorthPremier
-ACCON,Acconeer,FirstNorthPremier
-PADEL,Acenta Group,FirstNorthPremier
-ADTR,Adtraction,FirstNorthPremier
-AVT-B,AVTECH Sweden B,FirstNorthPremier
-BUSER,Bambuser,FirstNorthPremier
-BEAMMW-B,Beammwave B,FirstNorthPremier
-BIM,BIMobject,FirstNorthPremier
-BINERO,Binero Group,FirstNorthPremier
-BRILL,Brilliant Future,FirstNorthPremier
-CHARGE,Chargepanel,FirstNorthPremier
-CHECK,Checkin.com Group,FirstNorthPremier
-CLAV,Clavister,FirstNorthPremier
-CDMIL,CodeMill,FirstNorthPremier
-COMPDM,Compodium,FirstNorthPremier
-CFISH,Crunchfish,FirstNorthPremier
-DIAH,Diadrom Holding,FirstNorthPremier
-DIVIO-B,Divio Technologies B,FirstNorthPremier
-DONE,Done.ai Group,FirstNorthPremier
-ENERS,Enersize,FirstNorthPremier
-EXS,Exsitec,FirstNorthPremier
-FLEXM,Flexion Mobile,FirstNorthPremier
-FLOWS,Flowscape Technology,FirstNorthPremier
-FRAM-B,Fram Skandinavien B,FirstNorthPremier
-GENI,Generic Sweden,FirstNorthPremier
-GREAT,Greater Than,FirstNorthPremier
-HDW-B,H&D Wireless Sweden Holding B,FirstNorthPremier
-HIFA-B,Hifab B,FirstNorthPremier
-INSP,Insplorion,FirstNorthPremier
-IRIS,Irisity,FirstNorthPremier
-JLT,JLT Mobile Computers,FirstNorthPremier
-K33,K33,FirstNorthPremier
-KENH,Kentima Holding B,FirstNorthPremier
-KLIMAT,Klimator,FirstNorthPremier
-LITI,Litium,FirstNorthPremier
-LOYAL,Loyal Solutions,FirstNorthPremier
-MODEL,Modelon,FirstNorthPremier
-NEO-B,Neovici Holding B,FirstNorthPremier
-NOSA,Nosa Plugs,FirstNorthPremier
-OBSE,Observit,FirstNorthPremier
-OODA,OODA AI,FirstNorthPremier
-OPTER,Opter,FirstNorthPremier
-QLOSR-B,Qlosr Group B,FirstNorthPremier
-QCORE,Qlucore,FirstNorthPremier
-RPLAN,Ranplan Group,FirstNorthPremier
-RIGHTB,RightBridge Ventures Group,FirstNorthPremier
-SFTR,Safeture,FirstNorthPremier
-SONE,Sonetel,FirstNorthPremier
-SPEONE,SpectrumOne,FirstNorthPremier
-SPOTR,Spotr Group,FirstNorthPremier
-TENEO,Teneo AI,FirstNorthPremier
-UNIBAP,Unibap Space Solutions,FirstNorthPremier
-UPSALE,Upsales Technology,FirstNorthPremier
-VERT-B,Vertiseit B,FirstNorthPremier
-VO2,VO2 Cap Holding,FirstNorthPremier
-VUXEN,Vuxen Group,FirstNorthPremier
-WPTG-B,White Pearl Technology Group B,FirstNorthPremier
-XMR,XMReality,FirstNorthPremier
-ZAPLOX,Zaplox,FirstNorthPremier
-ALCA,Alcadon Group,FirstNorthPremier
-BAHN-B,Bahnhof B,FirstNorthPremier
-BRE2,Bredband2,FirstNorthPremier
-EFFH,Effnetplattformen Holding,FirstNorthPremier
-GAPW-B,Gapwaves B,FirstNorthPremier
-INCOAX,InCoax,FirstNorthPremier
-KEBNI-B,KebNi B,FirstNorthPremier
-LUMEN,LumenRadio,FirstNorthPremier
-MAVEN,Maven Wireless,FirstNorthPremier
-TALK,TalkPool,FirstNorthPremier
-TESSIN,Tessin Nordic Holding,FirstNorthPremier
-WAYS,Waystream Group,FirstNorthPremier
-WYLD,Wyld Networks,FirstNorthPremier
+﻿Instrument,Name,Sektor,Lista
+ARION-SDB,Arion Bank SDB,Bank,LargeCap
+AZA,Avanza Bank,Bank,LargeCap
+SHB-A,Handelsbanken A,Bank,LargeCap
+SHB-B,Handelsbanken B,Bank,LargeCap
+NDA-SE,Nordea Bank,Bank,LargeCap
+SEB-A,SEB A,Bank,LargeCap
+SEB-C,SEB C,Bank,LargeCap
+SWED-A,Swedbank A,Bank,LargeCap
+AAK,AAK,Dagligvaror,LargeCap
+AXFO,Axfood,Dagligvaror,LargeCap
+ESSITY-A,Essity A,Dagligvaror,LargeCap
+ESSITY-B,Essity B,Dagligvaror,LargeCap
+IPCO,International Petroleum Corp.,Energi,LargeCap
+ATRLJ-B,Atrium Ljungberg B,Fastigheter,LargeCap
+BALD-B,Balder B,Fastigheter,LargeCap
+CAST,Castellum,Fastigheter,LargeCap
+CATE,Catena,Fastigheter,LargeCap
+CORE-A,Corem Property Group A,Fastigheter,LargeCap
+CORE-B,Corem Property Group B,Fastigheter,LargeCap
+CORE-D,Corem Property Group D,Fastigheter,LargeCap
+CORE-PREF,Corem Property Group Pref,Fastigheter,LargeCap
+FABG,Fabege,Fastigheter,LargeCap
+FPAR-A,Fastpartner A,Fastigheter,LargeCap
+FPAR-D,Fastpartner D,Fastigheter,LargeCap
+HEM,Hemnet Group,Fastigheter,LargeCap
+HUFV-A,Hufvudstaden A,Fastigheter,LargeCap
+NP3,NP3 Fastigheter,Fastigheter,LargeCap
+NP3-PREF,NP3 Fastigheter Pref,Fastigheter,LargeCap
+NYF,Nyfosa,Fastigheter,LargeCap
+PNDX-B,Pandox B,Fastigheter,LargeCap
+SAGA-A,Sagax A,Fastigheter,LargeCap
+SAGA-B,Sagax B,Fastigheter,LargeCap
+SAGA-D,Sagax D,Fastigheter,LargeCap
+WALL-B,Wallenstam B,Fastigheter,LargeCap
+WIHL,Wihlborgs Fastigheter,Fastigheter,LargeCap
+BURE,Bure Equity,Finansiella tjänster,LargeCap
+EQT,EQT,Finansiella tjänster,LargeCap
+INDU-A,Industrivärden A,Finansiella tjänster,LargeCap
+INDU-C,Industrivärden C,Finansiella tjänster,LargeCap
+INVE-A,Investor A,Finansiella tjänster,LargeCap
+INVE-B,Investor B,Finansiella tjänster,LargeCap
+KINV-A,Kinnevik A,Finansiella tjänster,LargeCap
+KINV-B,Kinnevik B,Finansiella tjänster,LargeCap
+LATO-B,Latour B,Finansiella tjänster,LargeCap
+LUND-B,Lundberg B,Finansiella tjänster,LargeCap
+SAVE,Nordnet,Finansiella tjänster,LargeCap
+ROKO-B,Röko B,Finansiella tjänster,LargeCap
+STOR-B,Storskogen B,Finansiella tjänster,LargeCap
+SAMPO-SDB,Sampo A SDB,Försäkring,LargeCap
+ALIF-B,AddLife B,Hälsovård,LargeCap
+ALVO-SDB,Alvotech SDB,Hälsovård,LargeCap
+ASKER,Asker Healthcare,Hälsovård,LargeCap
+AZN,Astra Zeneca,Hälsovård,LargeCap
+BIOA-B,BioArctic B,Hälsovård,LargeCap
+BONEX,BONESUPPORT,Hälsovård,LargeCap
+CAMX,Camurus,Hälsovård,LargeCap
+EKTA-B,Elekta B,Hälsovård,LargeCap
+GETI-B,Getinge B,Hälsovård,LargeCap
+MCOV-B,Medicover B,Hälsovård,LargeCap
+SECT-B,Sectra B,Hälsovård,LargeCap
+SOBI,Swedish Orphan Biovitrum,Hälsovård,LargeCap
+VIMIAN,Vimian Group,Hälsovård,LargeCap
+VITR,Vitrolife,Hälsovård,LargeCap
+ABB,ABB,Industri,LargeCap
+ADDT-B,Addtech B,Industri,LargeCap
+AFRY,AFRY,Industri,LargeCap
+ALFA,Alfa Laval,Industri,LargeCap
+ASSA-B,Assa Abloy B,Industri,LargeCap
+ATCO-A,Atlas Copco A,Industri,LargeCap
+ATCO-B,Atlas Copco B,Industri,LargeCap
+BEIJ-B,Beijer Ref B,Industri,LargeCap
+BRAV,Bravida Holding,Industri,LargeCap
+EPRO-B,Electrolux Professional B,Industri,LargeCap
+ENGCON-B,engcon B,Industri,LargeCap
+EPI-A,Epiroc A,Industri,LargeCap
+EPI-B,Epiroc B,Industri,LargeCap
+INDT,Indutrade,Industri,LargeCap
+LIFCO-B,Lifco B,Industri,LargeCap
+LIAB,Lindab International,Industri,LargeCap
+LOOMIS,Loomis,Industri,LargeCap
+MTRS,Munters Group AB,Industri,LargeCap
+NCC-A,NCC A,Industri,LargeCap
+NCC-B,NCC B,Industri,LargeCap
+NIBE-B,Nibe Industrier B,Industri,LargeCap
+NOLA-B,Nolato B,Industri,LargeCap
+OEM-B,OEM International B,Industri,LargeCap
+PEAB-B,Peab B,Industri,LargeCap
+SAAB-B,SAAB B,Industri,LargeCap
+SAND,Sandvik,Industri,LargeCap
+SECU-B,Securitas B,Industri,LargeCap
+SKA-B,Skanska B,Industri,LargeCap
+SWEC-A,Sweco A,Industri,LargeCap
+SWEC-B,Sweco B,Industri,LargeCap
+SYSR,Systemair,Industri,LargeCap
+8TRA,TRATON SE,Industri,LargeCap
+TREL-B,Trelleborg B,Industri,LargeCap
+VOLV-A,Volvo A,Industri,LargeCap
+VOLV-B,Volvo B,Industri,LargeCap
+ALLEI,Alleima,Råvaror,LargeCap
+BILL,Billerud,Råvaror,LargeCap
+BOL,Boliden,Råvaror,LargeCap
+GRNG,Gränges,Råvaror,LargeCap
+HPOL-B,Hexpol B,Råvaror,LargeCap
+HOLM-A,Holmen A,Råvaror,LargeCap
+HOLM-B,Holmen B,Råvaror,LargeCap
+LUG,Lundin Gold,Råvaror,LargeCap
+LUMI,Lundin Mining Corporation,Råvaror,LargeCap
+SCA-A,SCA A,Råvaror,LargeCap
+SCA-B,SCA B,Råvaror,LargeCap
+SKF-A,SKF A,Råvaror,LargeCap
+SKF-B,SKF B,Råvaror,LargeCap
+SSAB-A,SSAB A,Råvaror,LargeCap
+SSAB-B,SSAB B,Råvaror,LargeCap
+STE-A,Stora Enso A,Råvaror,LargeCap
+STE-R,Stora Enso R,Råvaror,LargeCap
+TROAX,Troax Group,Råvaror,LargeCap
+ASMDEE-B,Asmodee,Sällanköpsvaror,LargeCap
+ALIV-SDB,Autoliv SDB,Sällanköpsvaror,LargeCap
+BETS-B,Betsson B,Sällanköpsvaror,LargeCap
+BILI-A,Bilia A,Sällanköpsvaror,LargeCap
+DOM,Dometic Group,Sällanköpsvaror,LargeCap
+ELUX-A,Electrolux A,Sällanköpsvaror,LargeCap
+ELUX-B,Electrolux B,Sällanköpsvaror,LargeCap
+EMBRAC-B,Embracer Group B,Sällanköpsvaror,LargeCap
+EVO,Evolution,Sällanköpsvaror,LargeCap
+FOI-B,Fenix Outdoor B,Sällanköpsvaror,LargeCap
+HM-B,H&M B,Sällanköpsvaror,LargeCap
+HUSQ-A,Husqvarna A,Sällanköpsvaror,LargeCap
+HUSQ-B,Husqvarna B,Sällanköpsvaror,LargeCap
+JM,JM,Sällanköpsvaror,LargeCap
+MIPS,Mips,Sällanköpsvaror,LargeCap
+NEWA-B,New Wave B,Sällanköpsvaror,LargeCap
+THULE,Thule Group,Sällanköpsvaror,LargeCap
+VOLCAR-B,Volvo Car B,Sällanköpsvaror,LargeCap
+ANOD-B,Addnode Group B,Teknik,LargeCap
+BETCO,Better Collective,Teknik,LargeCap
+HACK,Hacksaw,Teknik,LargeCap
+HEXA-B,Hexagon B,Teknik,LargeCap
+LAGR-B,Lagercrantz Group B,Teknik,LargeCap
+MYCR,Mycronic,Teknik,LargeCap
+NCAB,NCAB Group,Teknik,LargeCap
+SINCH,Sinch,Teknik,LargeCap
+TIETOS,Tieto Evry,Teknik,LargeCap
+TRUE-B,Truecaller,Teknik,LargeCap
+VIT-B,Vitec Software Group B,Teknik,LargeCap
+YUBICO,Yubico,Teknik,LargeCap
+ERIC-A,Ericsson A,Telekommunikation,LargeCap
+ERIC-B,Ericsson B,Telekommunikation,LargeCap
+HMS,HMS Networks,Telekommunikation,LargeCap
+TEL2-A,Tele2 A,Telekommunikation,LargeCap
+TEL2-B,Tele2 B,Telekommunikation,LargeCap
+TELIA,Telia Company,Telekommunikation,LargeCap
+ENITY,Enity,Bank,MidCap
+NORION,Norion Bank,Bank,MidCap
+TFBANK,TF Bank,Bank,MidCap
+APOTEA,Apotea,Dagligvaror,MidCap
+CLA-B,Cloetta,Dagligvaror,MidCap
+DUNI,Duni,Dagligvaror,MidCap
+HUMBLE,Humble Group,Dagligvaror,MidCap
+SCST,Scandi Standard,Dagligvaror,MidCap
+EOLU-B,Eolus B,Energi,MidCap
+MER,Meren Energy,Energi,MidCap
+ORRON,Orrön Energy,Energi,MidCap
+BESQAB,Besqab,Fastigheter,MidCap
+BESQAB-PREF-B,Besqab Pref B,Fastigheter,MidCap
+BRIN-B,Brinova Fastigheter B,Fastigheter,MidCap
+CIBUS,Cibus Nordic Real Estate,Fastigheter,MidCap
+DIOS,Diös Fastigheter,Fastigheter,MidCap
+EAST,Eastnine,Fastigheter,MidCap
+EMIL-B,Emilshus B,Fastigheter,MidCap
+EMIL-PREF,Emilshus Pref,Fastigheter,MidCap
+GPG,Genova Property Group,Fastigheter,MidCap
+HEBA-B,Heba B,Fastigheter,MidCap
+INTEA-B,Intea Fastigheter B,Fastigheter,MidCap
+INTEA-D,Intea Fastigheter D,Fastigheter,MidCap
+JOMA,John Mattson,Fastigheter,MidCap
+KFAST-B,K-Fast Holding B,Fastigheter,MidCap
+KLARA-B,KlaraBo,Fastigheter,MidCap
+LOGI-A,Logistea A,Fastigheter,MidCap
+LOGI-B,Logistea B,Fastigheter,MidCap
+NEOBO,Neobo Fastigheter,Fastigheter,MidCap
+NIVI-B,Nivika,Fastigheter,MidCap
+PLAZ-B,Platzer Fastigheter Holding B,Fastigheter,MidCap
+PRISMA,Prisma Properties,Fastigheter,MidCap
+SBB-B,SBB Norden B,Fastigheter,MidCap
+SBB-D,SBB Norden D,Fastigheter,MidCap
+STEF-B,Stendörren Fastigheter B,Fastigheter,MidCap
+SFAST,Stenhus Fastigheter i Norden,Fastigheter,MidCap
+SVEAF,Sveafastigheter,Fastigheter,MidCap
+SLP-B,Swedish Logistic Property B,Fastigheter,MidCap
+TRIAN-B,Trianon B,Fastigheter,MidCap
+CAT-A,Catella A,Finansiella tjänster,MidCap
+CAT-B,Catella B,Finansiella tjänster,MidCap
+CS,CoinShares International Limited,Finansiella tjänster,MidCap
+CRED-A,Creades A,Finansiella tjänster,MidCap
+FLERIE,Flerie,Finansiella tjänster,MidCap
+HOFI,Hoist Finance,Finansiella tjänster,MidCap
+INTRUM,Intrum,Finansiella tjänster,MidCap
+LINC,Linc,Finansiella tjänster,MidCap
+RATO-A,Ratos A,Finansiella tjänster,MidCap
+RATO-B,Ratos B,Finansiella tjänster,MidCap
+RESURS,Resurs Holding,Finansiella tjänster,MidCap
+SVOL-A,Svolder A,Finansiella tjänster,MidCap
+SVOL-B,Svolder B,Finansiella tjänster,MidCap
+TRAC-B,Traction B,Finansiella tjänster,MidCap
+VEFAB,VEF,Finansiella tjänster,MidCap
+VNV,VNV Global,Finansiella tjänster,MidCap
+ORES,Öresund,Finansiella tjänster,MidCap
+AMBEA,Ambea,Hälsovård,MidCap
+ARJO-B,Arjo,Hälsovård,MidCap
+ATT,Attendo,Hälsovård,MidCap
+BACTI-B,Bactiguard Holding B,Hälsovård,MidCap
+BICO,BICO Group,Hälsovård,MidCap
+BIOG-B,BioGaia B,Hälsovård,MidCap
+BINV,BioInvent International,Hälsovård,MidCap
+CEVI,CellaVision,Hälsovård,MidCap
+CINPHA,Cinclus Pharma,Hälsovård,MidCap
+HNSA,Hansa Biopharma,Hälsovård,MidCap
+HUM,Humana,Hälsovård,MidCap
+MCAP,MedCap,Hälsovård,MidCap
+RAY-B,RaySearch Laboratories B,Hälsovård,MidCap
+SEDANA,Sedana Medical,Hälsovård,MidCap
+XVIVO,Xvivo Perfusion,Hälsovård,MidCap
+ALIG,Alimak Group,Industri,MidCap
+AQ,AQ Group,Industri,MidCap
+BERG-B,Bergman & Beving B,Industri,MidCap
+BTS-B,BTS Group B,Industri,MidCap
+BUFAB,Bufab,Industri,MidCap
+AJA-B,Byggmästare Anders J Ahlström Holding B,Industri,MidCap
+CCCAB,Cavotec Group,Industri,MidCap
+CCC,Cavotec SA,Industri,MidCap
+COOR,Coor Service Management Holding,Industri,MidCap
+CTT,CTT Systems,Industri,MidCap
+ELAN-B,Elanders B,Industri,MidCap
+EPEN,Ependion,Industri,MidCap
+EWRK,Ework Group,Industri,MidCap
+FAG,Fagerhult Group,Industri,MidCap
+FG,Fasadgruppen,Industri,MidCap
+FMM-B,FM Mattsson B,Industri,MidCap
+GREEN,Green Landscaping Group,Industri,MidCap
+HANZA,HANZA,Industri,MidCap
+INSTAL,Instalco,Industri,MidCap
+IVSO,INVISIO,Industri,MidCap
+INWI,Inwido,Industri,MidCap
+ITAB,ITAB Shop Concept,Industri,MidCap
+KAR,Karnov Group,Industri,MidCap
+MILDEF,MilDef Group,Industri,MidCap
+MMGR-B,Momentum Group B,Industri,MidCap
+NMAN,Nederman Holding,Industri,MidCap
+NOTE,Note,Industri,MidCap
+PCELL,PowerCell Sweden,Industri,MidCap
+REJL-B,Rejlers B,Industri,MidCap
+SDIP-B,Sdiptech B,Industri,MidCap
+SDIP-PREF,Sdiptech Pref,Industri,MidCap
+VOLO,Volati,Industri,MidCap
+VOLO-PREF,Volati Pref,Industri,MidCap
+XANO-B,XANO Industri B,Industri,MidCap
+ARISE,Arise,Kraft,MidCap
+ARP,Arctic Paper,Råvaror,MidCap
+BEIA-B,Beijer Alma B,Råvaror,MidCap
+NPAPER,Nordic Paper Holding AB,Råvaror,MidCap
+RROS,Rottneros,Råvaror,MidCap
+VISC,Viscaria,Råvaror,MidCap
+ACAD,AcadeMedia,Sällanköpsvaror,MidCap
+ALLIGO-B,Alligo B,Sällanköpsvaror,MidCap
+BHG,BHG Group,Sällanköpsvaror,MidCap
+BONAV-A,Bonava A,Sällanköpsvaror,MidCap
+BONAV-B,Bonava B,Sällanköpsvaror,MidCap
+BOOZT,Boozt,Sällanköpsvaror,MidCap
+BMAX,Byggmax Group,Sällanköpsvaror,MidCap
+CLAS-B,Clas Ohlson B,Sällanköpsvaror,MidCap
+G2M,Gentoo Media,Sällanköpsvaror,MidCap
+KABE-B,KABE Group B,Sällanköpsvaror,MidCap
+MEKO,MEKO,Sällanköpsvaror,MidCap
+MTG-A,MTG A,Sällanköpsvaror,MidCap
+MTG-B,MTG B,Sällanköpsvaror,MidCap
+NOBI,Nobia,Sällanköpsvaror,MidCap
+PRFO,Profoto Holding,Sällanköpsvaror,MidCap
+RVRC,Revolutionrace,Sällanköpsvaror,MidCap
+RUSTA,Rusta,Sällanköpsvaror,MidCap
+SHOT,Scandic Hotels Group,Sällanköpsvaror,MidCap
+SKIS-B,SkiStar B,Sällanköpsvaror,MidCap
+SF,Stillfront Group,Sällanköpsvaror,MidCap
+SYNSAM,Synsam,Sällanköpsvaror,MidCap
+VBG-B,VBG Group B,Sällanköpsvaror,MidCap
+VESTUM,Vestum,Sällanköpsvaror,MidCap
+CINT,Cint Group,Teknik,MidCap
+DUST,Dustin Group,Teknik,MidCap
+DYVOX,Dynavox Group,Teknik,MidCap
+ENEA,Enea,Teknik,MidCap
+IAR-B,I.A.R Systems Group B,Teknik,MidCap
+KNOW,Knowit,Teknik,MidCap
+LIME,Lime Technologies,Teknik,MidCap
+PRIC-B,Pricer B,Teknik,MidCap
+PACT,Proact IT Group,Teknik,MidCap
+HTRO,Hexatronic Group,Telekommunikation,MidCap
+NETI-B,Net Insight B,Telekommunikation,MidCap
+VPLAY-A,Viaplay Group A,Telekommunikation,MidCap
+VPLAY-B,Viaplay Group B,Telekommunikation,MidCap
+MSON-A,Midsona A,Dagligvaror,SmallCap
+MSON-B,Midsona B,Dagligvaror,SmallCap
+CTEK,CTEK,Energi,SmallCap
+MAHA-A,Maha Energy A,Energi,SmallCap
+ACRI-A,Acrinova A,Fastigheter,SmallCap
+ACRI-B,Acrinova B,Fastigheter,SmallCap
+ANNE-B,Annehem Fastigheter B,Fastigheter,SmallCap
+FASTAT,Fastator,Fastigheter,SmallCap
+K2A-B,K2A Knaust & Andersson Fastigheter B,Fastigheter,SmallCap
+K2A-PREF,K2A Knaust & Andersson Fastigheter Pref,Fastigheter,SmallCap
+HAV-B,Havsfrun Investment B,Finansiella tjänster,SmallCap
+MANG,Mangold,Finansiella tjänster,SmallCap
+NAXS,NAXS,Finansiella tjänster,SmallCap
+QLIRO,Qliro,Finansiella tjänster,SmallCap
+SEAF,Seafire,Finansiella tjänster,SmallCap
+STWK,Stockwik Förvaltning,Finansiella tjänster,SmallCap
+SFAB,Solid Försäkring,Försäkring,SmallCap
+ACTI,Active Biotech,Hälsovård,SmallCap
+ATORX,Alligator Bioscience,Hälsovård,SmallCap
+ACE,Ascelia Pharma,Hälsovård,SmallCap
+BOUL,Boule Diagnostics,Hälsovård,SmallCap
+CRAD-B,C-RAD B,Hälsovård,SmallCap
+CANTA,Cantargia,Hälsovård,SmallCap
+CARA,Carasent,Hälsovård,SmallCap
+DEDI,Dedicare B,Hälsovård,SmallCap
+EGTX,Egetis Therapeutics,Hälsovård,SmallCap
+EPIS-B,Episurf Medical B,Hälsovård,SmallCap
+EQL,EQL Pharma,Hälsovård,SmallCap
+IMMNOV,Immunovia,Hälsovård,SmallCap
+IBT-B,Infant Bacterial Therapeutics B,Hälsovård,SmallCap
+IRLAB-A,IRLAB Therapeutics A,Hälsovård,SmallCap
+ISOFOL,Isofol Medical,Hälsovård,SmallCap
+KDEV,Karolinska Development B,Hälsovård,SmallCap
+MVIR,Medivir,Hälsovård,SmallCap
+IMMU,Mendus,Hälsovård,SmallCap
+MOB,Moberg Pharma,Hälsovård,SmallCap
+NICA,Nanologica,Hälsovård,SmallCap
+ONCO,Oncopeptides,Hälsovård,SmallCap
+ORX,Orexo,Hälsovård,SmallCap
+QLINEA,Q-Linea,Hälsovård,SmallCap
+SANION,Saniona,Hälsovård,SmallCap
+SEZI,Senzime,Hälsovård,SmallCap
+SYNACT,SynAct Pharma,Hälsovård,SmallCap
+VICO,Vicore Pharma Holding,Hälsovård,SmallCap
+VIVE,Vivesto,Hälsovård,SmallCap
+XBRANE,Xbrane Biopharma,Hälsovård,SmallCap
+XSPRAY,Xspray Pharma,Hälsovård,SmallCap
+ARPL,Arla Plast,Industri,SmallCap
+BALCO,Balco Group,Industri,SmallCap
+BERNER-B,Berner Industrier B,Industri,SmallCap
+BONG,Bong,Industri,SmallCap
+CNCJO-B,Concejo B,Industri,SmallCap
+ELTEL,Eltel,Industri,SmallCap
+FNM,Ferronordic,Industri,SmallCap
+HAKI-A,HAKI Safety A,Industri,SmallCap
+HAKI-B,HAKI Safety B,Industri,SmallCap
+IS,Image Systems,Industri,SmallCap
+INFREA,Infrea,Industri,SmallCap
+INISS-B,Inission B,Industri,SmallCap
+KARNEL-B,Karnell,Industri,SmallCap
+MEAB-B,Malmbergs Elektriska B,Industri,SmallCap
+NETEL,Netel,Industri,SmallCap
+NGS,NGS Group,Industri,SmallCap
+PION-B,PION Group B,Industri,SmallCap
+PENG-B,Projektengagemang Sweden B,Industri,SmallCap
+RAIL,Railcare Group,Industri,SmallCap
+SINT,Sintercast,Industri,SmallCap
+SVIK,Studsvik,Industri,SmallCap
+SVED-B,Svedbergs Group B,Industri,SmallCap
+TRANS,Transtema Group,Industri,SmallCap
+WTW-A,Wall to Wall Group A,Industri,SmallCap
+WISE,Wise Group,Industri,SmallCap
+WBGR-B,Wästbygg,Industri,SmallCap
+BEGR,BE Group,Råvaror,SmallCap
+DURC-B,Duroc B,Råvaror,SmallCap
+NORB-B,Nordisk Bergteknik,Råvaror,SmallCap
+PROF-B,ProfilGruppen B,Råvaror,SmallCap
+ATIC,Actic Group,Sällanköpsvaror,SmallCap
+BORG,Björn Borg,Sällanköpsvaror,SmallCap
+BULTEN,Bulten,Sällanköpsvaror,SmallCap
+CTM,Catena Media,Sällanköpsvaror,SmallCap
+ELON,Elon,Sällanköpsvaror,SmallCap
+EG7,Enad Global 7,Sällanköpsvaror,SmallCap
+ENRO,Eniro Group,Sällanköpsvaror,SmallCap
+G5EN,G5 Entertainment,Sällanköpsvaror,SmallCap
+LAMM-B,Lammhults Design Group B,Sällanköpsvaror,SmallCap
+MOMENT,Moment Group,Sällanköpsvaror,SmallCap
+NELLY,Nelly Group,Sällanköpsvaror,SmallCap
+NIL-B,Nilörngruppen B,Sällanköpsvaror,SmallCap
+PIERCE,Pierce Group,Sällanköpsvaror,SmallCap
+STAR-A,Starbreeze A,Sällanköpsvaror,SmallCap
+STAR-B,Starbreeze B,Sällanköpsvaror,SmallCap
+ANOT,Anoto Group,Teknik,SmallCap
+B3,B3 Consulting Group,Teknik,SmallCap
+FING-B,Fingerprint Cards B,Teknik,SmallCap
+FPIP,Formpipe Software,Teknik,SmallCap
+GARO,Garo,Teknik,SmallCap
+MSAB-B,Micro Systemation B,Teknik,SmallCap
+SAFETY-B,mySafety Group B,Teknik,SmallCap
+NTEK-B,Novotek B,Teknik,SmallCap
+PREC,Precise Biometrics,Teknik,SmallCap
+PREV-B,Prevas B,Teknik,SmallCap
+SGG,Sensys Gatso Group,Teknik,SmallCap
+SIVE,Sivers Semiconductors,Teknik,SmallCap
+SLEEP,Sleep Cycle,Teknik,SmallCap
+SOF-B,Softronic B,Teknik,SmallCap
+TOBII,Tobii,Teknik,SmallCap
+TRAD,TradeDoubler,Teknik,SmallCap
+DORO,Doro,Telekommunikation,SmallCap
+OVZON,Ovzon,Telekommunikation,SmallCap
+LEA,Lea Bank,Bank,FirstNorth
+CHEF,Cheffelo,Dagligvaror,FirstNorth
+VIVA,Viva Wine,Dagligvaror,FirstNorth
+CLIME-B,Climeon B,Energi,FirstNorth
+HEXI,Hexicon,Energi,FirstNorth
+MIDS,Midsummer,Energi,FirstNorth
+AGROUP,Arlandastad Group,Fastigheter,FirstNorth
+FNOVA-B,Fortinova Fastigheter,Fastigheter,FirstNorth
+STUDBO,Studentbostäder i Norden,Fastigheter,FirstNorth
+NAVIGO-STAM,Navigo Invest,Finansiella tjänster,FirstNorth
+NAVIGO-PREF,Navigo Invest Pref,Finansiella tjänster,FirstNorth
+VER,Verve Group,Finansiella tjänster,FirstNorth
+ACARIX,Acarix,Hälsovård,FirstNorth
+ADDV-A,ADDvise Group A,Hälsovård,FirstNorth
+ADDV-B,ADDvise Group B,Hälsovård,FirstNorth
+ALZCUR,AlzeCure Pharma,Hälsovård,FirstNorth
+BIOVIC-B,Biovica International B,Hälsovård,FirstNorth
+DVYSR,Devyser Diagnostics,Hälsovård,FirstNorth
+IMP-A-SDB,Implantica,Hälsovård,FirstNorth
+KAN,Kancera,Hälsovård,FirstNorth
+NANOFS,Nanoform Finland,Hälsovård,FirstNorth
+PTRK,Physitrack,Hälsovård,FirstNorth
+SPEC,SpectraCure AB,Hälsovård,FirstNorth
+SPRINT,Sprint Bioscience,Hälsovård,FirstNorth
+BYGGP,ByggPartner Gruppen,Industri,FirstNorth
+KBC,KB Components,Industri,FirstNorth
+NYAB,NYAB,Industri,FirstNorth
+QBEN,Qben Infra,Industri,FirstNorth
+QAIR,QleanAir,Industri,FirstNorth
+QSYS,Qualisys,Industri,FirstNorth
+SALT-B,SaltX Technology Holding B,Industri,FirstNorth
+TAGM-B,TagMaster B,Industri,FirstNorth
+TSEC,Tempest Security,Industri,FirstNorth
+NEXAM,Nexam Chemical Holding,Kemi,FirstNorth
+AGES-B,Ages Industri B,Råvaror,FirstNorth
+DRIL,Drillcon,Råvaror,FirstNorth
+GRANGX,GRANGEX,Råvaror,FirstNorth
+ACROUD,ACROUD,Sällanköpsvaror,FirstNorth
+BOKUS,Bokusgruppen,Sällanköpsvaror,FirstNorth
+EMBELL,Embellence Group,Sällanköpsvaror,FirstNorth
+LYKO-A,Lyko Group A,Sällanköpsvaror,FirstNorth
+MAGI,MAG Interactive,Sällanköpsvaror,FirstNorth
+PDX,Paradox Interactive,Sällanköpsvaror,FirstNorth
+RAKE,Raketech,Sällanköpsvaror,FirstNorth
+RUG,RugVista Group,Sällanköpsvaror,FirstNorth
+THUNDR,Thunderful Group,Sällanköpsvaror,FirstNorth
+ZZ-B,Zinzino B,Sällanköpsvaror,FirstNorth
+4C,4C Group,Teknik,FirstNorth
+ACAST,Acast,Teknik,FirstNorth
+ADVE,Advenica,Teknik,FirstNorth
+AVEN,Avensia,Teknik,FirstNorth
+BRIGHT,BrightBid Group,Teknik,FirstNorth
+CAG,CAG Group,Teknik,FirstNorth
+CX,Combinedx,Teknik,FirstNorth
+DEVP-B,DevPort,Teknik,FirstNorth
+DIST,DistIT,Teknik,FirstNorth
+FRACTL,Fractal Gaming Group,Teknik,FirstNorth
+FREJA,Freja eID Group,Teknik,FirstNorth
+GIG-SDB,GiG Software,Teknik,FirstNorth
+MNTC,Mentice,Teknik,FirstNorth
+ONEF,Oneflow,Teknik,FirstNorth
+PRCO-B,Precio Fishbone B,Teknik,FirstNorth
+TERRNT-B,Terranet B,Teknik,FirstNorth
+AAC,AAC Clyde Space,Telekommunikation,FirstNorth
+GOMX,GomSpace Group,Telekommunikation,FirstNorth
+AGTIRA-B,Agtira B,Dagligvaror,FirstNorthPremier
+ARCTIC,Arctic Blue Beverages,Dagligvaror,FirstNorthPremier
+DUG,DUG Foodtech,Dagligvaror,FirstNorthPremier
+HAYPP,Haypp Group,Dagligvaror,FirstNorthPremier
+HERNO-B,Hernö Gin B,Dagligvaror,FirstNorthPremier
+HIGHCO-B,High Coast Distillery B,Dagligvaror,FirstNorthPremier
+INT,Intellego Technologies,Dagligvaror,FirstNorthPremier
+NNH,New Nordic Healthbrands,Dagligvaror,FirstNorthPremier
+NICO,Nicoccino Holding,Dagligvaror,FirstNorthPremier
+SNX,Premium Snacks Nordic,Dagligvaror,FirstNorthPremier
+SIMRIS-B,Simris Group B,Dagligvaror,FirstNorthPremier
+SKMO,Skåne-möllan,Dagligvaror,FirstNorthPremier
+SECARE,Swedencare,Dagligvaror,FirstNorthPremier
+AEC,Africa Energy Corp,Energi,FirstNorthPremier
+CIRCLE-B,Circle Energy Sweden B,Energi,FirstNorthPremier
+META,Metacon,Energi,FirstNorthPremier
+MINEST,Minesto,Energi,FirstNorthPremier
+STW,SeaTwirl,Energi,FirstNorthPremier
+SNM,ShaMaran Petroleum,Energi,FirstNorthPremier
+SOLT,SolTech Energy Sweden,Energi,FirstNorthPremier
+ALM,ALM Equity,Fastigheter,FirstNorthPremier
+ALM-PREF,ALM Equity Pref,Fastigheter,FirstNorthPremier
+ATIN,Athanase Innovation,Fastigheter,FirstNorthPremier
+BOHO,Boho Group,Fastigheter,FirstNorthPremier
+BOHO-PREF,Boho Group Pref,Fastigheter,FirstNorthPremier
+BONAS,Bonäsudden Holding,Fastigheter,FirstNorthPremier
+DOXA,Doxa,Fastigheter,FirstNorthPremier
+HEIM-PREF,Heimstaden Pref,Fastigheter,FirstNorthPremier
+KAPIAB,Kallebäck Property Invest,Fastigheter,FirstNorthPremier
+LINKAB,Link Prop Investment,Fastigheter,FirstNorthPremier
+SOLNA,Solnaberg Property,Fastigheter,FirstNorthPremier
+TINGS-A,Tingsvalvet Fastighets A,Fastigheter,FirstNorthPremier
+TINGS-B,Tingsvalvet Fastighets B,Fastigheter,FirstNorthPremier
+TINGS-PREF,Tingsvalvet Fastighets PREF,Fastigheter,FirstNorthPremier
+TITA-B,Titania,Fastigheter,FirstNorthPremier
+ALPCOT-B,Alpcot Holding B,Finansiella tjänster,FirstNorthPremier
+BMC,Brock Milton Capital,Finansiella tjänster,FirstNorthPremier
+CASE,Case,Finansiella tjänster,FirstNorthPremier
+FIRST-B,First Venture Sweden,Finansiella tjänster,FirstNorthPremier
+FLAT-B,Flat Capital,Finansiella tjänster,FirstNorthPremier
+MTI,MTI Investment,Finansiella tjänster,FirstNorthPremier
+NAIG-B,Nordic Asia Investment Group 1987,Finansiella tjänster,FirstNorthPremier
+NFGAB,Nordic Flanges Group,Finansiella tjänster,FirstNorthPremier
+SFL,Safello Group,Finansiella tjänster,FirstNorthPremier
+YIELD,SaveLend Group,Finansiella tjänster,FirstNorthPremier
+VH,Västra Hamnen Corporate Finance,Finansiella tjänster,FirstNorthPremier
+WRV,Webrock Ventures,Finansiella tjänster,FirstNorthPremier
+2CUREX,2cureX,Hälsovård,FirstNorthPremier
+ACOU,AcouSort,Hälsovård,FirstNorthPremier
+AINO,Aino Health,Hälsovård,FirstNorthPremier
+ALZ,Alzinova,Hälsovård,FirstNorthPremier
+ANNX,Annexin Pharmaceuticals,Hälsovård,FirstNorthPremier
+ARCOMA,Arcoma,Hälsovård,FirstNorthPremier
+BIOSGN,Biosergen,Hälsovård,FirstNorthPremier
+BRAIN,BrainCool,Hälsovård,FirstNorthPremier
+CRNO-B,Cereno Scientific B,Hälsovård,FirstNorthPremier
+CMH,Chordate Medical Holding,Hälsovård,FirstNorthPremier
+CMH-PREF,Chordate Medical Holding Pref,Hälsovård,FirstNorthPremier
+CLS-B,Clinical Laserthermia Systems B,Hälsovård,FirstNorthPremier
+CLBIO,Corline Biomedical,Hälsovård,FirstNorthPremier
+DMYD-B,Diamyd Medical B,Hälsovård,FirstNorthPremier
+DICOT,Dicot Pharma,Hälsovård,FirstNorthPremier
+ELIC,Elicera Therapeutics,Hälsovård,FirstNorthPremier
+ELN,Ellen,Hälsovård,FirstNorthPremier
+ERMA,Enorama Pharma,Hälsovård,FirstNorthPremier
+ENZY,Enzymatica,Hälsovård,FirstNorthPremier
+EXPRS2,ExpreS2ion Biotech Holding,Hälsovård,FirstNorthPremier
+FLUI,Fluicell,Hälsovård,FirstNorthPremier
+FLUO,FluoGuide,Hälsovård,FirstNorthPremier
+GABA,Gabather,Hälsovård,FirstNorthPremier
+GENO,Genovis,Hälsovård,FirstNorthPremier
+GUARD,Guard Therapeutics International,Hälsovård,FirstNorthPremier
+ICO,Iconovo,Hälsovård,FirstNorthPremier
+IDLDX,IDL Diagnostics,Hälsovård,FirstNorthPremier
+INIT,Initiator Pharma,Hälsovård,FirstNorthPremier
+INTEG-B,Integrum B,Hälsovård,FirstNorthPremier
+IVACC,Intervacc,Hälsovård,FirstNorthPremier
+IZAFE-B,iZafe Group B,Hälsovård,FirstNorthPremier
+KLAR,Klaria Pharma Holding,Hälsovård,FirstNorthPremier
+KONT,Kontigo Care,Hälsovård,FirstNorthPremier
+LIDDS,LIDDS,Hälsovård,FirstNorthPremier
+LPGO,Lipigon Pharmaceuticals,Hälsovård,FirstNorthPremier
+LIPUM,Lipum,Hälsovård,FirstNorthPremier
+LARK,Lärkberget,Hälsovård,FirstNorthPremier
+MAGLE,Magle Chemoswed,Hälsovård,FirstNorthPremier
+MAGNA,Magnasense,Hälsovård,FirstNorthPremier
+MEDHLP,MedHelp Care,Hälsovård,FirstNorthPremier
+MODTX,Modus Therapeutics,Hälsovård,FirstNorthPremier
+NANEXA,Nanexa,Hälsovård,FirstNorthPremier
+NANECH,NanoEcho,Hälsovård,FirstNorthPremier
+NEOLA,Neola Medical,Hälsovård,FirstNorthPremier
+NEWBRY,Newbury Pharmaceuticals,Hälsovård,FirstNorthPremier
+NXTCL,NextCell Pharma AB,Hälsovård,FirstNorthPremier
+ONCOZ,OncoZenge,Hälsovård,FirstNorthPremier
+ORTI-A,Ortivus A,Hälsovård,FirstNorthPremier
+ORTI-B,Ortivus B,Hälsovård,FirstNorthPremier
+ORT-B,Ortoma B,Hälsovård,FirstNorthPremier
+OSSD,OssDsign,Hälsovård,FirstNorthPremier
+PAX,Paxman,Hälsovård,FirstNorthPremier
+PERP-B,Perpetua Medical B,Hälsovård,FirstNorthPremier
+PILA,Pila Pharma,Hälsovård,FirstNorthPremier
+PILA-BTU,PILA PHARMA AB BTU,Hälsovård,FirstNorthPremier
+PRO,Promimic,Hälsovård,FirstNorthPremier
+PLUN,ProstaLund,Hälsovård,FirstNorthPremier
+PROGEN,Prostatype Genomics,Hälsovård,FirstNorthPremier
+QLIFE,Qlife Holding,Hälsovård,FirstNorthPremier
+QUIA,QUIA PHARMA,Hälsovård,FirstNorthPremier
+S2M,S2Medical B,Hälsovård,FirstNorthPremier
+SDOS,ScandiDos,Hälsovård,FirstNorthPremier
+CMOTEC-B,Scandinavian ChemoTech B,Hälsovård,FirstNorthPremier
+HEART,Scandinavian Real Heart,Hälsovård,FirstNorthPremier
+SCIB,Scibase Holding,Hälsovård,FirstNorthPremier
+SENZA,Senzagen,Hälsovård,FirstNorthPremier
+SPAGO,Spago Nanomedical,Hälsovård,FirstNorthPremier
+STABL,Stayble Therapeutics,Hälsovård,FirstNorthPremier
+STIL,Stille,Hälsovård,FirstNorthPremier
+SUS,Surgical Science,Hälsovård,FirstNorthPremier
+TOL,Toleranzia,Hälsovård,FirstNorthPremier
+XINT,Xintela,Hälsovård,FirstNorthPremier
+XPC,XP Chemistries,Hälsovård,FirstNorthPremier
+ABSO,Absolent Air Care Group,Industri,FirstNorthPremier
+ACUVI,Acuvi,Industri,FirstNorthPremier
+AXOLOT,Axolot Solutions Holding,Industri,FirstNorthPremier
+BAWAT,Bawat Water Technologies,Industri,FirstNorthPremier
+BOMILL,BoMill,Industri,FirstNorthPremier
+CALVIK,Calviks,Industri,FirstNorthPremier
+CARE,Careium,Industri,FirstNorthPremier
+CI,Cell Impact,Industri,FirstNorthPremier
+DLAB,Dlaboratory Sweden,Industri,FirstNorthPremier
+ESGR-B,ES Energy Save Holding B,Industri,FirstNorthPremier
+FERRO,Ferroamp,Industri,FirstNorthPremier
+FIRE,Firefly,Industri,FirstNorthPremier
+FLEXQ,FlexQube,Industri,FirstNorthPremier
+FREEM,Freemelt,Industri,FirstNorthPremier
+GPX,Gasporox,Industri,FirstNorthPremier
+GOTL-A,Gotlandsbolaget A,Industri,FirstNorthPremier
+GOTL-B,Gotlandsbolaget B,Industri,FirstNorthPremier
+GGEO,Guideline Geo,Industri,FirstNorthPremier
+HEGR,Hedera Group,Industri,FirstNorthPremier
+HELIO,Heliospectra,Industri,FirstNorthPremier
+HILB-B,Hilbert Group,Industri,FirstNorthPremier
+IDUN-B,Idun Industrier B,Industri,FirstNorthPremier
+LXB,Luxbright,Industri,FirstNorthPremier
+LYGRD,Lyckegård,Industri,FirstNorthPremier
+MANTEX,Mantex,Industri,FirstNorthPremier
+NEPA,Nepa,Industri,FirstNorthPremier
+NJOB,NetJobs Group,Industri,FirstNorthPremier
+LEVEL,Nordic LEVEL Group,Industri,FirstNorthPremier
+NOTEK,Norditek,Industri,FirstNorthPremier
+OGUN-B,Ogunsen B,Industri,FirstNorthPremier
+OPTI,OptiCept Technologies,Industri,FirstNorthPremier
+OXE,OXE Marine,Industri,FirstNorthPremier
+PCOM-B,Precomp Solutions B,Industri,FirstNorthPremier
+RLOS-B,RanLOS,Industri,FirstNorthPremier
+RO,Rolling Optics Holding,Industri,FirstNorthPremier
+SAXG,Saxlund Group,Industri,FirstNorthPremier
+SES,Scandinavian Enviro Systems,Industri,FirstNorthPremier
+SERT,Serstech,Industri,FirstNorthPremier
+SIBEK,Sibek,Industri,FirstNorthPremier
+SILEON,Sileon,Industri,FirstNorthPremier
+SEYE,Smart Eye,Industri,FirstNorthPremier
+SUMMAS,Summa Defence,Industri,FirstNorthPremier
+TEQ,Teqnion,Industri,FirstNorthPremier
+TERNOR,Terranor Group,Industri,FirstNorthPremier
+TRAIN-B,Train Alliance B,Industri,FirstNorthPremier
+VSSAB-B,Viking Supply Ships B,Industri,FirstNorthPremier
+VIMAB,Vimab Group,Industri,FirstNorthPremier
+W5,W5 Solutions,Industri,FirstNorthPremier
+WPAY,Westpay,Industri,FirstNorthPremier
+AXIC-A,aXichem A,Kemi,FirstNorthPremier
+CINIS,Cinis Fertilizer,Kemi,FirstNorthPremier
+CLEM,Clemondo Group,Kemi,FirstNorthPremier
+ITECH,I-tech,Kemi,FirstNorthPremier
+IMPC,Impact Coatings,Kemi,FirstNorthPremier
+LCLEAN,LifeClean International,Kemi,FirstNorthPremier
+ORGC,OrganoClick,Kemi,FirstNorthPremier
+PCAT,Photocat,Kemi,FirstNorthPremier
+POLYG,Polygiene Group,Kemi,FirstNorthPremier
+AERO,Svenska Aerogel Holding,Kemi,FirstNorthPremier
+TRIBO-B,Tribox Group B,Kemi,FirstNorthPremier
+CIRCHE,CirChem,Kraft,FirstNorthPremier
+DE,Dala Energi,Kraft,FirstNorthPremier
+GIGA,Gigasun,Kraft,FirstNorthPremier
+MASHUP,Mashup Ireland,Kraft,FirstNorthPremier
+ARCT,Arctic Minerals,Råvaror,FirstNorthPremier
+BIOEX,Bioextrax,Råvaror,FirstNorthPremier
+BOTX,Botnia Exploration Holding,Råvaror,FirstNorthPremier
+DMXSE-SDB,District Metals Corp SDB,Råvaror,FirstNorthPremier
+FNMC-SDB,First Nordic Metals,Råvaror,FirstNorthPremier
+LEMSE,Leading Edge Materials Corp.,Råvaror,FirstNorthPremier
+LUC,Lucara Diamond Corp,Råvaror,FirstNorthPremier
+NIO,Nordic Iron Ore,Råvaror,FirstNorthPremier
+ADVBOX,Adventure Box Technology,Sällanköpsvaror,FirstNorthPremier
+BBROOM,Bubbleroom,Sällanköpsvaror,FirstNorthPremier
+CANDLE-B,Candles Scandinavia,Sällanköpsvaror,FirstNorthPremier
+CDON,CDON,Sällanköpsvaror,FirstNorthPremier
+CEDER,Cedergrenska,Sällanköpsvaror,FirstNorthPremier
+CLEMO,Clean Motion,Sällanköpsvaror,FirstNorthPremier
+DSNO,Desenio,Sällanköpsvaror,FirstNorthPremier
+ALBERT,eEducation Albert,Sällanköpsvaror,FirstNorthPremier
+ELLWEE,Ellwee,Sällanköpsvaror,FirstNorthPremier
+EMB,EMB Mission Bound,Sällanköpsvaror,FirstNorthPremier
+ENVAR,Envar,Sällanköpsvaror,FirstNorthPremier
+FRAG,Fragbite Group,Sällanköpsvaror,FirstNorthPremier
+FSPORT,FSport,Sällanköpsvaror,FirstNorthPremier
+GCOR,Gaming Corps,Sällanköpsvaror,FirstNorthPremier
+GBK,Goodbye Kansas Group,Sällanköpsvaror,FirstNorthPremier
+HOTEL,Hotel Fast SSE,Sällanköpsvaror,FirstNorthPremier
+KAKEL,Kakel Max,Sällanköpsvaror,FirstNorthPremier
+KAMBI,Kambi Group,Sällanköpsvaror,FirstNorthPremier
+BRAVE,Kinda Brave,Sällanköpsvaror,FirstNorthPremier
+KJELL,Kjell Group,Sällanköpsvaror,FirstNorthPremier
+MOBA,M.O.B.A Network,Sällanköpsvaror,FirstNorthPremier
+MAV,Mavshack,Sällanköpsvaror,FirstNorthPremier
+MAXENT-B,Maximum Entertainment B,Sällanköpsvaror,FirstNorthPremier
+NANOC-B,NanoCap Group B,Sällanköpsvaror,FirstNorthPremier
+BOAT,Nimbus Group,Sällanköpsvaror,FirstNorthPremier
+NITRO,Nitro Games,Sällanköpsvaror,FirstNorthPremier
+NREST,Nordrest,Sällanköpsvaror,FirstNorthPremier
+NBZ,Northbaze Group,Sällanköpsvaror,FirstNorthPremier
+OBAB,Online Brands Nordic,Sällanköpsvaror,FirstNorthPremier
+QIIWI,Qiiwi Games,Sällanköpsvaror,FirstNorthPremier
+REALFI,RealFiction,Sällanköpsvaror,FirstNorthPremier
+REFINE,Refine Group,Sällanköpsvaror,FirstNorthPremier
+SBOK,ScandBook Holding,Sällanköpsvaror,FirstNorthPremier
+SCOUT,Scout Gaming Group,Sällanköpsvaror,FirstNorthPremier
+SKOLON,Skolon,Sällanköpsvaror,FirstNorthPremier
+SOZAP,Sozap,Sällanköpsvaror,FirstNorthPremier
+STORY-B,Storytel B,Sällanköpsvaror,FirstNorthPremier
+BUY,Sweden Buyersclub,Sällanköpsvaror,FirstNorthPremier
+SODER,Söder Sportfiske,Sällanköpsvaror,FirstNorthPremier
+TELLUS,Tellusgruppen,Sällanköpsvaror,FirstNorthPremier
+TOURN,Tourn International,Sällanköpsvaror,FirstNorthPremier
+UTG,Unlimited Travel Group,Sällanköpsvaror,FirstNorthPremier
+USWE,USWE Sports,Sällanköpsvaror,FirstNorthPremier
+ACCON,Acconeer,Teknik,FirstNorthPremier
+PADEL,Acenta Group,Teknik,FirstNorthPremier
+ADTR,Adtraction,Teknik,FirstNorthPremier
+AVT-B,AVTECH Sweden B,Teknik,FirstNorthPremier
+BUSER,Bambuser,Teknik,FirstNorthPremier
+BEAMMW-B,Beammwave B,Teknik,FirstNorthPremier
+BIM,BIMobject,Teknik,FirstNorthPremier
+BINERO,Binero Group,Teknik,FirstNorthPremier
+BRILL,Brilliant Future,Teknik,FirstNorthPremier
+CHARGE,Chargepanel,Teknik,FirstNorthPremier
+CHECK,Checkin.com Group,Teknik,FirstNorthPremier
+CLAV,Clavister,Teknik,FirstNorthPremier
+CDMIL,CodeMill,Teknik,FirstNorthPremier
+COMPDM,Compodium,Teknik,FirstNorthPremier
+CFISH,Crunchfish,Teknik,FirstNorthPremier
+DIAH,Diadrom Holding,Teknik,FirstNorthPremier
+DIVIO-B,Divio Technologies B,Teknik,FirstNorthPremier
+DONE,Done.ai Group,Teknik,FirstNorthPremier
+ENERS,Enersize,Teknik,FirstNorthPremier
+EXS,Exsitec,Teknik,FirstNorthPremier
+FLEXM,Flexion Mobile,Teknik,FirstNorthPremier
+FLOWS,Flowscape Technology,Teknik,FirstNorthPremier
+FRAM-B,Fram Skandinavien B,Teknik,FirstNorthPremier
+GENI,Generic Sweden,Teknik,FirstNorthPremier
+GREAT,Greater Than,Teknik,FirstNorthPremier
+HDW-B,H&D Wireless Sweden Holding B,Teknik,FirstNorthPremier
+HIFA-B,Hifab B,Teknik,FirstNorthPremier
+INSP,Insplorion,Teknik,FirstNorthPremier
+IRIS,Irisity,Teknik,FirstNorthPremier
+JLT,JLT Mobile Computers,Teknik,FirstNorthPremier
+K33,K33,Teknik,FirstNorthPremier
+KENH,Kentima Holding B,Teknik,FirstNorthPremier
+KLIMAT,Klimator,Teknik,FirstNorthPremier
+LITI,Litium,Teknik,FirstNorthPremier
+LOYAL,Loyal Solutions,Teknik,FirstNorthPremier
+MODEL,Modelon,Teknik,FirstNorthPremier
+NEO-B,Neovici Holding B,Teknik,FirstNorthPremier
+NOSA,Nosa Plugs,Teknik,FirstNorthPremier
+OBSE,Observit,Teknik,FirstNorthPremier
+OODA,OODA AI,Teknik,FirstNorthPremier
+OPTER,Opter,Teknik,FirstNorthPremier
+QLOSR-B,Qlosr Group B,Teknik,FirstNorthPremier
+QCORE,Qlucore,Teknik,FirstNorthPremier
+RPLAN,Ranplan Group,Teknik,FirstNorthPremier
+RIGHTB,RightBridge Ventures Group,Teknik,FirstNorthPremier
+SFTR,Safeture,Teknik,FirstNorthPremier
+SONE,Sonetel,Teknik,FirstNorthPremier
+SPEONE,SpectrumOne,Teknik,FirstNorthPremier
+SPOTR,Spotr Group,Teknik,FirstNorthPremier
+TENEO,Teneo AI,Teknik,FirstNorthPremier
+UNIBAP,Unibap Space Solutions,Teknik,FirstNorthPremier
+UPSALE,Upsales Technology,Teknik,FirstNorthPremier
+VERT-B,Vertiseit B,Teknik,FirstNorthPremier
+VO2,VO2 Cap Holding,Teknik,FirstNorthPremier
+VUXEN,Vuxen Group,Teknik,FirstNorthPremier
+WPTG-B,White Pearl Technology Group B,Teknik,FirstNorthPremier
+XMR,XMReality,Teknik,FirstNorthPremier
+ZAPLOX,Zaplox,Teknik,FirstNorthPremier
+ALCA,Alcadon Group,Telekommunikation,FirstNorthPremier
+BAHN-B,Bahnhof B,Telekommunikation,FirstNorthPremier
+BRE2,Bredband2,Telekommunikation,FirstNorthPremier
+EFFH,Effnetplattformen Holding,Telekommunikation,FirstNorthPremier
+GAPW-B,Gapwaves B,Telekommunikation,FirstNorthPremier
+INCOAX,InCoax,Telekommunikation,FirstNorthPremier
+KEBNI-B,KebNi B,Telekommunikation,FirstNorthPremier
+LUMEN,LumenRadio,Telekommunikation,FirstNorthPremier
+MAVEN,Maven Wireless,Telekommunikation,FirstNorthPremier
+TALK,TalkPool,Telekommunikation,FirstNorthPremier
+TESSIN,Tessin Nordic Holding,Telekommunikation,FirstNorthPremier
+WAYS,Waystream Group,Telekommunikation,FirstNorthPremier
+WYLD,Wyld Networks,Telekommunikation,FirstNorthPremier
