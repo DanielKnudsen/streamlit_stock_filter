@@ -15,7 +15,7 @@ class GitSync:
     repo_dir: Path
     branch: str = "main"
     # Korrigering: Använd field(default_factory=list) för mutable standardvärden
-    csv_folders: list[str] = field(default_factory=lambda: ["data", "tickers", "fundamentals", "balance", "cashflow", "income", "ranks"])
+    csv_folders: list[str] = field(default_factory=lambda: ["csv-data", "tickers"])
     # Notera att du behöver importera `field` från `dataclasses`
 
     def run_git_command(self, command: list[str]) -> str:
