@@ -31,8 +31,8 @@ st.set_page_config(layout="centered", page_title="Stock Evaluation", page_icon="
 st.title("📈 Stock Screening Tool for Swedish Markets")
 st.markdown(
     """
-    This tool provides a comprehensive overview of Swedish stocks, ranking them across multiple financial categories and trends. 
-    Investors can use these rankings and filters to identify promising stocks, compare performance, and build a personalized shortlist for further analysis.
+    Detta verktyg ger en omfattande översikt över svenska aktier och rankar dem inom flera finansiella kategorier och trender.
+    Investerare kan använda dessa rankningar och filter för att identifiera lovande aktier, jämföra prestationer och bygga en personlig bevakningslista för vidare analys.
     """
 )
 
@@ -116,11 +116,11 @@ try:
         st.subheader("Aktiefilter")
         st.markdown(
             """
-            Använd reglagen nedan för att filtrera aktier baserat på deras totala poäng samt detaljerade 'senaste' och 'trend'-rankningar inom finansiella kategorier.
-            - **Reglage för totalrank:** Filtrera aktier efter deras övergripande 'Trend'- och 'Senaste'- Rank.
-            - **Reglage för SMA-differenser:** Förfina urvalet med hjälp av glidande medelvärdesdifferenser.
-            - **Kategorireglage:** Expandera för avancerad filtrering av specifika finansiella kategorier och nyckeltal.
-            Justera reglagen för att begränsa aktielistan enligt dina investeringskriterier.
+            Använd reglagen nedan för att filtrera aktier utifrån Totalrank, SMA-differenser och detaljerade rankningar inom olika finansiella kategorier.
+            - **Totalrank:** Filtrera aktier baserat på deras aggregerade 'Trend'- och 'Senaste'-rank.
+            - **SMA-differenser:** Begränsa urvalet med hjälp av skillnader mellan glidande medelvärden.
+            - **Utökade filter:** Expandera för avancerad filtrering på kategori- och nyckeltalsnivå.
+            Justera inställningarna för att hitta aktier som matchar dina investeringskriterier.
             """
         )
 
@@ -146,7 +146,8 @@ try:
                 min_value=min_diff_long_medium,
                 max_value=max_diff_long_medium,
                 value=(min_diff_long_medium, max_diff_long_medium),
-                step=0.01,
+                step=1.0,
+                format="%d",
                 help=get_tooltip_text('pct_SMA_medium_vs_SMA_long')
             )
         with col_diff_short_medium:
@@ -158,7 +159,8 @@ try:
                 min_value=min_diff_short_medium,
                 max_value=max_diff_short_medium,
                 value=(min_diff_short_medium, max_diff_short_medium),
-                step=0.01,
+                step=1.0,
+                format="%d",
                 help=get_tooltip_text('pct_SMA_short_vs_SMA_medium')
             )
         with col_diff_price_short:
@@ -170,7 +172,8 @@ try:
                 min_value=min_diff_price_short,
                 max_value=max_diff_price_short,
                 value=(min_diff_price_short, max_diff_price_short),
-                step=0.01,
+                step=1.0,
+                format="%d",
                 help=get_tooltip_text('pct_Close_vs_SMA_short')
             )
 
@@ -188,7 +191,8 @@ try:
                 min_value=min_trend,
                 max_value=max_trend,
                 value=(min_trend, max_trend),
-                step=0.1,
+                step=1.0,
+                format="%d",
                 help=get_tooltip_text('Trend_clusterRank')
             )
         with col_total_latest:
@@ -199,7 +203,8 @@ try:
                 min_value=min_latest,
                 max_value=max_latest,
                 value=(min_latest, max_latest),
-                step=0.1,
+                step=1.0,
+                format="%d",
                 help=get_tooltip_text('Latest_clusterRank')
             )
         
@@ -225,7 +230,9 @@ try:
                                 min_value=slider_min,
                                 max_value=slider_max,
                                 value=(slider_min, slider_max),
-                                key=f"slider_trend_{col}"
+                                key=f"slider_trend_{col}",
+                                step=1.0,
+                                format="%d"
                             )
                             df_filtered_by_sliders = df_filtered_by_sliders[
                                 (df_filtered_by_sliders[col] >= current_min) &
@@ -251,7 +258,9 @@ try:
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
-                                            key=f"slider_tab_trend_{category_name}_{r}"
+                                            key=f"slider_tab_trend_{category_name}_{r}",
+                                            step=1.0,
+                                            format="%d"
                                         )
                                         df_filtered_by_sliders = df_filtered_by_sliders[
                                             (df_filtered_by_sliders[r] >= slider_min) &
@@ -271,7 +280,9 @@ try:
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{r_data}"
+                                            key=f"slider_tab_latest_{r_data}",
+                                            step=0.1,
+                                            format="%.1f"
                                         )
                                         # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
                                         mask = (df_filtered_by_sliders[r_data].isna()) | (
@@ -299,7 +310,9 @@ try:
                                 min_value=slider_min,
                                 max_value=slider_max,
                                 value=(slider_min, slider_max),
-                                key=f"slider_latest_{col}"
+                                key=f"slider_latest_{col}",
+                                step=1.0,
+                                format="%d"
                             )
                             df_filtered_by_sliders = df_filtered_by_sliders[
                                 (df_filtered_by_sliders[col] >= current_min) &
@@ -325,7 +338,9 @@ try:
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{category_name}_{r}"
+                                            key=f"slider_tab_latest_{category_name}_{r}",
+                                            step=1.0,
+                                            format="%d"
                                         )
                                         df_filtered_by_sliders = df_filtered_by_sliders[
                                             (df_filtered_by_sliders[r] >= slider_min) &
@@ -344,7 +359,9 @@ try:
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{r_data}"
+                                            key=f"slider_tab_latest_{r_data}",
+                                            step=0.1,
+                                            format="%.1f"
                                         )
                                         # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
                                         mask = (df_filtered_by_sliders[r_data].isna()) | (
@@ -374,9 +391,9 @@ try:
             with st.container(border=True, key="lista_toggles"):
                 lista_values = df_filtered_by_sliders['Lista'].dropna().unique().tolist()
                 lista_values = lista_values[:5]  # Limit to 5 unique values
-                # Use segmented control for selection, all enabled by default
-                lista_selected = st.segmented_control(
-                    "Välj Lista:",
+                # Use pills for selection, all enabled by default
+                lista_selected = st.pills(
+                    "Välj/uteslut Lista:",
                     options=lista_values,
                     default=lista_values,
                     selection_mode='multi',
@@ -394,7 +411,7 @@ try:
                 sektor_values = df_filtered_by_sliders['Sektor'].dropna().unique().tolist()
                 # Use st.pills for multi-select, all enabled by default
                 sektor_selected = st.pills(
-                    "Välj Sektor:",
+                    "Välj/uteslut Sektor:",
                     options=sektor_values,
                     default=sektor_values,
                     selection_mode='multi',
@@ -458,9 +475,9 @@ try:
                     size=size_raw, # if 'marketCap' in plot_df.columns else [20]*len(plot_df),
                     hover_data={},
                     labels={
-                        'Trend_clusterRank': 'Total Trend Score',
-                        'Latest_clusterRank': 'Total Latest Score',
-                        'Lista': 'Lista',
+                        'Trend_clusterRank': get_display_name('Trend_clusterRank'),
+                        'Latest_clusterRank': get_display_name('Latest_clusterRank'),
+                        'Lista': get_display_name('Lista'),
                         #'hover_summary': 'Summary',
                         'size': 'Market Cap'
                     },
@@ -474,8 +491,10 @@ try:
                         yanchor="bottom",
                         y=1.02,
                         xanchor="center",
-                        x=0.5
-                    )
+                        x=0.5,
+                        title_text=None  # Hide the legend title
+                    ),
+                    showlegend=True
                 )
                 bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
                 if show_tickers:
@@ -570,25 +589,40 @@ try:
 
     if not shortlisted_stocks.empty:
         # Display only Ticker (index) and the renamed rank_Score columns for shortlist
+        download_columns = [col for col in display_rank_score_columns if col != 'Shortlist' and col != 'Välj']  # Remove 'Shortlist' and 'Välj' columns from display
         st.dataframe(
-            shortlisted_stocks[display_rank_score_columns], # Ticker is already the index
+            shortlisted_stocks[download_columns], # Ticker is already the index
             hide_index=False, # Show the index (Ticker) for the shortlist as well
             use_container_width=True
         )
-        st.download_button("Ladda ner bevakningslista", data=shortlisted_stocks.to_csv(), file_name="shortlist.csv", mime="text/csv")
+        
+        st.download_button("Ladda ner bevakningslista", data=shortlisted_stocks[download_columns].to_csv(), file_name="shortlist.csv", mime="text/csv")
     else:
         st.info("Din bevakningslista är tom. Markera rutan under 'Shortlist' för att lägga till aktier.")
 
     st.markdown("---")        
-    longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
-    st.subheader(f"{selected_stock_ticker} - Business Summary")
-    st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "No long business summary available for this stock.")
+    if selected_stock_ticker:
+        st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
+        left_col, right_col = st.columns([1,2], gap='medium', border=False)
+        with left_col:
+            
+            st.write(f"**Ticker:**   \n{selected_stock_ticker}")
+            st.write(f"**Lista:**   \n{selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'}")
+            st.write(f"**Sektor:**   \n{selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'}")
+            st.write(f"**Marknadsvärde:**   \n{selected_stock_dict['marketCap_MSEK'] if 'marketCap_MSEK' in selected_stock_dict else 'N/A'}")
+        with right_col:
+            #st.subheader("Företagsbeskrivning")
+            longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
+            with st.popover(f"{longBusinessSummary.values[0][0:500]}...",use_container_width=True):
+                st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
 
     st.subheader("Kursutveckling och Trendlinje")
 
     if selected_stock_ticker:
         # Add slider for PWLF
-        num_segments = st.slider('Antal linjesegment för trendlinje', 1, 6, 1, key="pwlf_slider")
+        label = "Antal linjesegment för trendlinje"
+        linjesegments =[1, 2, 3, 4, 5]
+        num_segments = st.segmented_control(label, linjesegments, selection_mode='single', default=1, key="pwlf_slider")
         price_file_path = os.path.join(CSV_DATA_DIR, "price_data.csv")
         if os.path.exists(price_file_path):
             df_price_all = pd.read_csv(price_file_path)
