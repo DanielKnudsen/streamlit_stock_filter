@@ -367,12 +367,6 @@ try:
     with st.container(border=True):
         st.subheader("Bubbelplot med filtrering")
         # --- Bubble Plot: Total_Trend_Score vs Total_Latest_Score (filtered) ---
-        with st.container(border=True, key="bubble_plot_container"):
-            col_ticker, col_hover = st.columns(2)
-            with col_ticker:
-                show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
-            with col_hover:
-                show_hover = st.toggle('Visa fullständig info vid hover i bubbelplotten', value=True)
 
         # --- Lista toggles for bubble plot ---
         lista_values = []
@@ -380,13 +374,14 @@ try:
             with st.container(border=True, key="lista_toggles"):
                 lista_values = df_filtered_by_sliders['Lista'].dropna().unique().tolist()
                 lista_values = lista_values[:5]  # Limit to 5 unique values
-                col_lista = st.columns(len(lista_values)) if lista_values else []
-                lista_selected = []
-                for idx, lista in enumerate(lista_values):
-                    with col_lista[idx]:
-                        show_lista = st.toggle(f"{lista}", value=True, key=f"toggle_lista_{lista}")
-                        if show_lista:
-                            lista_selected.append(lista)
+                # Use segmented control for selection, all enabled by default
+                lista_selected = st.segmented_control(
+                    "Välj Lista:",
+                    options=lista_values,
+                    default=lista_values,
+                    selection_mode='multi',
+                    key="segmented_lista"
+                )
                 # Filter df_filtered_by_sliders by selected Lista values
                 if lista_selected:
                     df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
@@ -397,25 +392,26 @@ try:
         if 'Sektor' in df_filtered_by_sliders.columns:
             with st.container(border=True, key="sektor_toggles"):
                 sektor_values = df_filtered_by_sliders['Sektor'].dropna().unique().tolist()
-                max_cols = 5
-                num_rows = int(np.ceil(len(sektor_values) / max_cols))
-                sektor_selected = []
-                for row in range(num_rows):
-                    cols_in_row = sektor_values[row * max_cols : (row + 1) * max_cols]
-                    col_sektor = st.columns(len(cols_in_row)) if cols_in_row else []
-                    for idx, sektor in enumerate(cols_in_row):
-                        with col_sektor[idx]:
-                            show_sektor = st.toggle(f"{sektor}", value=True, key=f"toggle_sektor_{sektor}")
-                            if show_sektor:
-                                sektor_selected.append(sektor)
+                # Use st.pills for multi-select, all enabled by default
+                sektor_selected = st.pills(
+                    "Välj Sektor:",
+                    options=sektor_values,
+                    default=sektor_values,
+                    selection_mode='multi',
+                    key="pills_sektor"
+                )
                 # Filter df_filtered_by_sliders by selected Sektor values
                 if sektor_selected:
                     df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         # Format marketCap for hover (MSEK, rounded, with space as thousands separator)
+
+        with st.container(border=True, key="bubble_plot_container"):
+            show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
         if 'marketCap' in df_filtered_by_sliders.columns:
             df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
+        
         if len(df_filtered_by_sliders) > 0:
             # Assign fixed colors to Lista values using all possible values from the full dataset
             lista_color_map = {
@@ -459,17 +455,14 @@ try:
                     color_discrete_map=color_discrete_map,
                     hover_name=plot_df.index if show_tickers else None,
                     text=plot_df.index if show_tickers else None,
-                    size=size if 'marketCap' in plot_df.columns else [20]*len(plot_df),
-                    hover_data={
-                        "hover_summary": True,
-                        "marketCap_MSEK": True
-                    } if show_hover else {},
+                    size=size_raw, # if 'marketCap' in plot_df.columns else [20]*len(plot_df),
+                    hover_data={},
                     labels={
                         'Trend_clusterRank': 'Total Trend Score',
                         'Latest_clusterRank': 'Total Latest Score',
-                        'Lista': '',
-                        'hover_summary': 'Summary',
-                        'marketCap_MSEK': 'Market Cap'
+                        'Lista': 'Lista',
+                        #'hover_summary': 'Summary',
+                        'size': 'Market Cap'
                     },
                     title='Total Trend Score vs Total Latest Score',
                     width=900,
@@ -582,6 +575,7 @@ try:
             hide_index=False, # Show the index (Ticker) for the shortlist as well
             use_container_width=True
         )
+        st.download_button("Ladda ner bevakningslista", data=shortlisted_stocks.to_csv(), file_name="shortlist.csv", mime="text/csv")
     else:
         st.info("Din bevakningslista är tom. Markera rutan under 'Shortlist' för att lägga till aktier.")
 

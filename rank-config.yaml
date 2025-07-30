@@ -5,7 +5,11 @@ output_file_path: "csv-data/stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 
 # Inställningar för datainhämtning
-data_fetch_years: 3
+data_fetch_years: 4 # Antal år av finansiella data som ska hämtas
+price_data_years: 3 # Antal år av prisdata som ska hämtas
+
+# Antal decimaler för Ranks
+rank_decimals: 1
 
 # Inställningar för glidande medelvärden
 SMA_short: 10
