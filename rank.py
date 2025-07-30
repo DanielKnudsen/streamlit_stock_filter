@@ -420,7 +420,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
 
     return df_agg.to_dict(orient='index')
 
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,cagr_results):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,cagr_results,rank_decimals):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
@@ -437,6 +437,11 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_last_SMA = pd.read_csv("csv-data/last_SMA.csv", index_col='Ticker')
 
     final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
+    # Round all columns containing "Rank" to 1 decimal
+    for col in final_df.columns:
+        if "Rank" in col:
+            final_df[col] = final_df[col].round(rank_decimals)
+    final_df
     return final_df#.sort_values(by='Total_Score', ascending=False)
 
 def save_results_to_csv(results_df, file_path):
@@ -660,7 +665,7 @@ if __name__ == "__main__":
                            config["SMA_medium"], 
                            config["SMA_long"],
                            tickers, 
-                           config["data_fetch_years"], 
+                           config["price_data_years"], 
                            os.path.join(output_dir, config["price_data_file"]))
             save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
                                  save_to=os.path.join(output_dir, "last_SMA.csv"))
@@ -680,7 +685,7 @@ if __name__ == "__main__":
 
             cagr_results = calculate_cagr(config['cagr_dimension'], os.path.join(output_dir, "raw_financial_data.csv"))
 
-            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results)
+            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results, config["rank_decimals"])
             save_results_to_csv(final_results, config["output_file_path"])
 
             print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")
