@@ -93,6 +93,14 @@ ratio_definitions:
     source_cf: ["Operating Cash Flow"]
     source_bs: ["Total Debt"]
     higher_is_better: True
+  Basic_EPS:
+    formula: "Basic_EPS"
+    source_income: ["Basic EPS"]
+    higher_is_better: True
+  Total_Revenue:
+    formula: "Total_Revenue"
+    source_income: ["Total Revenue"]
+    higher_is_better: True
 
 # Konfiguration för rankningsmetoden
 ranking_method:
