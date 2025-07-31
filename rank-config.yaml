@@ -24,9 +24,7 @@ SMA_long: 200
 # CAGR inställningar
 cagr_dimension:
   - "Total Revenue"
-  - "EBITDA"
   - "Basic EPS"
-
 
 # Definitioner av nyckeltal och deras källor/logik
 ratio_definitions:
@@ -216,6 +214,14 @@ display_names:
   Vardering_latest_catRank: "Värdering sen. året"
   Kassaflode_trend_catRank: "Kassaflöde trend 4 år"
   Kassaflode_latest_catRank: "Kassaflöde sen. året"
+  Kvalitet: "Kvalitet"
+  FinansiellHalsa: "Finansiell Hälsa"
+  Lonsamhet: "Lönsamhet"
+  Vardering: "Värdering"
+  Kassaflode: "Kassaflöde"
+  SMA_short: "SMA 10"
+  SMA_medium: "SMA 50"
+  SMA_long: "SMA 200"
 
 tooltip_texts:
   pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen)."
