@@ -55,7 +55,6 @@ def fetch_yfinance_data(ticker, years):
         info = ticker_obj.info
         shares_outstanding = info.get('sharesOutstanding', None)
         current_price = info.get('currentPrice', None)
-        market_cap = info.get('marketCap', None)
         longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
 
         print(f"Ticker: {ticker}")
@@ -80,12 +79,12 @@ def fetch_yfinance_data(ticker, years):
             'cash_flow': cf,
             'current_price': current_price,
             'shares_outstanding': shares_outstanding,
-            'longBusinessSummary': longBusinessSummary,
-            'market_cap': market_cap
+            'longBusinessSummary': longBusinessSummary
         }
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
         return None
+
 
 def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calculated_ratios.csv"):
     """
@@ -107,17 +106,17 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
     for ticker, data in raw_data.items():
         if data is None:
             print(f"Varning: Ingen data för {ticker}. Sätter alla nyckeltal till NaN.")
-            calculated_ratios[ticker] = {f'{ratio_name}_ratio_latest': np.nan for ratio_name in ratio_definitions}
+            calculated_ratios[ticker] = {f'{ratio_name}_latest': np.nan for ratio_name in ratio_definitions}
             for ratio_name in ratio_definitions:
-                calculated_ratios[ticker][f'{ratio_name}_ratio_trendSlope'] = np.nan
+                calculated_ratios[ticker][f'{ratio_name}_trend_slope'] = np.nan
             continue
 
         # Säkerhetskontroll: Kontrollera om DataFrames är tomma
         if data['balance_sheet'].empty or data['income_statement'].empty or data['cash_flow'].empty:
             print(f"Varning: Finansiella data är ofullständig för {ticker}. Kan inte beräkna nyckeltal.")
-            calculated_ratios[ticker] = {f'{ratio_name}_ratio_latest': np.nan for ratio_name in ratio_definitions}
+            calculated_ratios[ticker] = {f'{ratio_name}_latest': np.nan for ratio_name in ratio_definitions}
             for ratio_name in ratio_definitions:
-                calculated_ratios[ticker][f'{ratio_name}_ratio_trendSlope'] = np.nan
+                calculated_ratios[ticker][f'{ratio_name}_trend_slope'] = np.nan
             continue
 
         # Säkerställ att du jobbar med kopior för att undvika SettingWithCopyWarning
@@ -182,8 +181,7 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
             'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
             'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
             'sharesOutstanding': data['shares_outstanding'],
-            'currentPrice': data['current_price'],
-            'marketCap': data['market_cap']
+            'currentPrice': data['current_price']
         }
         ratios.update(raw_fields)
 
@@ -209,8 +207,7 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
                     'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
                     'sharesOutstanding': data['shares_outstanding'],
                     'currentPrice': data['current_price'],
-                    'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                    'marketCap': data['market_cap']
+                    'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan
                 }
 
                 # Hantera required_fields för både strängar och listor
@@ -230,15 +227,15 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
                 # Kontrollera om något värde är NaN eller noll
                 if any(pd.isna(locals_dict.get(field)) or locals_dict.get(field) == 0 for field in required_fields):
                     print(f"Varning: Ogiltiga värden (NaN eller 0) för {ticker}'s {ratio_name}: {locals_dict}")
-                    ratios[f'{ratio_name}_ratio_latest'] = np.nan
-                    ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                    ratios[f'{ratio_name}_latest'] = np.nan
+                    ratios[f'{ratio_name}_trend_slope'] = np.nan
                     for year in years:
                         ratios[f'{ratio_name}_year_{year}'] = np.nan
                     continue
 
                 # Beräkna senaste årets värde
                 latest_value = eval(definition['formula'], globals(), locals_dict)
-                ratios[f'{ratio_name}_ratio_latest'] = latest_value
+                ratios[f'{ratio_name}_latest'] = latest_value
 
                 # Beräkna historiska värden och trend om tillräckligt med data finns
                 if len(years) >= 2 and len(is_copy) >= 2 and len(bs_copy) >= 2 and len(cf_copy) >= 2:
@@ -268,8 +265,7 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
                                 'Free_Cash_Flow': cf_copy.loc[cf_copy.index[i], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
                                 'sharesOutstanding': data['shares_outstanding'],
                                 'currentPrice': data['current_price'],
-                                'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                                'marketCap': data['market_cap']
+                                'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan
                             }
                             # Kontrollera om något värde är NaN eller noll
                             if any(pd.isna(locals_dict_hist.get(field)) or locals_dict_hist.get(field) == 0 for field in required_fields):
@@ -288,22 +284,22 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
                     y = np.array(historical_values)
 
                     if np.isinf(y).any() or np.isnan(y).all():
-                        print(f"Varning: Ogiltiga historiska värden för {ticker}'s {ratio_name}_ratio_trendSlope: {y}")
-                        ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                        print(f"Varning: Ogiltiga historiska värden för {ticker}'s {ratio_name}_trend_slope: {y}")
+                        ratios[f'{ratio_name}_trend_slope'] = np.nan
                     else:
                         slope, _ = np.polyfit(x[~np.isnan(y)], y[~np.isnan(y)], 1)
-                        ratios[f'{ratio_name}_ratio_trendSlope'] = slope
+                        ratios[f'{ratio_name}_trend_slope'] = slope
                 else:
                     print(f"Varning: Otillräcklig data för trendberäkning för {ticker}'s {ratio_name} (bs: {len(bs_copy)}, is: {len(is_copy)}, cf: {len(cf_copy)}, years: {years})")
-                    ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                    ratios[f'{ratio_name}_trend_slope'] = np.nan
                     for year in years:
                         ratios[f'{ratio_name}_year_{year}'] = np.nan
 
             except (ZeroDivisionError, TypeError, KeyError) as e:
                 print(f"Varning: Beräkningsfel för {ticker}'s {ratio_name}: {e}")
                 print(f"Variabler: {locals_dict}")
-                ratios[f'{ratio_name}_ratio_latest'] = np.nan
-                ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                ratios[f'{ratio_name}_latest'] = np.nan
+                ratios[f'{ratio_name}_trend_slope'] = np.nan
                 for year in years:
                     ratios[f'{ratio_name}_year_{year}'] = np.nan
 
@@ -319,6 +315,7 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
 
     return calculated_ratios
 
+
 def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
     """
     Rankar varje nyckeltal (senaste år och trend) på en 0-100 skala.
@@ -329,17 +326,16 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
     #ratio_definitions = ranking_config.get('ratio_definitions', {})
 
     for column in df.columns:
-        if column.endswith('_ratio_latest'):
-            ratio_name = column.replace('_ratio_latest', '')
+        if column.endswith('_latest'):
+            ratio_name = column.replace('_latest', '')
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             #ascending = not is_better
             ranked = df[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
             for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_latest_ratioRank'] = rank if not pd.isna(rank) else np.nan
+                ranked_ratios[ticker][f'{column}_rank'] = rank if not pd.isna(rank) else np.nan
         
-        elif column.endswith('_ratio_trendSlope'):
-            ratio_name = column.replace('_ratio_trendSlope', '')
+        elif column.endswith('_trend_slope'):
+            ratio_name = column.replace('_trend_slope', '')
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             
             df_cleaned = df.loc[df[column].notna()]
@@ -354,95 +350,67 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
 
             if not positive_trend_slopes.empty:
                 pos_ranks = positive_trend_slopes.rank(pct=True, ascending=True) * 50 + 50
-
                 for ticker, rank in pos_ranks.items():
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank
+                    ranked_ratios[ticker][f'{ratio_name}_trend_rank'] = rank
             
             if not negative_trend_slopes.empty:
                 neg_ranks = negative_trend_slopes.rank(pct=True, ascending=True) * 50
                 for ticker, rank in neg_ranks.items():
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank
+                    ranked_ratios[ticker][f'{ratio_name}_trend_rank'] = rank
 
             for ticker in df.index:
-                if f'{ratio_name}_trend_ratioRank' not in ranked_ratios[ticker]:
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = 50
+                if f'{ratio_name}_trend_rank' not in ranked_ratios[ticker]:
+                    ranked_ratios[ticker][f'{ratio_name}_trend_rank'] = 50
 
     return ranked_ratios
 
-def aggregate_category_ranks(ranked_ratios, category_ratios):
+def aggregate_category_scores(ranked_ratios, category_weights):
     """
     Aggregerar de rankade nyckeltalen till en total poäng för varje kategori.
-    Efter beräkning rankas alla aggregerade värden (inklusive totalscore) på en 0-100-skala.
     """
     aggregated_scores = {}
     for ticker, ranks in ranked_ratios.items():
         if not ranks:
             continue
+        
         ticker_scores = {}
-        total_latest_score = 0
-        total_trend_score = 0
-        total_latest_weight = 0
-        total_trend_weight = 0
-        for category, ratios in category_ratios.items():
+        total_score = 0
+        
+        for category, weights in category_weights.items():
             category_score = 0
             num_ratios = 0
+            
             for rank_name, rank_value in ranks.items():
-                if rank_name in ratios:
+                if rank_name in weights:
                     if not pd.isna(rank_value):
                         category_score += rank_value
-                        num_ratios += ratios[rank_name]
-            cat_avg_name = category.replace('_ratioRank', '')
+                        num_ratios += weights[rank_name]
+            
             if num_ratios > 0:
-                ticker_scores[f'{cat_avg_name}_catAvg'] = category_score / num_ratios if num_ratios > 0 else np.nan
+                ticker_scores[f'{category}_Score'] = category_score / num_ratios if num_ratios > 0 else np.nan
+                total_score += ticker_scores[f'{category}_Score'] * weights['weight']
             else:
-                ticker_scores[f'{cat_avg_name}_catAvg'] = np.nan
-            # Add to total_latest_score or total_trend_score depending on category name
-            if category.endswith('_latest_ratioRank'):
-                if not pd.isna(ticker_scores[f'{cat_avg_name}_catAvg']):
-                    total_latest_score += ticker_scores[f'{cat_avg_name}_catAvg']
-                    total_latest_weight += 1
-            elif category.endswith('_trend_ratioRank'):
-                if not pd.isna(ticker_scores[f'{cat_avg_name}_catAvg']):
-                    total_trend_score += ticker_scores[f'{cat_avg_name}_catAvg']
-                    total_trend_weight += 1
+                ticker_scores[f'{category}_Score'] = np.nan
+        
+        ticker_scores['Total_Score'] = total_score
         aggregated_scores[ticker] = ticker_scores
+    
+    return aggregated_scores
 
-    # --- Rank all aggregated calculations (0-100) ---
-    # Convert to DataFrame for easy ranking
-    df_agg = pd.DataFrame.from_dict(aggregated_scores, orient='index')
-    for col in df_agg.columns:
-        col_name = col.replace('_catAvg', '_catRank') if col.endswith('_catAvg') else col
-        if df_agg[col].dtype in [float, int]:
-            # Rank so that higher is better (ascending=True)
-            ranks = df_agg[col].rank(pct=True, ascending=True) * 100
-            ranks = ranks.fillna(50)
-            df_agg[col_name] = ranks
-
-    return df_agg.to_dict(orient='index')
-
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,cagr_results,rank_decimals):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
     df_calculated = pd.DataFrame.from_dict(calculated_ratios, orient='index')
     df_ranked = pd.DataFrame.from_dict(ranked_ratios, orient='index')
     df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
-    df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')
-    df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
-
     # Load tickers file as defined in config
     tickers_file = config.get("input_ticker_file", "tickers/tickers_lists.csv")
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
-    df_last_SMA = pd.read_csv("csv-data/last_SMA.csv", index_col='Ticker')
-
-    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
-    # Round all columns containing "Rank" to 1 decimal
-    for col in final_df.columns:
-        if "Rank" in col:
-            final_df[col] = final_df[col].round(rank_decimals)
-    final_df
-    return final_df#.sort_values(by='Total_Score', ascending=False)
+    
+    final_df = pd.concat([df_calculated, df_ranked, df_scores,df_tickers], axis=1)
+    return final_df.sort_values(by='Total_Score', ascending=False)
 
 def save_results_to_csv(results_df, file_path):
     """
@@ -514,129 +482,6 @@ def save_category_scores_to_csv(category_scores, csv_file_path):
         df = pd.concat([df, df_temp], ignore_index=False)
     df.to_csv(csv_file_path, index=True)
 
-def get_price_data(SMA_short:int, SMA_medium:int, SMA_long:int, tickers:list, data_fetch_years:int, price_data_file_path:str):
-    df_complete = pd.DataFrame()
-    for ticker in tickers:
-        try:
-            yf_ticker = f"{ticker}.ST"
-            stock = yf.Ticker(yf_ticker)
-            df_price_data = stock.history(period=f"{data_fetch_years}y")[['Close', 'Volume']]
-            df_price_data['Ticker'] = ticker
-            if df_price_data.index.tz is not None:
-                df_price_data.index = df_price_data.index.tz_localize(None)
-            if df_price_data.empty:
-                print(f"Ingen data hämtad för {yf_ticker}")
-            # Calculate moving averages
-            df_price_data['SMA_short'] = df_price_data['Close'].rolling(window=SMA_short).mean()
-            df_price_data['SMA_medium'] = df_price_data['Close'].rolling(window=SMA_medium).mean()
-            df_price_data['SMA_long'] = df_price_data['Close'].rolling(window=SMA_long).mean()
-            # Calculate percent differences
-            df_price_data['pct_SMA_medium_vs_SMA_long'] = (((df_price_data['SMA_medium'] - df_price_data['SMA_long']) / df_price_data['SMA_long']) * 100).fillna(0)
-            df_price_data['pct_SMA_short_vs_SMA_medium'] = (((df_price_data['SMA_short'] - df_price_data['SMA_medium']) / df_price_data['SMA_medium']) * 100).fillna(0)
-            df_price_data['pct_Close_vs_SMA_short'] = (((df_price_data['Close'] - df_price_data['SMA_short']) / df_price_data['SMA_short']) * 100).fillna(0)
-            # Calculate percent differences for closing price
-            """df_price_data['pct_diff_short'] = (df_price_data['Close'].pct_change(periods=pct_diff_short)* 100).fillna(0)
-            df_price_data['pct_diff_medium'] = (df_price_data['Close'].pct_change(periods=pct_diff_medium)* 100).fillna(0)
-            df_price_data['pct_diff_long'] = (df_price_data['Close'].pct_change(periods=pct_diff_long)* 100).fillna(0)"""
-
-            df_complete = pd.concat([df_complete, df_price_data])
-        except Exception as e:
-            print(f"Fel vid hämtning av data för {yf_ticker}: {str(e)}")
-    # Om df_complete är tom, skriv ut ett meddelande
-    if df_complete.empty:
-        print("Ingen prisdata hämtad för några tickers.")
-    df_complete.to_csv(price_data_file_path, index=True)
-
-def save_last_SMA_to_csv(read_from, save_to):
-    """
-    Sparar den senaste SMA-data till en separat CSV-fil.
-    Beräknar även CAGR för 'Close' per ticker och lägger till det i resultatet.
-    """
-    try:
-        df = pd.read_csv(read_from, index_col='Date', parse_dates=True)
-        if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns and 'Close' in df.columns:
-            # Get the latest row for each ticker
-            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long']]
-            # Calculate CAGR for each ticker
-            cagr_list = []
-            for ticker, group in df.groupby('Ticker'):
-                group = group.sort_index()
-                if len(group) > 1:
-                    start_price = group['Close'].iloc[0]
-                    end_price = group['Close'].iloc[-1]
-                    num_years = (group.index[-1] - group.index[0]).days / 365.25
-                    if start_price > 0 and num_years > 0:
-                        cagr = ((end_price / start_price) ** (1 / num_years)) - 1
-                        cagr_list.append({'Ticker': ticker, 'CAGR': cagr})
-                    else:
-                        cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
-                else:
-                    cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
-            df_cagr = pd.DataFrame(cagr_list).set_index('Ticker')
-            last_rows = last_rows.set_index('Ticker')
-            last_rows['cagr_close'] = df_cagr['CAGR']
-            last_rows.reset_index(inplace=True)
-            last_rows.to_csv(save_to, index=False)
-            print(f"Senaste SMA-data per ticker sparad i '{save_to}'")
-        else:
-            print("Fel: Saknar nödvändiga kolumner i prisdata.")
-    except Exception as e:
-        print(f"Fel vid sparande av senaste SMA-data: {e}")
-
-def aggregate_cluster_ranks(category_ranks):
-    """
-    Agregerar rankningar för varje cluster baserat på de angivna cluster-ratio.
-    """
-    results = []
-    for ticker, subdict in category_ranks.items():
-        latest_vals = [v for k, v in subdict.items() if "latest_catRank" in k]
-        trend_vals = [v for k, v in subdict.items() if "trend_catRank" in k]
-        latest_avg = sum(latest_vals) / len(latest_vals) if latest_vals else None
-        trend_avg = sum(trend_vals) / len(trend_vals) if trend_vals else None
-        results.append({
-            "Ticker": ticker,
-            "Latest_clusterAvg": latest_avg,
-            "Trend_clusterAvg": trend_avg
-        })
-    df = pd.DataFrame(results)
-    for col in df.columns:
-        col_name = col.replace('_clusterAvg', '_clusterRank') if col.endswith('_clusterAvg') else col
-        if df[col].dtype in [float, int]:
-            # Rank so that higher is better (ascending=True)
-            ranks = df[col].rank(pct=True, ascending=True) * 100
-            df[col_name] = ranks
-    return df.set_index('Ticker').to_dict(orient='index')
-
-def calculate_cagr(cagr_dimension, raw_financial_data_file):
-    """
-    Beräknar CAGR (Compound Annual Growth Rate) för de angivna dimensionerna.
-    Dimensionerna finns i 'Metric'-kolumnen och datum i 'Date'-kolumnen.
-    Resultatnyckeln är 'cagr' + dimension med mellanslag ersatt av underscore.
-    """
-    cagr_results = {}
-    raw_financial_data = pd.read_csv(raw_financial_data_file, parse_dates=['Date'])
-    tickers = raw_financial_data['Ticker'].unique()
-    for ticker in tickers:
-        data_ticker = raw_financial_data[raw_financial_data['Ticker'] == ticker]
-        cagr_results[ticker] = {}
-        for dimension in cagr_dimension:
-            key = f"cagr{dimension.replace(' ', '_')}"
-            data_dim = data_ticker[data_ticker['Metric'] == dimension].sort_values('Date')
-            if not data_dim.empty:
-                start_value = data_dim['Value'].iloc[0]
-                end_value = data_dim['Value'].iloc[-1]
-                start_date = pd.to_datetime(data_dim['Date'].iloc[0])
-                end_date = pd.to_datetime(data_dim['Date'].iloc[-1])
-                num_years = (end_date - start_date).days / 365.25
-                if start_value > 0 and num_years > 0:
-                    cagr = ((end_value / start_value) ** (1 / num_years)) - 1
-                    cagr_results[ticker][key] = cagr
-                else:
-                    cagr_results[ticker][key] = np.nan
-            else:
-                cagr_results[ticker][key] = np.nan
-    return cagr_results
-
 # --- Huvudkörning ---
 
 if __name__ == "__main__":
@@ -647,29 +492,38 @@ if __name__ == "__main__":
             print("No tickers to evaluate. Please check your CSV file.")
         else:
             # 1. Hämta eller ladda data
-            output_dir = config.get("output_path", "csv-data")
-            #pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
+            output_dir = os.path.dirname(config["output_file_path"])
+            pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
             raw_financial_data = {}
-
-            for ticker in tickers:
-                raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
             
-            # Filtrera bort tickers som inte har data 
-            # TODO: Hantera fall där data är None
-            raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
+            if os.path.exists(pickle_file_path):
+                print("Laddar finansiell data från pickle-filen...")
+                try:
+                    with open(pickle_file_path, 'rb') as f:
+                        raw_financial_data = pickle.load(f)
+                except (IOError, pickle.PickleError) as e:
+                    print(f"Fel vid laddning av pickle-fil: {e}. Försöker hämta ny data.")
+                    os.remove(pickle_file_path) # Ta bort skadad fil
+                    # Fortsätter till datainsamling nedan
             
-            save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
-            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
-            print("läser in stock price data...")
-            get_price_data(config["SMA_short"], 
-                           config["SMA_medium"], 
-                           config["SMA_long"],
-                           tickers, 
-                           config["price_data_years"], 
-                           os.path.join(output_dir, config["price_data_file"]))
-            save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
-                                 save_to=os.path.join(output_dir, "last_SMA.csv"))
+            # Om datan inte laddades från filen, hämta den nu
+            if not raw_financial_data:
+                print("Pickle-filen hittades inte eller var skadad. Hämtar ny data från yFinance...")
+                for ticker in tickers:
+                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
+                
+                # Filtrera bort tickers som inte har data 
+                # TODO: Hantera fall där data är None
+                raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
 
+                print("Datainsamling slutförd. Sparar till pickle-fil...")
+                os.makedirs(output_dir, exist_ok=True)
+                with open(pickle_file_path, 'wb') as f:
+                    pickle.dump(raw_financial_data, f)
+                
+                save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
+                save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
+                
             # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, os.path.join(output_dir, "calculated_ratios.csv"))
@@ -677,17 +531,14 @@ if __name__ == "__main__":
             ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"],config["ratio_definitions"])
             save_ranked_ratios_to_csv(ranked_ratios, os.path.join(output_dir, "ranked_ratios.csv"))
 
-            category_ranks = aggregate_category_ranks(ranked_ratios, config["category_ratios"])
-            save_category_scores_to_csv(category_ranks, os.path.join(output_dir, "category_ranks.csv"))
+            category_scores = aggregate_category_scores(ranked_ratios, config["category_weights"])
+            save_category_scores_to_csv(category_scores, os.path.join(output_dir, "category_scores.csv"))
 
-            cluster_ranks = aggregate_cluster_ranks(category_ranks)
-            save_category_scores_to_csv(cluster_ranks, os.path.join(output_dir, "cluster_ranks.csv"))
 
-            cagr_results = calculate_cagr(config['cagr_dimension'], os.path.join(output_dir, "raw_financial_data.csv"))
-
-            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results, config["rank_decimals"])
+            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_scores)
             save_results_to_csv(final_results, config["output_file_path"])
-
-            print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")
+            
+            print("\nAktieutvärdering slutförd och sparad i " + config["output_file_path"])
     else:
         print("Kunde inte ladda konfigurationen. Avslutar.")
+        
