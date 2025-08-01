@@ -75,7 +75,7 @@ try:
     rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'Basic_EPS_trend_ratioRank','Total_Revenue_trend_ratioRank']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -121,7 +121,7 @@ try:
                 Justera inställningarna för att hitta, jämföra och spara aktier som matchar dina investeringskriterier. Resultatet uppdateras direkt i bubbelplotten och tabellen nedan.
                 """
             )
-
+        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
 
         # --- Reglage för totalrank (överst, nu i två kolumner) ---
         st.markdown('##### Filtrera efter Aggregerad Rank')
@@ -153,13 +153,14 @@ try:
         
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
                                     (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
-
+        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter tillväxt över 4 år ---
         st.markdown("#### Filtrera efter tillväxt över 4 år")
 
         cagr_dimension = config.get("cagr_dimension")
         cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
-        cagr_dimension_cleaned.append("cagr_close")  # Add cagr_close for consistency
+        cagr_dimension_cleaned.insert(0, "cagr_close")  # Add cagr_close for consistency
+
         cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
 
         with cagr_left:
@@ -218,6 +219,8 @@ try:
                 (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range[1])
             ]
 
+
+        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter SMA-differenser ---
         st.markdown("##### Filtrera efter SMA-differenser")
         col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
@@ -264,7 +267,7 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
                                                           (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
                                                           (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])]
-
+        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         lista_values = []
         if 'Lista' in df_filtered_by_sliders.columns:
             with st.container(border=True, key="lista_toggles"):
