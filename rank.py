@@ -3,11 +3,21 @@ import numpy as np
 import yfinance as yf
 import yaml
 import os
-import pickle
+from dotenv import load_dotenv
+from pathlib import Path
+from tqdm import tqdm
 
+# Ladda .env-filen endast om den finns
+if Path('.env').exists():
+    load_dotenv()
+    
+# Bestäm miljön (default till 'local')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+
+# Välj CSV-path
+CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
 # --- Funktionsdefinitioner ---
-
 
 def load_config(config_file_path):
     """
@@ -58,7 +68,7 @@ def fetch_yfinance_data(ticker, years):
         market_cap = info.get('marketCap', None)
         longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
 
-        print(f"Ticker: {ticker}")
+        #print(f"Ticker: {ticker}")
         """print(f"Balance sheet columns: {bs.columns.tolist() if not bs.empty else 'Empty'}")
         print(f"Income statement columns: {is_.columns.tolist() if not is_.empty else 'Empty'}")
         print(f"Cash flow columns: {cf.columns.tolist() if not cf.empty else 'Empty'}")
@@ -310,12 +320,12 @@ def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calcu
         calculated_ratios[ticker] = ratios
 
     # Konvertera calculated_ratios till en DataFrame och spara till CSV
-    df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    """df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
     try:
         df.to_csv(output_csv)
         print(f"Resultat sparade till {output_csv}")
     except Exception as e:
-        print(f"Fel vid skrivning till CSV {output_csv}: {e}")
+        print(f"Fel vid skrivning till CSV {output_csv}: {e}")"""
 
     return calculated_ratios
 
@@ -431,10 +441,10 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
 
     # Load tickers file as defined in config
-    tickers_file = config.get("input_ticker_file", "tickers/tickers_lists.csv")
+    tickers_file = CSV_PATH / config.get("input_ticker_file")
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
-    df_last_SMA = pd.read_csv("csv-data/last_SMA.csv", index_col='Ticker')
+    df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
 
     final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
     # Round all columns containing "Rank" to 1 decimal
@@ -516,7 +526,7 @@ def save_category_scores_to_csv(category_scores, csv_file_path):
 
 def get_price_data(SMA_short:int, SMA_medium:int, SMA_long:int, tickers:list, data_fetch_years:int, price_data_file_path:str):
     df_complete = pd.DataFrame()
-    for ticker in tickers:
+    for ticker in tqdm(tickers, desc="Fetching stock price data", disable=False if ENVIRONMENT == "local" else True):
         try:
             yf_ticker = f"{ticker}.ST"
             stock = yf.Ticker(yf_ticker)
@@ -649,59 +659,84 @@ def calculate_cagr(cagr_dimension, raw_financial_data_file, save_values_to_csv_f
     return cagr_results
 
 
-# --- Huvudkörning ---
+# --- Main Execution ---
 
 if __name__ == "__main__":
+    # Load configuration from YAML
     config = load_config("rank-config.yaml")
     if config:
-        tickers = read_tickers_from_csv(config["input_ticker_file"])
-        if not tickers:
-            print("No tickers to evaluate. Please check your CSV file.")
+        TICKERS_FILE_NAME = config["input_ticker_file"]
+        if not TICKERS_FILE_NAME:
+            print("No tickers file name found. Please check your CSV file.")
         else:
-            # 1. Hämta eller ladda data
-            output_dir = config.get("output_path", "csv-data")
-            #pickle_file_path = os.path.join(output_dir, "raw_financial_data.pkl")
+            # Step 0: Read tickers from CSV file
+            print(f"Reading tickers from {CSV_PATH / TICKERS_FILE_NAME}...")
+            tickers = read_tickers_from_csv(CSV_PATH / TICKERS_FILE_NAME)
+
+            # Step 1: Fetch financial data for each ticker
+            print("Fetching financial data...")
+            if not tickers:
+                print("No tickers found in the file. Exiting.")
+                exit(1)
+
             raw_financial_data = {}
-
-            for ticker in tickers:
+            for ticker in tqdm(tickers, desc="Fetching financial data", disable=False if ENVIRONMENT == "local" else True):
                 raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
-            
-            # Filtrera bort tickers som inte har data 
-            # TODO: Hantera fall där data är None
+
+            # Remove tickers with no data
             raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
-            
-            save_raw_data_to_csv(raw_financial_data, os.path.join(output_dir, "raw_financial_data.csv"))
-            save_longBusinessSummary_to_csv(raw_financial_data, os.path.join(output_dir, "longBusinessSummary.csv"))
-            print("läser in stock price data...")
-            get_price_data(config["SMA_short"], 
-                           config["SMA_medium"], 
-                           config["SMA_long"],
-                           tickers, 
-                           config["price_data_years"], 
-                           os.path.join(output_dir, config["price_data_file"]))
-            save_last_SMA_to_csv(read_from=os.path.join(output_dir, config["price_data_file"]),
-                                 save_to=os.path.join(output_dir, "last_SMA.csv"))
 
-            # 2. Utför alla beräkningar och rankningar med den hämtade/sparade datan
+            # Save raw financial data and business summaries
+            save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
+            save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
+
+            # Step 2: Fetch and process stock price data
+            print("Fetching stock price data...")
+            get_price_data(
+                config["SMA_short"],
+                config["SMA_medium"],
+                config["SMA_long"],
+                tickers,
+                config["price_data_years"],
+                CSV_PATH / config["price_data_file"]
+            )
+            save_last_SMA_to_csv(
+                read_from=CSV_PATH / config["price_data_file"],
+                save_to=CSV_PATH / "last_SMA.csv"
+            )
+
+            # Step 3: Calculate ratios and rankings
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
-            save_calculated_ratios_to_csv(calculated_ratios, os.path.join(output_dir, "calculated_ratios.csv"))
+            save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv")
 
-            ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"],config["ratio_definitions"])
-            save_ranked_ratios_to_csv(ranked_ratios, os.path.join(output_dir, "ranked_ratios.csv"))
+            ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"], config["ratio_definitions"])
+            save_ranked_ratios_to_csv(ranked_ratios, CSV_PATH / "ranked_ratios.csv")
 
+            # Step 4: Aggregate category and cluster ranks
             category_ranks = aggregate_category_ranks(ranked_ratios, config["category_ratios"])
-            save_category_scores_to_csv(category_ranks, os.path.join(output_dir, "category_ranks.csv"))
+            save_category_scores_to_csv(category_ranks, CSV_PATH / "category_ranks.csv")
 
             cluster_ranks = aggregate_cluster_ranks(category_ranks)
-            save_category_scores_to_csv(cluster_ranks, os.path.join(output_dir, "cluster_ranks.csv"))
+            save_category_scores_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv")
 
-            cagr_results = calculate_cagr(config['cagr_dimension'], 
-                                          os.path.join(output_dir, "raw_financial_data.csv"),
-                                          os.path.join(output_dir, "cagr_results.csv"))
+            # Step 5: Calculate CAGR results
+            cagr_results = calculate_cagr(
+                config['cagr_dimension'],
+                CSV_PATH / "raw_financial_data.csv",
+                CSV_PATH / "cagr_results.csv"
+            )
 
-            final_results = combine_all_results(calculated_ratios, ranked_ratios, category_ranks, cluster_ranks, cagr_results, config["rank_decimals"])
-            save_results_to_csv(final_results, config["output_file_path"])
+            # Step 6: Combine all results and save final output
+            final_results = combine_all_results(
+                calculated_ratios,
+                ranked_ratios,
+                category_ranks,
+                cluster_ranks,
+                cagr_results,
+                config["rank_decimals"]
+            )
+            save_results_to_csv(final_results, CSV_PATH / config["results_file"])
 
-            print(f"Aktieutvärdering slutförd och sparad i {config['output_file_path']}")
+            print(f"Stock evaluation completed and saved to {CSV_PATH / config['results_file']}")
     else:
-        print("Kunde inte ladda konfigurationen. Avslutar.")
+        print("Could not load configuration. Exiting.")
