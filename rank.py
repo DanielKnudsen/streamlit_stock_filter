@@ -696,7 +696,7 @@ if __name__ == "__main__":
                 config["SMA_short"],
                 config["SMA_medium"],
                 config["SMA_long"],
-                tickers,
+                raw_financial_data.keys(), # used because I want to use only those tickers with financial data
                 config["price_data_years"],
                 CSV_PATH / config["price_data_file"]
             )
