@@ -97,7 +97,7 @@ def fetch_yfinance_data(ticker, years):
         print(f"Error fetching data for {ticker}: {e}")
         return None
 
-def calculate_all_ratios(raw_data, ratio_definitions, output_csv="csv-data/calculated_ratios.csv"):
+def calculate_all_ratios(raw_data, ratio_definitions):
     """
     Beräknar alla definierade nyckeltal för varje bolag.
     Inkluderar beräkning av linjär regression för trenden och sparar historiska värden för tillgängliga år.
