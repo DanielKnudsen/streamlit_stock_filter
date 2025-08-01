@@ -1,10 +1,20 @@
-
+import os
 import pandas as pd
 import time
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from pathlib import Path
+from rank import load_config
 
-def Create_df_tickers():
+# Ladda .env-filen endast om den finns
+if Path('.env').exists():
+    load_dotenv()
+    
+# Bestäm miljön (default till 'local')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+
+def Create_df_tickers(path_file_name:str):
 
     markets = {'LargeCap':['35207'],
                 'MidCap':['35208'],
@@ -94,9 +104,15 @@ def Create_df_tickers():
     df_tickers = pd.concat(list_of_dfs, ignore_index=True) 
     df_tickers = df_tickers[~df_tickers['Instrument'].str.contains('-TO|-BTA|-TR')]
 
-    df_tickers.to_csv('tickers/tickers_lists.csv', index=False, encoding='utf-8-sig')
+    df_tickers.to_csv(path_file_name, index=False, encoding='utf-8-sig')
 
 if __name__ == "__main__":
-
-    Create_df_tickers()
-    print("Tickers skrapning klar")
+    config = load_config("rank-config.yaml")
+    if config:
+        CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
+        TICKERS_FILE_NAME = config["input_ticker_file"]
+        if not TICKERS_FILE_NAME:
+            print("No tickers file name found. Please check your CSV file.")
+        else:
+            Create_df_tickers(CSV_PATH/TICKERS_FILE_NAME)
+            print("Tickers skrapning klar")

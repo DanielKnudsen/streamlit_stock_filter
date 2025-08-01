@@ -1,13 +1,15 @@
 import streamlit as st
 import pandas as pd
 import os
-import yaml
 import plotly.graph_objects as go # Import Plotly
 import plotly.express as px # Import Plotly Express for bubble plot
 import numpy as np # For handling numerical operations
-from collections import OrderedDict
 import pwlf
-import streamlit as st
+from pathlib import Path
+from rank import load_config
+
+
+
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
 # =====================================================================
@@ -16,12 +18,14 @@ import streamlit as st
 # IMPORTS AND SETUP
 # =============================
 
-# --- Define directories for CSV files ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_DATA_DIR = "csv-data" # Directory for the main CSV (e.g., "stock_evaluation_results.csv")
-PRICE_DATA_DIR = "data" # Directory for individual stock price CSV files (e.g., "data/Company A.csv")
-CSV_FILE_NAME = "stock_evaluation_results.csv"
-full_csv_path = os.path.join(CSV_DATA_DIR, CSV_FILE_NAME)
+# Load environment variables
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+
+# Load configuration from YAML file
+config = load_config("rank-config.yaml")
+
+# --- Get directories for CSV files ---
+CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
 # =============================
 # STREAMLIT APPLICATION
@@ -35,7 +39,8 @@ st.markdown(
     Investerare kan använda dessa rankningar och filter för att identifiera lovande aktier, jämföra prestationer och bygga en personlig bevakningslista för vidare analys.
     """
 )
-
+# Logga miljö och path för felsökning
+st.write(f"Running in environment: {ENVIRONMENT}, using CSV path: {CSV_PATH}")
 # =============================
 # HELPER FUNCTIONS
 # =============================
@@ -60,9 +65,9 @@ def color_progress(val):
 # =============================
 try:
     # Load main stock evaluation CSV (index_col=0 sets Ticker as index)
-    df_new_ranks = pd.read_csv(full_csv_path, index_col=0)
-    df_long_business_summary = pd.read_csv(os.path.join(CSV_DATA_DIR, "longBusinessSummary.csv"), index_col=0)
-    
+    df_new_ranks = pd.read_csv(CSV_PATH / config["results_file"], index_col=0)
+    df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col=0)
+
     # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
     # =============================
@@ -77,10 +82,8 @@ try:
     # =============================
     # LOAD RANKING CATEGORIES FROM CONFIG
     # =============================
-    rank_config_path = os.path.join(BASE_DIR, "rank-config.yaml")
-    if os.path.exists(rank_config_path):
-        with open(rank_config_path, "r") as f:
-            config = yaml.safe_load(f)
+
+    if config:
         category_ratios = config.get("category_ratios", {})
         categories = list(category_ratios.keys())
         display_names = config.get("display_names", {})
@@ -708,8 +711,8 @@ try:
                 label = "Antal linjesegment för trendlinje"
                 linjesegments =[1, 2, 3, 4, 5]
                 num_segments = st.segmented_control(label, linjesegments, selection_mode='single', default=1, key="pwlf_slider")
-                price_file_path = os.path.join(CSV_DATA_DIR, "price_data.csv")
-                if os.path.exists(price_file_path):
+                price_file_path = CSV_PATH / config["price_data_file"]
+                if price_file_path.exists():
                     df_price_all = pd.read_csv(price_file_path)
                     df_price = df_price_all[df_price_all['Ticker'] == selected_stock_ticker].copy()
                     df_price['Date'] = pd.to_datetime(df_price['Date']) # Convert 'Date' to datetime object
@@ -813,7 +816,7 @@ try:
 
                     st.plotly_chart(fig, use_container_width=True)
                 else:
-                    st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_DATA_DIR}/'.")
+                    st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
 
             else:
                 st.info("Markera en ruta under 'Välj' i tabellen ovan för att visa prisutvecklingen.")
@@ -1040,7 +1043,7 @@ try:
                 # --- END: Show ratio bar charts for each _trend_rank category ---
 
 except FileNotFoundError:
-    st.error(f"Error: Main file '{CSV_FILE_NAME}' not found in directory '{CSV_DATA_DIR}'. Check the path.")
+    st.error(f"Error: Main file '{CSV_PATH / config['results_file']}' not found in directory '{CSV_PATH}'. Check the path.")
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
 
