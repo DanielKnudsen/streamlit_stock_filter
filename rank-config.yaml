@@ -102,7 +102,7 @@ ratio_definitions:
     higher_is_better: True
   Kassalikviditet:
     formula: "current_assets / current_liabilities"
-    source_bs: ["Current Assets", "Current Liabilities"]
+    source_bs: ["Current Assets", "Total Current Liabilities"]
     higher_is_better: True
 
 # Konfiguration för rankningsmetoden
@@ -120,13 +120,13 @@ category_ratios:
     ROIC_trend_ratioRank: 1
   FinansiellHalsa_latest_ratioRank:
     Soliditet_latest_ratioRank: 1
-    Kassalikviditet_latest_ratioRank: 1
-    # Skuldsättningsgrad_latest_ratioRank: 1
+    # Kassalikviditet_latest_ratioRank: 1
+    Skuldsättningsgrad_latest_ratioRank: 1
     # Räntetäckningsgrad_latest_ratioRank: 1
   FinansiellHalsa_trend_ratioRank:
     Soliditet_trend_ratioRank: 1
-    Kassalikviditet_trend_ratioRank: 1
-    # Skuldsättningsgrad_trend_ratioRank: 1
+    # Kassalikviditet_trend_ratioRank: 1
+    Skuldsättningsgrad_trend_ratioRank: 1
     # Räntetäckningsgrad_trend_ratioRank: 1
   Lonsamhet_latest_ratioRank:
     Bruttomarginal_latest_ratioRank: 1
