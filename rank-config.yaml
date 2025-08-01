@@ -1,7 +1,6 @@
 # Inställningar för in- och utdata
-output_path: "csv-data"
-input_ticker_file: "tickers/tickers_lists.csv"
-output_file_path: "csv-data/stock_evaluation_results.csv"
+input_ticker_file: "tickers_lists.csv"
+results_file: "stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 
 # Inställningar för datainhämtning
