@@ -732,7 +732,7 @@ try:
                     cagr_values = [float(selected_stock_dict.get(col, float('nan'))) for col in cagr_cols]
                     bar_colors = ['royalblue' for v in cagr_values]
                     bar_text = [
-                        "N/A" if pd.isna(v) else f"{v*100:.2f}%"
+                        "N/A" if pd.isna(v) else f"{v*1:.2f}%"
                         for v in cagr_values
                     ]
                     y_values = [v*100 if not pd.isna(v) else None for v in cagr_values]
