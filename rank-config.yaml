@@ -139,12 +139,12 @@ category_ratios:
     PB_tal_trend_ratioRank: 1
     EV_EBITDA_trend_ratioRank: 1
   Kassaflode_latest_ratioRank:
-    # Rörelseflödesmarginal_latest_ratioRank: 1
-    Fritt_Kassaflode_per_Aktie_latest_ratioRank: 1
+    Rörelseflödesmarginal_latest_ratioRank: 1
+    # Fritt_Kassaflode_per_Aktie_latest_ratioRank: 1
     Kassaflode_till_Skuld_latest_ratioRank: 1
   Kassaflode_trend_ratioRank:
-    # Rörelseflödesmarginal_trend_ratioRank: 1
-    Fritt_Kassaflode_per_Aktie_trend_ratioRank: 1
+    Rörelseflödesmarginal_trend_ratioRank: 1
+    # Fritt_Kassaflode_per_Aktie_trend_ratioRank: 1
     Kassaflode_till_Skuld_trend_ratioRank: 1
 
 # Hjälptexter för nyckeltal (endast _latest_rank)
@@ -202,9 +202,8 @@ display_names:
   pct_Close_vs_SMA_short: "Pris vs SMA 10 (%)"
   Trend_clusterRank: "Agg. Rank trend 4 år"
   Latest_clusterRank: "Agg. Rank sen. året"
-  cagr_close: "CAGR Pris"
+  cagr_close: "CAGR Aktiekurs"
   cagrTotal_Revenue: "CAGR omsättning"
-  cagrEBITDA: "CAGR EBITDA"
   cagrBasic_EPS: "CAGR vinst/aktie"
   pct_SMA_short_vs_SMA_medium: "SMA 10 vs 50 (%)"
   pct_SMA_medium_vs_SMA_long: "SMA 50 vs 200 (%)"
@@ -229,11 +228,14 @@ display_names:
   SMA_short: "SMA 10"
   SMA_medium: "SMA 50"
   SMA_long: "SMA 200"
+  cagrTotal_Revenue: "Omsättning trend 4 år"
+  cagrBasic_EPS: "Vinst/aktie trend 4 år"
 
 tooltip_texts:
-  pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen)."
-  pct_SMA_short_vs_SMA_medium: "Skillnaden mellan 10-dagars och 50-dagars glidande medelvärde i procent (senaste handelsdagen)."
-  pct_Close_vs_SMA_short: "Skillnaden mellan stängningskurs och 10-dagars glidande medelvärde i procent (senaste handelsdagen)."
-  Trend_clusterRank: "Sammanlagd rankning av aktier baserat på **trenden** från senaste 4 årens finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst."
-  Latest_clusterRank: "Sammanlagd rankning av aktier baserat på **senaste årets** finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst."
-
+  pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde indikerar att den kortare medelvärdesperioden ligger över den längre, vilket ofta ses som ett styrketecken i aktiens trend."
+  pct_SMA_short_vs_SMA_medium: "Skillnaden mellan 10-dagars och 50-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde kan tyda på att aktien har en kortsiktig uppåtgående trend."
+  pct_Close_vs_SMA_short: "Skillnaden mellan stängningskurs och 10-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde innebär att aktien handlas över sitt kortsiktiga medelvärde, vilket kan signalera styrka."
+  Trend_clusterRank: "Sammanlagd rankning av aktier baserat på **trenden** från senaste 4 årens finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde indikerar att bolaget har haft en positiv utveckling över tid inom flera nyckeltal."
+  Latest_clusterRank: "Sammanlagd rankning av aktier baserat på **senaste årets** finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde visar att bolaget presterar starkt just nu inom flera nyckeltal."
+  cagrTotal_Revenue: "Rankning av omsättningens trend över de senaste 4 åren. Ett högt värde indikerar att bolaget har haft en stabil och positiv tillväxt i omsättningen."
+  cagrBasic_EPS: "Rankning av vinst per aktie (EPS) trend över de senaste 4 åren. Ett högt värde visar att bolaget har haft en god och växande lönsamhet per aktie över tid."

@@ -154,7 +154,69 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
                                     (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
 
+        # --- Filtrera efter tillväxt över 4 år ---
+        st.markdown("#### Filtrera efter tillväxt över 4 år")
 
+        cagr_dimension = config.get("cagr_dimension")
+        cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
+        cagr_dimension_cleaned.append("cagr_close")  # Add cagr_close for consistency
+        cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
+
+        with cagr_left:
+            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[0]].min())
+            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[0]].max())
+            # Ensure slider has a valid range
+            if min_cagr == max_cagr:
+                max_cagr += 0.001
+            cagr_range = st.slider(
+                get_display_name(cagr_dimension_cleaned[0]),
+                min_value=min_cagr,
+                max_value=max_cagr,
+                value=(min_cagr, max_cagr), 
+                step=0.1,  # Use a smaller step for more precision
+                format="%.1f",  # Show as percentage with one decimal
+                help=get_tooltip_text(cagr_dimension_cleaned[0])
+            )
+            df_filtered_by_sliders = df_filtered_by_sliders[
+                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[0]] <= cagr_range[1])
+            ]
+        with cagr_middle:
+            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[1]].min())
+            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[1]].max())
+            # Ensure slider has a valid range
+            if min_cagr == max_cagr:
+                max_cagr += 0.001
+            cagr_range = st.slider(
+                get_display_name(cagr_dimension_cleaned[1]),
+                min_value=min_cagr,
+                max_value=max_cagr,
+                value=(min_cagr, max_cagr), 
+                step=0.1,  # Use a smaller step for more precision
+                format="%.1f",  # Show as percentage with one decimal
+                help=get_tooltip_text(cagr_dimension_cleaned[1])
+            )
+            df_filtered_by_sliders = df_filtered_by_sliders[
+                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[1]] <= cagr_range[1])
+            ]
+
+        with cagr_right:
+            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[2]].min())
+            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[2]].max())
+            # Ensure slider has a valid range
+            if min_cagr == max_cagr:
+                max_cagr += 0.001
+            cagr_range = st.slider(
+                get_display_name(cagr_dimension_cleaned[2]),
+                min_value=min_cagr,
+                max_value=max_cagr,
+                value=(min_cagr, max_cagr), 
+                step=0.1,  # Use a smaller step for more precision
+                format="%.1f",  # Show as percentage with one decimal
+                help=get_tooltip_text(cagr_dimension_cleaned[2])
+            )
+            df_filtered_by_sliders = df_filtered_by_sliders[
+                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range[1])
+            ]
 
         # --- Filtrera efter SMA-differenser ---
         st.markdown("##### Filtrera efter SMA-differenser")
@@ -169,7 +231,7 @@ try:
                 max_value=max_diff_long_medium,
                 value=(min_diff_long_medium, max_diff_long_medium),
                 step=1.0,
-                format="%d",
+                format="%d%%",  # Add % at the end of the value
                 help=get_tooltip_text('pct_SMA_medium_vs_SMA_long')
             )
         with col_diff_short_medium:
@@ -182,7 +244,7 @@ try:
                 max_value=max_diff_short_medium,
                 value=(min_diff_short_medium, max_diff_short_medium),
                 step=1.0,
-                format="%d",
+                format="%d%%",
                 help=get_tooltip_text('pct_SMA_short_vs_SMA_medium')
             )
         with col_diff_price_short:
@@ -195,7 +257,7 @@ try:
                 max_value=max_diff_price_short,
                 value=(min_diff_price_short, max_diff_price_short),
                 step=1.0,
-                format="%d",
+                format="%d%%",
                 help=get_tooltip_text('pct_Close_vs_SMA_short')
             )
 
@@ -702,6 +764,70 @@ try:
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
                     st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
+                with st.expander("**Detaljerad CAGR-data:**", expanded=False):
+                    
+                    left_col, right_col = st.columns(2, gap='medium', border=False)
+                    base_ratio_left = 'Total_Revenue'
+                    base_ratio_right = 'Basic_EPS'
+
+                    with left_col:
+                        st.write("**Omsättning senaste 4 åren:**")
+                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_left + '_year_')]
+                        # Filter out columns where the value for the selected stock is NaN
+                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
+                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
+                        year_cols_last4 = year_cols_sorted[-4:]
+                    
+                        if year_cols_last4:
+                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
+                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
+                            fig = go.Figure()  
+                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_left, showlegend=False))
+                            # Draw a line from the top of the first bar to the top of the last bar
+                            fig.add_trace(go.Scatter(
+                                x=[years[0], years[-1]],
+                                y=[values[0], values[-1]],
+                                mode='lines',
+                                name='Trend',
+                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
+                                showlegend=False
+                            ))
+                            fig.update_layout(title=f"{base_ratio_left}", 
+                                            height=250, 
+                                            margin=dict(l=10, r=10, t=30, b=10), 
+                                            showlegend=False)
+
+                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_left}_cagr_bar")
+
+                    with right_col:
+                        st.write("**Vinst per aktie senaste 4 åren:**")
+                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_right + '_year_')]
+                        # Filter out columns where the value for the selected stock is NaN
+                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
+                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
+                        year_cols_last4 = year_cols_sorted[-4:]
+                    
+                        if year_cols_last4:
+                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
+                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
+                            fig = go.Figure()  # Detta gör grafen statisk
+                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_right, showlegend=False))
+                            fig.add_trace(go.Scatter(
+                                x=[years[0], years[-1]] ,
+                                y=[values[0], values[-1]],
+                                mode='lines', 
+                                name='Trend',
+                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
+                                showlegend=False
+                            ))
+                            fig.update_layout(title=f"{base_ratio_right}", 
+                                            height=250, 
+                                            margin=dict(l=10, r=10, t=30, b=10), 
+                                            showlegend=False)
+
+                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_right}_cagr_bar")
 
         with st.container(border=True, key="stock_price_trend_container"):
             st.subheader("Kursutveckling och Trendlinje")
