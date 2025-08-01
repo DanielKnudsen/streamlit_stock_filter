@@ -1053,5 +1053,5 @@ except Exception as e:
 st.markdown("---")
 st.subheader("About this application")
 st.info("To run this app locally: Save the code as a .py file (e.g., `app.py`) and run `streamlit run app.py` in your terminal.")
-st.caption("Make sure your CSV files are in the specified folders (`csv-data` for the main file and `data` for the price files).")
+st.caption("Make sure your CSV files are in the specified folders (`data` for the main file and `data` for the price files).")
 
