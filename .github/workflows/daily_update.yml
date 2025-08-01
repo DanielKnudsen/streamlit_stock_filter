@@ -42,8 +42,7 @@ jobs:
     
     - name: Create data and tickers directories
       run: |
-        mkdir -p csv-data
-        mkdir -p tickers
+        mkdir -p data/remote
     
     - name: Run ticker scraper
       run: |
@@ -59,7 +58,7 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
-        git add csv-data/*.csv tickers/tickers_lists.csv
+        git add data/remote/*
         git diff --staged --quiet || git commit -m "Update stock data and tickers $(date -u +%Y-%m-%d)"
         git push origin main
       env:

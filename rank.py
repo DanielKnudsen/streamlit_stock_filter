@@ -576,7 +576,7 @@ def save_last_SMA_to_csv(read_from, save_to):
                     end_price = group['Close'].iloc[-1]
                     num_years = (group.index[-1] - group.index[0]).days / 365.25
                     if start_price > 0 and num_years > 0:
-                        cagr = ((end_price / start_price) ** (1 / num_years)) - 1
+                        cagr = (((end_price / start_price) ** (1 / num_years)) - 1) * 100  # CAGR in percent
                         cagr_list.append({'Ticker': ticker, 'CAGR': cagr})
                     else:
                         cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
@@ -643,8 +643,8 @@ def calculate_cagr(cagr_dimension, raw_financial_data_file, save_values_to_csv_f
                 end_date = pd.to_datetime(data_dim['Date'].iloc[-1])
                 num_years = (end_date - start_date).days / 365.25
                 if start_value > 0 and num_years > 0:
-                    cagr = ((end_value / start_value) ** (1 / num_years)) - 1
-                    cagr_results[ticker][key] = cagr
+                        cagr = ((end_value / start_value) ** (1 / num_years)) - 1
+                        cagr_results[ticker][key] = cagr * 100  # Store as percent
                 else:
                     cagr_results[ticker][key] = np.nan
             else:
