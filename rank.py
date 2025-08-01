@@ -195,7 +195,9 @@ def calculate_all_ratios(raw_data, ratio_definitions):
             'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
             'sharesOutstanding': data['shares_outstanding'],
             'currentPrice': data['current_price'],
-            'marketCap': data['market_cap']
+            'marketCap': data['market_cap'],
+            'current_assets': bs_copy.loc[bs_copy.index[0], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
+            'current_liabilities': bs_copy.loc[bs_copy.index[0], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
         }
         ratios.update(raw_fields)
 
@@ -222,7 +224,9 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                     'sharesOutstanding': data['shares_outstanding'],
                     'currentPrice': data['current_price'],
                     'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                    'marketCap': data['market_cap']
+                    'marketCap': data['market_cap'],
+                    'current_assets': bs_copy.loc[bs_copy.index[0], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
+            'current_liabilities': bs_copy.loc[bs_copy.index[0], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
                 }
 
                 # Hantera required_fields för både strängar och listor
@@ -281,7 +285,9 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                                 'sharesOutstanding': data['shares_outstanding'],
                                 'currentPrice': data['current_price'],
                                 'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                                'marketCap': data['market_cap']
+                                'marketCap': data['market_cap'],
+                                'current_assets': bs_copy.loc[bs_copy.index[i], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
+                                'current_liabilities': bs_copy.loc[bs_copy.index[i], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
                             }
                             # Kontrollera om något värde är NaN eller noll
                             if any(pd.isna(locals_dict_hist.get(field)) or locals_dict_hist.get(field) == 0 for field in required_fields):
