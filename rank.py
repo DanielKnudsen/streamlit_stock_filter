@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import yaml
+import pickle
 import os
 from dotenv import load_dotenv
 from pathlib import Path
@@ -13,6 +14,7 @@ if Path('.env').exists():
     
 # Bestäm miljön (default till 'local')
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+FETCH_DATA = os.getenv('FETCH_DATA', 'Yes')
 
 # Välj CSV-path
 CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
@@ -579,9 +581,9 @@ def save_last_SMA_to_csv(read_from, save_to):
                         cagr = (((end_price / start_price) ** (1 / num_years)) - 1) * 100  # CAGR in percent
                         cagr_list.append({'Ticker': ticker, 'CAGR': cagr})
                     else:
-                        cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
+                        cagr_list.append({'Ticker': ticker, 'CAGR': 0})  # If no valid CAGR can be calculated, set to 0
                 else:
-                    cagr_list.append({'Ticker': ticker, 'CAGR': np.nan})
+                    cagr_list.append({'Ticker': ticker, 'CAGR': 0})  # If no valid CAGR can be calculated, set to 0
             df_cagr = pd.DataFrame(cagr_list).set_index('Ticker')
             last_rows = last_rows.set_index('Ticker')
             last_rows['cagr_close'] = df_cagr['CAGR']
@@ -646,9 +648,9 @@ def calculate_cagr(cagr_dimension, raw_financial_data_file, save_values_to_csv_f
                         cagr = ((end_value / start_value) ** (1 / num_years)) - 1
                         cagr_results[ticker][key] = cagr * 100  # Store as percent
                 else:
-                    cagr_results[ticker][key] = np.nan
+                    cagr_results[ticker][key] = 0  # If no valid CAGR can be calculated, set to 0
             else:
-                cagr_results[ticker][key] = np.nan
+                cagr_results[ticker][key] = 0  # If no valid CAGR can be calculated, set to 0
     # Save all raw rows used for CAGR calculations to the specified CSV file
     if cagr_raw_rows:
         cagr_raw_df = pd.concat(cagr_raw_rows, ignore_index=True)
@@ -679,27 +681,38 @@ if __name__ == "__main__":
                 print("No tickers found in the file. Exiting.")
                 exit(1)
 
-            raw_financial_data = {}
-            for ticker in tqdm(tickers, desc="Fetching financial data", disable=False if ENVIRONMENT == "local" else True):
-                raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
+            if FETCH_DATA == "Yes":
+                raw_financial_data = {}
+                for ticker in tqdm(tickers, desc="Fetching financial data", disable=True if ENVIRONMENT == "remote" else False):
+                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
+            
+                # Save raw_financial_data as pickle for fast reload/debug
+                if ENVIRONMENT == "local":
+                    with open(CSV_PATH / "raw_financial_data.pkl", "wb") as f:
+                        pickle.dump(raw_financial_data, f)
+
+            else:
+                # Load raw financial data from pickle file
+                try:
+                    with open(CSV_PATH / "raw_financial_data.pkl", "rb") as f:
+                        raw_financial_data = pickle.load(f)
+                except FileNotFoundError:
+                    print("No raw financial data found. Please fetch data first.")
+                    exit(1)
 
             # Remove tickers with no data
             raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
-
+            
             # Save raw financial data and business summaries
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
 
             # Step 2: Fetch and process stock price data
             print("Fetching stock price data...")
-            get_price_data(
-                config["SMA_short"],
-                config["SMA_medium"],
-                config["SMA_long"],
-                raw_financial_data.keys(), # used because I want to use only those tickers with financial data
-                config["price_data_years"],
-                CSV_PATH / config["price_data_file"]
-            )
+            if FETCH_DATA == "Yes":
+                get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],
+                           raw_financial_data.keys(),config["price_data_years"],CSV_PATH / config["price_data_file"])
+            
             save_last_SMA_to_csv(
                 read_from=CSV_PATH / config["price_data_file"],
                 save_to=CSV_PATH / "last_SMA.csv"
