@@ -30,7 +30,7 @@
 8,Kassaflode_latest_catAvg,98.55359005729761,AZA
 9,Kassaflode_trend_catAvg,9.130241537841854,AZA
 10,Kvalitet_latest_catRank,78.38541666666666,AZA
-11,Kvalitet_trend_catRank,52.473958333333336,AZA
+11,Kvalitet_trend_catRank,52.734375,AZA
 12,FinansiellHalsa_latest_catRank,39.97395833333333,AZA
 13,FinansiellHalsa_trend_catRank,24.869791666666664,AZA
 14,Lonsamhet_latest_catRank,76.82291666666666,AZA
@@ -256,7 +256,7 @@
 14,Lonsamhet_latest_catRank,67.83854166666666,IPCO
 15,Lonsamhet_trend_catRank,10.807291666666668,IPCO
 16,Vardering_latest_catRank,2.473958333333333,IPCO
-17,Vardering_trend_catRank,19.140625,IPCO
+17,Vardering_trend_catRank,19.010416666666664,IPCO
 18,Kassaflode_latest_catRank,91.92708333333334,IPCO
 19,Kassaflode_trend_catRank,5.989583333333334,IPCO
 0,Kvalitet_latest_catAvg,44.52968384819238,ATRLJ-B
@@ -356,7 +356,7 @@
 14,Lonsamhet_latest_catRank,70.24739583333334,CORE-A
 15,Lonsamhet_trend_catRank,30.013020833333332,CORE-A
 16,Vardering_latest_catRank,60.416666666666664,CORE-A
-17,Vardering_trend_catRank,24.088541666666664,CORE-A
+17,Vardering_trend_catRank,23.958333333333336,CORE-A
 18,Kassaflode_latest_catRank,56.8359375,CORE-A
 19,Kassaflode_trend_catRank,19.205729166666664,CORE-A
 0,Kvalitet_latest_catAvg,33.6638601226274,CORE-B
@@ -376,7 +376,7 @@
 14,Lonsamhet_latest_catRank,70.24739583333334,CORE-B
 15,Lonsamhet_trend_catRank,30.013020833333332,CORE-B
 16,Vardering_latest_catRank,55.078125,CORE-B
-17,Vardering_trend_catRank,30.729166666666668,CORE-B
+17,Vardering_trend_catRank,30.598958333333332,CORE-B
 18,Kassaflode_latest_catRank,56.8359375,CORE-B
 19,Kassaflode_trend_catRank,19.205729166666664,CORE-B
 0,Kvalitet_latest_catAvg,33.6638601226274,CORE-D
@@ -536,7 +536,7 @@
 14,Lonsamhet_latest_catRank,96.6796875,NP3
 15,Lonsamhet_trend_catRank,42.12239583333333,NP3
 16,Vardering_latest_catRank,26.5625,NP3
-17,Vardering_trend_catRank,57.161458333333336,NP3
+17,Vardering_trend_catRank,57.291666666666664,NP3
 18,Kassaflode_latest_catRank,71.15885416666666,NP3
 19,Kassaflode_trend_catRank,28.971354166666668,NP3
 0,Kvalitet_latest_catAvg,63.39709175541017,NP3-PREF
@@ -636,7 +636,7 @@
 14,Lonsamhet_latest_catRank,99.21875,SAGA-B
 15,Lonsamhet_trend_catRank,28.515625,SAGA-B
 16,Vardering_latest_catRank,28.90625,SAGA-B
-17,Vardering_trend_catRank,60.807291666666664,SAGA-B
+17,Vardering_trend_catRank,60.9375,SAGA-B
 18,Kassaflode_latest_catRank,76.171875,SAGA-B
 19,Kassaflode_trend_catRank,28.125,SAGA-B
 0,Kvalitet_latest_catAvg,69.89541467421597,SAGA-D
@@ -706,7 +706,7 @@
 4,Lonsamhet_latest_catAvg,90.84276329165569,BURE
 5,Lonsamhet_trend_catAvg,73.31641218808677,BURE
 6,Vardering_latest_catAvg,63.80684252108487,BURE
-7,Vardering_trend_catAvg,38.124306307750395,BURE
+7,Vardering_trend_catAvg,38.190707370167395,BURE
 8,Kassaflode_latest_catAvg,98.45478940929155,BURE
 9,Kassaflode_trend_catAvg,4.390113476950429,BURE
 10,Kvalitet_latest_catRank,73.828125,BURE
@@ -716,7 +716,7 @@
 14,Lonsamhet_latest_catRank,97.265625,BURE
 15,Lonsamhet_trend_catRank,86.84895833333334,BURE
 16,Vardering_latest_catRank,75.13020833333334,BURE
-17,Vardering_trend_catRank,14.192708333333334,BURE
+17,Vardering_trend_catRank,14.322916666666666,BURE
 18,Kassaflode_latest_catRank,99.47916666666666,BURE
 19,Kassaflode_trend_catRank,0.9114583333333334,BURE
 0,Kvalitet_latest_catAvg,69.23631687544616,EQT
@@ -776,7 +776,7 @@
 14,Lonsamhet_latest_catRank,78.7109375,INDU-C
 15,Lonsamhet_trend_catRank,47.72135416666667,INDU-C
 16,Vardering_latest_catRank,67.83854166666666,INDU-C
-17,Vardering_trend_catRank,50.260416666666664,INDU-C
+17,Vardering_trend_catRank,50.130208333333336,INDU-C
 18,Kassaflode_latest_catRank,46.09375,INDU-C
 19,Kassaflode_trend_catRank,41.86197916666667,INDU-C
 0,Kvalitet_latest_catAvg,62.5,INVE-A
@@ -886,7 +886,7 @@
 4,Lonsamhet_latest_catAvg,74.81931420649767,LUND-B
 5,Lonsamhet_trend_catAvg,30.496871757505943,LUND-B
 6,Vardering_latest_catAvg,54.15271048095997,LUND-B
-7,Vardering_trend_catAvg,59.50197975349034,LUND-B
+7,Vardering_trend_catAvg,59.56838081590735,LUND-B
 8,Kassaflode_latest_catAvg,74.20987645975987,LUND-B
 9,Kassaflode_trend_catAvg,58.17830817830818,LUND-B
 10,Kvalitet_latest_catRank,62.5,LUND-B
@@ -944,7 +944,7 @@
 2,FinansiellHalsa_latest_catAvg,43.34704960835509,STOR-B
 3,FinansiellHalsa_trend_catAvg,26.982158572685815,STOR-B
 4,Lonsamhet_latest_catAvg,36.34772480542869,STOR-B
-5,Lonsamhet_trend_catAvg,35.782048659078825,STOR-B
+5,Lonsamhet_trend_catAvg,35.73199860902877,STOR-B
 6,Vardering_latest_catAvg,58.80782813592587,STOR-B
 7,Vardering_trend_catAvg,75.4056742357834,STOR-B
 8,Kassaflode_latest_catAvg,54.37437897540236,STOR-B
@@ -954,7 +954,7 @@
 12,FinansiellHalsa_latest_catRank,39.58333333333333,STOR-B
 13,FinansiellHalsa_trend_catRank,17.838541666666664,STOR-B
 14,Lonsamhet_latest_catRank,26.171875,STOR-B
-15,Lonsamhet_trend_catRank,25.78125,STOR-B
+15,Lonsamhet_trend_catRank,25.651041666666668,STOR-B
 16,Vardering_latest_catRank,65.75520833333334,STOR-B
 17,Vardering_trend_catRank,91.27604166666666,STOR-B
 18,Kassaflode_latest_catRank,53.125,STOR-B
@@ -1106,7 +1106,7 @@
 4,Lonsamhet_latest_catAvg,45.65368861446418,EKTA-B
 5,Lonsamhet_trend_catAvg,37.91356805638275,EKTA-B
 6,Vardering_latest_catAvg,33.15447188654564,EKTA-B
-7,Vardering_trend_catAvg,49.42832356183977,EKTA-B
+7,Vardering_trend_catAvg,49.49472462425677,EKTA-B
 8,Kassaflode_latest_catAvg,67.1370118267868,EKTA-B
 9,Kassaflode_trend_catAvg,56.932256932256934,EKTA-B
 10,Kvalitet_latest_catRank,45.83333333333333,EKTA-B
@@ -1116,7 +1116,7 @@
 14,Lonsamhet_latest_catRank,42.31770833333333,EKTA-B
 15,Lonsamhet_trend_catRank,29.296875,EKTA-B
 16,Vardering_latest_catRank,19.010416666666664,EKTA-B
-17,Vardering_trend_catRank,34.63541666666667,EKTA-B
+17,Vardering_trend_catRank,34.765625,EKTA-B
 18,Kassaflode_latest_catRank,73.69791666666666,EKTA-B
 19,Kassaflode_trend_catRank,51.953125,EKTA-B
 0,Kvalitet_latest_catAvg,53.238037961686274,GETI-B
@@ -1126,7 +1126,7 @@
 4,Lonsamhet_latest_catAvg,60.323232761680494,GETI-B
 5,Lonsamhet_trend_catAvg,29.22934183568368,GETI-B
 6,Vardering_latest_catAvg,38.93266489631919,GETI-B
-7,Vardering_trend_catAvg,40.861739694984216,GETI-B
+7,Vardering_trend_catAvg,40.928140757401216,GETI-B
 8,Kassaflode_latest_catAvg,66.60583160404035,GETI-B
 9,Kassaflode_trend_catAvg,21.525202438990515,GETI-B
 10,Kvalitet_latest_catRank,57.03125,GETI-B
@@ -1156,7 +1156,7 @@
 14,Lonsamhet_latest_catRank,28.776041666666668,MCOV-B
 15,Lonsamhet_trend_catRank,13.411458333333334,MCOV-B
 16,Vardering_latest_catRank,0.9114583333333334,MCOV-B
-17,Vardering_trend_catRank,55.989583333333336,MCOV-B
+17,Vardering_trend_catRank,56.119791666666664,MCOV-B
 18,Kassaflode_latest_catRank,56.380208333333336,MCOV-B
 19,Kassaflode_trend_catRank,26.302083333333332,MCOV-B
 0,Kvalitet_latest_catAvg,93.00759820459413,SECT-B
@@ -1205,7 +1205,7 @@
 3,FinansiellHalsa_trend_catAvg,79.17517424168058,VIMIAN
 4,Lonsamhet_latest_catAvg,68.913057796334,VIMIAN
 5,Lonsamhet_trend_catAvg,46.590780095934726,VIMIAN
-6,Vardering_latest_catAvg,2.1931134629366666,VIMIAN
+6,Vardering_latest_catAvg,2.1494834454846594,VIMIAN
 7,Vardering_trend_catAvg,49.9017335718946,VIMIAN
 8,Kassaflode_latest_catAvg,63.65961205255248,VIMIAN
 9,Kassaflode_trend_catAvg,56.747981747981754,VIMIAN
@@ -1273,7 +1273,7 @@
 11,Kvalitet_trend_catRank,71.484375,ADDT-B
 12,FinansiellHalsa_latest_catRank,16.927083333333336,ADDT-B
 13,FinansiellHalsa_trend_catRank,79.296875,ADDT-B
-14,Lonsamhet_latest_catRank,66.015625,ADDT-B
+14,Lonsamhet_latest_catRank,65.88541666666666,ADDT-B
 15,Lonsamhet_trend_catRank,71.22395833333334,ADDT-B
 16,Vardering_latest_catRank,4.947916666666666,ADDT-B
 17,Vardering_trend_catRank,68.88020833333334,ADDT-B
@@ -1505,7 +1505,7 @@
 3,FinansiellHalsa_trend_catAvg,80.27166977520369,INDT
 4,Lonsamhet_latest_catAvg,59.043248267400116,INDT
 5,Lonsamhet_trend_catAvg,46.75782802153893,INDT
-6,Vardering_latest_catAvg,22.997231920518967,INDT
+6,Vardering_latest_catAvg,23.040861937970973,INDT
 7,Vardering_trend_catAvg,70.64295516124922,INDT
 8,Kassaflode_latest_catAvg,64.6050339887748,INDT
 9,Kassaflode_trend_catAvg,54.145314145314146,INDT
@@ -1546,7 +1546,7 @@
 4,Lonsamhet_latest_catAvg,45.73262038372135,LIAB
 5,Lonsamhet_trend_catAvg,33.041950056644566,LIAB
 6,Vardering_latest_catAvg,29.82598980019118,LIAB
-7,Vardering_trend_catAvg,42.07293024163191,LIAB
+7,Vardering_trend_catAvg,42.13933130404891,LIAB
 8,Kassaflode_latest_catAvg,59.40690320240276,LIAB
 9,Kassaflode_trend_catAvg,61.58125658125658,LIAB
 10,Kvalitet_latest_catRank,54.166666666666664,LIAB
@@ -1646,7 +1646,7 @@
 4,Lonsamhet_latest_catAvg,42.25649215346985,NIBE-B
 5,Lonsamhet_trend_catAvg,26.043659493002107,NIBE-B
 6,Vardering_latest_catAvg,23.611737499361748,NIBE-B
-7,Vardering_trend_catAvg,42.980407771177426,NIBE-B
+7,Vardering_trend_catAvg,43.04680883359443,NIBE-B
 8,Kassaflode_latest_catAvg,50.02298213476995,NIBE-B
 9,Kassaflode_trend_catAvg,38.23805158548273,NIBE-B
 10,Kvalitet_latest_catRank,52.473958333333336,NIBE-B
@@ -1666,7 +1666,7 @@
 4,Lonsamhet_latest_catAvg,49.307305186413025,NOLA-B
 5,Lonsamhet_trend_catAvg,44.95128596167306,NOLA-B
 6,Vardering_latest_catAvg,38.02219018472148,NOLA-B
-7,Vardering_trend_catAvg,41.2637375892618,NOLA-B
+7,Vardering_trend_catAvg,41.3301386516788,NOLA-B
 8,Kassaflode_latest_catAvg,75.41677650775196,NOLA-B
 9,Kassaflode_trend_catAvg,65.14040014040015,NOLA-B
 10,Kvalitet_latest_catRank,78.90625,NOLA-B
@@ -1676,7 +1676,7 @@
 14,Lonsamhet_latest_catRank,48.56770833333333,NOLA-B
 15,Lonsamhet_trend_catRank,40.10416666666667,NOLA-B
 16,Vardering_latest_catRank,24.739583333333336,NOLA-B
-17,Vardering_trend_catRank,18.619791666666664,NOLA-B
+17,Vardering_trend_catRank,19.140625,NOLA-B
 18,Kassaflode_latest_catRank,86.71875,NOLA-B
 19,Kassaflode_trend_catRank,63.671875,NOLA-B
 0,Kvalitet_latest_catAvg,90.64379382169156,OEM-B
@@ -1756,7 +1756,7 @@
 14,Lonsamhet_latest_catRank,75.0,SAND
 15,Lonsamhet_trend_catRank,20.3125,SAND
 16,Vardering_latest_catRank,17.708333333333336,SAND
-17,Vardering_trend_catRank,57.942708333333336,SAND
+17,Vardering_trend_catRank,58.072916666666664,SAND
 18,Kassaflode_latest_catRank,83.984375,SAND
 19,Kassaflode_trend_catRank,60.416666666666664,SAND
 0,Kvalitet_latest_catAvg,69.36466492602263,SECU-B
@@ -1776,7 +1776,7 @@
 14,Lonsamhet_latest_catRank,37.76041666666667,SECU-B
 15,Lonsamhet_trend_catRank,68.09895833333334,SECU-B
 16,Vardering_latest_catRank,35.15625,SECU-B
-17,Vardering_trend_catRank,60.15625,SECU-B
+17,Vardering_trend_catRank,60.286458333333336,SECU-B
 18,Kassaflode_latest_catRank,36.97916666666667,SECU-B
 19,Kassaflode_trend_catRank,30.078125,SECU-B
 0,Kvalitet_latest_catAvg,63.55575439317042,SKA-B
@@ -1790,7 +1790,7 @@
 8,Kassaflode_latest_catAvg,55.62487748494332,SKA-B
 9,Kassaflode_trend_catAvg,53.48367848367848,SKA-B
 10,Kvalitet_latest_catRank,67.96875,SKA-B
-11,Kvalitet_trend_catRank,38.671875,SKA-B
+11,Kvalitet_trend_catRank,38.80208333333333,SKA-B
 12,FinansiellHalsa_latest_catRank,38.02083333333333,SKA-B
 13,FinansiellHalsa_trend_catRank,40.49479166666667,SKA-B
 14,Lonsamhet_latest_catRank,25.390625,SKA-B
@@ -1840,23 +1840,23 @@
 18,Kassaflode_latest_catRank,79.1015625,SWEC-B
 19,Kassaflode_trend_catRank,52.799479166666664,SWEC-B
 0,Kvalitet_latest_catAvg,71.43583575361086,SYSR
-1,Kvalitet_trend_catAvg,43.154783882242896,SYSR
+1,Kvalitet_trend_catAvg,43.60523433269335,SYSR
 2,FinansiellHalsa_latest_catAvg,54.660156657963455,SYSR
 3,FinansiellHalsa_trend_catAvg,83.6237361342888,SYSR
 4,Lonsamhet_latest_catAvg,54.42277441755209,SYSR
 5,Lonsamhet_trend_catAvg,53.13783440849955,SYSR
 6,Vardering_latest_catAvg,24.237002539605168,SYSR
-7,Vardering_trend_catAvg,59.303346939922356,SYSR
+7,Vardering_trend_catAvg,56.51450231840841,SYSR
 8,Kassaflode_latest_catAvg,60.623153824835576,SYSR
 9,Kassaflode_trend_catAvg,73.46963846963847,SYSR
 10,Kvalitet_latest_catRank,77.47395833333334,SYSR
-11,Kvalitet_trend_catRank,51.302083333333336,SYSR
+11,Kvalitet_trend_catRank,52.083333333333336,SYSR
 12,FinansiellHalsa_latest_catRank,55.729166666666664,SYSR
 13,FinansiellHalsa_trend_catRank,97.13541666666666,SYSR
 14,Lonsamhet_latest_catRank,61.458333333333336,SYSR
 15,Lonsamhet_trend_catRank,59.505208333333336,SYSR
 16,Vardering_latest_catRank,10.9375,SYSR
-17,Vardering_trend_catRank,62.630208333333336,SYSR
+17,Vardering_trend_catRank,55.208333333333336,SYSR
 18,Kassaflode_latest_catRank,61.328125,SYSR
 19,Kassaflode_trend_catRank,78.90625,SYSR
 0,Kvalitet_latest_catAvg,64.68668407310705,8TRA
@@ -2003,7 +2003,7 @@
 1,Kvalitet_trend_catAvg,60.384898611634966,GRNG
 2,FinansiellHalsa_latest_catAvg,44.380678851174935,GRNG
 3,FinansiellHalsa_trend_catAvg,75.62874251497006,GRNG
-4,Lonsamhet_latest_catAvg,48.37879773702101,GRNG
+4,Lonsamhet_latest_catAvg,48.33048855827705,GRNG
 5,Lonsamhet_trend_catAvg,63.29789533147332,GRNG
 6,Vardering_latest_catAvg,49.89122651691891,GRNG
 7,Vardering_trend_catAvg,78.07337341194481,GRNG
@@ -2146,7 +2146,7 @@
 4,Lonsamhet_latest_catAvg,85.25216086098943,SCA-B
 5,Lonsamhet_trend_catAvg,33.5533560137959,SCA-B
 6,Vardering_latest_catAvg,44.66490938529788,SCA-B
-7,Vardering_trend_catAvg,43.575943393510904,SCA-B
+7,Vardering_trend_catAvg,43.642344455927905,SCA-B
 8,Kassaflode_latest_catAvg,66.11340556933733,SCA-B
 9,Kassaflode_trend_catAvg,23.673903079294973,SCA-B
 10,Kvalitet_latest_catRank,50.065104166666664,SCA-B
@@ -2156,11 +2156,11 @@
 14,Lonsamhet_latest_catRank,94.20572916666666,SCA-B
 15,Lonsamhet_trend_catRank,21.940104166666664,SCA-B
 16,Vardering_latest_catRank,34.50520833333333,SCA-B
-17,Vardering_trend_catRank,22.916666666666664,SCA-B
+17,Vardering_trend_catRank,23.046875,SCA-B
 18,Kassaflode_latest_catRank,71.80989583333334,SCA-B
 19,Kassaflode_trend_catRank,9.5703125,SCA-B
 0,Kvalitet_latest_catAvg,71.49230889586451,SKF-A
-1,Kvalitet_trend_catAvg,43.88038140599616,SKF-A
+1,Kvalitet_trend_catAvg,43.805306330921084,SKF-A
 2,FinansiellHalsa_latest_catAvg,51.90208877284596,SKF-A
 3,FinansiellHalsa_trend_catAvg,77.20759301069991,SKF-A
 4,Lonsamhet_latest_catAvg,53.57245645836283,SKF-A
@@ -2170,7 +2170,7 @@
 8,Kassaflode_latest_catAvg,65.99184810160807,SKF-A
 9,Kassaflode_trend_catAvg,70.22113022113022,SKF-A
 10,Kvalitet_latest_catRank,78.05989583333334,SKF-A
-11,Kvalitet_trend_catRank,52.669270833333336,SKF-A
+11,Kvalitet_trend_catRank,52.5390625,SKF-A
 12,FinansiellHalsa_latest_catRank,51.888020833333336,SKF-A
 13,FinansiellHalsa_trend_catRank,89.51822916666666,SKF-A
 14,Lonsamhet_latest_catRank,59.9609375,SKF-A
@@ -2180,7 +2180,7 @@
 18,Kassaflode_latest_catRank,71.41927083333334,SKF-A
 19,Kassaflode_trend_catRank,73.2421875,SKF-A
 0,Kvalitet_latest_catAvg,71.49230889586451,SKF-B
-1,Kvalitet_trend_catAvg,43.88038140599616,SKF-B
+1,Kvalitet_trend_catAvg,43.805306330921084,SKF-B
 2,FinansiellHalsa_latest_catAvg,51.90208877284596,SKF-B
 3,FinansiellHalsa_trend_catAvg,77.20759301069991,SKF-B
 4,Lonsamhet_latest_catAvg,53.57245645836283,SKF-B
@@ -2190,7 +2190,7 @@
 8,Kassaflode_latest_catAvg,65.99184810160807,SKF-B
 9,Kassaflode_trend_catAvg,70.22113022113022,SKF-B
 10,Kvalitet_latest_catRank,78.05989583333334,SKF-B
-11,Kvalitet_trend_catRank,52.669270833333336,SKF-B
+11,Kvalitet_trend_catRank,52.5390625,SKF-B
 12,FinansiellHalsa_latest_catRank,51.888020833333336,SKF-B
 13,FinansiellHalsa_trend_catRank,89.51822916666666,SKF-B
 14,Lonsamhet_latest_catRank,59.9609375,SKF-B
@@ -2366,7 +2366,7 @@
 4,Lonsamhet_latest_catAvg,36.07698059268081,BILI-A
 5,Lonsamhet_trend_catAvg,40.09593154991453,BILI-A
 6,Vardering_latest_catAvg,45.43467256874951,BILI-A
-7,Vardering_trend_catAvg,40.61328697655584,BILI-A
+7,Vardering_trend_catAvg,40.67968803897284,BILI-A
 8,Kassaflode_latest_catAvg,46.02713243793134,BILI-A
 9,Kassaflode_trend_catAvg,44.192827240037545,BILI-A
 10,Kvalitet_latest_catRank,74.08854166666666,BILI-A
@@ -2386,7 +2386,7 @@
 4,Lonsamhet_latest_catAvg,31.267918126544938,DOM
 5,Lonsamhet_trend_catAvg,27.173130382720483,DOM
 6,Vardering_latest_catAvg,66.12708770687372,DOM
-7,Vardering_trend_catAvg,60.9885920123613,DOM
+7,Vardering_trend_catAvg,61.0549930747783,DOM
 8,Kassaflode_latest_catAvg,62.54328865335957,DOM
 9,Kassaflode_trend_catAvg,71.39873639873639,DOM
 10,Kvalitet_latest_catRank,21.09375,DOM
@@ -2396,7 +2396,7 @@
 14,Lonsamhet_latest_catRank,17.1875,DOM
 15,Lonsamhet_trend_catRank,14.453125,DOM
 16,Vardering_latest_catRank,79.81770833333334,DOM
-17,Vardering_trend_catRank,67.31770833333334,DOM
+17,Vardering_trend_catRank,67.70833333333334,DOM
 18,Kassaflode_latest_catRank,63.541666666666664,DOM
 19,Kassaflode_trend_catRank,75.65104166666666,DOM
 0,Kvalitet_latest_catAvg,37.78004322273399,ELUX-A
@@ -2406,7 +2406,7 @@
 4,Lonsamhet_latest_catAvg,30.864822920853754,ELUX-A
 5,Lonsamhet_trend_catAvg,30.62271474877817,ELUX-A
 6,Vardering_latest_catAvg,83.40697615301151,ELUX-A
-7,Vardering_trend_catAvg,30.83101617356358,ELUX-A
+7,Vardering_trend_catAvg,30.897417235980573,ELUX-A
 8,Kassaflode_latest_catAvg,38.19101308404477,ELUX-A
 9,Kassaflode_trend_catAvg,37.76928205341889,ELUX-A
 10,Kvalitet_latest_catRank,36.1328125,ELUX-A
@@ -2426,7 +2426,7 @@
 4,Lonsamhet_latest_catAvg,30.864822920853754,ELUX-B
 5,Lonsamhet_trend_catAvg,30.62271474877817,ELUX-B
 6,Vardering_latest_catAvg,67.16601443818986,ELUX-B
-7,Vardering_trend_catAvg,40.42937942944563,ELUX-B
+7,Vardering_trend_catAvg,40.49578049186263,ELUX-B
 8,Kassaflode_latest_catAvg,38.19101308404477,ELUX-B
 9,Kassaflode_trend_catAvg,37.76928205341889,ELUX-B
 10,Kvalitet_latest_catRank,36.1328125,ELUX-B
@@ -2436,7 +2436,7 @@
 14,Lonsamhet_latest_catRank,16.341145833333336,ELUX-B
 15,Lonsamhet_trend_catRank,17.7734375,ELUX-B
 16,Vardering_latest_catRank,81.11979166666666,ELUX-B
-17,Vardering_trend_catRank,17.317708333333336,ELUX-B
+17,Vardering_trend_catRank,17.447916666666664,ELUX-B
 18,Kassaflode_latest_catRank,33.7890625,ELUX-B
 19,Kassaflode_trend_catRank,25.716145833333332,ELUX-B
 0,Kvalitet_latest_catAvg,78.34902846637526,EMBRAC-B
@@ -2615,7 +2615,7 @@
 13,FinansiellHalsa_trend_catRank,97.65625,NEWA-B
 14,Lonsamhet_latest_catRank,80.859375,NEWA-B
 15,Lonsamhet_trend_catRank,44.140625,NEWA-B
-16,Vardering_latest_catRank,38.28125,NEWA-B
+16,Vardering_latest_catRank,38.41145833333333,NEWA-B
 17,Vardering_trend_catRank,97.52604166666666,NEWA-B
 18,Kassaflode_latest_catRank,77.734375,NEWA-B
 19,Kassaflode_trend_catRank,30.598958333333332,NEWA-B
@@ -2643,7 +2643,7 @@
 1,Kvalitet_trend_catAvg,42.60633584404076,VOLCAR-B
 2,FinansiellHalsa_latest_catAvg,42.29263707571801,VOLCAR-B
 3,FinansiellHalsa_trend_catAvg,74.55924217139491,VOLCAR-B
-4,Lonsamhet_latest_catAvg,43.57475413230895,VOLCAR-B
+4,Lonsamhet_latest_catAvg,43.526444953564976,VOLCAR-B
 5,Lonsamhet_trend_catAvg,46.33503920329264,VOLCAR-B
 6,Vardering_latest_catAvg,71.36355296686126,VOLCAR-B
 7,Vardering_trend_catAvg,63.347163217576316,VOLCAR-B
@@ -2736,7 +2736,7 @@
 14,Lonsamhet_latest_catRank,90.234375,HEXA-B
 15,Lonsamhet_trend_catRank,61.328125,HEXA-B
 16,Vardering_latest_catRank,1.171875,HEXA-B
-17,Vardering_trend_catRank,64.71354166666666,HEXA-B
+17,Vardering_trend_catRank,64.58333333333334,HEXA-B
 18,Kassaflode_latest_catRank,89.453125,HEXA-B
 19,Kassaflode_trend_catRank,31.901041666666668,HEXA-B
 0,Kvalitet_latest_catAvg,87.6646522134538,LAGR-B
@@ -2793,7 +2793,7 @@
 11,Kvalitet_trend_catRank,22.786458333333336,NCAB
 12,FinansiellHalsa_latest_catRank,28.515625,NCAB
 13,FinansiellHalsa_trend_catRank,87.109375,NCAB
-14,Lonsamhet_latest_catRank,66.40625,NCAB
+14,Lonsamhet_latest_catRank,66.27604166666666,NCAB
 15,Lonsamhet_trend_catRank,66.015625,NCAB
 16,Vardering_latest_catRank,6.380208333333333,NCAB
 17,Vardering_trend_catRank,41.92708333333333,NCAB
@@ -3006,7 +3006,7 @@
 4,Lonsamhet_latest_catAvg,69.20540119919139,TELIA
 5,Lonsamhet_trend_catAvg,71.6751970617082,TELIA
 6,Vardering_latest_catAvg,43.77756952307374,TELIA
-7,Vardering_trend_catAvg,27.747870752538734,TELIA
+7,Vardering_trend_catAvg,27.814271814955735,TELIA
 8,Kassaflode_latest_catAvg,67.03945041153793,TELIA
 9,Kassaflode_trend_catAvg,27.384127116407626,TELIA
 10,Kvalitet_latest_catRank,69.27083333333334,TELIA
@@ -3215,7 +3215,7 @@
 13,FinansiellHalsa_trend_catRank,3.125,MER
 14,Lonsamhet_latest_catRank,52.604166666666664,MER
 15,Lonsamhet_trend_catRank,51.3671875,MER
-16,Vardering_latest_catRank,47.52604166666667,MER
+16,Vardering_latest_catRank,47.39583333333333,MER
 17,Vardering_trend_catRank,47.00520833333333,MER
 18,Kassaflode_latest_catRank,20.703125,MER
 19,Kassaflode_trend_catRank,17.1875,MER
@@ -3276,7 +3276,7 @@
 14,Lonsamhet_latest_catRank,89.32291666666666,BRIN-B
 15,Lonsamhet_trend_catRank,43.48958333333333,BRIN-B
 16,Vardering_latest_catRank,17.447916666666664,BRIN-B
-17,Vardering_trend_catRank,18.75,BRIN-B
+17,Vardering_trend_catRank,18.619791666666664,BRIN-B
 18,Kassaflode_latest_catRank,51.5625,BRIN-B
 19,Kassaflode_trend_catRank,18.75,BRIN-B
 0,Kvalitet_latest_catAvg,38.348930677384345,CIBUS
@@ -3336,7 +3336,7 @@
 14,Lonsamhet_latest_catRank,74.21875,EAST
 15,Lonsamhet_trend_catRank,30.338541666666668,EAST
 16,Vardering_latest_catRank,7.421875,EAST
-17,Vardering_trend_catRank,56.640625,EAST
+17,Vardering_trend_catRank,56.770833333333336,EAST
 18,Kassaflode_latest_catRank,73.95833333333334,EAST
 19,Kassaflode_trend_catRank,67.578125,EAST
 0,Kvalitet_latest_catAvg,58.08494929640821,EMIL-B
@@ -3356,7 +3356,7 @@
 14,Lonsamhet_latest_catRank,97.39583333333334,EMIL-B
 15,Lonsamhet_trend_catRank,13.671875,EMIL-B
 16,Vardering_latest_catRank,22.916666666666664,EMIL-B
-17,Vardering_trend_catRank,37.890625,EMIL-B
+17,Vardering_trend_catRank,37.76041666666667,EMIL-B
 18,Kassaflode_latest_catRank,72.91666666666666,EMIL-B
 19,Kassaflode_trend_catRank,64.71354166666666,EMIL-B
 0,Kvalitet_latest_catAvg,48.337587154438154,GPG
@@ -3436,7 +3436,7 @@
 14,Lonsamhet_latest_catRank,97.98177083333334,INTEA-D
 15,Lonsamhet_trend_catRank,42.51302083333333,INTEA-D
 16,Vardering_latest_catRank,59.244791666666664,INTEA-D
-17,Vardering_trend_catRank,60.416666666666664,INTEA-D
+17,Vardering_trend_catRank,60.546875,INTEA-D
 18,Kassaflode_latest_catRank,60.872395833333336,INTEA-D
 19,Kassaflode_trend_catRank,24.934895833333336,INTEA-D
 0,Kvalitet_latest_catAvg,56.06462874409599,JOMA
@@ -3456,7 +3456,7 @@
 14,Lonsamhet_latest_catRank,98.4375,JOMA
 15,Lonsamhet_trend_catRank,64.453125,JOMA
 16,Vardering_latest_catRank,40.49479166666667,JOMA
-17,Vardering_trend_catRank,59.895833333333336,JOMA
+17,Vardering_trend_catRank,60.026041666666664,JOMA
 18,Kassaflode_latest_catRank,57.291666666666664,JOMA
 19,Kassaflode_trend_catRank,56.380208333333336,JOMA
 0,Kvalitet_latest_catAvg,41.06477542758236,KFAST-B
@@ -3556,11 +3556,11 @@
 14,Lonsamhet_latest_catRank,66.53645833333334,NEOBO
 15,Lonsamhet_trend_catRank,11.067708333333332,NEOBO
 16,Vardering_latest_catRank,67.31770833333334,NEOBO
-17,Vardering_trend_catRank,19.010416666666664,NEOBO
+17,Vardering_trend_catRank,18.880208333333336,NEOBO
 18,Kassaflode_latest_catRank,35.9375,NEOBO
 19,Kassaflode_trend_catRank,55.729166666666664,NEOBO
 0,Kvalitet_latest_catAvg,45.86303673932389,NIVI-B
-1,Kvalitet_trend_catAvg,35.0534448382809,NIVI-B
+1,Kvalitet_trend_catAvg,34.978369763205826,NIVI-B
 2,FinansiellHalsa_latest_catAvg,33.51738903394256,NIVI-B
 3,FinansiellHalsa_trend_catAvg,73.08898596250123,NIVI-B
 4,Lonsamhet_latest_catAvg,84.49866171231191,NIVI-B
@@ -3576,7 +3576,7 @@
 14,Lonsamhet_latest_catRank,93.61979166666666,NIVI-B
 15,Lonsamhet_trend_catRank,26.302083333333332,NIVI-B
 16,Vardering_latest_catRank,28.255208333333332,NIVI-B
-17,Vardering_trend_catRank,48.56770833333333,NIVI-B
+17,Vardering_trend_catRank,48.4375,NIVI-B
 18,Kassaflode_latest_catRank,76.69270833333334,NIVI-B
 19,Kassaflode_trend_catRank,75.52083333333334,NIVI-B
 0,Kvalitet_latest_catAvg,44.73675203645574,PLAZ-B
@@ -3625,7 +3625,7 @@
 3,FinansiellHalsa_trend_catAvg,31.307959182189123,SBB-B
 4,Lonsamhet_latest_catAvg,57.78145450824126,SBB-B
 5,Lonsamhet_trend_catAvg,26.61280564657794,SBB-B
-6,Vardering_latest_catAvg,80.82767448804326,SBB-B
+6,Vardering_latest_catAvg,80.77155776525986,SBB-B
 7,Vardering_trend_catAvg,59.582013783225044,SBB-B
 8,Kassaflode_latest_catAvg,25.030361202551468,SBB-B
 9,Kassaflode_trend_catAvg,24.98645776907371,SBB-B
@@ -3726,7 +3726,7 @@
 4,Lonsamhet_latest_catAvg,93.60641968141232,SLP-B
 5,Lonsamhet_trend_catAvg,56.222433603809726,SLP-B
 6,Vardering_latest_catAvg,42.16369319753491,SLP-B
-7,Vardering_trend_catAvg,34.082754215788604,SLP-B
+7,Vardering_trend_catAvg,34.1491552782056,SLP-B
 8,Kassaflode_latest_catAvg,66.56707741599692,SLP-B
 9,Kassaflode_trend_catAvg,61.05124605124605,SLP-B
 10,Kvalitet_latest_catRank,63.802083333333336,SLP-B
@@ -3766,7 +3766,7 @@
 4,Lonsamhet_latest_catAvg,48.64119149880233,CAT-A
 5,Lonsamhet_trend_catAvg,18.714226776871786,CAT-A
 6,Vardering_latest_catAvg,53.38637760577969,CAT-A
-7,Vardering_trend_catAvg,50.739423397407194,CAT-A
+7,Vardering_trend_catAvg,50.80582445982419,CAT-A
 8,Kassaflode_latest_catAvg,37.319945113254605,CAT-A
 9,Kassaflode_trend_catAvg,83.65917865917866,CAT-A
 10,Kvalitet_latest_catRank,51.7578125,CAT-A
@@ -3796,7 +3796,7 @@
 14,Lonsamhet_latest_catRank,47.8515625,CAT-B
 15,Lonsamhet_trend_catRank,7.877604166666667,CAT-B
 16,Vardering_latest_catRank,19.401041666666664,CAT-B
-17,Vardering_trend_catRank,31.510416666666668,CAT-B
+17,Vardering_trend_catRank,31.380208333333332,CAT-B
 18,Kassaflode_latest_catRank,32.74739583333333,CAT-B
 19,Kassaflode_trend_catRank,91.34114583333334,CAT-B
 0,Kvalitet_latest_catAvg,95.23229774791955,CS
@@ -3845,7 +3845,7 @@
 3,FinansiellHalsa_trend_catAvg,80.79218611956415,FLERIE
 4,Lonsamhet_latest_catAvg,17.04873013009401,FLERIE
 5,Lonsamhet_trend_catAvg,17.299085628551985,FLERIE
-6,Vardering_latest_catAvg,82.57746109631687,FLERIE
+6,Vardering_latest_catAvg,82.52134437353347,FLERIE
 7,Vardering_trend_catAvg,55.177725584183655,FLERIE
 8,Kassaflode_latest_catAvg,1.7915925943450428,FLERIE
 9,Kassaflode_trend_catAvg,50.07880469045517,FLERIE
@@ -3876,7 +3876,7 @@
 14,Lonsamhet_latest_catRank,72.39583333333334,HOFI
 15,Lonsamhet_trend_catRank,70.83333333333334,HOFI
 16,Vardering_latest_catRank,51.953125,HOFI
-17,Vardering_trend_catRank,55.208333333333336,HOFI
+17,Vardering_trend_catRank,55.338541666666664,HOFI
 18,Kassaflode_latest_catRank,96.74479166666666,HOFI
 19,Kassaflode_trend_catRank,31.119791666666668,HOFI
 0,Kvalitet_latest_catAvg,37.030246134890135,INTRUM
@@ -3916,7 +3916,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,LINC
 15,Lonsamhet_trend_catRank,51.3671875,LINC
 16,Vardering_latest_catRank,60.9375,LINC
-17,Vardering_trend_catRank,61.588541666666664,LINC
+17,Vardering_trend_catRank,61.71875,LINC
 18,Kassaflode_latest_catRank,46.09375,LINC
 19,Kassaflode_trend_catRank,41.86197916666667,LINC
 0,Kvalitet_latest_catAvg,50.167219174465345,RATO-A
@@ -4036,7 +4036,7 @@
 14,Lonsamhet_latest_catRank,78.125,TRAC-B
 15,Lonsamhet_trend_catRank,39.19270833333333,TRAC-B
 16,Vardering_latest_catRank,61.588541666666664,TRAC-B
-17,Vardering_trend_catRank,58.203125,TRAC-B
+17,Vardering_trend_catRank,58.333333333333336,TRAC-B
 18,Kassaflode_latest_catRank,76.82291666666666,TRAC-B
 19,Kassaflode_trend_catRank,69.40104166666666,TRAC-B
 0,Kvalitet_latest_catAvg,18.862762930149323,VEFAB
@@ -4056,7 +4056,7 @@
 14,Lonsamhet_latest_catRank,100.0,VEFAB
 15,Lonsamhet_trend_catRank,100.0,VEFAB
 16,Vardering_latest_catRank,83.72395833333334,VEFAB
-17,Vardering_trend_catRank,56.510416666666664,VEFAB
+17,Vardering_trend_catRank,56.640625,VEFAB
 18,Kassaflode_latest_catRank,61.197916666666664,VEFAB
 19,Kassaflode_trend_catRank,100.0,VEFAB
 0,Kvalitet_latest_catAvg,39.75195822454308,VNV
@@ -4160,7 +4160,7 @@
 18,Kassaflode_latest_catRank,53.255208333333336,ATT
 19,Kassaflode_trend_catRank,57.161458333333336,ATT
 0,Kvalitet_latest_catAvg,28.995902641280644,BACTI-B
-1,Kvalitet_trend_catAvg,40.97576059666224,BACTI-B
+1,Kvalitet_trend_catAvg,40.900685521587164,BACTI-B
 2,FinansiellHalsa_latest_catAvg,41.72,BACTI-B
 3,FinansiellHalsa_trend_catAvg,23.846453170799116,BACTI-B
 4,Lonsamhet_latest_catAvg,47.84076524222939,BACTI-B
@@ -4196,7 +4196,7 @@
 14,Lonsamhet_latest_catRank,35.67708333333333,BICO
 15,Lonsamhet_trend_catRank,48.30729166666667,BICO
 16,Vardering_latest_catRank,90.75520833333334,BICO
-17,Vardering_trend_catRank,23.046875,BICO
+17,Vardering_trend_catRank,22.916666666666664,BICO
 18,Kassaflode_latest_catRank,37.890625,BICO
 19,Kassaflode_trend_catRank,87.63020833333334,BICO
 0,Kvalitet_latest_catAvg,67.2976501305483,BIOG-B
@@ -4236,7 +4236,7 @@
 14,Lonsamhet_latest_catRank,8.072916666666668,BINV
 15,Lonsamhet_trend_catRank,89.97395833333334,BINV
 16,Vardering_latest_catRank,81.38020833333334,BINV
-17,Vardering_trend_catRank,4.947916666666666,BINV
+17,Vardering_trend_catRank,4.817708333333334,BINV
 18,Kassaflode_latest_catRank,1.3020833333333335,BINV
 19,Kassaflode_trend_catRank,38.02083333333333,BINV
 0,Kvalitet_latest_catAvg,84.91727051368557,CEVI
@@ -4245,7 +4245,7 @@
 3,FinansiellHalsa_trend_catAvg,80.32001570629234,CEVI
 4,Lonsamhet_latest_catAvg,80.1450496166449,CEVI
 5,Lonsamhet_trend_catAvg,37.26418536936711,CEVI
-6,Vardering_latest_catAvg,22.1823286357773,CEVI
+6,Vardering_latest_catAvg,22.22595865322931,CEVI
 7,Vardering_trend_catAvg,77.94432806210507,CEVI
 8,Kassaflode_latest_catAvg,91.11346189809902,CEVI
 9,Kassaflode_trend_catAvg,74.51035451035452,CEVI
@@ -4310,7 +4310,7 @@
 8,Kassaflode_latest_catAvg,47.69615364683669,HUM
 9,Kassaflode_trend_catAvg,52.92207792207792,HUM
 10,Kvalitet_latest_catRank,54.947916666666664,HUM
-11,Kvalitet_trend_catRank,51.953125,HUM
+11,Kvalitet_trend_catRank,51.822916666666664,HUM
 12,FinansiellHalsa_latest_catRank,9.375,HUM
 13,FinansiellHalsa_trend_catRank,64.84375,HUM
 14,Lonsamhet_latest_catRank,74.08854166666666,HUM
@@ -4356,7 +4356,7 @@
 14,Lonsamhet_latest_catRank,94.53125,RAY-B
 15,Lonsamhet_trend_catRank,83.984375,RAY-B
 16,Vardering_latest_catRank,13.802083333333334,RAY-B
-17,Vardering_trend_catRank,56.380208333333336,RAY-B
+17,Vardering_trend_catRank,56.510416666666664,RAY-B
 18,Kassaflode_latest_catRank,95.83333333333334,RAY-B
 19,Kassaflode_trend_catRank,74.86979166666666,RAY-B
 0,Kvalitet_latest_catAvg,34.83903932095325,SEDANA
@@ -4396,7 +4396,7 @@
 14,Lonsamhet_latest_catRank,89.19270833333334,XVIVO
 15,Lonsamhet_trend_catRank,87.5,XVIVO
 16,Vardering_latest_catRank,11.328125,XVIVO
-17,Vardering_trend_catRank,58.723958333333336,XVIVO
+17,Vardering_trend_catRank,58.854166666666664,XVIVO
 18,Kassaflode_latest_catRank,90.75520833333334,XVIVO
 19,Kassaflode_trend_catRank,91.796875,XVIVO
 0,Kvalitet_latest_catAvg,62.51992450689901,ALIG
@@ -4453,7 +4453,7 @@
 11,Kvalitet_trend_catRank,19.921875,BERG-B
 12,FinansiellHalsa_latest_catRank,13.020833333333334,BERG-B
 13,FinansiellHalsa_trend_catRank,34.11458333333333,BERG-B
-14,Lonsamhet_latest_catRank,40.49479166666667,BERG-B
+14,Lonsamhet_latest_catRank,40.625,BERG-B
 15,Lonsamhet_trend_catRank,45.3125,BERG-B
 16,Vardering_latest_catRank,50.651041666666664,BERG-B
 17,Vardering_trend_catRank,29.6875,BERG-B
@@ -4490,7 +4490,7 @@
 8,Kassaflode_latest_catAvg,64.27382087003153,BUFAB
 9,Kassaflode_trend_catAvg,74.87012987012986,BUFAB
 10,Kvalitet_latest_catRank,83.07291666666666,BUFAB
-11,Kvalitet_trend_catRank,51.822916666666664,BUFAB
+11,Kvalitet_trend_catRank,51.692708333333336,BUFAB
 12,FinansiellHalsa_latest_catRank,25.260416666666668,BUFAB
 13,FinansiellHalsa_trend_catRank,92.96875,BUFAB
 14,Lonsamhet_latest_catRank,62.5,BUFAB
@@ -4546,7 +4546,7 @@
 4,Lonsamhet_latest_catAvg,33.55815119613936,COOR
 5,Lonsamhet_trend_catAvg,43.778180205094365,COOR
 6,Vardering_latest_catAvg,31.337207797864906,COOR
-7,Vardering_trend_catAvg,23.970354906654688,COOR
+7,Vardering_trend_catAvg,24.03675596907168,COOR
 8,Kassaflode_latest_catAvg,37.741509565750306,COOR
 9,Kassaflode_trend_catAvg,30.666208314235316,COOR
 10,Kvalitet_latest_catRank,63.932291666666664,COOR
@@ -4576,7 +4576,7 @@
 14,Lonsamhet_latest_catRank,95.57291666666666,CTT
 15,Lonsamhet_trend_catRank,85.546875,CTT
 16,Vardering_latest_catRank,5.989583333333334,CTT
-17,Vardering_trend_catRank,61.067708333333336,CTT
+17,Vardering_trend_catRank,61.197916666666664,CTT
 18,Kassaflode_latest_catRank,94.140625,CTT
 19,Kassaflode_trend_catRank,82.29166666666666,CTT
 0,Kvalitet_latest_catAvg,48.82286502185584,ELAN-B
@@ -4666,7 +4666,7 @@
 4,Lonsamhet_latest_catAvg,48.017013186643915,FG
 5,Lonsamhet_trend_catAvg,36.097756214777014,FG
 6,Vardering_latest_catAvg,40.323989536752265,FG
-7,Vardering_trend_catAvg,47.818110727698745,FG
+7,Vardering_trend_catAvg,47.88451179011574,FG
 8,Kassaflode_latest_catAvg,41.936650421451795,FG
 9,Kassaflode_trend_catAvg,45.86128588691196,FG
 10,Kvalitet_latest_catRank,33.72395833333333,FG
@@ -4676,7 +4676,7 @@
 14,Lonsamhet_latest_catRank,46.74479166666667,FG
 15,Lonsamhet_trend_catRank,25.911458333333332,FG
 16,Vardering_latest_catRank,27.734375,FG
-17,Vardering_trend_catRank,30.46875,FG
+17,Vardering_trend_catRank,30.859375,FG
 18,Kassaflode_latest_catRank,36.45833333333333,FG
 19,Kassaflode_trend_catRank,35.02604166666667,FG
 0,Kvalitet_latest_catAvg,68.8334262328747,FMM-B
@@ -5004,7 +5004,7 @@
 2,FinansiellHalsa_latest_catAvg,16.91211488250653,VOLO
 3,FinansiellHalsa_trend_catAvg,36.86022154499633,VOLO
 4,Lonsamhet_latest_catAvg,51.43330920361219,VOLO
-5,Lonsamhet_trend_catAvg,44.53955827148516,VOLO
+5,Lonsamhet_trend_catAvg,44.48950822143511,VOLO
 6,Vardering_latest_catAvg,27.02546039673288,VOLO
 7,Vardering_trend_catAvg,38.10218829236435,VOLO
 8,Kassaflode_latest_catAvg,55.81121302861726,VOLO
@@ -5024,7 +5024,7 @@
 2,FinansiellHalsa_latest_catAvg,16.91211488250653,VOLO-PREF
 3,FinansiellHalsa_trend_catAvg,36.86022154499633,VOLO-PREF
 4,Lonsamhet_latest_catAvg,51.43330920361219,VOLO-PREF
-5,Lonsamhet_trend_catAvg,44.53955827148516,VOLO-PREF
+5,Lonsamhet_trend_catAvg,44.48950822143511,VOLO-PREF
 6,Vardering_latest_catAvg,52.09025348641404,VOLO-PREF
 7,Vardering_trend_catAvg,47.7771350132786,VOLO-PREF
 8,Kassaflode_latest_catAvg,55.81121302861726,VOLO-PREF
@@ -5046,7 +5046,7 @@
 4,Lonsamhet_latest_catAvg,38.96845969635738,XANO-B
 5,Lonsamhet_trend_catAvg,25.155676663797312,XANO-B
 6,Vardering_latest_catAvg,37.73260081401822,XANO-B
-7,Vardering_trend_catAvg,44.02480187061187,XANO-B
+7,Vardering_trend_catAvg,44.09120293302886,XANO-B
 8,Kassaflode_latest_catAvg,42.59795008370454,XANO-B
 9,Kassaflode_trend_catAvg,40.80100559745545,XANO-B
 10,Kvalitet_latest_catRank,61.328125,XANO-B
@@ -5056,7 +5056,7 @@
 14,Lonsamhet_latest_catRank,30.078125,XANO-B
 15,Lonsamhet_trend_catRank,12.5,XANO-B
 16,Vardering_latest_catRank,24.609375,XANO-B
-17,Vardering_trend_catRank,23.567708333333336,XANO-B
+17,Vardering_trend_catRank,23.697916666666664,XANO-B
 18,Kassaflode_latest_catRank,36.71875,XANO-B
 19,Kassaflode_trend_catRank,28.776041666666668,XANO-B
 0,Kvalitet_latest_catAvg,67.30694008468527,ARISE
@@ -5096,7 +5096,7 @@
 14,Lonsamhet_latest_catRank,34.11458333333333,ARP
 15,Lonsamhet_trend_catRank,22.526041666666664,ARP
 16,Vardering_latest_catRank,53.385416666666664,ARP
-17,Vardering_trend_catRank,62.369791666666664,ARP
+17,Vardering_trend_catRank,62.5,ARP
 18,Kassaflode_latest_catRank,60.026041666666664,ARP
 19,Kassaflode_trend_catRank,29.817708333333332,ARP
 0,Kvalitet_latest_catAvg,79.8921387430203,BEIA-B
@@ -5306,7 +5306,7 @@
 4,Lonsamhet_latest_catAvg,41.60718260863536,BMAX
 5,Lonsamhet_trend_catAvg,35.17461587471766,BMAX
 6,Vardering_latest_catAvg,41.85019614301047,BMAX
-7,Vardering_trend_catAvg,50.31868299392975,BMAX
+7,Vardering_trend_catAvg,50.38508405634675,BMAX
 8,Kassaflode_latest_catAvg,66.72964222223723,BMAX
 9,Kassaflode_trend_catAvg,58.37311337311337,BMAX
 10,Kvalitet_latest_catRank,47.65625,BMAX
@@ -5316,7 +5316,7 @@
 14,Lonsamhet_latest_catRank,34.63541666666667,BMAX
 15,Lonsamhet_trend_catRank,24.739583333333336,BMAX
 16,Vardering_latest_catRank,29.817708333333332,BMAX
-17,Vardering_trend_catRank,37.63020833333333,BMAX
+17,Vardering_trend_catRank,37.890625,BMAX
 18,Kassaflode_latest_catRank,73.046875,BMAX
 19,Kassaflode_trend_catRank,53.90625,BMAX
 0,Kvalitet_latest_catAvg,93.271872952543,CLAS-B
@@ -5466,7 +5466,7 @@
 4,Lonsamhet_latest_catAvg,83.78048072855178,PRFO
 5,Lonsamhet_trend_catAvg,47.83469941425903,PRFO
 6,Vardering_latest_catAvg,52.75080886659914,PRFO
-7,Vardering_trend_catAvg,35.80780530705112,PRFO
+7,Vardering_trend_catAvg,35.87420636946812,PRFO
 8,Kassaflode_latest_catAvg,65.09667142081415,PRFO
 9,Kassaflode_trend_catAvg,15.958303818214647,PRFO
 10,Kvalitet_latest_catRank,96.22395833333334,PRFO
@@ -5500,7 +5500,7 @@
 18,Kassaflode_latest_catRank,95.96354166666666,RVRC
 19,Kassaflode_trend_catRank,65.49479166666666,RVRC
 0,Kvalitet_latest_catAvg,79.65768963730063,RUSTA
-1,Kvalitet_trend_catAvg,34.947447447447445,RUSTA
+1,Kvalitet_trend_catAvg,34.872372372372375,RUSTA
 2,FinansiellHalsa_latest_catAvg,6.445013054830287,RUSTA
 3,FinansiellHalsa_trend_catAvg,61.80450574261313,RUSTA
 4,Lonsamhet_latest_catAvg,54.542912094114655,RUSTA
@@ -5510,7 +5510,7 @@
 8,Kassaflode_latest_catAvg,51.02191639459875,RUSTA
 9,Kassaflode_trend_catAvg,61.66900666900666,RUSTA
 10,Kvalitet_latest_catRank,86.58854166666666,RUSTA
-11,Kvalitet_trend_catRank,38.80208333333333,RUSTA
+11,Kvalitet_trend_catRank,38.671875,RUSTA
 12,FinansiellHalsa_latest_catRank,2.994791666666667,RUSTA
 13,FinansiellHalsa_trend_catRank,63.932291666666664,RUSTA
 14,Lonsamhet_latest_catRank,61.588541666666664,RUSTA
@@ -5676,7 +5676,7 @@
 14,Lonsamhet_latest_catRank,19.401041666666664,DUST
 15,Lonsamhet_trend_catRank,31.380208333333332,DUST
 16,Vardering_latest_catRank,64.97395833333334,DUST
-17,Vardering_trend_catRank,17.447916666666664,DUST
+17,Vardering_trend_catRank,17.317708333333336,DUST
 18,Kassaflode_latest_catRank,26.953125,DUST
 19,Kassaflode_trend_catRank,38.54166666666667,DUST
 0,Kvalitet_latest_catAvg,89.25959065528403,DYVOX
@@ -5725,7 +5725,7 @@
 3,FinansiellHalsa_trend_catAvg,12.008233385943601,IAR-B
 4,Lonsamhet_latest_catAvg,75.8157059013521,IAR-B
 5,Lonsamhet_trend_catAvg,76.4457295490668,IAR-B
-6,Vardering_latest_catAvg,32.43183061833946,IAR-B
+6,Vardering_latest_catAvg,32.475460635791464,IAR-B
 7,Vardering_trend_catAvg,36.919062602386276,IAR-B
 8,Kassaflode_latest_catAvg,50.0,IAR-B
 9,Kassaflode_trend_catAvg,50.0,IAR-B
@@ -5750,7 +5750,7 @@
 8,Kassaflode_latest_catAvg,65.0913765172152,KNOW
 9,Kassaflode_trend_catAvg,55.829235489429664,KNOW
 10,Kvalitet_latest_catRank,47.13541666666667,KNOW
-11,Kvalitet_trend_catRank,44.79166666666667,KNOW
+11,Kvalitet_trend_catRank,44.921875,KNOW
 12,FinansiellHalsa_latest_catRank,64.58333333333334,KNOW
 13,FinansiellHalsa_trend_catRank,79.6875,KNOW
 14,Lonsamhet_latest_catRank,23.4375,KNOW
@@ -5796,7 +5796,7 @@
 14,Lonsamhet_latest_catRank,45.3125,PRIC-B
 15,Lonsamhet_trend_catRank,58.463541666666664,PRIC-B
 16,Vardering_latest_catRank,82.68229166666666,PRIC-B
-17,Vardering_trend_catRank,59.505208333333336,PRIC-B
+17,Vardering_trend_catRank,59.635416666666664,PRIC-B
 18,Kassaflode_latest_catRank,33.33333333333333,PRIC-B
 19,Kassaflode_trend_catRank,79.42708333333334,PRIC-B
 0,Kvalitet_latest_catAvg,84.67915432080656,PACT
@@ -5866,7 +5866,7 @@
 4,Lonsamhet_latest_catAvg,30.094842162836887,VPLAY-A
 5,Lonsamhet_trend_catAvg,20.21887774014611,VPLAY-A
 6,Vardering_latest_catAvg,60.04096807268521,VPLAY-A
-7,Vardering_trend_catAvg,50.80787462991282,VPLAY-A
+7,Vardering_trend_catAvg,50.874275692329824,VPLAY-A
 8,Kassaflode_latest_catAvg,19.567259921184796,VPLAY-A
 9,Kassaflode_trend_catAvg,21.130394321985637,VPLAY-A
 10,Kvalitet_latest_catRank,55.794270833333336,VPLAY-A
@@ -5926,7 +5926,7 @@
 4,Lonsamhet_latest_catAvg,40.03133774058696,MSON-B
 5,Lonsamhet_trend_catAvg,64.18800177234284,MSON-B
 6,Vardering_latest_catAvg,58.24520648293318,MSON-B
-7,Vardering_trend_catAvg,44.42487784470699,MSON-B
+7,Vardering_trend_catAvg,44.491278907123984,MSON-B
 8,Kassaflode_latest_catAvg,45.22546150154454,MSON-B
 9,Kassaflode_trend_catAvg,69.32607932607932,MSON-B
 10,Kvalitet_latest_catRank,43.5546875,MSON-B
@@ -5936,7 +5936,7 @@
 14,Lonsamhet_latest_catRank,32.09635416666667,MSON-B
 15,Lonsamhet_trend_catRank,76.10677083333334,MSON-B
 16,Vardering_latest_catRank,64.453125,MSON-B
-17,Vardering_trend_catRank,23.958333333333336,MSON-B
+17,Vardering_trend_catRank,24.348958333333336,MSON-B
 18,Kassaflode_latest_catRank,39.2578125,MSON-B
 19,Kassaflode_trend_catRank,71.15885416666666,MSON-B
 0,Kvalitet_latest_catAvg,31.05044934041325,CTEK
@@ -6316,7 +6316,7 @@
 14,Lonsamhet_latest_catRank,15.494791666666666,BOUL
 15,Lonsamhet_trend_catRank,19.270833333333336,BOUL
 16,Vardering_latest_catRank,80.72916666666666,BOUL
-17,Vardering_trend_catRank,55.46875,BOUL
+17,Vardering_trend_catRank,55.598958333333336,BOUL
 18,Kassaflode_latest_catRank,48.828125,BOUL
 19,Kassaflode_trend_catRank,55.46875,BOUL
 0,Kvalitet_latest_catAvg,85.07617762392309,CRAD-B
@@ -6375,7 +6375,7 @@
 13,FinansiellHalsa_trend_catRank,4.6875,CARA
 14,Lonsamhet_latest_catRank,44.53125,CARA
 15,Lonsamhet_trend_catRank,18.880208333333336,CARA
-16,Vardering_latest_catRank,38.80208333333333,CARA
+16,Vardering_latest_catRank,38.93229166666667,CARA
 17,Vardering_trend_catRank,17.96875,CARA
 18,Kassaflode_latest_catRank,86.06770833333334,CARA
 19,Kassaflode_trend_catRank,6.901041666666667,CARA
@@ -6705,8 +6705,8 @@
 3,FinansiellHalsa_trend_catAvg,35.30352592141797,SANION
 4,Lonsamhet_latest_catAvg,94.86883816070936,SANION
 5,Lonsamhet_trend_catAvg,95.66360217022748,SANION
-6,Vardering_latest_catAvg,46.704018932564345,SANION
-7,Vardering_trend_catAvg,29.108521789909812,SANION
+6,Vardering_latest_catAvg,46.61675889766033,SANION
+7,Vardering_trend_catAvg,29.440527101994803,SANION
 8,Kassaflode_latest_catAvg,98.53905723678133,SANION
 9,Kassaflode_trend_catAvg,97.52720252720252,SANION
 10,Kvalitet_latest_catRank,99.609375,SANION
@@ -6715,8 +6715,8 @@
 13,FinansiellHalsa_trend_catRank,42.05729166666667,SANION
 14,Lonsamhet_latest_catRank,98.828125,SANION
 15,Lonsamhet_trend_catRank,98.56770833333334,SANION
-16,Vardering_latest_catRank,38.93229166666667,SANION
-17,Vardering_trend_catRank,4.557291666666666,SANION
+16,Vardering_latest_catRank,38.28125,SANION
+17,Vardering_trend_catRank,4.6875,SANION
 18,Kassaflode_latest_catRank,99.609375,SANION
 19,Kassaflode_trend_catRank,99.609375,SANION
 0,Kvalitet_latest_catAvg,15.931293454982839,SEZI
@@ -6745,8 +6745,8 @@
 3,FinansiellHalsa_trend_catAvg,85.27387847256307,SYNACT
 4,Lonsamhet_latest_catAvg,50.0,SYNACT
 5,Lonsamhet_trend_catAvg,50.0,SYNACT
-6,Vardering_latest_catAvg,65.88286107217742,SYNACT
-7,Vardering_trend_catAvg,54.255724021145596,SYNACT
+6,Vardering_latest_catAvg,65.55879434322412,SYNACT
+7,Vardering_trend_catAvg,54.32212508356259,SYNACT
 8,Kassaflode_latest_catAvg,25.48465266558966,SYNACT
 9,Kassaflode_trend_catAvg,25.858369098712448,SYNACT
 10,Kvalitet_latest_catRank,6.119791666666666,SYNACT
@@ -6755,8 +6755,8 @@
 13,FinansiellHalsa_trend_catRank,98.17708333333334,SYNACT
 14,Lonsamhet_latest_catRank,52.604166666666664,SYNACT
 15,Lonsamhet_trend_catRank,51.3671875,SYNACT
-16,Vardering_latest_catRank,79.03645833333334,SYNACT
-17,Vardering_trend_catRank,47.91666666666667,SYNACT
+16,Vardering_latest_catRank,78.515625,SYNACT
+17,Vardering_trend_catRank,48.30729166666667,SYNACT
 18,Kassaflode_latest_catRank,17.578125,SYNACT
 19,Kassaflode_trend_catRank,11.979166666666668,SYNACT
 0,Kvalitet_latest_catAvg,39.62140992167102,VICO
@@ -6885,7 +6885,7 @@
 3,FinansiellHalsa_trend_catAvg,70.89673112790813,BERNER-B
 4,Lonsamhet_latest_catAvg,49.83245292255234,BERNER-B
 5,Lonsamhet_trend_catAvg,55.53584677489076,BERNER-B
-6,Vardering_latest_catAvg,22.48828622035997,BERNER-B
+6,Vardering_latest_catAvg,22.53191623781198,BERNER-B
 7,Vardering_trend_catAvg,67.98301253741771,BERNER-B
 8,Kassaflode_latest_catAvg,65.76608242475041,BERNER-B
 9,Kassaflode_trend_catAvg,74.2102492102492,BERNER-B
@@ -7076,7 +7076,7 @@
 14,Lonsamhet_latest_catRank,58.333333333333336,INISS-B
 15,Lonsamhet_trend_catRank,82.8125,INISS-B
 16,Vardering_latest_catRank,62.890625,INISS-B
-17,Vardering_trend_catRank,62.239583333333336,INISS-B
+17,Vardering_trend_catRank,62.369791666666664,INISS-B
 18,Kassaflode_latest_catRank,22.135416666666664,INISS-B
 19,Kassaflode_trend_catRank,60.9375,INISS-B
 0,Kvalitet_latest_catAvg,58.32306548928722,KARNEL-B
@@ -7096,7 +7096,7 @@
 14,Lonsamhet_latest_catRank,63.020833333333336,KARNEL-B
 15,Lonsamhet_trend_catRank,76.30208333333334,KARNEL-B
 16,Vardering_latest_catRank,14.192708333333334,KARNEL-B
-17,Vardering_trend_catRank,59.114583333333336,KARNEL-B
+17,Vardering_trend_catRank,59.244791666666664,KARNEL-B
 18,Kassaflode_latest_catRank,61.458333333333336,KARNEL-B
 19,Kassaflode_trend_catRank,73.56770833333334,KARNEL-B
 0,Kvalitet_latest_catAvg,28.891023948523877,MEAB-B
@@ -7133,7 +7133,7 @@
 11,Kvalitet_trend_catRank,47.00520833333333,NETEL
 12,FinansiellHalsa_latest_catRank,19.401041666666664,NETEL
 13,FinansiellHalsa_trend_catRank,25.130208333333332,NETEL
-14,Lonsamhet_latest_catRank,34.24479166666667,NETEL
+14,Lonsamhet_latest_catRank,34.375,NETEL
 15,Lonsamhet_trend_catRank,38.15104166666667,NETEL
 16,Vardering_latest_catRank,95.05208333333334,NETEL
 17,Vardering_trend_catRank,49.73958333333333,NETEL
@@ -7156,7 +7156,7 @@
 14,Lonsamhet_latest_catRank,8.333333333333332,NGS
 15,Lonsamhet_trend_catRank,8.984375,NGS
 16,Vardering_latest_catRank,89.58333333333334,NGS
-17,Vardering_trend_catRank,58.333333333333336,NGS
+17,Vardering_trend_catRank,58.463541666666664,NGS
 18,Kassaflode_latest_catRank,12.760416666666666,NGS
 19,Kassaflode_trend_catRank,9.765625,NGS
 0,Kvalitet_latest_catAvg,12.92330409442505,PION-B
@@ -7266,7 +7266,7 @@
 4,Lonsamhet_latest_catAvg,47.563573375075784,TRANS
 5,Lonsamhet_trend_catAvg,25.60898098407766,TRANS
 6,Vardering_latest_catAvg,71.70303258777346,TRANS
-7,Vardering_trend_catAvg,48.17246846636625,TRANS
+7,Vardering_trend_catAvg,48.238869528783255,TRANS
 8,Kassaflode_latest_catAvg,58.60489429344581,TRANS
 9,Kassaflode_trend_catAvg,26.212550522938457,TRANS
 10,Kvalitet_latest_catRank,51.5625,TRANS
@@ -7276,7 +7276,7 @@
 14,Lonsamhet_latest_catRank,45.83333333333333,TRANS
 15,Lonsamhet_trend_catRank,13.020833333333334,TRANS
 16,Vardering_latest_catRank,88.54166666666666,TRANS
-17,Vardering_trend_catRank,31.119791666666668,TRANS
+17,Vardering_trend_catRank,31.25,TRANS
 18,Kassaflode_latest_catRank,58.203125,TRANS
 19,Kassaflode_trend_catRank,12.5,TRANS
 0,Kvalitet_latest_catAvg,41.30875895991629,WTW-A
@@ -7400,7 +7400,7 @@
 18,Kassaflode_latest_catRank,50.0,NORB-B
 19,Kassaflode_trend_catRank,55.338541666666664,NORB-B
 0,Kvalitet_latest_catAvg,82.16451041941698,PROF-B
-1,Kvalitet_trend_catAvg,39.53425761827401,PROF-B
+1,Kvalitet_trend_catAvg,39.459182543198935,PROF-B
 2,FinansiellHalsa_latest_catAvg,57.869242819843336,PROF-B
 3,FinansiellHalsa_trend_catAvg,75.27338765092765,PROF-B
 4,Lonsamhet_latest_catAvg,42.71256046183171,PROF-B
@@ -7410,7 +7410,7 @@
 8,Kassaflode_latest_catAvg,59.0912368218862,PROF-B
 9,Kassaflode_trend_catAvg,69.97016497016497,PROF-B
 10,Kvalitet_latest_catRank,88.671875,PROF-B
-11,Kvalitet_trend_catRank,44.921875,PROF-B
+11,Kvalitet_trend_catRank,44.79166666666667,PROF-B
 12,FinansiellHalsa_latest_catRank,59.114583333333336,PROF-B
 13,FinansiellHalsa_trend_catRank,84.765625,PROF-B
 14,Lonsamhet_latest_catRank,36.84895833333333,PROF-B
@@ -7606,7 +7606,7 @@
 4,Lonsamhet_latest_catAvg,45.52876267281349,MOMENT
 5,Lonsamhet_trend_catAvg,37.856329632488205,MOMENT
 6,Vardering_latest_catAvg,53.40118509554733,MOMENT
-7,Vardering_trend_catAvg,48.30288074502204,MOMENT
+7,Vardering_trend_catAvg,48.36928180743903,MOMENT
 8,Kassaflode_latest_catAvg,44.788800940915635,MOMENT
 9,Kassaflode_trend_catAvg,30.448490909343445,MOMENT
 10,Kvalitet_latest_catRank,8.984375,MOMENT
@@ -7616,7 +7616,7 @@
 14,Lonsamhet_latest_catRank,42.1875,MOMENT
 15,Lonsamhet_trend_catRank,29.166666666666668,MOMENT
 16,Vardering_latest_catRank,54.166666666666664,MOMENT
-17,Vardering_trend_catRank,31.380208333333332,MOMENT
+17,Vardering_trend_catRank,31.510416666666668,MOMENT
 18,Kassaflode_latest_catRank,38.671875,MOMENT
 19,Kassaflode_trend_catRank,17.447916666666664,MOMENT
 0,Kvalitet_latest_catAvg,92.19643852495086,NELLY
@@ -7636,7 +7636,7 @@
 14,Lonsamhet_latest_catRank,74.47916666666666,NELLY
 15,Lonsamhet_trend_catRank,89.71354166666666,NELLY
 16,Vardering_latest_catRank,7.161458333333333,NELLY
-17,Vardering_trend_catRank,48.046875,NELLY
+17,Vardering_trend_catRank,47.91666666666667,NELLY
 18,Kassaflode_latest_catRank,81.11979166666666,NELLY
 19,Kassaflode_trend_catRank,85.15625,NELLY
 0,Kvalitet_latest_catAvg,83.7851184713625,NIL-B
@@ -7656,7 +7656,7 @@
 14,Lonsamhet_latest_catRank,67.96875,NIL-B
 15,Lonsamhet_trend_catRank,20.052083333333336,NIL-B
 16,Vardering_latest_catRank,57.421875,NIL-B
-17,Vardering_trend_catRank,13.541666666666666,NIL-B
+17,Vardering_trend_catRank,13.411458333333334,NIL-B
 18,Kassaflode_latest_catRank,79.81770833333334,NIL-B
 19,Kassaflode_trend_catRank,59.635416666666664,NIL-B
 0,Kvalitet_latest_catAvg,56.2685187901546,PIERCE
@@ -7664,7 +7664,7 @@
 2,FinansiellHalsa_latest_catAvg,70.2979634464752,PIERCE
 3,FinansiellHalsa_trend_catAvg,76.99150878570727,PIERCE
 4,Lonsamhet_latest_catAvg,46.97428368564082,PIERCE
-5,Lonsamhet_trend_catAvg,42.9316048805608,PIERCE
+5,Lonsamhet_trend_catAvg,42.881554830510744,PIERCE
 6,Vardering_latest_catAvg,54.585126409619924,PIERCE
 7,Vardering_trend_catAvg,52.71107406537854,PIERCE
 8,Kassaflode_latest_catAvg,67.31816512438516,PIERCE
@@ -7726,7 +7726,7 @@
 4,Lonsamhet_latest_catAvg,27.613498235335168,ANOT
 5,Lonsamhet_trend_catAvg,23.085977548383585,ANOT
 6,Vardering_latest_catAvg,68.49170837144128,ANOT
-7,Vardering_trend_catAvg,46.929875409458106,ANOT
+7,Vardering_trend_catAvg,46.9962764718751,ANOT
 8,Kassaflode_latest_catAvg,8.684881135047078,ANOT
 9,Kassaflode_trend_catAvg,8.205202994569218,ANOT
 10,Kvalitet_latest_catRank,25.390625,ANOT
@@ -7783,7 +7783,7 @@
 1,Kvalitet_trend_catAvg,36.44125683060109,FPIP
 2,FinansiellHalsa_latest_catAvg,70.33973890339425,FPIP
 3,FinansiellHalsa_trend_catAvg,20.81693808231931,FPIP
-4,Lonsamhet_latest_catAvg,57.897047326958926,FPIP
+4,Lonsamhet_latest_catAvg,57.84873814821497,FPIP
 5,Lonsamhet_trend_catAvg,33.46455856123296,FPIP
 6,Vardering_latest_catAvg,22.994542967606176,FPIP
 7,Vardering_trend_catAvg,38.86805911899618,FPIP
@@ -7815,7 +7815,7 @@
 13,FinansiellHalsa_trend_catRank,30.078125,GARO
 14,Lonsamhet_latest_catRank,26.953125,GARO
 15,Lonsamhet_trend_catRank,7.682291666666667,GARO
-16,Vardering_latest_catRank,38.54166666666667,GARO
+16,Vardering_latest_catRank,38.671875,GARO
 17,Vardering_trend_catRank,85.546875,GARO
 18,Kassaflode_latest_catRank,16.015625,GARO
 19,Kassaflode_trend_catRank,6.380208333333333,GARO
@@ -8016,7 +8016,7 @@
 14,Lonsamhet_latest_catRank,42.83854166666667,TOBII
 15,Lonsamhet_trend_catRank,61.848958333333336,TOBII
 16,Vardering_latest_catRank,49.86979166666667,TOBII
-17,Vardering_trend_catRank,34.765625,TOBII
+17,Vardering_trend_catRank,34.63541666666667,TOBII
 18,Kassaflode_latest_catRank,23.4375,TOBII
 19,Kassaflode_trend_catRank,49.08854166666667,TOBII
 0,Kvalitet_latest_catAvg,34.40778987101632,TRAD
@@ -8090,7 +8090,7 @@
 8,Kassaflode_latest_catAvg,21.856010166214908,LEA
 9,Kassaflode_trend_catAvg,94.4138294138294,LEA
 10,Kvalitet_latest_catRank,58.984375,LEA
-11,Kvalitet_trend_catRank,51.692708333333336,LEA
+11,Kvalitet_trend_catRank,51.5625,LEA
 12,FinansiellHalsa_latest_catRank,41.27604166666667,LEA
 13,FinansiellHalsa_trend_catRank,72.265625,LEA
 14,Lonsamhet_latest_catRank,70.703125,LEA
@@ -8296,7 +8296,7 @@
 14,Lonsamhet_latest_catRank,28.3203125,NAVIGO-PREF
 15,Lonsamhet_trend_catRank,74.0234375,NAVIGO-PREF
 16,Vardering_latest_catRank,98.69791666666666,NAVIGO-PREF
-17,Vardering_trend_catRank,58.463541666666664,NAVIGO-PREF
+17,Vardering_trend_catRank,58.59375,NAVIGO-PREF
 18,Kassaflode_latest_catRank,15.0390625,NAVIGO-PREF
 19,Kassaflode_trend_catRank,51.236979166666664,NAVIGO-PREF
 0,Kvalitet_latest_catAvg,66.86346701088391,VER
@@ -8396,7 +8396,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,ALZCUR
 15,Lonsamhet_trend_catRank,51.3671875,ALZCUR
 16,Vardering_latest_catRank,39.97395833333333,ALZCUR
-17,Vardering_trend_catRank,57.8125,ALZCUR
+17,Vardering_trend_catRank,57.942708333333336,ALZCUR
 18,Kassaflode_latest_catRank,46.09375,ALZCUR
 19,Kassaflode_trend_catRank,41.86197916666667,ALZCUR
 0,Kvalitet_latest_catAvg,2.6874859428325557,BIOVIC-B
@@ -8416,7 +8416,7 @@
 14,Lonsamhet_latest_catRank,21.484375,BIOVIC-B
 15,Lonsamhet_trend_catRank,77.99479166666666,BIOVIC-B
 16,Vardering_latest_catRank,69.921875,BIOVIC-B
-17,Vardering_trend_catRank,56.25,BIOVIC-B
+17,Vardering_trend_catRank,56.380208333333336,BIOVIC-B
 18,Kassaflode_latest_catRank,1.5625,BIOVIC-B
 19,Kassaflode_trend_catRank,45.44270833333333,BIOVIC-B
 0,Kvalitet_latest_catAvg,22.741807727286066,DVYSR
@@ -8456,7 +8456,7 @@
 14,Lonsamhet_latest_catRank,5.598958333333334,KAN
 15,Lonsamhet_trend_catRank,6.119791666666666,KAN
 16,Vardering_latest_catRank,54.296875,KAN
-17,Vardering_trend_catRank,59.765625,KAN
+17,Vardering_trend_catRank,59.895833333333336,KAN
 18,Kassaflode_latest_catRank,17.057291666666664,KAN
 19,Kassaflode_trend_catRank,10.807291666666668,KAN
 0,Kvalitet_latest_catAvg,14.333665815902446,NANOFS
@@ -8475,7 +8475,7 @@
 13,FinansiellHalsa_trend_catRank,9.635416666666668,NANOFS
 14,Lonsamhet_latest_catRank,17.96875,NANOFS
 15,Lonsamhet_trend_catRank,73.4375,NANOFS
-16,Vardering_latest_catRank,78.64583333333334,NANOFS
+16,Vardering_latest_catRank,78.77604166666666,NANOFS
 17,Vardering_trend_catRank,35.15625,NANOFS
 18,Kassaflode_latest_catRank,4.166666666666666,NANOFS
 19,Kassaflode_trend_catRank,39.58333333333333,NANOFS
@@ -8546,7 +8546,7 @@
 4,Lonsamhet_latest_catAvg,32.11930692688785,BYGGP
 5,Lonsamhet_trend_catAvg,41.15668786975825,BYGGP
 6,Vardering_latest_catAvg,45.36246410060812,BYGGP
-7,Vardering_trend_catAvg,34.0150643854754,BYGGP
+7,Vardering_trend_catAvg,34.08146544789239,BYGGP
 8,Kassaflode_latest_catAvg,50.39418867431387,BYGGP
 9,Kassaflode_trend_catAvg,25.237857132936096,BYGGP
 10,Kvalitet_latest_catRank,76.5625,BYGGP
@@ -8585,7 +8585,7 @@
 3,FinansiellHalsa_trend_catAvg,62.107565326537596,NYAB
 4,Lonsamhet_latest_catAvg,47.086415298574785,NYAB
 5,Lonsamhet_trend_catAvg,51.415567570631474,NYAB
-6,Vardering_latest_catAvg,2.6801524544145376,NYAB
+6,Vardering_latest_catAvg,2.7237824718665453,NYAB
 7,Vardering_trend_catAvg,49.94985820470965,NYAB
 8,Kassaflode_latest_catAvg,69.3881344590073,NYAB
 9,Kassaflode_trend_catAvg,60.15088471399151,NYAB
@@ -8616,7 +8616,7 @@
 14,Lonsamhet_latest_catRank,10.286458333333332,QBEN
 15,Lonsamhet_trend_catRank,25.260416666666668,QBEN
 16,Vardering_latest_catRank,90.49479166666666,QBEN
-17,Vardering_trend_catRank,62.5,QBEN
+17,Vardering_trend_catRank,62.630208333333336,QBEN
 18,Kassaflode_latest_catRank,54.427083333333336,QBEN
 19,Kassaflode_trend_catRank,76.04166666666666,QBEN
 0,Kvalitet_latest_catAvg,42.122607836809735,QAIR
@@ -8626,7 +8626,7 @@
 4,Lonsamhet_latest_catAvg,51.638953659330234,QAIR
 5,Lonsamhet_trend_catAvg,23.55036256815066,QAIR
 6,Vardering_latest_catAvg,66.94630773278622,QAIR
-7,Vardering_trend_catAvg,55.00172675457046,QAIR
+7,Vardering_trend_catAvg,55.06812781698746,QAIR
 8,Kassaflode_latest_catAvg,49.190217721929685,QAIR
 9,Kassaflode_trend_catAvg,27.50565995805381,QAIR
 10,Kvalitet_latest_catRank,43.75,QAIR
@@ -8636,7 +8636,7 @@
 14,Lonsamhet_latest_catRank,57.942708333333336,QAIR
 15,Lonsamhet_trend_catRank,11.848958333333332,QAIR
 16,Vardering_latest_catRank,80.98958333333334,QAIR
-17,Vardering_trend_catRank,50.130208333333336,QAIR
+17,Vardering_trend_catRank,50.260416666666664,QAIR
 18,Kassaflode_latest_catRank,43.359375,QAIR
 19,Kassaflode_trend_catRank,13.932291666666666,QAIR
 0,Kvalitet_latest_catAvg,89.4094522838619,QSYS
@@ -8730,7 +8730,7 @@
 8,Kassaflode_latest_catAvg,49.70675246663647,NEXAM
 9,Kassaflode_trend_catAvg,60.914355914355916,NEXAM
 10,Kvalitet_latest_catRank,25.0,NEXAM
-11,Kvalitet_trend_catRank,51.432291666666664,NEXAM
+11,Kvalitet_trend_catRank,51.302083333333336,NEXAM
 12,FinansiellHalsa_latest_catRank,86.97916666666666,NEXAM
 13,FinansiellHalsa_trend_catRank,11.458333333333332,NEXAM
 14,Lonsamhet_latest_catRank,33.07291666666667,NEXAM
@@ -8856,7 +8856,7 @@
 14,Lonsamhet_latest_catRank,82.16145833333334,EMBELL
 15,Lonsamhet_trend_catRank,60.286458333333336,EMBELL
 16,Vardering_latest_catRank,41.40625,EMBELL
-17,Vardering_trend_catRank,58.072916666666664,EMBELL
+17,Vardering_trend_catRank,58.203125,EMBELL
 18,Kassaflode_latest_catRank,86.45833333333334,EMBELL
 19,Kassaflode_trend_catRank,65.75520833333334,EMBELL
 0,Kvalitet_latest_catAvg,49.552126421607454,LYKO-A
@@ -8916,14 +8916,14 @@
 14,Lonsamhet_latest_catRank,87.63020833333334,PDX
 15,Lonsamhet_trend_catRank,75.390625,PDX
 16,Vardering_latest_catRank,23.828125,PDX
-17,Vardering_trend_catRank,67.44791666666666,PDX
+17,Vardering_trend_catRank,67.31770833333334,PDX
 18,Kassaflode_latest_catRank,98.95833333333334,PDX
 19,Kassaflode_trend_catRank,77.734375,PDX
 0,Kvalitet_latest_catAvg,5.5167659224924455,RAKE
 1,Kvalitet_trend_catAvg,3.9234418845074583,RAKE
 2,FinansiellHalsa_latest_catAvg,69.66590078328983,RAKE
 3,FinansiellHalsa_trend_catAvg,49.583317485070936,RAKE
-4,Lonsamhet_latest_catAvg,45.01822539993015,RAKE
+4,Lonsamhet_latest_catAvg,44.969916221186196,RAKE
 5,Lonsamhet_trend_catAvg,14.47448995786196,RAKE
 6,Vardering_latest_catAvg,63.30774566983687,RAKE
 7,Vardering_trend_catAvg,55.98059601288423,RAKE
@@ -8933,7 +8933,7 @@
 11,Kvalitet_trend_catRank,1.171875,RAKE
 12,FinansiellHalsa_latest_catRank,74.73958333333334,RAKE
 13,FinansiellHalsa_trend_catRank,54.947916666666664,RAKE
-14,Lonsamhet_latest_catRank,40.75520833333333,RAKE
+14,Lonsamhet_latest_catRank,40.49479166666667,RAKE
 15,Lonsamhet_trend_catRank,5.729166666666666,RAKE
 16,Vardering_latest_catRank,73.95833333333334,RAKE
 17,Vardering_trend_catRank,53.515625,RAKE
@@ -8946,7 +8946,7 @@
 4,Lonsamhet_latest_catAvg,66.85005405449398,RUG
 5,Lonsamhet_trend_catAvg,29.876938036257446,RUG
 6,Vardering_latest_catAvg,40.01871536775551,RUG
-7,Vardering_trend_catAvg,51.66957086097772,RUG
+7,Vardering_trend_catAvg,51.73597192339472,RUG
 8,Kassaflode_latest_catAvg,75.5654844386163,RUG
 9,Kassaflode_trend_catAvg,69.74376974376975,RUG
 10,Kvalitet_latest_catRank,73.69791666666666,RUG
@@ -8956,7 +8956,7 @@
 14,Lonsamhet_latest_catRank,80.72916666666666,RUG
 15,Lonsamhet_trend_catRank,16.796875,RUG
 16,Vardering_latest_catRank,27.213541666666668,RUG
-17,Vardering_trend_catRank,40.88541666666667,RUG
+17,Vardering_trend_catRank,41.015625,RUG
 18,Kassaflode_latest_catRank,86.84895833333334,RUG
 19,Kassaflode_trend_catRank,72.00520833333334,RUG
 0,Kvalitet_latest_catAvg,4.631286609753474,THUNDR
@@ -8974,7 +8974,7 @@
 12,FinansiellHalsa_latest_catRank,91.14583333333334,THUNDR
 13,FinansiellHalsa_trend_catRank,99.609375,THUNDR
 14,Lonsamhet_latest_catRank,29.817708333333332,THUNDR
-15,Lonsamhet_trend_catRank,25.651041666666668,THUNDR
+15,Lonsamhet_trend_catRank,25.78125,THUNDR
 16,Vardering_latest_catRank,91.92708333333334,THUNDR
 17,Vardering_trend_catRank,79.42708333333334,THUNDR
 18,Kassaflode_latest_catRank,99.34895833333334,THUNDR
@@ -8995,7 +8995,7 @@
 13,FinansiellHalsa_trend_catRank,91.796875,ZZ-B
 14,Lonsamhet_latest_catRank,63.151041666666664,ZZ-B
 15,Lonsamhet_trend_catRank,81.640625,ZZ-B
-16,Vardering_latest_catRank,10.286458333333332,ZZ-B
+16,Vardering_latest_catRank,10.15625,ZZ-B
 17,Vardering_trend_catRank,49.08854166666667,ZZ-B
 18,Kassaflode_latest_catRank,93.09895833333334,ZZ-B
 19,Kassaflode_trend_catRank,85.41666666666666,ZZ-B
@@ -9016,7 +9016,7 @@
 14,Lonsamhet_latest_catRank,27.083333333333332,4C
 15,Lonsamhet_trend_catRank,7.421875,4C
 16,Vardering_latest_catRank,55.208333333333336,4C
-17,Vardering_trend_catRank,31.25,4C
+17,Vardering_trend_catRank,31.119791666666668,4C
 18,Kassaflode_latest_catRank,13.802083333333334,4C
 19,Kassaflode_trend_catRank,3.515625,4C
 0,Kvalitet_latest_catAvg,60.83404230351747,ACAST
@@ -9096,7 +9096,7 @@
 14,Lonsamhet_latest_catRank,35.41666666666667,BRIGHT
 15,Lonsamhet_trend_catRank,70.96354166666666,BRIGHT
 16,Vardering_latest_catRank,88.80208333333334,BRIGHT
-17,Vardering_trend_catRank,55.729166666666664,BRIGHT
+17,Vardering_trend_catRank,55.859375,BRIGHT
 18,Kassaflode_latest_catRank,6.510416666666667,BRIGHT
 19,Kassaflode_trend_catRank,3.125,BRIGHT
 0,Kvalitet_latest_catAvg,82.11366014414097,CAG
@@ -9265,7 +9265,7 @@
 3,FinansiellHalsa_trend_catAvg,75.78384215176204,ONEF
 4,Lonsamhet_latest_catAvg,16.193816069429694,ONEF
 5,Lonsamhet_trend_catAvg,51.16528653199953,ONEF
-6,Vardering_latest_catAvg,65.593649450543,ONEF
+6,Vardering_latest_catAvg,65.637279467995,ONEF
 7,Vardering_trend_catAvg,37.483646047351996,ONEF
 8,Kassaflode_latest_catAvg,16.36035086059082,ONEF
 9,Kassaflode_trend_catAvg,17.764629081767296,ONEF
@@ -9275,7 +9275,7 @@
 13,FinansiellHalsa_trend_catRank,86.58854166666666,ONEF
 14,Lonsamhet_latest_catRank,5.338541666666666,ONEF
 15,Lonsamhet_trend_catRank,57.03125,ONEF
-16,Vardering_latest_catRank,78.515625,ONEF
+16,Vardering_latest_catRank,78.64583333333334,ONEF
 17,Vardering_trend_catRank,12.630208333333334,ONEF
 18,Kassaflode_latest_catRank,10.416666666666668,ONEF
 19,Kassaflode_trend_catRank,5.598958333333334,ONEF
@@ -9676,7 +9676,7 @@
 14,Lonsamhet_latest_catRank,1.8229166666666667,META
 15,Lonsamhet_trend_catRank,24.21875,META
 16,Vardering_latest_catRank,60.026041666666664,META
-17,Vardering_trend_catRank,13.671875,META
+17,Vardering_trend_catRank,13.541666666666666,META
 18,Kassaflode_latest_catRank,3.7760416666666665,META
 19,Kassaflode_trend_catRank,86.97916666666666,META
 0,Kvalitet_latest_catAvg,42.62402088772846,MINEST
@@ -9836,7 +9836,7 @@
 14,Lonsamhet_latest_catRank,85.41666666666666,BONAS
 15,Lonsamhet_trend_catRank,20.963541666666664,BONAS
 16,Vardering_latest_catRank,41.27604166666667,BONAS
-17,Vardering_trend_catRank,4.6875,BONAS
+17,Vardering_trend_catRank,4.557291666666666,BONAS
 18,Kassaflode_latest_catRank,53.776041666666664,BONAS
 19,Kassaflode_trend_catRank,19.661458333333336,BONAS
 0,Kvalitet_latest_catAvg,31.39686684073107,DOXA
@@ -9956,7 +9956,7 @@
 14,Lonsamhet_latest_catRank,96.2890625,TINGS-A
 15,Lonsamhet_trend_catRank,88.73697916666666,TINGS-A
 16,Vardering_latest_catRank,61.197916666666664,TINGS-A
-17,Vardering_trend_catRank,67.578125,TINGS-A
+17,Vardering_trend_catRank,67.44791666666666,TINGS-A
 18,Kassaflode_latest_catRank,65.55989583333334,TINGS-A
 19,Kassaflode_trend_catRank,67.25260416666666,TINGS-A
 0,Kvalitet_latest_catAvg,47.58876795650345,TINGS-B
@@ -9976,7 +9976,7 @@
 14,Lonsamhet_latest_catRank,96.2890625,TINGS-B
 15,Lonsamhet_trend_catRank,88.73697916666666,TINGS-B
 16,Vardering_latest_catRank,57.552083333333336,TINGS-B
-17,Vardering_trend_catRank,64.453125,TINGS-B
+17,Vardering_trend_catRank,64.32291666666666,TINGS-B
 18,Kassaflode_latest_catRank,65.55989583333334,TINGS-B
 19,Kassaflode_trend_catRank,67.25260416666666,TINGS-B
 0,Kvalitet_latest_catAvg,88.89361535678313,TITA-B
@@ -10036,7 +10036,7 @@
 14,Lonsamhet_latest_catRank,70.83333333333334,BMC
 15,Lonsamhet_trend_catRank,36.45833333333333,BMC
 16,Vardering_latest_catRank,16.796875,BMC
-17,Vardering_trend_catRank,55.338541666666664,BMC
+17,Vardering_trend_catRank,55.46875,BMC
 18,Kassaflode_latest_catRank,82.16145833333334,BMC
 19,Kassaflode_trend_catRank,72.39583333333334,BMC
 0,Kvalitet_latest_catAvg,57.942666314626294,CASE
@@ -10156,7 +10156,7 @@
 14,Lonsamhet_latest_catRank,33.33333333333333,NFGAB
 15,Lonsamhet_trend_catRank,23.177083333333336,NFGAB
 16,Vardering_latest_catRank,90.625,NFGAB
-17,Vardering_trend_catRank,59.635416666666664,NFGAB
+17,Vardering_trend_catRank,59.765625,NFGAB
 18,Kassaflode_latest_catRank,19.921875,NFGAB
 19,Kassaflode_trend_catRank,36.328125,NFGAB
 0,Kvalitet_latest_catAvg,67.55874673629242,SFL
@@ -10353,10 +10353,10 @@
 11,Kvalitet_trend_catRank,80.98958333333334,ARCOMA
 12,FinansiellHalsa_latest_catRank,65.88541666666666,ARCOMA
 13,FinansiellHalsa_trend_catRank,75.78125,ARCOMA
-14,Lonsamhet_latest_catRank,66.27604166666666,ARCOMA
+14,Lonsamhet_latest_catRank,66.14583333333334,ARCOMA
 15,Lonsamhet_trend_catRank,85.80729166666666,ARCOMA
 16,Vardering_latest_catRank,35.02604166666667,ARCOMA
-17,Vardering_trend_catRank,41.015625,ARCOMA
+17,Vardering_trend_catRank,40.88541666666667,ARCOMA
 18,Kassaflode_latest_catRank,55.598958333333336,ARCOMA
 19,Kassaflode_trend_catRank,61.458333333333336,ARCOMA
 0,Kvalitet_latest_catAvg,34.33420365535248,BIOSGN
@@ -10646,7 +10646,7 @@
 4,Lonsamhet_latest_catAvg,50.0,FLUO
 5,Lonsamhet_trend_catAvg,50.0,FLUO
 6,Vardering_latest_catAvg,48.995628184109854,FLUO
-7,Vardering_trend_catAvg,37.944839001481995,FLUO
+7,Vardering_trend_catAvg,38.01124006389899,FLUO
 8,Kassaflode_latest_catAvg,25.565428109854604,FLUO
 9,Kassaflode_trend_catAvg,74.8051948051948,FLUO
 10,Kvalitet_latest_catRank,1.5625,FLUO
@@ -10656,7 +10656,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,FLUO
 15,Lonsamhet_trend_catRank,51.3671875,FLUO
 16,Vardering_latest_catRank,43.359375,FLUO
-17,Vardering_trend_catRank,13.411458333333334,FLUO
+17,Vardering_trend_catRank,13.671875,FLUO
 18,Kassaflode_latest_catRank,18.098958333333336,FLUO
 19,Kassaflode_trend_catRank,82.03125,FLUO
 0,Kvalitet_latest_catAvg,74.02088772845953,GABA
@@ -10730,7 +10730,7 @@
 8,Kassaflode_latest_catAvg,7.797477823366522,ICO
 9,Kassaflode_trend_catAvg,45.28537805236835,ICO
 10,Kvalitet_latest_catRank,32.421875,ICO
-11,Kvalitet_trend_catRank,52.083333333333336,ICO
+11,Kvalitet_trend_catRank,51.953125,ICO
 12,FinansiellHalsa_latest_catRank,93.61979166666666,ICO
 13,FinansiellHalsa_trend_catRank,74.73958333333334,ICO
 14,Lonsamhet_latest_catRank,25.520833333333332,ICO
@@ -10776,7 +10776,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,INIT
 15,Lonsamhet_trend_catRank,51.3671875,INIT
 16,Vardering_latest_catRank,41.92708333333333,INIT
-17,Vardering_trend_catRank,57.552083333333336,INIT
+17,Vardering_trend_catRank,57.682291666666664,INIT
 18,Kassaflode_latest_catRank,46.09375,INIT
 19,Kassaflode_trend_catRank,41.86197916666667,INIT
 0,Kvalitet_latest_catAvg,22.216925318547638,INTEG-B
@@ -10836,7 +10836,7 @@
 14,Lonsamhet_latest_catRank,2.473958333333333,IZAFE-B
 15,Lonsamhet_trend_catRank,99.34895833333334,IZAFE-B
 16,Vardering_latest_catRank,46.22395833333333,IZAFE-B
-17,Vardering_trend_catRank,62.109375,IZAFE-B
+17,Vardering_trend_catRank,62.239583333333336,IZAFE-B
 18,Kassaflode_latest_catRank,8.333333333333332,IZAFE-B
 19,Kassaflode_trend_catRank,98.69791666666666,IZAFE-B
 0,Kvalitet_latest_catAvg,1.5066838775290678,KLAR
@@ -10876,7 +10876,7 @@
 14,Lonsamhet_latest_catRank,76.171875,KONT
 15,Lonsamhet_trend_catRank,87.23958333333334,KONT
 16,Vardering_latest_catRank,22.526041666666664,KONT
-17,Vardering_trend_catRank,61.71875,KONT
+17,Vardering_trend_catRank,61.848958333333336,KONT
 18,Kassaflode_latest_catRank,90.234375,KONT
 19,Kassaflode_trend_catRank,5.078125,KONT
 0,Kvalitet_latest_catAvg,28.851174934725847,LIDDS
@@ -10896,7 +10896,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,LIDDS
 15,Lonsamhet_trend_catRank,51.3671875,LIDDS
 16,Vardering_latest_catRank,51.432291666666664,LIDDS
-17,Vardering_trend_catRank,61.328125,LIDDS
+17,Vardering_trend_catRank,61.458333333333336,LIDDS
 18,Kassaflode_latest_catRank,46.09375,LIDDS
 19,Kassaflode_trend_catRank,41.86197916666667,LIDDS
 0,Kvalitet_latest_catAvg,26.240208877284594,LPGO
@@ -11075,7 +11075,7 @@
 13,FinansiellHalsa_trend_catRank,8.463541666666668,NANECH
 14,Lonsamhet_latest_catRank,52.604166666666664,NANECH
 15,Lonsamhet_trend_catRank,51.3671875,NANECH
-16,Vardering_latest_catRank,78.77604166666666,NANECH
+16,Vardering_latest_catRank,78.90625,NANECH
 17,Vardering_trend_catRank,54.036458333333336,NANECH
 18,Kassaflode_latest_catRank,26.692708333333332,NANECH
 19,Kassaflode_trend_catRank,75.26041666666666,NANECH
@@ -11156,7 +11156,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,ONCOZ
 15,Lonsamhet_trend_catRank,51.3671875,ONCOZ
 16,Vardering_latest_catRank,25.651041666666668,ONCOZ
-17,Vardering_trend_catRank,30.598958333333332,ONCOZ
+17,Vardering_trend_catRank,30.46875,ONCOZ
 18,Kassaflode_latest_catRank,46.09375,ONCOZ
 19,Kassaflode_trend_catRank,41.86197916666667,ONCOZ
 0,Kvalitet_latest_catAvg,51.824253625526836,ORTI-A
@@ -11216,7 +11216,7 @@
 14,Lonsamhet_latest_catRank,46.35416666666667,ORT-B
 15,Lonsamhet_trend_catRank,20.182291666666664,ORT-B
 16,Vardering_latest_catRank,63.671875,ORT-B
-17,Vardering_trend_catRank,64.58333333333334,ORT-B
+17,Vardering_trend_catRank,64.453125,ORT-B
 18,Kassaflode_latest_catRank,29.036458333333332,ORT-B
 19,Kassaflode_trend_catRank,14.583333333333334,ORT-B
 0,Kvalitet_latest_catAvg,19.44167375636851,OSSD
@@ -11233,7 +11233,7 @@
 11,Kvalitet_trend_catRank,87.109375,OSSD
 12,FinansiellHalsa_latest_catRank,91.66666666666666,OSSD
 13,FinansiellHalsa_trend_catRank,60.677083333333336,OSSD
-14,Lonsamhet_latest_catRank,40.625,OSSD
+14,Lonsamhet_latest_catRank,40.75520833333333,OSSD
 15,Lonsamhet_trend_catRank,96.35416666666666,OSSD
 16,Vardering_latest_catRank,83.07291666666666,OSSD
 17,Vardering_trend_catRank,48.69791666666667,OSSD
@@ -11305,7 +11305,7 @@
 3,FinansiellHalsa_trend_catAvg,63.32335329341318,PRO
 4,Lonsamhet_latest_catAvg,49.02409369988203,PRO
 5,Lonsamhet_trend_catAvg,89.11759732200812,PRO
-6,Vardering_latest_catAvg,54.712312878713966,PRO
+6,Vardering_latest_catAvg,54.755942896165976,PRO
 7,Vardering_trend_catAvg,59.89397995348521,PRO
 8,Kassaflode_latest_catAvg,35.808926080892604,PRO
 9,Kassaflode_trend_catAvg,71.007371007371,PRO
@@ -11315,8 +11315,8 @@
 13,FinansiellHalsa_trend_catRank,65.88541666666666,PRO
 14,Lonsamhet_latest_catRank,48.17708333333333,PRO
 15,Lonsamhet_trend_catRank,95.3125,PRO
-16,Vardering_latest_catRank,55.859375,PRO
-17,Vardering_trend_catRank,64.32291666666666,PRO
+16,Vardering_latest_catRank,55.989583333333336,PRO
+17,Vardering_trend_catRank,64.19270833333334,PRO
 18,Kassaflode_latest_catRank,31.380208333333332,PRO
 19,Kassaflode_trend_catRank,74.73958333333334,PRO
 0,Kvalitet_latest_catAvg,34.26892950391645,PLUN
@@ -11436,7 +11436,7 @@
 14,Lonsamhet_latest_catRank,39.453125,SDOS
 15,Lonsamhet_trend_catRank,15.364583333333334,SDOS
 16,Vardering_latest_catRank,65.88541666666666,SDOS
-17,Vardering_trend_catRank,55.598958333333336,SDOS
+17,Vardering_trend_catRank,55.729166666666664,SDOS
 18,Kassaflode_latest_catRank,35.546875,SDOS
 19,Kassaflode_trend_catRank,35.15625,SDOS
 0,Kvalitet_latest_catAvg,26.827676240208877,CMOTEC-B
@@ -11476,7 +11476,7 @@
 14,Lonsamhet_latest_catRank,52.604166666666664,HEART
 15,Lonsamhet_trend_catRank,51.3671875,HEART
 16,Vardering_latest_catRank,98.56770833333334,HEART
-17,Vardering_trend_catRank,57.421875,HEART
+17,Vardering_trend_catRank,57.552083333333336,HEART
 18,Kassaflode_latest_catRank,25.520833333333332,HEART
 19,Kassaflode_trend_catRank,66.40625,HEART
 0,Kvalitet_latest_catAvg,27.87206266318538,SCIB
@@ -11496,7 +11496,7 @@
 14,Lonsamhet_latest_catRank,18.229166666666664,SCIB
 15,Lonsamhet_trend_catRank,95.05208333333334,SCIB
 16,Vardering_latest_catRank,41.14583333333333,SCIB
-17,Vardering_trend_catRank,59.375,SCIB
+17,Vardering_trend_catRank,59.505208333333336,SCIB
 18,Kassaflode_latest_catRank,24.088541666666664,SCIB
 19,Kassaflode_trend_catRank,74.34895833333334,SCIB
 0,Kvalitet_latest_catAvg,20.375314147133317,SENZA
@@ -11516,7 +11516,7 @@
 14,Lonsamhet_latest_catRank,31.770833333333332,SENZA
 15,Lonsamhet_trend_catRank,94.01041666666666,SENZA
 16,Vardering_latest_catRank,91.27604166666666,SENZA
-17,Vardering_trend_catRank,58.984375,SENZA
+17,Vardering_trend_catRank,59.114583333333336,SENZA
 18,Kassaflode_latest_catRank,9.244791666666668,SENZA
 19,Kassaflode_trend_catRank,97.65625,SENZA
 0,Kvalitet_latest_catAvg,29.83028720626632,SPAGO
@@ -11576,7 +11576,7 @@
 14,Lonsamhet_latest_catRank,84.89583333333334,STIL
 15,Lonsamhet_trend_catRank,83.07291666666666,STIL
 16,Vardering_latest_catRank,12.369791666666668,STIL
-17,Vardering_trend_catRank,60.546875,STIL
+17,Vardering_trend_catRank,60.677083333333336,STIL
 18,Kassaflode_latest_catRank,85.80729166666666,STIL
 19,Kassaflode_trend_catRank,84.375,STIL
 0,Kvalitet_latest_catAvg,45.196360293758126,SUS
@@ -11655,7 +11655,7 @@
 13,FinansiellHalsa_trend_catRank,61.588541666666664,XPC
 14,Lonsamhet_latest_catRank,22.65625,XPC
 15,Lonsamhet_trend_catRank,22.135416666666664,XPC
-16,Vardering_latest_catRank,38.671875,XPC
+16,Vardering_latest_catRank,38.80208333333333,XPC
 17,Vardering_trend_catRank,20.572916666666664,XPC
 18,Kassaflode_latest_catRank,19.010416666666664,XPC
 19,Kassaflode_trend_catRank,13.020833333333334,XPC
@@ -11696,7 +11696,7 @@
 14,Lonsamhet_latest_catRank,87.23958333333334,ACUVI
 15,Lonsamhet_trend_catRank,95.96354166666666,ACUVI
 16,Vardering_latest_catRank,37.63020833333333,ACUVI
-17,Vardering_trend_catRank,60.286458333333336,ACUVI
+17,Vardering_trend_catRank,60.416666666666664,ACUVI
 18,Kassaflode_latest_catRank,16.536458333333336,ACUVI
 19,Kassaflode_trend_catRank,92.44791666666666,ACUVI
 0,Kvalitet_latest_catAvg,37.66318537859008,AXOLOT
@@ -11726,7 +11726,7 @@
 4,Lonsamhet_latest_catAvg,23.848698057610203,BAWAT
 5,Lonsamhet_trend_catAvg,74.28745640114805,BAWAT
 6,Vardering_latest_catAvg,48.52206680494108,BAWAT
-7,Vardering_trend_catAvg,54.334565020389896,BAWAT
+7,Vardering_trend_catAvg,54.400966082806896,BAWAT
 8,Kassaflode_latest_catAvg,12.051876536366976,BAWAT
 9,Kassaflode_trend_catAvg,34.62870791196971,BAWAT
 10,Kvalitet_latest_catRank,13.020833333333334,BAWAT
@@ -11736,7 +11736,7 @@
 14,Lonsamhet_latest_catRank,9.375,BAWAT
 15,Lonsamhet_trend_catRank,87.63020833333334,BAWAT
 16,Vardering_latest_catRank,42.44791666666667,BAWAT
-17,Vardering_trend_catRank,48.4375,BAWAT
+17,Vardering_trend_catRank,48.56770833333333,BAWAT
 18,Kassaflode_latest_catRank,7.421875,BAWAT
 19,Kassaflode_trend_catRank,22.395833333333336,BAWAT
 0,Kvalitet_latest_catAvg,30.80939947780679,BOMILL
@@ -11896,7 +11896,7 @@
 14,Lonsamhet_latest_catRank,76.04166666666666,FIRE
 15,Lonsamhet_trend_catRank,83.85416666666666,FIRE
 16,Vardering_latest_catRank,19.921875,FIRE
-17,Vardering_trend_catRank,57.682291666666664,FIRE
+17,Vardering_trend_catRank,57.8125,FIRE
 18,Kassaflode_latest_catRank,85.41666666666666,FIRE
 19,Kassaflode_trend_catRank,83.72395833333334,FIRE
 0,Kvalitet_latest_catAvg,11.555236111518564,FLEXQ
@@ -11955,7 +11955,7 @@
 13,FinansiellHalsa_trend_catRank,48.17708333333333,GPX
 14,Lonsamhet_latest_catRank,57.291666666666664,GPX
 15,Lonsamhet_trend_catRank,72.65625,GPX
-16,Vardering_latest_catRank,38.41145833333333,GPX
+16,Vardering_latest_catRank,38.54166666666667,GPX
 17,Vardering_trend_catRank,8.59375,GPX
 18,Kassaflode_latest_catRank,87.76041666666666,GPX
 19,Kassaflode_trend_catRank,94.27083333333334,GPX
@@ -12085,7 +12085,7 @@
 3,FinansiellHalsa_trend_catAvg,39.451973795356,IDUN-B
 4,Lonsamhet_latest_catAvg,50.10423105089683,IDUN-B
 5,Lonsamhet_trend_catAvg,50.817534566752215,IDUN-B
-6,Vardering_latest_catAvg,23.43298189530832,IDUN-B
+6,Vardering_latest_catAvg,23.47661191276033,IDUN-B
 7,Vardering_trend_catAvg,56.79329916678847,IDUN-B
 8,Kassaflode_latest_catAvg,57.985503229891194,IDUN-B
 9,Kassaflode_trend_catAvg,57.12881712881713,IDUN-B
@@ -12095,8 +12095,8 @@
 13,FinansiellHalsa_trend_catRank,47.265625,IDUN-B
 14,Lonsamhet_latest_catRank,55.859375,IDUN-B
 15,Lonsamhet_trend_catRank,56.119791666666664,IDUN-B
-16,Vardering_latest_catRank,10.15625,IDUN-B
-17,Vardering_trend_catRank,56.119791666666664,IDUN-B
+16,Vardering_latest_catRank,10.286458333333332,IDUN-B
+17,Vardering_trend_catRank,56.25,IDUN-B
 18,Kassaflode_latest_catRank,57.421875,IDUN-B
 19,Kassaflode_trend_catRank,52.34375,IDUN-B
 0,Kvalitet_latest_catAvg,33.09399477806789,LXB
@@ -12246,7 +12246,7 @@
 4,Lonsamhet_latest_catAvg,56.51531559067854,OGUN-B
 5,Lonsamhet_trend_catAvg,47.03128911420888,OGUN-B
 6,Vardering_latest_catAvg,45.681509686745294,OGUN-B
-7,Vardering_trend_catAvg,29.696191081086283,OGUN-B
+7,Vardering_trend_catAvg,29.76259214350328,OGUN-B
 8,Kassaflode_latest_catAvg,63.875013237259,OGUN-B
 9,Kassaflode_trend_catAvg,18.668486186924454,OGUN-B
 10,Kvalitet_latest_catRank,96.35416666666666,OGUN-B
@@ -12256,7 +12256,7 @@
 14,Lonsamhet_latest_catRank,63.802083333333336,OGUN-B
 15,Lonsamhet_trend_catRank,43.61979166666667,OGUN-B
 16,Vardering_latest_catRank,36.19791666666667,OGUN-B
-17,Vardering_trend_catRank,4.817708333333334,OGUN-B
+17,Vardering_trend_catRank,4.947916666666666,OGUN-B
 18,Kassaflode_latest_catRank,66.66666666666666,OGUN-B
 19,Kassaflode_trend_catRank,6.25,OGUN-B
 0,Kvalitet_latest_catAvg,23.170367979972816,OPTI
@@ -12286,7 +12286,7 @@
 4,Lonsamhet_latest_catAvg,22.587284857763507,OXE
 5,Lonsamhet_trend_catAvg,83.37389998786243,OXE
 6,Vardering_latest_catAvg,67.49420994621693,OXE
-7,Vardering_trend_catAvg,59.888078834523405,OXE
+7,Vardering_trend_catAvg,59.9544798969404,OXE
 8,Kassaflode_latest_catAvg,18.075223681512675,OXE
 9,Kassaflode_trend_catAvg,45.683637207242356,OXE
 10,Kvalitet_latest_catRank,5.598958333333334,OXE
@@ -12296,7 +12296,7 @@
 14,Lonsamhet_latest_catRank,8.984375,OXE
 15,Lonsamhet_trend_catRank,92.83854166666666,OXE
 16,Vardering_latest_catRank,82.55208333333334,OXE
-17,Vardering_trend_catRank,64.19270833333334,OXE
+17,Vardering_trend_catRank,64.71354166666666,OXE
 18,Kassaflode_latest_catRank,11.197916666666668,OXE
 19,Kassaflode_trend_catRank,34.765625,OXE
 0,Kvalitet_latest_catAvg,50.38479967925211,PCOM-B
@@ -12316,7 +12316,7 @@
 14,Lonsamhet_latest_catRank,38.15104166666667,PCOM-B
 15,Lonsamhet_trend_catRank,67.44791666666666,PCOM-B
 16,Vardering_latest_catRank,91.53645833333334,PCOM-B
-17,Vardering_trend_catRank,8.463541666666668,PCOM-B
+17,Vardering_trend_catRank,8.333333333333332,PCOM-B
 18,Kassaflode_latest_catRank,35.15625,PCOM-B
 19,Kassaflode_trend_catRank,18.359375,PCOM-B
 0,Kvalitet_latest_catAvg,31.72323759791123,RLOS-B
@@ -12376,7 +12376,7 @@
 14,Lonsamhet_latest_catRank,18.619791666666664,SAXG
 15,Lonsamhet_trend_catRank,16.276041666666664,SAXG
 16,Vardering_latest_catRank,93.75,SAXG
-17,Vardering_trend_catRank,48.17708333333333,SAXG
+17,Vardering_trend_catRank,48.046875,SAXG
 18,Kassaflode_latest_catRank,11.067708333333332,SAXG
 19,Kassaflode_trend_catRank,22.916666666666664,SAXG
 0,Kvalitet_latest_catAvg,62.59791122715404,SES
@@ -12513,7 +12513,7 @@
 11,Kvalitet_trend_catRank,27.34375,TEQ
 12,FinansiellHalsa_latest_catRank,41.92708333333333,TEQ
 13,FinansiellHalsa_trend_catRank,99.47916666666666,TEQ
-14,Lonsamhet_latest_catRank,66.14583333333334,TEQ
+14,Lonsamhet_latest_catRank,66.015625,TEQ
 15,Lonsamhet_trend_catRank,46.09375,TEQ
 16,Vardering_latest_catRank,15.234375,TEQ
 17,Vardering_trend_catRank,89.58333333333334,TEQ
@@ -12556,7 +12556,7 @@
 14,Lonsamhet_latest_catRank,67.578125,TRAIN-B
 15,Lonsamhet_trend_catRank,5.859375,TRAIN-B
 16,Vardering_latest_catRank,18.229166666666664,TRAIN-B
-17,Vardering_trend_catRank,37.76041666666667,TRAIN-B
+17,Vardering_trend_catRank,37.63020833333333,TRAIN-B
 18,Kassaflode_latest_catRank,96.875,TRAIN-B
 19,Kassaflode_trend_catRank,95.18229166666666,TRAIN-B
 0,Kvalitet_latest_catAvg,53.133159268929504,VSSAB-B
@@ -12616,7 +12616,7 @@
 14,Lonsamhet_latest_catRank,37.63020833333333,W5
 15,Lonsamhet_trend_catRank,17.578125,W5
 16,Vardering_latest_catRank,36.71875,W5
-17,Vardering_trend_catRank,61.979166666666664,W5
+17,Vardering_trend_catRank,62.109375,W5
 18,Kassaflode_latest_catRank,25.260416666666668,W5
 19,Kassaflode_trend_catRank,19.921875,W5
 0,Kvalitet_latest_catAvg,14.151289347845221,WPAY
@@ -12636,7 +12636,7 @@
 14,Lonsamhet_latest_catRank,30.859375,WPAY
 15,Lonsamhet_trend_catRank,92.1875,WPAY
 16,Vardering_latest_catRank,22.65625,WPAY
-17,Vardering_trend_catRank,60.026041666666664,WPAY
+17,Vardering_trend_catRank,60.15625,WPAY
 18,Kassaflode_latest_catRank,78.25520833333334,WPAY
 19,Kassaflode_trend_catRank,35.546875,WPAY
 0,Kvalitet_latest_catAvg,37.467362924281986,AXIC-A
@@ -12656,7 +12656,7 @@
 14,Lonsamhet_latest_catRank,24.739583333333336,AXIC-A
 15,Lonsamhet_trend_catRank,30.46875,AXIC-A
 16,Vardering_latest_catRank,40.10416666666667,AXIC-A
-17,Vardering_trend_catRank,61.848958333333336,AXIC-A
+17,Vardering_trend_catRank,61.979166666666664,AXIC-A
 18,Kassaflode_latest_catRank,25.390625,AXIC-A
 19,Kassaflode_trend_catRank,70.05208333333334,AXIC-A
 0,Kvalitet_latest_catAvg,31.788511749347258,CINIS
@@ -12785,7 +12785,7 @@
 3,FinansiellHalsa_trend_catAvg,57.776235213571184,PCAT
 4,Lonsamhet_latest_catAvg,36.31831849754882,PCAT
 5,Lonsamhet_trend_catAvg,59.31775298231188,PCAT
-6,Vardering_latest_catAvg,25.47434790017687,PCAT
+6,Vardering_latest_catAvg,25.51797791762888,PCAT
 7,Vardering_trend_catAvg,41.44101195016527,PCAT
 8,Kassaflode_latest_catAvg,64.77582279422202,PCAT
 9,Kassaflode_trend_catAvg,79.24885924885925,PCAT
@@ -12876,7 +12876,7 @@
 14,Lonsamhet_latest_catRank,62.109375,CIRCHE
 15,Lonsamhet_trend_catRank,79.6875,CIRCHE
 16,Vardering_latest_catRank,80.33854166666666,CIRCHE
-17,Vardering_trend_catRank,67.70833333333334,CIRCHE
+17,Vardering_trend_catRank,67.578125,CIRCHE
 18,Kassaflode_latest_catRank,30.859375,CIRCHE
 19,Kassaflode_trend_catRank,80.20833333333334,CIRCHE
 0,Kvalitet_latest_catAvg,72.71540469973891,DE
@@ -12906,7 +12906,7 @@
 4,Lonsamhet_latest_catAvg,55.72493836069517,GIGA
 5,Lonsamhet_trend_catAvg,27.945346738850215,GIGA
 6,Vardering_latest_catAvg,70.58740272185905,GIGA
-7,Vardering_trend_catAvg,64.51883247548132,GIGA
+7,Vardering_trend_catAvg,64.58523353789832,GIGA
 8,Kassaflode_latest_catAvg,69.25069228048119,GIGA
 9,Kassaflode_trend_catAvg,26.482353431392973,GIGA
 10,Kvalitet_latest_catRank,43.22916666666667,GIGA
@@ -12965,7 +12965,7 @@
 3,FinansiellHalsa_trend_catAvg,73.27844311377245,BIOEX
 4,Lonsamhet_latest_catAvg,2.478096739232168,BIOEX
 5,Lonsamhet_trend_catAvg,96.2037352954864,BIOEX
-6,Vardering_latest_catAvg,51.00186443801285,BIOEX
+6,Vardering_latest_catAvg,51.04549445546487,BIOEX
 7,Vardering_trend_catAvg,65.06454017366,BIOEX
 8,Kassaflode_latest_catAvg,26.115760111576012,BIOEX
 9,Kassaflode_trend_catAvg,72.60442260442261,BIOEX
@@ -12975,7 +12975,7 @@
 13,FinansiellHalsa_trend_catRank,79.16666666666666,BIOEX
 14,Lonsamhet_latest_catRank,0.6510416666666667,BIOEX
 15,Lonsamhet_trend_catRank,98.69791666666666,BIOEX
-16,Vardering_latest_catRank,47.39583333333333,BIOEX
+16,Vardering_latest_catRank,47.52604166666667,BIOEX
 17,Vardering_trend_catRank,76.69270833333334,BIOEX
 18,Kassaflode_latest_catRank,18.880208333333336,BIOEX
 19,Kassaflode_trend_catRank,77.34375,BIOEX
@@ -13070,7 +13070,7 @@
 8,Kassaflode_latest_catAvg,71.30139717860499,LUC
 9,Kassaflode_trend_catAvg,20.184868813978362,LUC
 10,Kvalitet_latest_catRank,83.46354166666666,LUC
-11,Kvalitet_trend_catRank,51.5625,LUC
+11,Kvalitet_trend_catRank,51.432291666666664,LUC
 12,FinansiellHalsa_latest_catRank,25.651041666666668,LUC
 13,FinansiellHalsa_trend_catRank,16.927083333333336,LUC
 14,Lonsamhet_latest_catRank,85.67708333333334,LUC
@@ -13156,7 +13156,7 @@
 14,Lonsamhet_latest_catRank,31.640625,CANDLE-B
 15,Lonsamhet_trend_catRank,62.109375,CANDLE-B
 16,Vardering_latest_catRank,64.58333333333334,CANDLE-B
-17,Vardering_trend_catRank,57.291666666666664,CANDLE-B
+17,Vardering_trend_catRank,57.421875,CANDLE-B
 18,Kassaflode_latest_catRank,19.401041666666664,CANDLE-B
 19,Kassaflode_trend_catRank,91.66666666666666,CANDLE-B
 0,Kvalitet_latest_catAvg,21.42238976735999,CDON
@@ -13183,8 +13183,8 @@
 1,Kvalitet_trend_catAvg,55.199922518554764,CEDER
 2,FinansiellHalsa_latest_catAvg,53.16553524804178,CEDER
 3,FinansiellHalsa_trend_catAvg,67.38931972121331,CEDER
-4,Lonsamhet_latest_catAvg,41.257702558157376,CEDER
-5,Lonsamhet_trend_catAvg,36.819780477939794,CEDER
+4,Lonsamhet_latest_catAvg,41.20939337941342,CEDER
+5,Lonsamhet_trend_catAvg,36.76973042788975,CEDER
 6,Vardering_latest_catAvg,29.397793894341433,CEDER
 7,Vardering_trend_catAvg,48.91847365714283,CEDER
 8,Kassaflode_latest_catAvg,72.12289583910703,CEDER
@@ -13193,7 +13193,7 @@
 11,Kvalitet_trend_catRank,69.53125,CEDER
 12,FinansiellHalsa_latest_catRank,53.645833333333336,CEDER
 13,FinansiellHalsa_trend_catRank,70.05208333333334,CEDER
-14,Lonsamhet_latest_catRank,34.375,CEDER
+14,Lonsamhet_latest_catRank,34.24479166666667,CEDER
 15,Lonsamhet_trend_catRank,27.604166666666668,CEDER
 16,Vardering_latest_catRank,14.322916666666666,CEDER
 17,Vardering_trend_catRank,33.07291666666667,CEDER
@@ -13266,7 +13266,7 @@
 4,Lonsamhet_latest_catAvg,31.631737350472218,ELLWEE
 5,Lonsamhet_trend_catAvg,65.63720626474014,ELLWEE
 6,Vardering_latest_catAvg,62.61939106047157,ELLWEE
-7,Vardering_trend_catAvg,16.314695684472948,ELLWEE
+7,Vardering_trend_catAvg,16.381096746889945,ELLWEE
 8,Kassaflode_latest_catAvg,38.99730297889023,ELLWEE
 9,Kassaflode_trend_catAvg,89.96138996138995,ELLWEE
 10,Kvalitet_latest_catRank,97.91666666666666,ELLWEE
@@ -13336,7 +13336,7 @@
 14,Lonsamhet_latest_catRank,18.75,FRAG
 15,Lonsamhet_trend_catRank,35.9375,FRAG
 16,Vardering_latest_catRank,52.213541666666664,FRAG
-17,Vardering_trend_catRank,30.859375,FRAG
+17,Vardering_trend_catRank,30.729166666666668,FRAG
 18,Kassaflode_latest_catRank,14.84375,FRAG
 19,Kassaflode_trend_catRank,9.375,FRAG
 0,Kvalitet_latest_catAvg,36.22715404699739,FSPORT
@@ -13355,7 +13355,7 @@
 13,FinansiellHalsa_trend_catRank,60.9375,FSPORT
 14,Lonsamhet_latest_catRank,27.864583333333332,FSPORT
 15,Lonsamhet_trend_catRank,77.60416666666666,FSPORT
-16,Vardering_latest_catRank,78.90625,FSPORT
+16,Vardering_latest_catRank,79.03645833333334,FSPORT
 17,Vardering_trend_catRank,44.79166666666667,FSPORT
 18,Kassaflode_latest_catRank,27.604166666666668,FSPORT
 19,Kassaflode_trend_catRank,77.47395833333334,FSPORT
@@ -13416,7 +13416,7 @@
 14,Lonsamhet_latest_catRank,27.994791666666668,HOTEL
 15,Lonsamhet_trend_catRank,94.40104166666666,HOTEL
 16,Vardering_latest_catRank,96.74479166666666,HOTEL
-17,Vardering_trend_catRank,18.880208333333336,HOTEL
+17,Vardering_trend_catRank,18.75,HOTEL
 18,Kassaflode_latest_catRank,14.0625,HOTEL
 19,Kassaflode_trend_catRank,25.260416666666668,HOTEL
 0,Kvalitet_latest_catAvg,26.50741729496093,KAKEL
@@ -13436,7 +13436,7 @@
 14,Lonsamhet_latest_catRank,19.270833333333336,KAKEL
 15,Lonsamhet_trend_catRank,25.520833333333332,KAKEL
 16,Vardering_latest_catRank,56.770833333333336,KAKEL
-17,Vardering_trend_catRank,59.244791666666664,KAKEL
+17,Vardering_trend_catRank,59.375,KAKEL
 18,Kassaflode_latest_catRank,28.125,KAKEL
 19,Kassaflode_trend_catRank,27.734375,KAKEL
 0,Kvalitet_latest_catAvg,66.18872297356764,KAMBI
@@ -13456,7 +13456,7 @@
 14,Lonsamhet_latest_catRank,75.13020833333334,KAMBI
 15,Lonsamhet_trend_catRank,15.104166666666666,KAMBI
 16,Vardering_latest_catRank,1.8229166666666667,KAMBI
-17,Vardering_trend_catRank,24.348958333333336,KAMBI
+17,Vardering_trend_catRank,24.21875,KAMBI
 18,Kassaflode_latest_catRank,97.78645833333334,KAMBI
 19,Kassaflode_trend_catRank,50.130208333333336,KAMBI
 0,Kvalitet_latest_catAvg,27.154046997389035,BRAVE
@@ -13466,7 +13466,7 @@
 4,Lonsamhet_latest_catAvg,36.11418196100631,BRAVE
 5,Lonsamhet_trend_catAvg,66.45732912480663,BRAVE
 6,Vardering_latest_catAvg,59.66266971654331,BRAVE
-7,Vardering_trend_catAvg,33.51404450356373,BRAVE
+7,Vardering_trend_catAvg,33.58044556598073,BRAVE
 8,Kassaflode_latest_catAvg,11.296395184566821,BRAVE
 9,Kassaflode_trend_catAvg,91.17936117936118,BRAVE
 10,Kvalitet_latest_catRank,17.057291666666664,BRAVE
@@ -13476,7 +13476,7 @@
 14,Lonsamhet_latest_catRank,25.130208333333332,BRAVE
 15,Lonsamhet_trend_catRank,79.94791666666666,BRAVE
 16,Vardering_latest_catRank,67.1875,BRAVE
-17,Vardering_trend_catRank,8.333333333333332,BRAVE
+17,Vardering_trend_catRank,8.463541666666668,BRAVE
 18,Kassaflode_latest_catRank,6.380208333333333,BRAVE
 19,Kassaflode_trend_catRank,96.484375,BRAVE
 0,Kvalitet_latest_catAvg,36.12423113405893,KJELL
@@ -13496,7 +13496,7 @@
 14,Lonsamhet_latest_catRank,33.984375,KJELL
 15,Lonsamhet_trend_catRank,23.4375,KJELL
 16,Vardering_latest_catRank,94.40104166666666,KJELL
-17,Vardering_trend_catRank,55.859375,KJELL
+17,Vardering_trend_catRank,55.989583333333336,KJELL
 18,Kassaflode_latest_catRank,38.54166666666667,KJELL
 19,Kassaflode_trend_catRank,45.3125,KJELL
 0,Kvalitet_latest_catAvg,32.17771193319056,MOBA
@@ -13536,7 +13536,7 @@
 14,Lonsamhet_latest_catRank,23.567708333333336,MAV
 15,Lonsamhet_trend_catRank,27.34375,MAV
 16,Vardering_latest_catRank,82.29166666666666,MAV
-17,Vardering_trend_catRank,23.697916666666664,MAV
+17,Vardering_trend_catRank,23.567708333333336,MAV
 18,Kassaflode_latest_catRank,30.46875,MAV
 19,Kassaflode_trend_catRank,67.05729166666666,MAV
 0,Kvalitet_latest_catAvg,11.915344070564537,MAXENT-B
@@ -13696,7 +13696,7 @@
 14,Lonsamhet_latest_catRank,41.015625,QIIWI
 15,Lonsamhet_trend_catRank,33.85416666666667,QIIWI
 16,Vardering_latest_catRank,70.83333333333334,QIIWI
-17,Vardering_trend_catRank,56.901041666666664,QIIWI
+17,Vardering_trend_catRank,57.03125,QIIWI
 18,Kassaflode_latest_catRank,30.598958333333332,QIIWI
 19,Kassaflode_trend_catRank,24.088541666666664,QIIWI
 0,Kvalitet_latest_catAvg,16.626328707914062,REALFI
@@ -13743,8 +13743,8 @@
 1,Kvalitet_trend_catAvg,41.30175257224438,SBOK
 2,FinansiellHalsa_latest_catAvg,78.13326370757181,SBOK
 3,FinansiellHalsa_trend_catAvg,78.7152743692942,SBOK
-4,Lonsamhet_latest_catAvg,57.91548749798605,SBOK
-5,Lonsamhet_trend_catAvg,38.97734125885711,SBOK
+4,Lonsamhet_latest_catAvg,58.20534257044981,SBOK
+5,Lonsamhet_trend_catAvg,39.22759150910736,SBOK
 6,Vardering_latest_catAvg,64.82421656941726,SBOK
 7,Vardering_trend_catAvg,76.36061977897059,SBOK
 8,Kassaflode_latest_catAvg,71.72194771339025,SBOK
@@ -13753,8 +13753,8 @@
 11,Kvalitet_trend_catRank,48.046875,SBOK
 12,FinansiellHalsa_latest_catRank,87.5,SBOK
 13,FinansiellHalsa_trend_catRank,93.09895833333334,SBOK
-14,Lonsamhet_latest_catRank,65.88541666666666,SBOK
-15,Lonsamhet_trend_catRank,31.510416666666668,SBOK
+14,Lonsamhet_latest_catRank,66.40625,SBOK
+15,Lonsamhet_trend_catRank,31.640625,SBOK
 16,Vardering_latest_catRank,77.734375,SBOK
 17,Vardering_trend_catRank,93.48958333333334,SBOK
 18,Kassaflode_latest_catRank,80.98958333333334,SBOK
@@ -13823,7 +13823,7 @@
 1,Kvalitet_trend_catAvg,83.16764552687825,STORY-B
 2,FinansiellHalsa_latest_catAvg,42.150600522193216,STORY-B
 3,FinansiellHalsa_trend_catAvg,25.377484744234085,STORY-B
-4,Lonsamhet_latest_catAvg,56.35791475200117,STORY-B
+4,Lonsamhet_latest_catAvg,56.309605573257215,STORY-B
 5,Lonsamhet_trend_catAvg,76.32663261978456,STORY-B
 6,Vardering_latest_catAvg,26.895717278143863,STORY-B
 7,Vardering_trend_catAvg,36.421416892262144,STORY-B
@@ -13916,7 +13916,7 @@
 14,Lonsamhet_latest_catRank,10.026041666666668,TOURN
 15,Lonsamhet_trend_catRank,30.859375,TOURN
 16,Vardering_latest_catRank,39.453125,TOURN
-17,Vardering_trend_catRank,24.21875,TOURN
+17,Vardering_trend_catRank,24.088541666666664,TOURN
 18,Kassaflode_latest_catRank,29.557291666666668,TOURN
 19,Kassaflode_trend_catRank,20.052083333333336,TOURN
 0,Kvalitet_latest_catAvg,96.45270435454376,UTG
@@ -13925,7 +13925,7 @@
 3,FinansiellHalsa_trend_catAvg,71.1931873957004,UTG
 4,Lonsamhet_latest_catAvg,40.38415993076685,UTG
 5,Lonsamhet_trend_catAvg,63.881184458716405,UTG
-6,Vardering_latest_catAvg,47.31594596341542,UTG
+6,Vardering_latest_catAvg,47.359575980867426,UTG
 7,Vardering_trend_catAvg,53.04856082711913,UTG
 8,Kassaflode_latest_catAvg,69.9384664607287,UTG
 9,Kassaflode_trend_catAvg,71.66725166725166,UTG
@@ -14016,7 +14016,7 @@
 14,Lonsamhet_latest_catRank,16.536458333333336,ADTR
 15,Lonsamhet_trend_catRank,32.68229166666667,ADTR
 16,Vardering_latest_catRank,77.60416666666666,ADTR
-17,Vardering_trend_catRank,56.770833333333336,ADTR
+17,Vardering_trend_catRank,56.901041666666664,ADTR
 18,Kassaflode_latest_catRank,37.76041666666667,ADTR
 19,Kassaflode_trend_catRank,37.36979166666667,ADTR
 0,Kvalitet_latest_catAvg,69.19060052219322,AVT-B
@@ -14496,7 +14496,7 @@
 14,Lonsamhet_latest_catRank,83.07291666666666,HIFA-B
 15,Lonsamhet_trend_catRank,84.89583333333334,HIFA-B
 16,Vardering_latest_catRank,47.65625,HIFA-B
-17,Vardering_trend_catRank,14.322916666666666,HIFA-B
+17,Vardering_trend_catRank,14.192708333333334,HIFA-B
 18,Kassaflode_latest_catRank,75.13020833333334,HIFA-B
 19,Kassaflode_trend_catRank,88.28125,HIFA-B
 0,Kvalitet_latest_catAvg,31.33159268929504,INSP
@@ -14526,7 +14526,7 @@
 4,Lonsamhet_latest_catAvg,39.42835921965597,IRIS
 5,Lonsamhet_trend_catAvg,34.08220899101369,IRIS
 6,Vardering_latest_catAvg,75.62091088914065,IRIS
-7,Vardering_trend_catAvg,6.531622413671429,IRIS
+7,Vardering_trend_catAvg,6.598023476088429,IRIS
 8,Kassaflode_latest_catAvg,12.487748494332198,IRIS
 9,Kassaflode_trend_catAvg,58.18118774429454,IRIS
 10,Kvalitet_latest_catRank,7.161458333333333,IRIS
@@ -14554,8 +14554,8 @@
 12,FinansiellHalsa_latest_catRank,54.036458333333336,JLT
 13,FinansiellHalsa_trend_catRank,53.125,JLT
 14,Lonsamhet_latest_catRank,30.729166666666668,JLT
-15,Lonsamhet_trend_catRank,31.640625,JLT
-16,Vardering_latest_catRank,55.989583333333336,JLT
+15,Lonsamhet_trend_catRank,31.510416666666668,JLT
+16,Vardering_latest_catRank,55.859375,JLT
 17,Vardering_trend_catRank,14.713541666666666,JLT
 18,Kassaflode_latest_catRank,41.66666666666667,JLT
 19,Kassaflode_trend_catRank,51.041666666666664,JLT
@@ -14636,7 +14636,7 @@
 14,Lonsamhet_latest_catRank,60.286458333333336,LITI
 15,Lonsamhet_trend_catRank,92.44791666666666,LITI
 16,Vardering_latest_catRank,15.885416666666666,LITI
-17,Vardering_trend_catRank,58.854166666666664,LITI
+17,Vardering_trend_catRank,58.984375,LITI
 18,Kassaflode_latest_catRank,70.96354166666666,LITI
 19,Kassaflode_trend_catRank,66.015625,LITI
 0,Kvalitet_latest_catAvg,47.286844447052154,LOYAL
@@ -14665,7 +14665,7 @@
 3,FinansiellHalsa_trend_catAvg,27.262180974477957,MODEL
 4,Lonsamhet_latest_catAvg,13.094293855994247,MODEL
 5,Lonsamhet_trend_catAvg,20.334547442049374,MODEL
-6,Vardering_latest_catAvg,48.67483984260675,MODEL
+6,Vardering_latest_catAvg,48.71846986005875,MODEL
 7,Vardering_trend_catAvg,32.740574157365764,MODEL
 8,Kassaflode_latest_catAvg,33.43793584379358,MODEL
 9,Kassaflode_trend_catAvg,33.65695792880259,MODEL
@@ -14685,7 +14685,7 @@
 3,FinansiellHalsa_trend_catAvg,49.7906127572173,NEO-B
 4,Lonsamhet_latest_catAvg,35.869121357124236,NEO-B
 5,Lonsamhet_trend_catAvg,60.271888869518115,NEO-B
-6,Vardering_latest_catAvg,63.065669650008374,NEO-B
+6,Vardering_latest_catAvg,63.10929966746037,NEO-B
 7,Vardering_trend_catAvg,18.136756654873096,NEO-B
 8,Kassaflode_latest_catAvg,13.1694391683171,NEO-B
 9,Kassaflode_trend_catAvg,93.15373815373816,NEO-B
@@ -14836,7 +14836,7 @@
 14,Lonsamhet_latest_catRank,40.88541666666667,RPLAN
 15,Lonsamhet_trend_catRank,75.78125,RPLAN
 16,Vardering_latest_catRank,96.484375,RPLAN
-17,Vardering_trend_catRank,58.59375,RPLAN
+17,Vardering_trend_catRank,58.723958333333336,RPLAN
 18,Kassaflode_latest_catRank,12.630208333333334,RPLAN
 19,Kassaflode_trend_catRank,93.61979166666666,RPLAN
 0,Kvalitet_latest_catAvg,73.23759791122716,RIGHTB
@@ -14856,7 +14856,7 @@
 14,Lonsamhet_latest_catRank,23.177083333333336,RIGHTB
 15,Lonsamhet_trend_catRank,24.869791666666664,RIGHTB
 16,Vardering_latest_catRank,94.921875,RIGHTB
-17,Vardering_trend_catRank,60.677083333333336,RIGHTB
+17,Vardering_trend_catRank,60.807291666666664,RIGHTB
 18,Kassaflode_latest_catRank,4.557291666666666,RIGHTB
 19,Kassaflode_trend_catRank,16.276041666666664,RIGHTB
 0,Kvalitet_latest_catAvg,49.02088772845953,SFTR
@@ -14876,7 +14876,7 @@
 14,Lonsamhet_latest_catRank,33.85416666666667,SFTR
 15,Lonsamhet_trend_catRank,95.44270833333334,SFTR
 16,Vardering_latest_catRank,9.505208333333332,SFTR
-17,Vardering_trend_catRank,61.197916666666664,SFTR
+17,Vardering_trend_catRank,61.328125,SFTR
 18,Kassaflode_latest_catRank,70.57291666666666,SFTR
 19,Kassaflode_trend_catRank,71.61458333333334,SFTR
 0,Kvalitet_latest_catAvg,32.28430193328835,SONE
@@ -15096,7 +15096,7 @@
 14,Lonsamhet_latest_catRank,4.296875,ZAPLOX
 15,Lonsamhet_trend_catRank,98.828125,ZAPLOX
 16,Vardering_latest_catRank,45.83333333333333,ZAPLOX
-17,Vardering_trend_catRank,61.458333333333336,ZAPLOX
+17,Vardering_trend_catRank,61.588541666666664,ZAPLOX
 18,Kassaflode_latest_catRank,26.432291666666668,ZAPLOX
 19,Kassaflode_trend_catRank,78.77604166666666,ZAPLOX
 0,Kvalitet_latest_catAvg,50.723883005251274,ALCA
@@ -15116,7 +15116,7 @@
 14,Lonsamhet_latest_catRank,33.72395833333333,ALCA
 15,Lonsamhet_trend_catRank,21.09375,ALCA
 16,Vardering_latest_catRank,65.10416666666666,ALCA
-17,Vardering_trend_catRank,60.9375,ALCA
+17,Vardering_trend_catRank,61.067708333333336,ALCA
 18,Kassaflode_latest_catRank,52.473958333333336,ALCA
 19,Kassaflode_trend_catRank,69.921875,ALCA
 0,Kvalitet_latest_catAvg,95.836878184254,BAHN-B
@@ -15236,7 +15236,7 @@
 14,Lonsamhet_latest_catRank,56.770833333333336,KEBNI-B
 15,Lonsamhet_trend_catRank,76.43229166666666,KEBNI-B
 16,Vardering_latest_catRank,24.479166666666664,KEBNI-B
-17,Vardering_trend_catRank,57.03125,KEBNI-B
+17,Vardering_trend_catRank,57.161458333333336,KEBNI-B
 18,Kassaflode_latest_catRank,40.75520833333333,KEBNI-B
 19,Kassaflode_trend_catRank,75.13020833333334,KEBNI-B
 0,Kvalitet_latest_catAvg,75.77131066584523,LUMEN
@@ -15276,7 +15276,7 @@
 14,Lonsamhet_latest_catRank,46.875,MAVEN
 15,Lonsamhet_trend_catRank,79.42708333333334,MAVEN
 16,Vardering_latest_catRank,29.6875,MAVEN
-17,Vardering_trend_catRank,48.30729166666667,MAVEN
+17,Vardering_trend_catRank,48.17708333333333,MAVEN
 18,Kassaflode_latest_catRank,11.979166666666668,MAVEN
 19,Kassaflode_trend_catRank,94.66145833333334,MAVEN
 0,Kvalitet_latest_catAvg,97.02892598351278,TALK

@@ -1210,7 +1210,7 @@ PE_tal_trend_ratioRank,9.578544061302683,BURE
 PB_tal_latest_ratioRank,69.10994764397905,BURE
 PB_tal_trend_ratioRank,90.4517453798768,BURE
 EV_EBITDA_latest_ratioRank,69.36026936026936,BURE
-EV_EBITDA_trend_ratioRank,14.342629482071715,BURE
+EV_EBITDA_trend_ratioRank,14.54183266932271,BURE
 Rörelseflödesmarginal_latest_ratioRank,97.07112970711297,BURE
 Rörelseflödesmarginal_trend_ratioRank,6.634304207119741,BURE
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,65.83769633507853,BURE
@@ -1516,7 +1516,7 @@ PE_tal_trend_ratioRank,73.16753926701571,LUND-B
 PB_tal_latest_ratioRank,78.1413612565445,LUND-B
 PB_tal_trend_ratioRank,91.9917864476386,LUND-B
 EV_EBITDA_latest_ratioRank,50.0,LUND-B
-EV_EBITDA_trend_ratioRank,13.346613545816732,LUND-B
+EV_EBITDA_trend_ratioRank,13.545816733067728,LUND-B
 Rörelseflödesmarginal_latest_ratioRank,83.96094839609484,LUND-B
 Rörelseflödesmarginal_trend_ratioRank,54.66830466830467,LUND-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,96.33507853403141,LUND-B
@@ -1610,7 +1610,7 @@ Räntetäckningsgrad_trend_ratioRank,41.68674698795181,STOR-B
 Bruttomarginal_latest_ratioRank,14.736842105263156,STOR-B
 Bruttomarginal_trend_ratioRank,37.37373737373738,STOR-B
 Rörelsemarginal_latest_ratioRank,51.01449275362319,STOR-B
-Rörelsemarginal_trend_ratioRank,37.83783783783784,STOR-B
+Rörelsemarginal_trend_ratioRank,37.687687687687685,STOR-B
 Vinstmarginal_latest_ratioRank,43.291839557399726,STOR-B
 Vinstmarginal_trend_ratioRank,32.13457076566125,STOR-B
 PE_tal_latest_ratioRank,50.0,STOR-B
@@ -1890,7 +1890,7 @@ PE_tal_trend_ratioRank,38.31417624521073,EKTA-B
 PB_tal_latest_ratioRank,47.64397905759162,EKTA-B
 PB_tal_trend_ratioRank,97.02258726899385,EKTA-B
 EV_EBITDA_latest_ratioRank,43.43434343434344,EKTA-B
-EV_EBITDA_trend_ratioRank,12.94820717131474,EKTA-B
+EV_EBITDA_trend_ratioRank,13.147410358565736,EKTA-B
 Rörelseflödesmarginal_latest_ratioRank,71.26917712691771,EKTA-B
 Rörelseflödesmarginal_trend_ratioRank,57.37100737100737,EKTA-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,68.32460732984293,EKTA-B
@@ -1924,7 +1924,7 @@ PE_tal_trend_ratioRank,24.71264367816092,GETI-B
 PB_tal_latest_ratioRank,56.41361256544503,GETI-B
 PB_tal_trend_ratioRank,82.13552361396304,GETI-B
 EV_EBITDA_latest_ratioRank,41.75084175084175,GETI-B
-EV_EBITDA_trend_ratioRank,15.737051792828685,GETI-B
+EV_EBITDA_trend_ratioRank,15.936254980079681,GETI-B
 Rörelseflödesmarginal_latest_ratioRank,64.71408647140865,GETI-B
 Rörelseflödesmarginal_trend_ratioRank,24.59546925566343,GETI-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,88.48167539267016,GETI-B
@@ -2057,7 +2057,7 @@ Vinstmarginal_latest_ratioRank,61.68741355463347,VIMIAN
 Vinstmarginal_trend_ratioRank,62.19931271477663,VIMIAN
 PE_tal_latest_ratioRank,0.9316770186335404,VIMIAN
 PE_tal_trend_ratioRank,44.44444444444444,VIMIAN
-PB_tal_latest_ratioRank,3.7958115183246073,VIMIAN
+PB_tal_latest_ratioRank,3.664921465968586,VIMIAN
 PB_tal_trend_ratioRank,53.79876796714579,VIMIAN
 EV_EBITDA_latest_ratioRank,1.8518518518518516,VIMIAN
 EV_EBITDA_trend_ratioRank,51.461988304093566,VIMIAN
@@ -2567,7 +2567,7 @@ Vinstmarginal_latest_ratioRank,72.61410788381743,INDT
 Vinstmarginal_trend_ratioRank,45.011600928074245,INDT
 PE_tal_latest_ratioRank,18.944099378881987,INDT
 PE_tal_trend_ratioRank,75.13089005235602,INDT
-PB_tal_latest_ratioRank,22.774869109947645,INDT
+PB_tal_latest_ratioRank,22.905759162303667,INDT
 PB_tal_trend_ratioRank,63.5523613963039,INDT
 EV_EBITDA_latest_ratioRank,27.27272727272727,INDT
 EV_EBITDA_trend_ratioRank,73.24561403508773,INDT
@@ -2638,7 +2638,7 @@ PE_tal_trend_ratioRank,28.160919540229884,LIAB
 PB_tal_latest_ratioRank,45.41884816753927,LIAB
 PB_tal_trend_ratioRank,78.33675564681724,LIAB
 EV_EBITDA_latest_ratioRank,31.48148148148148,LIAB
-EV_EBITDA_trend_ratioRank,19.721115537848604,LIAB
+EV_EBITDA_trend_ratioRank,19.9203187250996,LIAB
 Rörelseflödesmarginal_latest_ratioRank,58.71687587168759,LIAB
 Rörelseflödesmarginal_trend_ratioRank,65.1105651105651,LIAB
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,90.31413612565446,LIAB
@@ -2808,7 +2808,7 @@ PE_tal_trend_ratioRank,35.82375478927203,NIBE-B
 PB_tal_latest_ratioRank,40.70680628272251,NIBE-B
 PB_tal_trend_ratioRank,72.99794661190965,NIBE-B
 EV_EBITDA_latest_ratioRank,22.053872053872052,NIBE-B
-EV_EBITDA_trend_ratioRank,20.119521912350596,NIBE-B
+EV_EBITDA_trend_ratioRank,20.318725099601593,NIBE-B
 Rörelseflödesmarginal_latest_ratioRank,54.811715481171554,NIBE-B
 Rörelseflödesmarginal_trend_ratioRank,45.14563106796117,NIBE-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,54.712041884816756,NIBE-B
@@ -2842,7 +2842,7 @@ PE_tal_trend_ratioRank,24.904214559386972,NOLA-B
 PB_tal_latest_ratioRank,41.361256544502616,NOLA-B
 PB_tal_trend_ratioRank,82.75154004106776,NOLA-B
 EV_EBITDA_latest_ratioRank,44.44444444444444,NOLA-B
-EV_EBITDA_trend_ratioRank,16.135458167330675,NOLA-B
+EV_EBITDA_trend_ratioRank,16.334661354581673,NOLA-B
 Rörelseflödesmarginal_latest_ratioRank,69.7350069735007,NOLA-B
 Rörelseflödesmarginal_trend_ratioRank,63.26781326781327,NOLA-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,69.24083769633508,NOLA-B
@@ -3130,7 +3130,7 @@ Kassalikviditet_trend_ratioRank,50.0,SWEC-B
 ROE_latest_ratioRank,71.14882506527415,SYSR
 ROE_trend_ratioRank,42.3155737704918,SYSR
 ROIC_latest_ratioRank,71.72284644194757,SYSR
-ROIC_trend_ratioRank,43.993993993993996,SYSR
+ROIC_trend_ratioRank,44.8948948948949,SYSR
 Soliditet_latest_ratioRank,64.3603133159269,SYSR
 Soliditet_trend_ratioRank,91.01796407185628,SYSR
 Skuldsättningsgrad_latest_ratioRank,44.96,SYSR
@@ -3148,7 +3148,7 @@ PE_tal_trend_ratioRank,86.78010471204189,SYSR
 PB_tal_latest_ratioRank,31.675392670157066,SYSR
 PB_tal_trend_ratioRank,69.81519507186859,SYSR
 EV_EBITDA_latest_ratioRank,20.53872053872054,SYSR
-EV_EBITDA_trend_ratioRank,21.314741035856574,SYSR
+EV_EBITDA_trend_ratioRank,12.94820717131474,SYSR
 Rörelseflödesmarginal_latest_ratioRank,53.55648535564853,SYSR
 Rörelseflödesmarginal_trend_ratioRank,71.74447174447175,SYSR
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,77.09424083769633,SYSR
@@ -3411,7 +3411,7 @@ Räntetäckningsgrad_latest_ratioRank,71.02526002971769,GRNG
 Räntetäckningsgrad_trend_ratioRank,43.855421686746986,GRNG
 Bruttomarginal_latest_ratioRank,28.270676691729324,GRNG
 Bruttomarginal_trend_ratioRank,73.29700272479565,GRNG
-Rörelsemarginal_latest_ratioRank,57.391304347826086,GRNG
+Rörelsemarginal_latest_ratioRank,57.2463768115942,GRNG
 Rörelsemarginal_trend_ratioRank,58.00561797752809,GRNG
 Vinstmarginal_latest_ratioRank,59.47441217150761,GRNG
 Vinstmarginal_trend_ratioRank,58.59106529209622,GRNG
@@ -3658,7 +3658,7 @@ PE_tal_trend_ratioRank,22.22222222222222,SCA-B
 PB_tal_latest_ratioRank,72.77486910994764,SCA-B
 PB_tal_trend_ratioRank,87.98767967145791,SCA-B
 EV_EBITDA_latest_ratioRank,34.51178451178451,SCA-B
-EV_EBITDA_trend_ratioRank,20.51792828685259,SCA-B
+EV_EBITDA_trend_ratioRank,20.717131474103585,SCA-B
 Rörelseflödesmarginal_latest_ratioRank,77.05718270571828,SCA-B
 Rörelseflödesmarginal_trend_ratioRank,20.631067961165048,SCA-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,64.00523560209425,SCA-B
@@ -3674,7 +3674,7 @@ Kassalikviditet_trend_ratioRank,50.0,SCA-B
 ROE_latest_ratioRank,68.73368146214099,SKF-A
 ROE_trend_ratioRank,43.39139344262295,SKF-A
 ROIC_latest_ratioRank,74.25093632958801,SKF-A
-ROIC_trend_ratioRank,44.36936936936937,SKF-A
+ROIC_trend_ratioRank,44.21921921921922,SKF-A
 Soliditet_latest_ratioRank,49.80417754569191,SKF-A
 Soliditet_trend_ratioRank,72.52994011976048,SKF-A
 Skuldsättningsgrad_latest_ratioRank,54.0,SKF-A
@@ -3708,7 +3708,7 @@ Kassalikviditet_trend_ratioRank,50.0,SKF-A
 ROE_latest_ratioRank,68.73368146214099,SKF-B
 ROE_trend_ratioRank,43.39139344262295,SKF-B
 ROIC_latest_ratioRank,74.25093632958801,SKF-B
-ROIC_trend_ratioRank,44.36936936936937,SKF-B
+ROIC_trend_ratioRank,44.21921921921922,SKF-B
 Soliditet_latest_ratioRank,49.80417754569191,SKF-B
 Soliditet_trend_ratioRank,72.52994011976048,SKF-B
 Skuldsättningsgrad_latest_ratioRank,54.0,SKF-B
@@ -4001,7 +4001,7 @@ EV_EBITDA_latest_ratioRank,6.7340067340067336,BETS-B
 EV_EBITDA_trend_ratioRank,55.994152046783626,BETS-B
 Rörelseflödesmarginal_latest_ratioRank,84.10041841004184,BETS-B
 Rörelseflödesmarginal_trend_ratioRank,59.95085995085995,BETS-B
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.43455497382199,BETS-B
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.56544502617801,BETS-B
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,70.48192771084337,BETS-B
 Kassaflode_till_Skuld_latest_ratioRank,88.04523424878838,BETS-B
 Kassaflode_till_Skuld_trend_ratioRank,63.506493506493506,BETS-B
@@ -4032,7 +4032,7 @@ PE_tal_trend_ratioRank,19.54022988505747,BILI-A
 PB_tal_latest_ratioRank,44.76439790575916,BILI-A
 PB_tal_trend_ratioRank,86.96098562628336,BILI-A
 EV_EBITDA_latest_ratioRank,53.03030303030303,BILI-A
-EV_EBITDA_trend_ratioRank,15.338645418326694,BILI-A
+EV_EBITDA_trend_ratioRank,15.53784860557769,BILI-A
 Rörelseflödesmarginal_latest_ratioRank,41.00418410041841,BILI-A
 Rörelseflödesmarginal_trend_ratioRank,52.334152334152336,BILI-A
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,82.98429319371728,BILI-A
@@ -4066,7 +4066,7 @@ PE_tal_trend_ratioRank,70.81151832460733,DOM
 PB_tal_latest_ratioRank,79.05759162303664,DOM
 PB_tal_trend_ratioRank,93.42915811088295,DOM
 EV_EBITDA_latest_ratioRank,38.88888888888889,DOM
-EV_EBITDA_trend_ratioRank,18.725099601593627,DOM
+EV_EBITDA_trend_ratioRank,18.92430278884462,DOM
 Rörelseflödesmarginal_latest_ratioRank,74.19804741980475,DOM
 Rörelseflödesmarginal_trend_ratioRank,76.04422604422604,DOM
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,87.04188481675392,DOM
@@ -4100,7 +4100,7 @@ PE_tal_trend_ratioRank,69.76439790575915,ELUX-A
 PB_tal_latest_ratioRank,94.24083769633508,ELUX-A
 PB_tal_trend_ratioRank,3.804347826086957,ELUX-A
 EV_EBITDA_latest_ratioRank,69.02356902356902,ELUX-A
-EV_EBITDA_trend_ratioRank,18.92430278884462,ELUX-A
+EV_EBITDA_trend_ratioRank,19.12350597609562,ELUX-A
 Rörelseflödesmarginal_latest_ratioRank,35.91352859135286,ELUX-A
 Rörelseflödesmarginal_trend_ratioRank,45.38834951456311,ELUX-A
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,0.6544502617801047,ELUX-A
@@ -4134,10 +4134,10 @@ PE_tal_trend_ratioRank,73.56020942408377,ELUX-B
 PB_tal_latest_ratioRank,54.581151832460726,ELUX-B
 PB_tal_trend_ratioRank,26.811594202898554,ELUX-B
 EV_EBITDA_latest_ratioRank,62.2895622895623,ELUX-B
-EV_EBITDA_trend_ratioRank,20.916334661354583,ELUX-B
+EV_EBITDA_trend_ratioRank,21.115537848605577,ELUX-B
 Rörelseflödesmarginal_latest_ratioRank,35.91352859135286,ELUX-B
 Rörelseflödesmarginal_trend_ratioRank,45.38834951456311,ELUX-B
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,10.078534031413612,ELUX-B
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.947643979057592,ELUX-B
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,85.4417670682731,ELUX-B
 Kassaflode_till_Skuld_latest_ratioRank,40.468497576736674,ELUX-B
 Kassaflode_till_Skuld_trend_ratioRank,30.150214592274676,ELUX-B
@@ -4499,7 +4499,7 @@ Räntetäckningsgrad_latest_ratioRank,83.20950965824666,VOLCAR-B
 Räntetäckningsgrad_trend_ratioRank,43.734939759036145,VOLCAR-B
 Bruttomarginal_latest_ratioRank,15.939849624060152,VOLCAR-B
 Bruttomarginal_trend_ratioRank,41.245791245791246,VOLCAR-B
-Rörelsemarginal_latest_ratioRank,57.2463768115942,VOLCAR-B
+Rörelsemarginal_latest_ratioRank,57.10144927536231,VOLCAR-B
 Rörelsemarginal_trend_ratioRank,51.12359550561798,VOLCAR-B
 Vinstmarginal_latest_ratioRank,57.53803596127247,VOLCAR-B
 Vinstmarginal_trend_ratioRank,46.635730858468676,VOLCAR-B
@@ -5120,7 +5120,7 @@ PE_tal_trend_ratioRank,43.103448275862064,TELIA
 PB_tal_latest_ratioRank,40.83769633507853,TELIA
 PB_tal_trend_ratioRank,26.992753623188403,TELIA
 EV_EBITDA_latest_ratioRank,57.57575757575758,TELIA
-EV_EBITDA_trend_ratioRank,13.147410358565736,TELIA
+EV_EBITDA_trend_ratioRank,13.346613545816732,TELIA
 Rörelseflödesmarginal_latest_ratioRank,82.70571827057182,TELIA
 Rörelseflödesmarginal_trend_ratioRank,28.802588996763756,TELIA
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.82722513089005,TELIA
@@ -6054,7 +6054,7 @@ Kassalikviditet_trend_ratioRank,50.0,NEOBO
 ROE_latest_ratioRank,49.21671018276763,NIVI-B
 ROE_trend_ratioRank,25.512295081967213,NIVI-B
 ROIC_latest_ratioRank,42.50936329588015,NIVI-B
-ROIC_trend_ratioRank,44.5945945945946,NIVI-B
+ROIC_trend_ratioRank,44.44444444444444,NIVI-B
 Soliditet_latest_ratioRank,43.994778067885115,NIVI-B
 Soliditet_trend_ratioRank,88.47305389221557,NIVI-B
 Skuldsättningsgrad_latest_ratioRank,23.04,NIVI-B
@@ -6173,7 +6173,7 @@ PE_tal_latest_ratioRank,63.35403726708074,SBB-B
 PE_tal_trend_ratioRank,93.32460732984293,SBB-B
 PB_tal_latest_ratioRank,88.21989528795811,SBB-B
 PB_tal_trend_ratioRank,16.1231884057971,SBB-B
-EV_EBITDA_latest_ratioRank,90.9090909090909,SBB-B
+EV_EBITDA_latest_ratioRank,90.74074074074075,SBB-B
 EV_EBITDA_trend_ratioRank,69.29824561403508,SBB-B
 Rörelseflödesmarginal_latest_ratioRank,24.616457461645748,SBB-B
 Rörelseflödesmarginal_trend_ratioRank,9.951456310679612,SBB-B
@@ -6344,7 +6344,7 @@ PE_tal_trend_ratioRank,18.773946360153257,SLP-B
 PB_tal_latest_ratioRank,59.68586387434554,SLP-B
 PB_tal_trend_ratioRank,66.94045174537987,SLP-B
 EV_EBITDA_latest_ratioRank,28.45117845117845,SLP-B
-EV_EBITDA_trend_ratioRank,16.533864541832667,SLP-B
+EV_EBITDA_trend_ratioRank,16.733067729083665,SLP-B
 Rörelseflödesmarginal_latest_ratioRank,95.81589958158996,SLP-B
 Rörelseflödesmarginal_trend_ratioRank,65.47911547911548,SLP-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,61.518324607329845,SLP-B
@@ -6412,7 +6412,7 @@ PE_tal_trend_ratioRank,31.513409961685824,CAT-A
 PB_tal_latest_ratioRank,95.02617801047121,CAT-A
 PB_tal_trend_ratioRank,99.58932238193017,CAT-A
 EV_EBITDA_latest_ratioRank,57.91245791245792,CAT-A
-EV_EBITDA_trend_ratioRank,21.115537848605577,CAT-A
+EV_EBITDA_trend_ratioRank,21.314741035856574,CAT-A
 Rörelseflödesmarginal_latest_ratioRank,40.79497907949791,CAT-A
 Rörelseflödesmarginal_trend_ratioRank,90.11056511056512,CAT-A
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,96.59685863874346,CAT-A
@@ -6547,7 +6547,7 @@ PE_tal_latest_ratioRank,86.18012422360249,FLERIE
 PE_tal_trend_ratioRank,73.69109947643979,FLERIE
 PB_tal_latest_ratioRank,70.81151832460732,FLERIE
 PB_tal_trend_ratioRank,56.98151950718686,FLERIE
-EV_EBITDA_latest_ratioRank,90.74074074074075,FLERIE
+EV_EBITDA_latest_ratioRank,90.57239057239057,FLERIE
 EV_EBITDA_trend_ratioRank,34.8605577689243,FLERIE
 Rörelseflödesmarginal_latest_ratioRank,0.8368200836820083,FLERIE
 Rörelseflödesmarginal_trend_ratioRank,1.4563106796116505,FLERIE
@@ -7074,7 +7074,7 @@ Kassalikviditet_trend_ratioRank,50.0,ATT
 ROE_latest_ratioRank,32.89817232375979,BACTI-B
 ROE_trend_ratioRank,37.80737704918033,BACTI-B
 ROIC_latest_ratioRank,25.0936329588015,BACTI-B
-ROIC_trend_ratioRank,44.14414414414414,BACTI-B
+ROIC_trend_ratioRank,43.993993993993996,BACTI-B
 Soliditet_latest_ratioRank,50.0,BACTI-B
 Soliditet_trend_ratioRank,17.28538283062645,BACTI-B
 Skuldsättningsgrad_latest_ratioRank,33.44,BACTI-B
@@ -7225,7 +7225,7 @@ Vinstmarginal_latest_ratioRank,85.61549100968188,CEVI
 Vinstmarginal_trend_ratioRank,41.067285382830626,CEVI
 PE_tal_latest_ratioRank,20.652173913043477,CEVI
 PE_tal_trend_ratioRank,84.42408376963351,CEVI
-PB_tal_latest_ratioRank,23.16753926701571,CEVI
+PB_tal_latest_ratioRank,23.298429319371728,CEVI
 PB_tal_trend_ratioRank,66.22176591375771,CEVI
 EV_EBITDA_latest_ratioRank,22.727272727272727,CEVI
 EV_EBITDA_trend_ratioRank,83.18713450292398,CEVI
@@ -7738,10 +7738,10 @@ PE_tal_trend_ratioRank,28.9272030651341,COOR
 PB_tal_latest_ratioRank,33.638743455497384,COOR
 PB_tal_trend_ratioRank,28.442028985507246,COOR
 EV_EBITDA_latest_ratioRank,43.602693602693606,COOR
-EV_EBITDA_trend_ratioRank,14.54183266932271,COOR
+EV_EBITDA_trend_ratioRank,14.741035856573706,COOR
 Rörelseflödesmarginal_latest_ratioRank,34.449093444909344,COOR
 Rörelseflödesmarginal_trend_ratioRank,32.362459546925564,COOR
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.56544502617801,COOR
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.69633507853403,COOR
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,10.18867924528302,COOR
 Kassaflode_till_Skuld_latest_ratioRank,41.033925686591274,COOR
 Kassaflode_till_Skuld_trend_ratioRank,28.96995708154507,COOR
@@ -7942,7 +7942,7 @@ PE_tal_trend_ratioRank,46.934865900383144,FG
 PB_tal_latest_ratioRank,77.4869109947644,FG
 PB_tal_trend_ratioRank,80.18480492813141,FG
 EV_EBITDA_latest_ratioRank,42.08754208754209,FG
-EV_EBITDA_trend_ratioRank,16.334661354581673,FG
+EV_EBITDA_trend_ratioRank,16.533864541832667,FG
 Rörelseflödesmarginal_latest_ratioRank,42.67782426778243,FG
 Rörelseflödesmarginal_trend_ratioRank,47.0873786407767,FG
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,70.28795811518324,FG
@@ -8512,7 +8512,7 @@ Räntetäckningsgrad_trend_ratioRank,35.722891566265055,VOLO
 Bruttomarginal_latest_ratioRank,39.62406015037594,VOLO
 Bruttomarginal_trend_ratioRank,60.694822888283376,VOLO
 Rörelsemarginal_latest_ratioRank,57.89855072463767,VOLO
-Rörelsemarginal_trend_ratioRank,38.06306306306306,VOLO
+Rörelsemarginal_trend_ratioRank,37.91291291291291,VOLO
 Vinstmarginal_latest_ratioRank,56.77731673582296,VOLO
 Vinstmarginal_trend_ratioRank,34.86078886310905,VOLO
 PE_tal_latest_ratioRank,14.906832298136646,VOLO
@@ -8546,7 +8546,7 @@ Räntetäckningsgrad_trend_ratioRank,35.722891566265055,VOLO-PREF
 Bruttomarginal_latest_ratioRank,39.62406015037594,VOLO-PREF
 Bruttomarginal_trend_ratioRank,60.694822888283376,VOLO-PREF
 Rörelsemarginal_latest_ratioRank,57.89855072463767,VOLO-PREF
-Rörelsemarginal_trend_ratioRank,38.06306306306306,VOLO-PREF
+Rörelsemarginal_trend_ratioRank,37.91291291291291,VOLO-PREF
 Vinstmarginal_latest_ratioRank,56.77731673582296,VOLO-PREF
 Vinstmarginal_trend_ratioRank,34.86078886310905,VOLO-PREF
 PE_tal_latest_ratioRank,3.571428571428571,VOLO-PREF
@@ -8588,7 +8588,7 @@ PE_tal_trend_ratioRank,31.226053639846747,XANO-B
 PB_tal_latest_ratioRank,53.79581151832461,XANO-B
 PB_tal_trend_ratioRank,81.72484599589322,XANO-B
 EV_EBITDA_latest_ratioRank,43.09764309764309,XANO-B
-EV_EBITDA_trend_ratioRank,19.12350597609562,XANO-B
+EV_EBITDA_trend_ratioRank,19.322709163346612,XANO-B
 Rörelseflödesmarginal_latest_ratioRank,40.4463040446304,XANO-B
 Rörelseflödesmarginal_trend_ratioRank,40.614886731391586,XANO-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,60.73298429319372,XANO-B
@@ -9030,7 +9030,7 @@ PE_tal_trend_ratioRank,40.61302681992337,BMAX
 PB_tal_latest_ratioRank,58.24607329842932,BMAX
 PB_tal_trend_ratioRank,92.81314168377824,BMAX
 EV_EBITDA_latest_ratioRank,54.882154882154886,BMAX
-EV_EBITDA_trend_ratioRank,17.52988047808765,BMAX
+EV_EBITDA_trend_ratioRank,17.729083665338646,BMAX
 Rörelseflödesmarginal_latest_ratioRank,70.29288702928869,BMAX
 Rörelseflödesmarginal_trend_ratioRank,63.75921375921376,BMAX
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,88.87434554973822,BMAX
@@ -9302,7 +9302,7 @@ PE_tal_trend_ratioRank,8.045977011494253,PRFO
 PB_tal_latest_ratioRank,41.8848167539267,PRFO
 PB_tal_trend_ratioRank,85.83162217659137,PRFO
 EV_EBITDA_latest_ratioRank,64.81481481481481,PRFO
-EV_EBITDA_trend_ratioRank,13.545816733067728,PRFO
+EV_EBITDA_trend_ratioRank,13.745019920318724,PRFO
 Rörelseflödesmarginal_latest_ratioRank,65.41143654114366,PRFO
 Rörelseflödesmarginal_trend_ratioRank,19.25566343042071,PRFO
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,17.408376963350786,PRFO
@@ -9352,7 +9352,7 @@ Kassalikviditet_trend_ratioRank,50.0,RVRC
 ROE_latest_ratioRank,88.90339425587467,RUSTA
 ROE_trend_ratioRank,25.0,RUSTA
 ROIC_latest_ratioRank,70.4119850187266,RUSTA
-ROIC_trend_ratioRank,44.8948948948949,RUSTA
+ROIC_trend_ratioRank,44.74474474474475,RUSTA
 Soliditet_latest_ratioRank,9.530026109660575,RUSTA
 Soliditet_trend_ratioRank,67.21556886227545,RUSTA
 Skuldsättningsgrad_latest_ratioRank,3.36,RUSTA
@@ -9741,7 +9741,7 @@ Vinstmarginal_latest_ratioRank,89.76486860304288,IAR-B
 Vinstmarginal_trend_ratioRank,76.80412371134021,IAR-B
 PE_tal_latest_ratioRank,36.024844720496894,IAR-B
 PE_tal_trend_ratioRank,32.56704980842912,IAR-B
-PB_tal_latest_ratioRank,23.56020942408377,IAR-B
+PB_tal_latest_ratioRank,23.69109947643979,IAR-B
 PB_tal_trend_ratioRank,32.971014492753625,IAR-B
 EV_EBITDA_latest_ratioRank,37.71043771043771,IAR-B
 EV_EBITDA_trend_ratioRank,45.21912350597609,IAR-B
@@ -9982,7 +9982,7 @@ PE_tal_trend_ratioRank,36.59003831417624,VPLAY-A
 PB_tal_latest_ratioRank,96.07329842931938,VPLAY-A
 PB_tal_trend_ratioRank,99.89733059548254,VPLAY-A
 EV_EBITDA_latest_ratioRank,72.55892255892256,VPLAY-A
-EV_EBITDA_trend_ratioRank,15.936254980079681,VPLAY-A
+EV_EBITDA_trend_ratioRank,16.135458167330675,VPLAY-A
 Rörelseflödesmarginal_latest_ratioRank,23.221757322175733,VPLAY-A
 Rörelseflödesmarginal_trend_ratioRank,22.411003236245953,VPLAY-A
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,0.13089005235602094,VPLAY-A
@@ -10084,7 +10084,7 @@ PE_tal_trend_ratioRank,20.689655172413794,MSON-B
 PB_tal_latest_ratioRank,87.43455497382199,MSON-B
 PB_tal_trend_ratioRank,97.84394250513347,MSON-B
 EV_EBITDA_latest_ratioRank,60.437710437710436,MSON-B
-EV_EBITDA_trend_ratioRank,14.741035856573706,MSON-B
+EV_EBITDA_trend_ratioRank,14.940239043824702,MSON-B
 Rörelseflödesmarginal_latest_ratioRank,37.86610878661088,MSON-B
 Rörelseflödesmarginal_trend_ratioRank,66.76904176904176,MSON-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,55.366492146596855,MSON-B
@@ -10904,7 +10904,7 @@ EV_EBITDA_trend_ratioRank,29.282868525896415,EGTX
 Rörelseflödesmarginal_latest_ratioRank,7.112970711297072,EGTX
 Rörelseflödesmarginal_trend_ratioRank,11.488673139158575,EGTX
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,19.63350785340314,EGTX
-Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.45283018867924,EGTX
+Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.264150943396224,EGTX
 Kassaflode_till_Skuld_latest_ratioRank,12.924071082390952,EGTX
 Kassaflode_till_Skuld_trend_ratioRank,98.44155844155844,EGTX
 Basic_EPS_latest_ratioRank,50.0,EGTX
@@ -11407,14 +11407,14 @@ Vinstmarginal_latest_ratioRank,95.29737206085753,SANION
 Vinstmarginal_trend_ratioRank,96.73539518900344,SANION
 PE_tal_latest_ratioRank,52.484472049689444,SANION
 PE_tal_trend_ratioRank,15.900383141762454,SANION
-PB_tal_latest_ratioRank,21.465968586387437,SANION
+PB_tal_latest_ratioRank,21.20418848167539,SANION
 PB_tal_trend_ratioRank,53.696098562628336,SANION
 EV_EBITDA_latest_ratioRank,66.16161616161617,SANION
-EV_EBITDA_trend_ratioRank,17.729083665338646,SANION
+EV_EBITDA_trend_ratioRank,18.725099601593627,SANION
 Rörelseflödesmarginal_latest_ratioRank,98.04741980474198,SANION
 Rörelseflödesmarginal_trend_ratioRank,97.91154791154791,SANION
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.69633507853403,SANION
-Fritt_Kassaflode_per_Aktie_trend_ratioRank,86.14457831325302,SANION
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.30366492146597,SANION
+Fritt_Kassaflode_per_Aktie_trend_ratioRank,86.0441767068273,SANION
 Kassaflode_till_Skuld_latest_ratioRank,99.03069466882067,SANION
 Kassaflode_till_Skuld_trend_ratioRank,97.14285714285714,SANION
 Basic_EPS_latest_ratioRank,64.82919254658384,SANION
@@ -11475,14 +11475,14 @@ Vinstmarginal_latest_ratioRank,50.0,SYNACT
 Vinstmarginal_trend_ratioRank,50.0,SYNACT
 PE_tal_latest_ratioRank,83.38509316770187,SYNACT
 PE_tal_trend_ratioRank,93.06282722513089,SYNACT
-PB_tal_latest_ratioRank,23.69109947643979,SYNACT
+PB_tal_latest_ratioRank,22.38219895287958,SYNACT
 PB_tal_trend_ratioRank,52.772073921971256,SYNACT
-EV_EBITDA_latest_ratioRank,90.57239057239057,SYNACT
-EV_EBITDA_trend_ratioRank,16.93227091633466,SYNACT
+EV_EBITDA_latest_ratioRank,90.9090909090909,SYNACT
+EV_EBITDA_trend_ratioRank,17.131474103585656,SYNACT
 Rörelseflödesmarginal_latest_ratioRank,50.0,SYNACT
 Rörelseflödesmarginal_trend_ratioRank,50.0,SYNACT
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.55497382198953,SYNACT
-Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.264150943396224,SYNACT
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,10.078534031413612,SYNACT
+Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.64150943396226,SYNACT
 Kassaflode_till_Skuld_latest_ratioRank,0.9693053311793215,SYNACT
 Kassaflode_till_Skuld_trend_ratioRank,1.7167381974248928,SYNACT
 Basic_EPS_latest_ratioRank,12.422360248447205,SYNACT
@@ -11713,7 +11713,7 @@ Vinstmarginal_latest_ratioRank,57.399723374827104,BERNER-B
 Vinstmarginal_trend_ratioRank,57.560137457044675,BERNER-B
 PE_tal_latest_ratioRank,15.527950310559005,BERNER-B
 PE_tal_trend_ratioRank,64.00523560209425,BERNER-B
-PB_tal_latest_ratioRank,22.643979057591622,BERNER-B
+PB_tal_latest_ratioRank,22.774869109947645,BERNER-B
 PB_tal_trend_ratioRank,68.89117043121149,BERNER-B
 EV_EBITDA_latest_ratioRank,29.292929292929294,BERNER-B
 EV_EBITDA_trend_ratioRank,71.05263157894737,BERNER-B
@@ -11924,7 +11924,7 @@ EV_EBITDA_trend_ratioRank,7.370517928286853,HAKI-B
 Rörelseflödesmarginal_latest_ratioRank,29.218967921896795,HAKI-B
 Rörelseflödesmarginal_trend_ratioRank,30.339805825242717,HAKI-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,14.921465968586386,HAKI-B
-Fritt_Kassaflode_per_Aktie_trend_ratioRank,86.0441767068273,HAKI-B
+Fritt_Kassaflode_per_Aktie_trend_ratioRank,86.14457831325302,HAKI-B
 Kassaflode_till_Skuld_latest_ratioRank,24.959612277867528,HAKI-B
 Kassaflode_till_Skuld_trend_ratioRank,21.99570815450644,HAKI-B
 Basic_EPS_latest_ratioRank,63.121118012422365,HAKI-B
@@ -12362,7 +12362,7 @@ PE_tal_trend_ratioRank,58.638743455497384,TRANS
 PB_tal_latest_ratioRank,61.518324607329845,TRANS
 PB_tal_trend_ratioRank,70.73921971252567,TRANS
 EV_EBITDA_latest_ratioRank,58.24915824915825,TRANS
-EV_EBITDA_trend_ratioRank,15.139442231075698,TRANS
+EV_EBITDA_trend_ratioRank,15.338645418326694,TRANS
 Rörelseflödesmarginal_latest_ratioRank,47.41980474198048,TRANS
 Rörelseflödesmarginal_trend_ratioRank,32.038834951456316,TRANS
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,71.46596858638743,TRANS
@@ -12582,7 +12582,7 @@ Kassalikviditet_trend_ratioRank,50.0,NORB-B
 ROE_latest_ratioRank,76.50130548302873,PROF-B
 ROE_trend_ratioRank,34.32377049180328,PROF-B
 ROIC_latest_ratioRank,87.82771535580525,PROF-B
-ROIC_trend_ratioRank,44.74474474474475,PROF-B
+ROIC_trend_ratioRank,44.5945945945946,PROF-B
 Soliditet_latest_ratioRank,47.25848563968668,PROF-B
 Soliditet_trend_ratioRank,85.62874251497006,PROF-B
 Skuldsättningsgrad_latest_ratioRank,68.47999999999999,PROF-B
@@ -12940,7 +12940,7 @@ PE_tal_trend_ratioRank,78.66492146596859,MOMENT
 PB_tal_latest_ratioRank,31.02094240837696,MOMENT
 PB_tal_trend_ratioRank,48.91304347826087,MOMENT
 EV_EBITDA_latest_ratioRank,53.87205387205387,MOMENT
-EV_EBITDA_trend_ratioRank,17.330677290836654,MOMENT
+EV_EBITDA_trend_ratioRank,17.52988047808765,MOMENT
 Rörelseflödesmarginal_latest_ratioRank,46.44351464435147,MOMENT
 Rörelseflödesmarginal_trend_ratioRank,21.197411003236247,MOMENT
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,66.49214659685863,MOMENT
@@ -13034,7 +13034,7 @@ Räntetäckningsgrad_trend_ratioRank,60.311284046692606,PIERCE
 Bruttomarginal_latest_ratioRank,49.02255639097744,PIERCE
 Bruttomarginal_trend_ratioRank,41.91919191919192,PIERCE
 Rörelsemarginal_latest_ratioRank,40.72463768115942,PIERCE
-Rörelsemarginal_trend_ratioRank,37.687687687687685,PIERCE
+Rörelsemarginal_trend_ratioRank,37.53753753753754,PIERCE
 Vinstmarginal_latest_ratioRank,51.17565698478561,PIERCE
 Vinstmarginal_trend_ratioRank,49.187935034802784,PIERCE
 PE_tal_latest_ratioRank,32.298136645962735,PIERCE
@@ -13144,7 +13144,7 @@ PE_tal_trend_ratioRank,98.82198952879581,ANOT
 PB_tal_latest_ratioRank,68.717277486911,ANOT
 PB_tal_trend_ratioRank,22.644927536231883,ANOT
 EV_EBITDA_latest_ratioRank,77.44107744107744,ANOT
-EV_EBITDA_trend_ratioRank,19.322709163346612,ANOT
+EV_EBITDA_trend_ratioRank,19.52191235059761,ANOT
 Rörelseflödesmarginal_latest_ratioRank,11.715481171548117,ANOT
 Rörelseflödesmarginal_trend_ratioRank,8.89967637540453,ANOT
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,36.518324607329845,ANOT
@@ -13237,7 +13237,7 @@ Räntetäckningsgrad_latest_ratioRank,82.46656760772659,FPIP
 Räntetäckningsgrad_trend_ratioRank,15.180722891566264,FPIP
 Bruttomarginal_latest_ratioRank,60.0,FPIP
 Bruttomarginal_trend_ratioRank,38.215488215488215,FPIP
-Rörelsemarginal_latest_ratioRank,57.536231884057976,FPIP
+Rörelsemarginal_latest_ratioRank,57.391304347826086,FPIP
 Rörelsemarginal_trend_ratioRank,29.57957957957958,FPIP
 Vinstmarginal_latest_ratioRank,56.15491009681881,FPIP
 Vinstmarginal_trend_ratioRank,32.59860788863109,FPIP
@@ -13963,7 +13963,7 @@ EV_EBITDA_latest_ratioRank,7.575757575757576,AGROUP
 EV_EBITDA_trend_ratioRank,42.03187250996016,AGROUP
 Rörelseflödesmarginal_latest_ratioRank,19.665271966527197,AGROUP
 Rörelseflödesmarginal_trend_ratioRank,17.637540453074433,AGROUP
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.68586387434555,AGROUP
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.55497382198953,AGROUP
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,21.88679245283019,AGROUP
 Kassaflode_till_Skuld_latest_ratioRank,21.97092084006462,AGROUP
 Kassaflode_till_Skuld_trend_ratioRank,39.27038626609442,AGROUP
@@ -14304,7 +14304,7 @@ EV_EBITDA_trend_ratioRank,93.12865497076024,BIOVIC-B
 Rörelseflödesmarginal_latest_ratioRank,4.741980474198047,BIOVIC-B
 Rörelseflödesmarginal_trend_ratioRank,97.29729729729729,BIOVIC-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,17.539267015706805,BIOVIC-B
-Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.64150943396226,BIOVIC-B
+Fritt_Kassaflode_per_Aktie_trend_ratioRank,32.45283018867924,BIOVIC-B
 Kassaflode_till_Skuld_latest_ratioRank,3.231017770597738,BIOVIC-B
 Kassaflode_till_Skuld_trend_ratioRank,5.150214592274678,BIOVIC-B
 Basic_EPS_latest_ratioRank,50.0,BIOVIC-B
@@ -14538,7 +14538,7 @@ PE_tal_trend_ratioRank,24.137931034482758,BYGGP
 PB_tal_latest_ratioRank,47.25130890052356,BYGGP
 PB_tal_trend_ratioRank,63.96303901437371,BYGGP
 EV_EBITDA_latest_ratioRank,54.20875420875421,BYGGP
-EV_EBITDA_trend_ratioRank,13.94422310756972,BYGGP
+EV_EBITDA_trend_ratioRank,14.143426294820719,BYGGP
 Rörelseflödesmarginal_latest_ratioRank,32.77545327754533,BYGGP
 Rörelseflödesmarginal_trend_ratioRank,38.673139158576056,BYGGP
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,60.86387434554974,BYGGP
@@ -14603,7 +14603,7 @@ Vinstmarginal_latest_ratioRank,61.54910096818811,NYAB
 Vinstmarginal_trend_ratioRank,72.85223367697594,NYAB
 PE_tal_latest_ratioRank,2.018633540372671,NYAB
 PE_tal_trend_ratioRank,47.89272030651341,NYAB
-PB_tal_latest_ratioRank,3.664921465968586,NYAB
+PB_tal_latest_ratioRank,3.7958115183246073,NYAB
 PB_tal_trend_ratioRank,52.15605749486653,NYAB
 EV_EBITDA_latest_ratioRank,2.356902356902357,NYAB
 EV_EBITDA_trend_ratioRank,49.800796812749006,NYAB
@@ -14674,7 +14674,7 @@ PE_tal_trend_ratioRank,53.92670157068063,QAIR
 PB_tal_latest_ratioRank,56.937172774869104,QAIR
 PB_tal_trend_ratioRank,90.75975359342917,QAIR
 EV_EBITDA_latest_ratioRank,45.45454545454545,QAIR
-EV_EBITDA_trend_ratioRank,20.318725099601593,QAIR
+EV_EBITDA_trend_ratioRank,20.51792828685259,QAIR
 Rörelseflödesmarginal_latest_ratioRank,51.04602510460251,QAIR
 Rörelseflödesmarginal_trend_ratioRank,24.110032362459545,QAIR
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,57.72251308900523,QAIR
@@ -15175,7 +15175,7 @@ Räntetäckningsgrad_latest_ratioRank,12.778603268945021,RAKE
 Räntetäckningsgrad_trend_ratioRank,8.433734939759036,RAKE
 Bruttomarginal_latest_ratioRank,61.05263157894737,RAKE
 Bruttomarginal_trend_ratioRank,14.814814814814813,RAKE
-Rörelsemarginal_latest_ratioRank,57.68115942028985,RAKE
+Rörelsemarginal_latest_ratioRank,57.536231884057976,RAKE
 Rörelsemarginal_trend_ratioRank,15.615615615615615,RAKE
 Vinstmarginal_latest_ratioRank,16.32088520055325,RAKE
 Vinstmarginal_trend_ratioRank,12.993039443155451,RAKE
@@ -15218,7 +15218,7 @@ PE_tal_trend_ratioRank,50.0,RUG
 PB_tal_latest_ratioRank,39.92146596858639,RUG
 PB_tal_trend_ratioRank,84.29158110882958,RUG
 EV_EBITDA_latest_ratioRank,30.134680134680135,RUG
-EV_EBITDA_trend_ratioRank,20.717131474103585,RUG
+EV_EBITDA_trend_ratioRank,20.916334661354583,RUG
 Rörelseflödesmarginal_latest_ratioRank,59.693165969316595,RUG
 Rörelseflödesmarginal_trend_ratioRank,58.96805896805897,RUG
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,67.5392670157068,RUG
@@ -15323,7 +15323,7 @@ EV_EBITDA_latest_ratioRank,26.094276094276093,4C
 EV_EBITDA_trend_ratioRank,26.693227091633464,4C
 Rörelseflödesmarginal_latest_ratioRank,23.84937238493724,4C
 Rörelseflödesmarginal_trend_ratioRank,13.268608414239482,4C
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.947643979057592,4C
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.81675392670157,4C
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,13.584905660377359,4C
 Kassaflode_till_Skuld_latest_ratioRank,18.73990306946688,4C
 Kassaflode_till_Skuld_trend_ratioRank,14.806866952789699,4C
@@ -15759,7 +15759,7 @@ Vinstmarginal_latest_ratioRank,19.22544951590595,ONEF
 Vinstmarginal_trend_ratioRank,70.446735395189,ONEF
 PE_tal_latest_ratioRank,82.14285714285714,ONEF
 PE_tal_trend_ratioRank,24.32950191570881,ONEF
-PB_tal_latest_ratioRank,22.38219895287958,ONEF
+PB_tal_latest_ratioRank,22.5130890052356,ONEF
 PB_tal_trend_ratioRank,52.46406570841889,ONEF
 EV_EBITDA_latest_ratioRank,92.25589225589226,ONEF
 EV_EBITDA_trend_ratioRank,35.657370517928285,ONEF
@@ -16343,7 +16343,7 @@ EV_EBITDA_latest_ratioRank,33.670033670033675,SECARE
 EV_EBITDA_trend_ratioRank,60.8187134502924,SECARE
 Rörelseflödesmarginal_latest_ratioRank,69.31659693165969,SECARE
 Rörelseflödesmarginal_trend_ratioRank,47.249190938511326,SECARE
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.30366492146597,SECARE
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,62.43455497382199,SECARE
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,73.89558232931726,SECARE
 Kassaflode_till_Skuld_latest_ratioRank,53.47334410339257,SECARE
 Kassaflode_till_Skuld_trend_ratioRank,61.94805194805195,SECARE
@@ -18108,7 +18108,7 @@ PE_tal_trend_ratioRank,50.0,FLUO
 PB_tal_latest_ratioRank,4.057591623036649,FLUO
 PB_tal_trend_ratioRank,47.10144927536232,FLUO
 EV_EBITDA_latest_ratioRank,92.92929292929293,FLUO
-EV_EBITDA_trend_ratioRank,16.733067729083665,FLUO
+EV_EBITDA_trend_ratioRank,16.93227091633466,FLUO
 Rörelseflödesmarginal_latest_ratioRank,50.0,FLUO
 Rörelseflödesmarginal_trend_ratioRank,50.0,FLUO
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,8.37696335078534,FLUO
@@ -19227,7 +19227,7 @@ Vinstmarginal_latest_ratioRank,25.03457814661134,PRO
 Vinstmarginal_trend_ratioRank,89.00343642611685,PRO
 PE_tal_latest_ratioRank,90.83850931677019,PRO
 PE_tal_trend_ratioRank,72.90575916230367,PRO
-PB_tal_latest_ratioRank,23.298429319371728,PRO
+PB_tal_latest_ratioRank,23.42931937172775,PRO
 PB_tal_trend_ratioRank,56.776180698151954,PRO
 EV_EBITDA_latest_ratioRank,50.0,PRO
 EV_EBITDA_trend_ratioRank,50.0,PRO
@@ -19944,7 +19944,7 @@ PE_tal_trend_ratioRank,96.59685863874346,BAWAT
 PB_tal_latest_ratioRank,1.7015706806282722,BAWAT
 PB_tal_trend_ratioRank,49.275362318840585,BAWAT
 EV_EBITDA_latest_ratioRank,80.97643097643098,BAWAT
-EV_EBITDA_trend_ratioRank,17.131474103585656,BAWAT
+EV_EBITDA_trend_ratioRank,17.330677290836654,BAWAT
 Rörelseflödesmarginal_latest_ratioRank,11.01813110181311,BAWAT
 Rörelseflödesmarginal_trend_ratioRank,52.94840294840295,BAWAT
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,25.916230366492147,BAWAT
@@ -20553,7 +20553,7 @@ Vinstmarginal_latest_ratioRank,49.100968188105114,IDUN-B
 Vinstmarginal_trend_ratioRank,44.895591647331784,IDUN-B
 PE_tal_latest_ratioRank,4.968944099378882,IDUN-B
 PE_tal_trend_ratioRank,30.65134099616858,IDUN-B
-PB_tal_latest_ratioRank,22.905759162303667,IDUN-B
+PB_tal_latest_ratioRank,23.036649214659686,IDUN-B
 PB_tal_trend_ratioRank,65.60574948665298,IDUN-B
 EV_EBITDA_latest_ratioRank,42.42424242424242,IDUN-B
 EV_EBITDA_trend_ratioRank,74.12280701754386,IDUN-B
@@ -20828,7 +20828,7 @@ PE_tal_trend_ratioRank,50.0,OGUN-B
 PB_tal_latest_ratioRank,29.973821989528798,OGUN-B
 PB_tal_trend_ratioRank,23.55072463768116,OGUN-B
 EV_EBITDA_latest_ratioRank,57.07070707070707,OGUN-B
-EV_EBITDA_trend_ratioRank,15.53784860557769,OGUN-B
+EV_EBITDA_trend_ratioRank,15.737051792828685,OGUN-B
 Rörelseflödesmarginal_latest_ratioRank,40.0278940027894,OGUN-B
 Rörelseflödesmarginal_trend_ratioRank,29.61165048543689,OGUN-B
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,64.92146596858639,OGUN-B
@@ -20896,7 +20896,7 @@ PE_tal_trend_ratioRank,94.24083769633508,OXE
 PB_tal_latest_ratioRank,46.07329842931937,OXE
 PB_tal_trend_ratioRank,65.50308008213553,OXE
 EV_EBITDA_latest_ratioRank,88.55218855218855,OXE
-EV_EBITDA_trend_ratioRank,19.9203187250996,OXE
+EV_EBITDA_trend_ratioRank,20.119521912350596,OXE
 Rörelseflödesmarginal_latest_ratioRank,20.641562064156208,OXE
 Rörelseflödesmarginal_trend_ratioRank,73.34152334152334,OXE
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,33.90052356020942,OXE
@@ -21743,7 +21743,7 @@ Vinstmarginal_latest_ratioRank,27.52420470262794,PCAT
 Vinstmarginal_trend_ratioRank,36.42691415313225,PCAT
 PE_tal_latest_ratioRank,50.0,PCAT
 PE_tal_trend_ratioRank,50.0,PCAT
-PB_tal_latest_ratioRank,21.20418848167539,PCAT
+PB_tal_latest_ratioRank,21.335078534031414,PCAT
 PB_tal_trend_ratioRank,23.007246376811594,PCAT
 EV_EBITDA_latest_ratioRank,5.218855218855219,PCAT
 EV_EBITDA_trend_ratioRank,51.31578947368421,PCAT
@@ -21950,7 +21950,7 @@ PE_tal_trend_ratioRank,78.1413612565445,GIGA
 PB_tal_latest_ratioRank,90.0523560209424,GIGA
 PB_tal_trend_ratioRank,95.89322381930185,GIGA
 EV_EBITDA_latest_ratioRank,45.62289562289562,GIGA
-EV_EBITDA_trend_ratioRank,19.52191235059761,GIGA
+EV_EBITDA_trend_ratioRank,19.721115537848604,GIGA
 Rörelseflödesmarginal_latest_ratioRank,97.62900976290098,GIGA
 Rörelseflödesmarginal_trend_ratioRank,12.62135922330097,GIGA
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,6.806282722513089,GIGA
@@ -22049,7 +22049,7 @@ Vinstmarginal_latest_ratioRank,3.0428769017980635,BIOEX
 Vinstmarginal_trend_ratioRank,95.53264604810997,BIOEX
 PE_tal_latest_ratioRank,79.96894409937887,BIOEX
 PE_tal_trend_ratioRank,89.13612565445027,BIOEX
-PB_tal_latest_ratioRank,23.036649214659686,BIOEX
+PB_tal_latest_ratioRank,23.16753926701571,BIOEX
 PB_tal_trend_ratioRank,56.05749486652977,BIOEX
 EV_EBITDA_latest_ratioRank,50.0,BIOEX
 EV_EBITDA_trend_ratioRank,50.0,BIOEX
@@ -22417,8 +22417,8 @@ Räntetäckningsgrad_latest_ratioRank,71.1738484398217,CEDER
 Räntetäckningsgrad_trend_ratioRank,41.566265060240966,CEDER
 Bruttomarginal_latest_ratioRank,20.75187969924812,CEDER
 Bruttomarginal_trend_ratioRank,30.63973063973064,CEDER
-Rörelsemarginal_latest_ratioRank,57.10144927536231,CEDER
-Rörelsemarginal_trend_ratioRank,38.288288288288285,CEDER
+Rörelsemarginal_latest_ratioRank,56.95652173913044,CEDER
+Rörelsemarginal_trend_ratioRank,38.13813813813814,CEDER
 Vinstmarginal_latest_ratioRank,45.91977869986169,CEDER
 Vinstmarginal_trend_ratioRank,41.53132250580047,CEDER
 PE_tal_latest_ratioRank,9.472049689440993,CEDER
@@ -22562,7 +22562,7 @@ PE_tal_trend_ratioRank,7.662835249042145,ELLWEE
 PB_tal_latest_ratioRank,61.78010471204188,ELLWEE
 PB_tal_trend_ratioRank,27.536231884057973,ELLWEE
 EV_EBITDA_latest_ratioRank,71.88552188552188,ELLWEE
-EV_EBITDA_trend_ratioRank,13.745019920318724,ELLWEE
+EV_EBITDA_trend_ratioRank,13.94422310756972,ELLWEE
 Rörelseflödesmarginal_latest_ratioRank,33.89121338912134,ELLWEE
 Rörelseflödesmarginal_trend_ratioRank,92.26044226044226,ELLWEE
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,72.12041884816755,ELLWEE
@@ -22902,7 +22902,7 @@ PE_tal_trend_ratioRank,26.053639846743295,BRAVE
 PB_tal_latest_ratioRank,30.89005235602094,BRAVE
 PB_tal_trend_ratioRank,59.5482546201232,BRAVE
 EV_EBITDA_latest_ratioRank,83.5016835016835,BRAVE
-EV_EBITDA_trend_ratioRank,14.940239043824702,BRAVE
+EV_EBITDA_trend_ratioRank,15.139442231075698,BRAVE
 Rörelseflödesmarginal_latest_ratioRank,6.2761506276150625,BRAVE
 Rörelseflödesmarginal_trend_ratioRank,99.63144963144964,BRAVE
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,14.528795811518325,BRAVE
@@ -23369,8 +23369,8 @@ Räntetäckningsgrad_latest_ratioRank,84.84398216939078,SBOK
 Räntetäckningsgrad_trend_ratioRank,34.21686746987952,SBOK
 Bruttomarginal_latest_ratioRank,52.48120300751879,SBOK
 Bruttomarginal_trend_ratioRank,40.06734006734007,SBOK
-Rörelsemarginal_latest_ratioRank,56.811594202898554,SBOK
-Rörelsemarginal_trend_ratioRank,37.53753753753754,SBOK
+Rörelsemarginal_latest_ratioRank,57.68115942028985,SBOK
+Rörelsemarginal_trend_ratioRank,38.288288288288285,SBOK
 Vinstmarginal_latest_ratioRank,64.4536652835408,SBOK
 Vinstmarginal_trend_ratioRank,39.327146171693734,SBOK
 PE_tal_latest_ratioRank,50.0,SBOK
@@ -23505,7 +23505,7 @@ Räntetäckningsgrad_latest_ratioRank,71.47102526002972,STORY-B
 Räntetäckningsgrad_trend_ratioRank,73.92996108949416,STORY-B
 Bruttomarginal_latest_ratioRank,49.32330827067669,STORY-B
 Bruttomarginal_trend_ratioRank,76.97547683923706,STORY-B
-Rörelsemarginal_latest_ratioRank,56.95652173913044,STORY-B
+Rörelsemarginal_latest_ratioRank,56.811594202898554,STORY-B
 Rörelsemarginal_trend_ratioRank,77.9494382022472,STORY-B
 Vinstmarginal_latest_ratioRank,62.7939142461964,STORY-B
 Vinstmarginal_trend_ratioRank,74.05498281786942,STORY-B
@@ -23681,7 +23681,7 @@ Vinstmarginal_latest_ratioRank,53.665283540802214,UTG
 Vinstmarginal_trend_ratioRank,69.7594501718213,UTG
 PE_tal_latest_ratioRank,50.0,UTG
 PE_tal_trend_ratioRank,50.0,UTG
-PB_tal_latest_ratioRank,23.42931937172775,UTG
+PB_tal_latest_ratioRank,23.56020942408377,UTG
 PB_tal_trend_ratioRank,52.56673511293634,UTG
 EV_EBITDA_latest_ratioRank,68.51851851851852,UTG
 EV_EBITDA_trend_ratioRank,56.578947368421055,UTG
@@ -24571,7 +24571,7 @@ EV_EBITDA_latest_ratioRank,20.033670033670035,GREAT
 EV_EBITDA_trend_ratioRank,33.067729083665334,GREAT
 Rörelseflödesmarginal_latest_ratioRank,18.270571827057182,GREAT
 Rörelseflödesmarginal_trend_ratioRank,95.57739557739558,GREAT
-Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.81675392670157,GREAT
+Fritt_Kassaflode_per_Aktie_latest_ratioRank,9.68586387434555,GREAT
 Fritt_Kassaflode_per_Aktie_trend_ratioRank,71.78714859437751,GREAT
 Kassaflode_till_Skuld_latest_ratioRank,5.169628432956381,GREAT
 Kassaflode_till_Skuld_trend_ratioRank,96.88311688311688,GREAT
@@ -24704,7 +24704,7 @@ PE_tal_trend_ratioRank,3.6398467432950192,IRIS
 PB_tal_latest_ratioRank,93.58638743455498,IRIS
 PB_tal_trend_ratioRank,1.8115942028985508,IRIS
 EV_EBITDA_latest_ratioRank,76.5993265993266,IRIS
-EV_EBITDA_trend_ratioRank,14.143426294820719,IRIS
+EV_EBITDA_trend_ratioRank,14.342629482071715,IRIS
 Rörelseflödesmarginal_latest_ratioRank,16.736401673640167,IRIS
 Rörelseflödesmarginal_trend_ratioRank,20.388349514563107,IRIS
 Fritt_Kassaflode_per_Aktie_latest_ratioRank,24.476439790575917,IRIS
@@ -24939,7 +24939,7 @@ Vinstmarginal_latest_ratioRank,17.842323651452283,MODEL
 Vinstmarginal_trend_ratioRank,20.649651972157773,MODEL
 PE_tal_latest_ratioRank,74.68944099378882,MODEL
 PE_tal_trend_ratioRank,7.2796934865900385,MODEL
-PB_tal_latest_ratioRank,21.335078534031414,MODEL
+PB_tal_latest_ratioRank,21.465968586387437,MODEL
 PB_tal_trend_ratioRank,40.94202898550724,MODEL
 EV_EBITDA_latest_ratioRank,50.0,MODEL
 EV_EBITDA_trend_ratioRank,50.0,MODEL
@@ -24973,7 +24973,7 @@ Vinstmarginal_latest_ratioRank,21.023513139695712,NEO-B
 Vinstmarginal_trend_ratioRank,84.36426116838487,NEO-B
 PE_tal_latest_ratioRank,77.79503105590062,NEO-B
 PE_tal_trend_ratioRank,11.494252873563218,NEO-B
-PB_tal_latest_ratioRank,22.5130890052356,NEO-B
+PB_tal_latest_ratioRank,22.643979057591622,NEO-B
 PB_tal_trend_ratioRank,41.1231884057971,NEO-B
 EV_EBITDA_latest_ratioRank,88.88888888888889,NEO-B
 EV_EBITDA_trend_ratioRank,1.7928286852589643,NEO-B
