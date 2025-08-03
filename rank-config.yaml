@@ -100,10 +100,6 @@ ratio_definitions:
     formula: "Total_Revenue"
     source_income: ["Total Revenue"]
     higher_is_better: True
-  Kassalikviditet:
-    formula: "current_assets / current_liabilities"
-    source_bs: ["Current Assets", "Total Current Liabilities"]
-    higher_is_better: True
 
 # Konfiguration för rankningsmetoden
 ranking_method:
@@ -245,3 +241,15 @@ tooltip_texts:
   Latest_clusterRank: "Sammanlagd rankning av aktier baserat på **senaste årets** finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde visar att bolaget presterar starkt just nu inom flera nyckeltal."
   cagrTotal_Revenue: "Rankning av omsättningens trend över de senaste 4 åren. Ett högt värde indikerar att bolaget har haft en stabil och positiv tillväxt i omsättningen."
   cagrBasic_EPS: "Rankning av vinst per aktie (EPS) trend över de senaste 4 åren. Ett högt värde visar att bolaget har haft en god och växande lönsamhet per aktie över tid."
+
+color_ranges:
+  - range: [0, 20]
+    color: "#ffcccc"
+  - range: [20, 40]
+    color: "#ffe5cc"
+  - range: [40, 60]
+    color: "#ffffcc"
+  - range: [60, 80]
+    color: "#e6ffe6"
+  - range: [80, 100]
+    color: "#ccffcc"
