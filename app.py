@@ -46,15 +46,10 @@ st.write(f"Running in environment: {ENVIRONMENT}, using CSV path: {CSV_PATH}")
 # =============================
 # Funktion för att applicera bakgrundsfärger baserat på värden
 def color_progress(val):
-    color_ranges = [
-        {'range': [0, 20], 'color': '#ffcccc'},    # Light Red
-        {'range': [20, 40], 'color': '#ffe5cc'},   # Light Orange
-        {'range': [40, 60], 'color': '#ffffcc'},   # Light Yellow
-        {'range': [60, 80], 'color': '#e6ffe6'},   # Very Light Green
-        {'range': [80, 100], 'color': '#ccffcc'}   # Light Green
-    ]
-    
+    # Get color ranges from config loaded at the top of the file
+    color_ranges = config.get('color_ranges', [])
     for cr in color_ranges:
+        # Each cr should be a dict with 'range' and 'color' keys
         if cr['range'][0] <= val <= cr['range'][1]:
             return f'background-color: {cr["color"]}'
     return ''
@@ -152,7 +147,7 @@ try:
     # =============================
     with st.container(border=True, key="filter_section"):
         st.subheader("Aktiefilter")
-        with st.expander('**Hjälp med Filtrering**', expanded=False):
+        with st.expander('🛟**Hjälp med Filtrering**', expanded=False):
             st.markdown(
                 """
                 **Så här använder du filtreringsverktyget:**
@@ -450,7 +445,7 @@ try:
         # Get the number of stocks after filtering by sliders
         #num_filtered_stocks = len(df_display)
         st.subheader(f"Resultat av filtrering: {df_filtered_by_sliders.shape[0]} aktier")
-        with st.expander('**Hjälp med filtreringsresultat**', expanded=False):
+        with st.expander('🛟**Hjälp med filtreringsresultat**', expanded=False):
                     st.markdown(
                         """
                         **Så här använder du filtreringsresultatet:**
@@ -652,7 +647,7 @@ try:
 
     with st.container(border=True, key="stock_details_container"):
         st.subheader("**Detaljerad information om vald aktie**")
-        with st.expander("Hjälp om aktieinformation", expanded=False):
+        with st.expander("🛟**Hjälp om aktieinformation**", expanded=False):
             st.markdown(
                 """
                 **Så här tolkar du aktieinformationen:**
@@ -1129,49 +1124,139 @@ try:
                                     
                     # Clear the empty space before each category
                     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
-        st.write(f"{selected_stock_lista}, {selected_stock_sektor}")              
-        display_ratio = st.selectbox(
-            "Välj ett nyckeltal att visa detaljerad information om:",
-            options=list(ratio_to_rank_map.keys()))      
-        display_rank = ratio_to_rank_map.get(display_ratio, None)
+        with st.container(border=True, key="ratio_rank_container"):
+            st.subheader("**Ratio 2 Rank**")
+            if selected_stock_ticker is None:
+                st.info("Ingen aktie är vald. Välj en aktie i tabellen ovan för att visa Ratio 2 Rank-sektionen.")
+            else:
+                st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
+                with st.expander("🛟 **Hjälp om Ratio 2 Rank**", expanded=False):
+                    st.markdown(
+                        """
+                        **Så här använder du Ratio 2 Rank-sektionen:**
 
-        sektors_all = [selected_stock_sektor, 'Alla']
-        display_stock_sektor = st.segmented_control(
-            "Välj Sektor att visa:",
-            options=sektors_all,
-            selection_mode='single',
-            default=selected_stock_sektor,
-            key="display_stock_sektor"
-        )
+                        - Här kan du visualisera sambandet mellan valda nyckeltal (*ratio*) och deras respektive rankvärden för alla aktier som matchar dina filter.
+                        - Välj område (*Trend senaste 4 åren* eller *Senaste året*) för att se hur bolagen presterar över tid eller i det senaste året.
+                        - Använd reglagen för att filtrera på sektor och lista, så att du kan jämföra bolag inom samma bransch eller marknadssegment.
+                        - I scatterplotten visas varje aktie som en punkt, där x-axeln visar det valda nyckeltalet och y-axeln visar dess rankvärde. Den valda aktien markeras med röd färg och korslinje.
+                        - Bakgrundsfärgerna i diagrammet hjälper dig att snabbt se vilka rankvärden som är svaga, medel eller starka enligt färgskalan.
+                        - Använd denna sektion för att identifiera bolag med intressanta egenskaper, jämföra prestationer och hitta potentiella investeringsmöjligheter.
 
-        lista_all = [selected_stock_lista, 'Alla']
-        display_stock_lista = st.segmented_control(
-            "Välj Lista att visa:",
-            options=lista_all,
-            selection_mode='single',
-            default=selected_stock_lista,
-            key="display_stock_lista"
-        )
+                        Justera inställningarna för att utforska olika samband och få en djupare förståelse för hur nyckeltal och rankvärden samverkar för de aktier du är intresserad av.
+                        """
+                    )
+                col_left, col_mid, col_right = st.columns(3, gap='medium', border=False)
+                with col_left:
+                    selected_ratio_area = st.radio(
+                        "Välj område att visa:",
+                        options=['Trend senaste 4 åren', 'Senaste året'],
+                        index=0,
+                        key="selected_ratio_area"
+                    )
+                    ratio_to_rank_map_temp = ratio_to_rank_trend_map if selected_ratio_area == 'Trend senaste 4 åren' else ratio_to_rank_latest_map
+                with col_mid:
+                    sektors_all = [selected_stock_sektor, 'Alla']
+                    display_stock_sektor_selector = st.radio(
+                        "Välj Sektor att visa:",
+                        options=sektors_all,
+                        index=sektors_all.index(selected_stock_sektor) if selected_stock_sektor in sektors_all else 0,
+                        key="display_stock_sektor"
+                    )
+                    display_stock_sektor = display_stock_sektor_selector if display_stock_sektor_selector != 'Alla' else unique_values_sector
+                    display_stock_sektor = [display_stock_sektor] if isinstance(display_stock_sektor, str) else display_stock_sektor
 
-        # Plotly scatter plot for selected ratio and rank
-        if display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
-            scatter_fig = go.Figure(go.Scatter(
-                x=df_new_ranks[df_new_ranks['Sektor'] == selected_stock_sektor][display_ratio],
-                y=df_new_ranks[df_new_ranks['Sektor'] == selected_stock_sektor][display_rank],
-                mode='markers',
-                marker=dict(size=8, color='royalblue'),
-                text=df_new_ranks.index,
-                hoverinfo='text+x+y',
-                name=f"{display_ratio} vs {display_rank}"
-            ))
-            scatter_fig.update_layout(
-                title=f"Scatterplot: {display_ratio} vs {display_rank}",
-                xaxis_title=display_ratio,
-                yaxis_title=display_rank,
-                height=400,
-                margin=dict(l=10, r=10, t=40, b=10)
-            )
-            st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
+                with col_right:
+                    lists_all = [selected_stock_lista, 'Alla']
+                    display_stock_lista_selector = st.radio(
+                        "Välj Lista att visa:",
+                        options=lists_all,
+                        index=lists_all.index(selected_stock_lista) if selected_stock_lista in lists_all else 0,
+                        key="display_stock_lista"
+                    )
+                    display_stock_lista = display_stock_lista_selector if display_stock_lista_selector != 'Alla' else unique_values_lista
+                    display_stock_lista = [display_stock_lista] if isinstance(display_stock_lista, str) else display_stock_lista
+                # Plotly scatter plot for selected ratio and rank
+                filtered_scatter_df = df_new_ranks[df_new_ranks['Sektor'].isin(display_stock_sektor) & df_new_ranks['Lista'].isin(display_stock_lista)]
+                display_ratio = st.selectbox(
+                    "Välj ett nyckeltal att visa detaljerad information om:",
+                    options=list(ratio_to_rank_map_temp.keys())
+                )
+                display_rank = ratio_to_rank_map_temp.get(display_ratio, None)
+                col_left, col_right = st.columns(2, gap='medium', border=False)
+
+                if (
+                    display_ratio and display_rank and
+                    display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns and
+                    not filtered_scatter_df.empty
+                ):
+                    # Create color array: red for selected_stock_ticker, royalblue for others
+                    marker_colors = [
+                        'red' if idx == selected_stock_ticker else 'royalblue'
+                        for idx in filtered_scatter_df.index
+                    ]
+                    scatter_fig = go.Figure()
+
+                    # Add horizontal background color bars for Rank value ranges
+                    color_ranges = config.get('color_ranges', [])
+                    x_min = filtered_scatter_df[display_ratio].min()
+                    x_max = filtered_scatter_df[display_ratio].max()
+                    for cr in color_ranges:
+                        y0 = cr['range'][0]
+                        y1 = cr['range'][1]
+                        scatter_fig.add_shape(
+                            type="rect",
+                            x0=x_min, x1=x_max,
+                            y0=y0, y1=y1,
+                            fillcolor=cr['color'],
+                            opacity=0.25,
+                            line=dict(width=0),
+                            layer="below"
+                        )
+
+                    # Add scatter points
+                    scatter_fig.add_trace(go.Scatter(
+                        x=filtered_scatter_df[display_ratio],
+                        y=filtered_scatter_df[display_rank],
+                        mode='markers',
+                        marker=dict(size=8, color=marker_colors),
+                        text=filtered_scatter_df.index,
+                        hoverinfo='text+x+y',
+                        name=f"{display_ratio} vs {display_rank}"
+                    ))
+
+                    # Add crosshair for selected_stock_ticker if present in filtered_scatter_df and has valid display_ratio value
+                    if (
+                        selected_stock_ticker in filtered_scatter_df.index and
+                        pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_ratio]) and
+                        pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_rank])
+                    ):
+                        x_val = filtered_scatter_df.loc[selected_stock_ticker, display_ratio]
+                        y_val = filtered_scatter_df.loc[selected_stock_ticker, display_rank]
+                        scatter_fig.add_shape(
+                            type="line",
+                            x0=x_val, x1=x_val,
+                            y0=filtered_scatter_df[display_rank].min(), y1=filtered_scatter_df[display_rank].max(),
+                            line=dict(color="red", width=2, dash="dot"),
+                        )
+                        scatter_fig.add_shape(
+                            type="line",
+                            x0=filtered_scatter_df[display_ratio].min(), x1=filtered_scatter_df[display_ratio].max(),
+                            y0=y_val, y1=y_val,
+                            line=dict(color="red", width=2, dash="dot"),
+                        )
+                    else:
+                        st.warning(f"Valt bolag {selected_stock_ticker} saknar giltiga värden för {display_ratio} eller {display_rank}. Ingen korslinje visas.")
+
+                    scatter_fig.update_layout(
+                        title=f"Scatterplot: {display_ratio} vs {display_rank}",
+                        xaxis_title=get_display_name(display_ratio),
+                        yaxis_title=get_display_name(display_rank),
+                        height=400,
+                        margin=dict(l=10, r=10, t=40, b=10)
+                    )
+                    st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
+                elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
+                    st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
 
         with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
             st.write(f"Datadump av {selected_stock_ticker}")

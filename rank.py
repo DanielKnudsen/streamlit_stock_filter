@@ -360,6 +360,12 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
             ratio_name = column.replace('_ratio_trendSlope', '')
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             
+            ranked = df[column].rank(pct=True, ascending=is_better) * 100
+            ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
+            for ticker, rank in ranked.items():
+                ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank if not pd.isna(rank) else np.nan
+
+            """
             df_cleaned = df.loc[df[column].notna()]
             slopes = df_cleaned[column]
 
@@ -383,7 +389,7 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
 
             for ticker in df.index:
                 if f'{ratio_name}_trend_ratioRank' not in ranked_ratios[ticker]:
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = 50
+                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = 50"""
 
     return ranked_ratios
 
@@ -455,11 +461,13 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
 
     final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
+    # Force index to string type
+    final_df.index = final_df.index.astype(str)
+    final_df['Name'] = final_df['Name'].astype(str)
     # Round all columns containing "Rank" to 1 decimal
     for col in final_df.columns:
         if "Rank" in col:
             final_df[col] = final_df[col].round(rank_decimals)
-    final_df
     return final_df#.sort_values(by='Total_Score', ascending=False)
 
 def save_results_to_csv(results_df, file_path):
@@ -683,13 +691,14 @@ if __name__ == "__main__":
             tickers = read_tickers_from_csv(CSV_PATH / TICKERS_FILE_NAME)
 
             # Step 1: Fetch financial data for each ticker
-            print("Fetching financial data...")
+            
             if not tickers:
                 print("No tickers found in the file. Exiting.")
                 exit(1)
 
             if FETCH_DATA == "Yes":
                 raw_financial_data = {}
+                print("Fetching financial data...")
                 for ticker in tqdm(tickers, desc="Fetching financial data", disable=True if ENVIRONMENT == "remote" else False):
                     raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
             
@@ -700,6 +709,7 @@ if __name__ == "__main__":
 
             else:
                 # Load raw financial data from pickle file
+                print("Loading raw financial data from pickle...")
                 try:
                     with open(CSV_PATH / "raw_financial_data.pkl", "rb") as f:
                         raw_financial_data = pickle.load(f)
@@ -715,8 +725,9 @@ if __name__ == "__main__":
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
 
             # Step 2: Fetch and process stock price data
-            print("Fetching stock price data...")
+            
             if FETCH_DATA == "Yes":
+                print("Fetching stock price data...")
                 get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],
                            raw_financial_data.keys(),config["price_data_years"],CSV_PATH / config["price_data_file"])
             
