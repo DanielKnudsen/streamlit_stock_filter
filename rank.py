@@ -622,6 +622,7 @@ def aggregate_cluster_ranks(category_ranks):
         if df[col].dtype in [float, int]:
             # Rank so that higher is better (ascending=True)
             ranks = df[col].rank(pct=True, ascending=True) * 100
+            ranks = ranks.fillna(50)
             df[col_name] = ranks
     return df.set_index('Ticker').to_dict(orient='index')
 
