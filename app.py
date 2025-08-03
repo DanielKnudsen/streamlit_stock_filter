@@ -59,7 +59,36 @@ def color_progress(val):
             return f'background-color: {cr["color"]}'
     return ''
 
+def create_slider(df, column_name, display_name_func, tooltip_func, step=1.0, format_str="%d%%"):
+    """
+    Skapar en Streamlit-slider för en given kolumn i en DataFrame.
 
+    Parametrar:
+        df: DataFrame som innehåller kolumnen
+        column_name: Namn på kolumnen i DataFrame
+        display_name_func: Funktion som returnerar visningsnamn för kolumnen
+        tooltip_func: Funktion som returnerar tooltip-text för kolumnen
+        step: Stegstorlek för slidern (default: 1.0)
+        format_str: Formatsträng för sliderns värden (default: "%d%%")
+
+    Returnerar:
+        Tuple med valda min- och maxvärden från slidern
+    """
+    min_value = float(df[column_name].min())
+    max_value = float(df[column_name].max())
+    # Ensure the slider has a valid range
+    if min_value == max_value:
+        max_value += 0.001  # Ensure a valid range if min and max are equal
+    
+    return st.slider(
+        label=display_name_func(column_name),
+        min_value=min_value,
+        max_value=max_value,
+        value=(min_value, max_value),
+        step=step,
+        format=format_str,
+        help=tooltip_func(column_name)
+    )
 # =============================
 # LOAD DATA
 # =============================
@@ -67,6 +96,23 @@ try:
     # Load main stock evaluation CSV (index_col=0 sets Ticker as index)
     df_new_ranks = pd.read_csv(CSV_PATH / config["results_file"], index_col=0)
     df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col=0)
+    unique_values_lista = df_new_ranks['Lista'].dropna().unique().tolist()
+    unique_values_sector = df_new_ranks['Sektor'].dropna().unique().tolist()
+    allCols_ratio_latest = [col for col in df_new_ranks.columns if col.endswith('_ratio_latest')]
+    allCols_ratio_trendSlope = [col for col in df_new_ranks.columns if col.endswith('_ratio_trendSlope')]
+    allCols_latest_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioRank')]
+    allCols_trend_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioRank')]
+
+    # --- Create ratio-to-rank mapping dict from config['ratio_definitions'] ---
+    ratio_definitions = config.get('ratio_definitions', {})
+    ratio_to_rank_map = {}
+    ratio_to_rank_latest_map = {}
+    ratio_to_rank_trend_map = {}
+    for ratio in ratio_definitions.keys():
+        ratio_to_rank_map[f"{ratio}_ratio_latest"] = f"{ratio}_latest_ratioRank"
+        ratio_to_rank_map[f"{ratio}_ratio_trendSlope"] = f"{ratio}_trend_ratioRank"
+        ratio_to_rank_latest_map[f"{ratio}_ratio_latest"] = f"{ratio}_latest_ratioRank"
+        ratio_to_rank_trend_map[f"{ratio}_ratio_trendSlope"] = f"{ratio}_trend_ratioRank"
 
     # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
@@ -127,32 +173,14 @@ try:
         st.markdown('##### Filtrera efter Aggregerad Rank')
         col_total_trend, col_total_latest = st.columns(2,gap='medium',border=True)
         with col_total_trend:
-            min_trend = float(df_new_ranks['Trend_clusterRank'].min())
-            max_trend = float(df_new_ranks['Trend_clusterRank'].max())
-            trend_range = st.slider(
-                get_display_name('Trend_clusterRank'),
-                min_value=min_trend,
-                max_value=max_trend,
-                value=(min_trend, max_trend),
-                step=1.0,
-                format="%d",
-                help=get_tooltip_text('Trend_clusterRank')
-            )
+            trend_range = create_slider(df_new_ranks,'Trend_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
         with col_total_latest:
-            min_latest = float(df_new_ranks['Latest_clusterRank'].min())
-            max_latest = float(df_new_ranks['Latest_clusterRank'].max())
-            latest_range = st.slider(
-                get_display_name('Latest_clusterRank'),
-                min_value=min_latest,
-                max_value=max_latest,
-                value=(min_latest, max_latest),
-                step=1.0,
-                format="%d",
-                help=get_tooltip_text('Latest_clusterRank')
-            )
+            latest_range = create_slider(df_new_ranks,'Latest_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
         
-        df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
-                                    (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
+        df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & 
+                                                        (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
+                                                        (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & 
+                                                        (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter tillväxt över 4 år ---
         st.markdown("#### Filtrera efter tillväxt över 4 år")
@@ -164,59 +192,26 @@ try:
         cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
 
         with cagr_left:
-            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[0]].min())
-            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[0]].max())
-            # Ensure slider has a valid range
-            if min_cagr == max_cagr:
-                max_cagr += 0.001
-            cagr_range = st.slider(
-                get_display_name(cagr_dimension_cleaned[0]),
-                min_value=min_cagr,
-                max_value=max_cagr,
-                value=(min_cagr, max_cagr), 
-                step=0.1,  # Use a smaller step for more precision
-                format="%.1f",  # Show as percentage with one decimal
-                help=get_tooltip_text(cagr_dimension_cleaned[0])
-            )
+            cagr_range_left = create_slider(df_new_ranks,cagr_dimension_cleaned[0],get_display_name,get_tooltip_text,0.1,"%.1f")
+
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[0]] <= cagr_range[1])
+                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] >= cagr_range_left[0]) & 
+                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] <= cagr_range_left[1])
             ]
         with cagr_middle:
-            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[1]].min())
-            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[1]].max())
-            # Ensure slider has a valid range
-            if min_cagr == max_cagr:
-                max_cagr += 0.001
-            cagr_range = st.slider(
-                get_display_name(cagr_dimension_cleaned[1]),
-                min_value=min_cagr,
-                max_value=max_cagr,
-                value=(min_cagr, max_cagr), 
-                step=0.1,  # Use a smaller step for more precision
-                format="%.1f",  # Show as percentage with one decimal
-                help=get_tooltip_text(cagr_dimension_cleaned[1])
-            )
+            cagr_range_middle = create_slider(df_new_ranks,cagr_dimension_cleaned[1],get_display_name,get_tooltip_text,0.1,"%.1f")
+
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[1]] <= cagr_range[1])
+                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] >= cagr_range_middle[0]) & 
+                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] <= cagr_range_middle[1])
             ]
 
         with cagr_right:
-            min_cagr = float(df_new_ranks[cagr_dimension_cleaned[2]].min())
-            max_cagr = float(df_new_ranks[cagr_dimension_cleaned[2]].max())
-            # Ensure slider has a valid range
-            if min_cagr == max_cagr:
-                max_cagr += 0.001
-            cagr_range = st.slider(
-                get_display_name(cagr_dimension_cleaned[2]),
-                min_value=min_cagr,
-                max_value=max_cagr,
-                value=(min_cagr, max_cagr), 
-                step=0.1,  # Use a smaller step for more precision
-                format="%.1f",  # Show as percentage with one decimal
-                help=get_tooltip_text(cagr_dimension_cleaned[2])
-            )
+            cagr_range_right = create_slider(df_new_ranks,cagr_dimension_cleaned[2],get_display_name,get_tooltip_text,0.1,"%.1f")
+            
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range[0]) & (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range[1])
+                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range_right[0]) & 
+                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range_right[1])
             ]
 
 
@@ -225,59 +220,30 @@ try:
         st.markdown("##### Filtrera efter SMA-differenser")
         col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
         with col_diff_long_medium:
-            # Filter by Long-Medium SMA difference
-            min_diff_long_medium = float(df_new_ranks['pct_SMA_medium_vs_SMA_long'].min())
-            max_diff_long_medium = float(df_new_ranks['pct_SMA_medium_vs_SMA_long'].max())
-            diff_long_medium_range = st.slider(
-                get_display_name('pct_SMA_medium_vs_SMA_long'),
-                min_value=min_diff_long_medium,
-                max_value=max_diff_long_medium,
-                value=(min_diff_long_medium, max_diff_long_medium),
-                step=1.0,
-                format="%d%%",  # Add % at the end of the value
-                help=get_tooltip_text('pct_SMA_medium_vs_SMA_long')
-            )
-        with col_diff_short_medium:
-            # Filter by Short-Medium SMA difference
-            min_diff_short_medium = float(df_new_ranks['pct_SMA_short_vs_SMA_medium'].min())
-            max_diff_short_medium = float(df_new_ranks['pct_SMA_short_vs_SMA_medium'].max())
-            diff_short_medium_range = st.slider(
-                get_display_name('pct_SMA_short_vs_SMA_medium'),
-                min_value=min_diff_short_medium,
-                max_value=max_diff_short_medium,
-                value=(min_diff_short_medium, max_diff_short_medium),
-                step=1.0,
-                format="%d%%",
-                help=get_tooltip_text('pct_SMA_short_vs_SMA_medium')
-            )
-        with col_diff_price_short:
-            # Filter by Price-Short SMA difference
-            min_diff_price_short = float(df_new_ranks['pct_Close_vs_SMA_short'].min())
-            max_diff_price_short = float(df_new_ranks['pct_Close_vs_SMA_short'].max())
-            diff_price_short_range = st.slider(
-                get_display_name('pct_Close_vs_SMA_short'),
-                min_value=min_diff_price_short,
-                max_value=max_diff_price_short,
-                value=(min_diff_price_short, max_diff_price_short),
-                step=1.0,
-                format="%d%%",
-                help=get_tooltip_text('pct_Close_vs_SMA_short')
-            )
+            diff_long_medium_range = create_slider(df_new_ranks,'pct_SMA_medium_vs_SMA_long',get_display_name,get_tooltip_text,1.0,"%d%%")
 
-        df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
-                                                          (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
-                                                          (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])]
+        with col_diff_short_medium:
+            diff_short_medium_range = create_slider(df_new_ranks,'pct_SMA_short_vs_SMA_medium',get_display_name,get_tooltip_text,1.0,"%d%%")
+
+        with col_diff_price_short:
+            diff_price_short_range = create_slider(df_new_ranks,'pct_Close_vs_SMA_short',get_display_name,get_tooltip_text,1.0,"%d%%")
+
+        df_filtered_by_sliders = df_filtered_by_sliders[
+            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & 
+            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
+            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & 
+            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
+            (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & 
+            (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])
+        ]
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
-        lista_values = []
         if 'Lista' in df_filtered_by_sliders.columns:
             with st.container(border=True, key="lista_toggles"):
-                lista_values = df_filtered_by_sliders['Lista'].dropna().unique().tolist()
-                lista_values = lista_values[:5]  # Limit to 5 unique values
                 # Use pills for selection, all enabled by default
                 lista_selected = st.pills(
                     "Välj/uteslut Lista:",
-                    options=lista_values,
-                    default=lista_values,
+                    options=unique_values_lista,
+                    default=unique_values_lista,
                     selection_mode='multi',
                     key="segmented_lista"
                 )
@@ -287,15 +253,13 @@ try:
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         # --- Sektor toggles for bubble plot ---
-        sektor_values = []
         if 'Sektor' in df_filtered_by_sliders.columns:
-            with st.container(border=True, key="sektor_toggles"):
-                sektor_values = df_filtered_by_sliders['Sektor'].dropna().unique().tolist()
+            with st.container(border=True, key="sektor_toggles"):       
                 # Use st.pills for multi-select, all enabled by default
                 sektor_selected = st.pills(
                     "Välj/uteslut Sektor:",
-                    options=sektor_values,
-                    default=sektor_values,
+                    options=unique_values_sector,
+                    default=unique_values_sector,
                     selection_mode='multi',
                     key="pills_sektor"
                 )
@@ -709,12 +673,14 @@ try:
         with st.container(border=True, key="stock_details"):
             if selected_stock_ticker:
                 #st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
+                selected_stock_sektor = selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'
+                selected_stock_lista = selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'
                 left_col, right_col = st.columns([1,2], gap='medium', border=False)
                 with left_col:
                     
                     st.write(f"**Ticker:**   \n{selected_stock_ticker}")
-                    st.write(f"**Lista:**   \n{selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'}")
-                    st.write(f"**Sektor:**   \n{selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'}")
+                    st.write(f"**Lista:**   \n{selected_stock_lista}")
+                    st.write(f"**Sektor:**   \n{selected_stock_sektor}")
                     st.write(f"**Marknadsvärde:**   \n{selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A'}")
                 with right_col:
                     #st.subheader("Företagsbeskrivning")
@@ -1161,13 +1127,56 @@ try:
                                         }
                                     )
                                     
-
                     # Clear the empty space before each category
                     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
-                    
+        st.write(f"{selected_stock_lista}, {selected_stock_sektor}")              
+        display_ratio = st.selectbox(
+            "Välj ett nyckeltal att visa detaljerad information om:",
+            options=list(ratio_to_rank_map.keys()))      
+        display_rank = ratio_to_rank_map.get(display_ratio, None)
+
+        sektors_all = [selected_stock_sektor, 'Alla']
+        display_stock_sektor = st.segmented_control(
+            "Välj Sektor att visa:",
+            options=sektors_all,
+            selection_mode='single',
+            default=selected_stock_sektor,
+            key="display_stock_sektor"
+        )
+
+        lista_all = [selected_stock_lista, 'Alla']
+        display_stock_lista = st.segmented_control(
+            "Välj Lista att visa:",
+            options=lista_all,
+            selection_mode='single',
+            default=selected_stock_lista,
+            key="display_stock_lista"
+        )
+
+        # Plotly scatter plot for selected ratio and rank
+        if display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
+            scatter_fig = go.Figure(go.Scatter(
+                x=df_new_ranks[df_new_ranks['Sektor'] == selected_stock_sektor][display_ratio],
+                y=df_new_ranks[df_new_ranks['Sektor'] == selected_stock_sektor][display_rank],
+                mode='markers',
+                marker=dict(size=8, color='royalblue'),
+                text=df_new_ranks.index,
+                hoverinfo='text+x+y',
+                name=f"{display_ratio} vs {display_rank}"
+            ))
+            scatter_fig.update_layout(
+                title=f"Scatterplot: {display_ratio} vs {display_rank}",
+                xaxis_title=display_ratio,
+                yaxis_title=display_rank,
+                height=400,
+                margin=dict(l=10, r=10, t=40, b=10)
+            )
+            st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
+
         with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
             st.write(f"Datadump av {selected_stock_ticker}")
             st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
+
                         
                 # --- END: Show ratio bar charts for each _trend_rank category ---
 
