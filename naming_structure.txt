@@ -1,10 +1,9 @@
 level                               should include      exempel_latest          exempel_trend
 data point                          value               Net Income              Net Income
-ratio                               ratio               ROE_ratio_latest        ROE_ratio_trendSlope
+ratio (old)                         ratio               (ROE_ratio_latest)        (ROE_ratio_trendSlope)
+ratio (new)                         ratioValue          ROE_latest_ratioValue   ROE_trend_ratioValue
 rank of ratio                       ratioRank           ROE_latest_ratioRank    ROE_trend_ratioRank     
 average of ranks in category        catAvg              Kvalitet_latest_catAvg  Kvalitet_trend_catAvg    
 rank of average rank in category    catRank             Kvalitet_latest_catRank Kvalitet_trend_catRank
 average of cluster                  clusterAvg          Latest_clusterAvg       Trend_clusterAvg
 rank of cluster                     clusterRank         Latest_clusterRank      Trend_clusterRank
-                                                        ROE_latest_ratio        ROE_trend_ratio
-                                                        ROE_latest_rank         ROE_trend_rank
