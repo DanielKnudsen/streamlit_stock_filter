@@ -6,4 +6,5 @@ average of ranks in category        catAvg              Kvalitet_latest_catAvg  
 rank of average rank in category    catRank             Kvalitet_latest_catRank Kvalitet_trend_catRank
 average of cluster                  clusterAvg          Latest_clusterAvg       Trend_clusterAvg
 rank of cluster                     clusterRank         Latest_clusterRank      Trend_clusterRank
-
+                                                        ROE_latest_ratio        ROE_trend_ratio
+                                                        ROE_latest_rank         ROE_trend_rank

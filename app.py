@@ -116,7 +116,7 @@ try:
     rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'Basic_EPS_trend_ratioRank','Total_Revenue_trend_ratioRank']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -129,6 +129,7 @@ try:
         categories = list(category_ratios.keys())
         display_names = config.get("display_names", {})
         tooltip_texts = config.get("tooltip_texts", {})
+        ratio_help_texts = config.get("ratio_help_texts", {})
     else:
         category_ratios = {}
         categories = []
@@ -140,6 +141,10 @@ try:
     def get_tooltip_text(var_name):
         # Try to get a tooltip text, fallback to an empty string
         return tooltip_texts.get(var_name, "")
+    
+    def get_ratio_help_text(var_name):
+        # Try to get a help text, fallback to an empty string
+        return ratio_help_texts.get(var_name, "")
 
 
     # =============================
@@ -178,7 +183,7 @@ try:
                                                         (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter tillväxt över 4 år ---
-        st.markdown("#### Filtrera efter tillväxt över 4 år")
+        """st.markdown("#### Filtrera efter tillväxt över 4 år")
 
         cagr_dimension = config.get("cagr_dimension")
         cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
@@ -207,7 +212,7 @@ try:
             df_filtered_by_sliders = df_filtered_by_sliders[
                 (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range_right[0]) & 
                 (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range_right[1])
-            ]
+            ]"""
 
 
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
@@ -1182,6 +1187,7 @@ try:
                     options=list(ratio_to_rank_map_temp.keys())
                 )
                 display_rank = ratio_to_rank_map_temp.get(display_ratio, None)
+                st.write(f"Data för {display_ratio}, Rank: {display_rank}")
                 col_left, col_right = st.columns(2, gap='medium', border=False)
 
                 if (
@@ -1255,6 +1261,10 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10)
                     )
                     st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
+                    with st.expander(f"🛟 **Hjälp om  {display_ratio}**"):
+                        st.write(f"Data för {display_ratio}")
+                        st.write(get_ratio_help_text(display_rank))
+
                 elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
                     st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
 
