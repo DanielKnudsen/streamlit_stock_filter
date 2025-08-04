@@ -93,6 +93,11 @@ ratio_definitions:
     source_bs: ["Total Debt"]
     higher_is_better: True
 
+# Average growhth rate (AGR) inställningar
+agr_dimensions:
+  - "Total Revenue"
+  - "Basic EPS"
+
 # Ratios i kategorier
 category_ratios:
   Kvalitet_latest_ratioRank:
@@ -222,6 +227,9 @@ display_names:
   SMA_long: "SMA 200"
   cagrTotal_Revenue: "Omsättning trend 4 år"
   cagrBasic_EPS: "Vinst/aktie trend 4 år"
+  Total_Revenue_AvgGrowth: "Omsättning genomsnittlig tillväxt"
+  Basic_EPS_AvgGrowth: "Vinst/aktie genomsnittlig tillväxt"
+  Free_Cash_Flow_AvgGrowth: "Fritt kassaflöde genomsnittlig tillväxt"
 
 tooltip_texts:
   pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde indikerar att den kortare medelvärdesperioden ligger över den längre, vilket ofta ses som ett styrketecken i aktiens trend."

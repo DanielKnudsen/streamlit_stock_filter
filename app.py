@@ -108,6 +108,8 @@ try:
     allCols_trend_ratioValue = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioValue')]
     allCols_latest_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioRank')]
     allCols_trend_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioRank')]
+    allCols_AvgGrowth_Rank = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth_Rank')]
+    allCols_AvgGrowth = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth')]
 
     # --- Create ratio-to-rank mapping dict from config['ratio_definitions'] ---
     ratio_definitions = config.get('ratio_definitions', {})
@@ -184,7 +186,7 @@ try:
                                                         (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter tillväxt över 4 år ---
-        """st.markdown("#### Filtrera efter tillväxt över 4 år")
+        st.markdown("#### Filtrera efter genomsnittlig tillväxt")
 
         cagr_dimension = config.get("cagr_dimension")
         cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
@@ -193,27 +195,27 @@ try:
         cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
 
         with cagr_left:
-            cagr_range_left = create_slider(df_new_ranks,cagr_dimension_cleaned[0],get_display_name,get_tooltip_text,0.1,"%.1f")
+            cagr_range_left = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[0],get_display_name,get_tooltip_text,0.1,"%.1f")
 
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] >= cagr_range_left[0]) & 
-                (df_filtered_by_sliders[cagr_dimension_cleaned[0]] <= cagr_range_left[1])
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] >= cagr_range_left[0]) & 
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] <= cagr_range_left[1])
             ]
         with cagr_middle:
-            cagr_range_middle = create_slider(df_new_ranks,cagr_dimension_cleaned[1],get_display_name,get_tooltip_text,0.1,"%.1f")
+            cagr_range_middle = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[1],get_display_name,get_tooltip_text,0.1,"%.1f")
 
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] >= cagr_range_middle[0]) & 
-                (df_filtered_by_sliders[cagr_dimension_cleaned[1]] <= cagr_range_middle[1])
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] >= cagr_range_middle[0]) & 
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] <= cagr_range_middle[1])
             ]
 
         with cagr_right:
-            cagr_range_right = create_slider(df_new_ranks,cagr_dimension_cleaned[2],get_display_name,get_tooltip_text,0.1,"%.1f")
-            
+            cagr_range_right = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[2],get_display_name,get_tooltip_text,0.1,"%.1f")
+
             df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] >= cagr_range_right[0]) & 
-                (df_filtered_by_sliders[cagr_dimension_cleaned[2]] <= cagr_range_right[1])
-            ]"""
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] >= cagr_range_right[0]) & 
+                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] <= cagr_range_right[1])
+            ]
 
 
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
@@ -690,16 +692,16 @@ try:
                         st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
         
         with st.container(border=True, key="cagr_container"):
-            st.subheader("CAGR (Compound Annual Growth Rate) över 4 år")
+            st.subheader("Genomsnittlig årlig tillväxttakt över 4 år")
             # Only show the following sections if a stock is selected
             if selected_stock_dict is not None and selected_stock_ticker is not None:
                 # Bar plot for all cagr columns for selected_stock_ticker using selected_stock_dict
-                cagr_cols = [col for col in selected_stock_dict.keys() if col.startswith('cagr')]
+                cagr_cols = [col for col in allCols_AvgGrowth]
                 if cagr_cols:
                     cagr_values = [float(selected_stock_dict.get(col, float('nan'))) for col in cagr_cols]
                     bar_colors = ['royalblue' for v in cagr_values]
                     bar_text = [
-                        "N/A" if pd.isna(v) else f"{v*1:.2f}%"
+                        "N/A" if pd.isna(v) else f"{v*100:.2f}%"
                         for v in cagr_values
                     ]
                     y_values = [v*100 if not pd.isna(v) else None for v in cagr_values]
@@ -735,13 +737,13 @@ try:
                     )
                     st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
                 with st.expander("**Detaljerad CAGR-data:**", expanded=False):
-                    
-                    left_col, right_col = st.columns(2, gap='medium', border=False)
-                    base_ratio_left = 'Total_Revenue'
-                    base_ratio_right = 'Basic_EPS'
+
+                    left_col, middle_col, right_col = st.columns(3, gap='medium', border=False)
+                    base_ratio_left = allCols_AvgGrowth[0].replace("_AvgGrowth", "")  # Use the first column as base for left side
+                    base_ratio_middle = allCols_AvgGrowth[1].replace("_AvgGrowth", "")  # Use the second column as base for middle
+                    base_ratio_right = allCols_AvgGrowth[2].replace("_AvgGrowth", "")  # Use the third column as base for right
 
                     with left_col:
-                        st.write("**Omsättning senaste 4 åren:**")
                         year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_left + '_year_')]
                         # Filter out columns where the value for the selected stock is NaN
                         year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
@@ -769,9 +771,37 @@ try:
                                             showlegend=False)
 
                             st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_left}_cagr_bar")
+                    with middle_col:
+                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_middle + '_year_')]
+                        # Filter out columns where the value for the selected stock is NaN
+                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
+                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
+                        year_cols_last4 = year_cols_sorted[-4:]
+                    
+                        if year_cols_last4:
+                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
+                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
+                            fig = go.Figure()  
+                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_middle, showlegend=False))
+                            # Draw a line from the top of the first bar to the top of the last bar
+                            fig.add_trace(go.Scatter(
+                                x=[years[0], years[-1]],
+                                y=[values[0], values[-1]],
+                                mode='lines',
+                                name='Trend',
+                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
+                                showlegend=False
+                            ))
+                            fig.update_layout(title=f"{base_ratio_middle}", 
+                                            height=250, 
+                                            margin=dict(l=10, r=10, t=30, b=10), 
+                                            showlegend=False)
+
+                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_middle}_cagr_bar")
+
 
                     with right_col:
-                        st.write("**Vinst per aktie senaste 4 åren:**")
                         year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_right + '_year_')]
                         # Filter out columns where the value for the selected stock is NaN
                         year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]

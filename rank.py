@@ -65,6 +65,8 @@ def fetch_yfinance_data(ticker, years):
         is_ = ticker_obj.income_stmt.transpose()
         cf = ticker_obj.cash_flow.transpose()
         info = ticker_obj.info
+        dividends = ticker_obj.dividends
+        calendar = ticker_obj.calendar
         shares_outstanding = info.get('sharesOutstanding', None)
         current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
@@ -93,7 +95,9 @@ def fetch_yfinance_data(ticker, years):
             'current_price': current_price,
             'shares_outstanding': shares_outstanding,
             'longBusinessSummary': longBusinessSummary,
-            'market_cap': market_cap
+            'market_cap': market_cap,
+            'dividends': dividends,
+            'calendar': calendar,
         }
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
@@ -195,9 +199,7 @@ def calculate_all_ratios(raw_data, ratio_definitions):
             'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
             'sharesOutstanding': data['shares_outstanding'],
             'currentPrice': data['current_price'],
-            'marketCap': data['market_cap'],
-            'current_assets': bs_copy.loc[bs_copy.index[0], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
-            'current_liabilities': bs_copy.loc[bs_copy.index[0], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
+            'marketCap': data['market_cap']
         }
         ratios.update(raw_fields)
 
@@ -224,9 +226,7 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                     'sharesOutstanding': data['shares_outstanding'],
                     'currentPrice': data['current_price'],
                     'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                    'marketCap': data['market_cap'],
-                    'current_assets': bs_copy.loc[bs_copy.index[0], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
-            'current_liabilities': bs_copy.loc[bs_copy.index[0], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
+                    'marketCap': data['market_cap']
                 }
 
                 # Hantera required_fields för både strängar och listor
@@ -285,9 +285,7 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                                 'sharesOutstanding': data['shares_outstanding'],
                                 'currentPrice': data['current_price'],
                                 'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
-                                'marketCap': data['market_cap'],
-                                'current_assets': bs_copy.loc[bs_copy.index[i], 'Current Assets'] if 'Current Assets' in bs_copy.columns else np.nan,
-                                'current_liabilities': bs_copy.loc[bs_copy.index[i], 'Current Liabilities'] if 'Current Liabilities' in bs_copy.columns else np.nan
+                                'marketCap': data['market_cap']
                             }
                             # Kontrollera om något värde är NaN eller noll
                             if any(pd.isna(locals_dict_hist.get(field)) or locals_dict_hist.get(field) == 0 for field in required_fields):
@@ -417,7 +415,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
 
     return df_agg.to_dict(orient='index')
 
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,rank_decimals):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores, cluster_ranks, rank_decimals):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
@@ -425,15 +423,15 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_ranked = pd.DataFrame.from_dict(ranked_ratios, orient='index')
     df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')
-    #df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
-
+    df_agr = pd.read_csv(CSV_PATH / "agr_results.csv", index_col=0)
+    df_agr_dividends = pd.read_csv(CSV_PATH / "agr_dividend_results.csv", index_col=0)
     # Load tickers file as defined in config
     tickers_file = CSV_PATH / config.get("input_ticker_file")
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
 
-    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks], axis=1)
+    final_df = pd.concat([df_tickers,df_calculated, df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends], axis=1)
     # Force index to string type
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -481,6 +479,23 @@ def save_longBusinessSummary_to_csv(raw_data, csv_file_path):
         else:
             print(f"Warning: No longBusinessSummary for {ticker}. Skipping.")
     
+    df.to_csv(csv_file_path, index=False)
+
+def save_dividends_to_csv(raw_data, csv_file_path):
+    rows = []
+    for ticker, data in raw_data.items():
+        if 'dividends' in data:
+            dividends = data['dividends']
+            # dividends is a pandas Series: index=date, value=dividend
+            if hasattr(dividends, 'items'):
+                for date, value in dividends.items():
+                    rows.append({'Ticker': ticker, 'Date': pd.to_datetime(date).date(), 'Value': value})
+            else:
+                print(f"Warning: Dividends for {ticker} not a Series. Skipping.")
+        else:
+            print(f"Warning: No dividends for {ticker}. Skipping.")
+
+    df = pd.DataFrame(rows)
     df.to_csv(csv_file_path, index=False)
 
 def save_calculated_ratios_to_csv(calculated_ratios, csv_file_path):
@@ -607,47 +622,122 @@ def aggregate_cluster_ranks(category_ranks):
             df[col_name] = ranks
     return df.set_index('Ticker').to_dict(orient='index')
 
-def calculate_cagr(cagr_dimension, raw_financial_data_file, save_values_to_csv_file):
+# --- AGR Calculation ---
+def calculate_agr_for_ticker(csv_path, tickers, dimensions):
     """
-    Beräknar CAGR (Compound Annual Growth Rate) för de angivna dimensionerna.
-    Dimensionerna finns i 'Metric'-kolumnen och datum i 'Date'-kolumnen.
-    Resultatnyckeln är 'cagr' + dimension med mellanslag ersatt av underscore.
+    Beräknar genomsnittlig tillväxttakt (AGR) för angivna dimensioner för en ticker.
+    Hanterar 0-värden och NaN-värden så att de inte ger division-by-zero eller felaktiga tillväxttal.
+    Args:
+        df (pd.DataFrame): DataFrame från raw_financial_data.csv
+        tickers (list): Lista med tickers att beräkna AGR för
+        dimensions (list): Lista med strängar, t.ex. ['Total Revenue', 'Basic EPS', 'Free Cash Flow']
+    Returns:
+        dict: AGR per dimension för varje ticker, med dimensionnamn utan mellanslag
     """
-    cagr_results = {}
-    raw_financial_data = pd.read_csv(raw_financial_data_file, parse_dates=['Date'])
-    tickers = raw_financial_data['Ticker'].unique()
-    # Collect all rows used for CAGR calculations
-    cagr_raw_rows = []
+    df = pd.read_csv(csv_path, parse_dates=['Date'])
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.year
+    agr_results = {}
+    # Group the DataFrame by 'Ticker' and 'Metric' for efficient lookup
+    grouped = df.groupby(['Ticker', 'Metric'])
     for ticker in tickers:
-        data_ticker = raw_financial_data[raw_financial_data['Ticker'] == ticker]
-        cagr_results[ticker] = {}
-        for dimension in cagr_dimension:
-            key = f"cagr{dimension.replace(' ', '_')}"
-            data_dim = data_ticker[data_ticker['Metric'] == dimension].sort_values('Date')
-            if not data_dim.empty:
-                # Save all rows used for this ticker/dimension
-                cagr_raw_rows.append(data_dim.assign(CAGR_Dimension=dimension))
-                start_value = data_dim['Value'].iloc[0]
-                end_value = data_dim['Value'].iloc[-1]
-                start_date = pd.to_datetime(data_dim['Date'].iloc[0])
-                end_date = pd.to_datetime(data_dim['Date'].iloc[-1])
-                num_years = (end_date - start_date).days / 365.25
-                if start_value > 0 and num_years > 0:
-                        cagr = ((end_value / start_value) ** (1 / num_years)) - 1
-                        cagr_results[ticker][key] = cagr * 100  # Store as percent
-                else:
-                    cagr_results[ticker][key] = 0  # If no valid CAGR can be calculated, set to 0
+        ticker_agr = {}
+        for dim in dimensions:
+            try:
+                group = grouped.get_group((ticker, dim)).sort_values('Date')
+                values = pd.to_numeric(group['Value'].values, errors='coerce')
+                years = group['Date'].values
+            except KeyError:
+                values = np.array([])
+                years = np.array([])
+            # Beräkna år-till-år tillväxt
+            growth_rates = []
+            for i in range(1, len(values)):
+                prev = values[i - 1]
+                curr = values[i]
+                if pd.isna(prev) or pd.isna(curr) or prev == 0:
+                    continue  # Hoppa över om föregående år är 0 eller NaN
+                growth = (curr - prev) / abs(prev)
+                growth_rates.append(growth)
+            if growth_rates:
+                agr = np.mean(growth_rates)
             else:
-                cagr_results[ticker][key] = 0  # If no valid CAGR can be calculated, set to 0
-    # Save all raw rows used for CAGR calculations to the specified CSV file
-    if cagr_raw_rows:
-        cagr_raw_df = pd.concat(cagr_raw_rows, ignore_index=True)
-        cagr_raw_df.to_csv(save_values_to_csv_file, index=False)
-    else:
-        # If no data, create an empty file with expected columns
-        pd.DataFrame(columns=['Ticker','Metric','Date','Value','CAGR_Dimension']).to_csv(save_values_to_csv_file, index=False)
-    return cagr_results
+                agr = np.nan
+            dim_key = dim.replace(" ", "_") + "_AvgGrowth"
+            ticker_agr[dim_key] = agr
+            # Add yearly data to result dict
+            dim_data_key = dim.replace(" ", "_")
+            for year, value in zip(years, values):
+                # year is a datetime.date, convert to string (YYYY)
+                year_str = str(year)
+                ticker_agr[f"{dim_data_key}_year_{year_str}"] = value
+        agr_results[ticker] = ticker_agr
 
+    return agr_results
+
+def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=5):
+    """
+    Beräknar genomsnittlig tillväxttakt (AGR) för utdelningar per ticker.
+    Hanterar 0-värden och NaN-värden så att de inte ger division-by-zero eller felaktiga tillväxttal.
+    Args:
+        csv_path (str): Sökväg till CSV-filen med utdelningsdata
+        tickers (list): Lista med tickers att beräkna AGR för
+    Returns:
+        dict: AGR per ticker för utdelningar
+    """
+    df = pd.read_csv(csv_path, parse_dates=['Date'])
+    df['Year'] = pd.to_datetime(df['Date'], errors='coerce').dt.year
+    agr_results = {}
+
+    for ticker in tickers:
+        # Aggregate dividends per year (sum all dividends for the same year)
+        group = df[df['Ticker'] == ticker]
+        yearly = group.groupby('Year')['Value'].sum().sort_index()
+        # Only keep the last n_years
+        yearly = yearly.tail(n_years)
+        years = yearly.index.values
+        values = yearly.values
+
+        # Beräkna år-till-år tillväxt
+        growth_rates = []
+        for i in range(1, len(values)):
+            prev = values[i - 1]
+            curr = values[i]
+            if pd.isna(prev) or pd.isna(curr) or prev == 0:
+                continue
+            growth = (curr - prev) / abs(prev)
+            growth_rates.append(growth)
+        if growth_rates:
+            agr = np.mean(growth_rates)
+        else:
+            agr = np.nan
+        # Build result dict for ticker
+        ticker_dict = {'Dividend_AvgGrowth': agr}
+        for year, value in zip(years, values):
+            ticker_dict[f"Dividend_year_{year}"] = value
+        agr_results[ticker] = ticker_dict
+
+    return agr_results
+
+
+
+def save_agr_results_to_csv(agr_results, csv_file_path):
+    """
+    Sparar AGR-resultat till en CSV-fil.
+    Args:
+        agr_results (dict): AGR-resultat per ticker och dimension
+        csv_file_path (str): Sökväg till CSV-filen att spara
+    """
+    df = pd.DataFrame.from_dict(agr_results, orient='index')
+    # Calculate percentage rank for each _AvgGrowth column
+    for col in df.columns:
+        if col.endswith('_AvgGrowth'):
+            # Rank so that higher AGR is better (100=best, 0=worst)
+            ranks = df[col].rank(pct=True, ascending=True) * 100
+            ranks = ranks.fillna(50)
+            rank_col = col.replace('_AvgGrowth', '_AvgGrowth_Rank')
+            df[rank_col] = ranks
+    df.to_csv(csv_file_path, index=True)
+    print(f"AGR-resultat sparade till {csv_file_path}")
 
 # --- Main Execution ---
 
@@ -696,6 +786,7 @@ if __name__ == "__main__":
             # Save raw financial data and business summaries
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
+            save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
 
             # Step 2: Fetch and process stock price data
             
@@ -707,7 +798,7 @@ if __name__ == "__main__":
             save_last_SMA_to_csv(
                 read_from=CSV_PATH / config["price_data_file"],
                 save_to=CSV_PATH / "last_SMA.csv"
-            )
+)
 
             # Step 3: Calculate ratios and rankings
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
@@ -723,12 +814,12 @@ if __name__ == "__main__":
             cluster_ranks = aggregate_cluster_ranks(category_ranks)
             save_category_scores_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv")
 
-            # Step 5: Calculate CAGR results
-            """cagr_results = calculate_cagr(
-                config['cagr_dimension'],
-                CSV_PATH / "raw_financial_data.csv",
-                CSV_PATH / "cagr_results.csv"
-            )"""
+            # Step 5: Calculate AGR results
+            agr_results = calculate_agr_for_ticker(CSV_PATH / "raw_financial_data.csv", tickers, config['agr_dimensions'])
+            save_agr_results_to_csv(agr_results, CSV_PATH / "agr_results.csv")
+
+            agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 5))
+            save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
             # Step 6: Combine all results and save final output
             final_results = combine_all_results(
@@ -736,7 +827,6 @@ if __name__ == "__main__":
                 ranked_ratios,
                 category_ranks,
                 cluster_ranks,
-                #cagr_results,
                 config["rank_decimals"]
             )
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
