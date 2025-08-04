@@ -119,17 +119,17 @@ def calculate_all_ratios(raw_data, ratio_definitions):
     for ticker, data in raw_data.items():
         if data is None:
             print(f"Varning: Ingen data för {ticker}. Sätter alla nyckeltal till NaN.")
-            calculated_ratios[ticker] = {f'{ratio_name}_ratio_latest': np.nan for ratio_name in ratio_definitions}
+            calculated_ratios[ticker] = {f'{ratio_name}_latest_ratioValue': np.nan for ratio_name in ratio_definitions}
             for ratio_name in ratio_definitions:
-                calculated_ratios[ticker][f'{ratio_name}_ratio_trendSlope'] = np.nan
+                calculated_ratios[ticker][f'{ratio_name}_trend_ratioValue'] = np.nan
             continue
 
         # Säkerhetskontroll: Kontrollera om DataFrames är tomma
         if data['balance_sheet'].empty or data['income_statement'].empty or data['cash_flow'].empty:
             print(f"Varning: Finansiella data är ofullständig för {ticker}. Kan inte beräkna nyckeltal.")
-            calculated_ratios[ticker] = {f'{ratio_name}_ratio_latest': np.nan for ratio_name in ratio_definitions}
+            calculated_ratios[ticker] = {f'{ratio_name}_latest_ratioValue': np.nan for ratio_name in ratio_definitions}
             for ratio_name in ratio_definitions:
-                calculated_ratios[ticker][f'{ratio_name}_ratio_trendSlope'] = np.nan
+                calculated_ratios[ticker][f'{ratio_name}_trend_ratioValue'] = np.nan
             continue
 
         # Säkerställ att du jobbar med kopior för att undvika SettingWithCopyWarning
@@ -246,15 +246,15 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                 # Kontrollera om något värde är NaN eller noll
                 if any(pd.isna(locals_dict.get(field)) or locals_dict.get(field) == 0 for field in required_fields):
                     print(f"Varning: Ogiltiga värden (NaN eller 0) för {ticker}'s {ratio_name}: {locals_dict}")
-                    ratios[f'{ratio_name}_ratio_latest'] = np.nan
-                    ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                    ratios[f'{ratio_name}_latest_ratioValue'] = np.nan
+                    ratios[f'{ratio_name}_trend_ratioValue'] = np.nan
                     for year in years:
                         ratios[f'{ratio_name}_year_{year}'] = np.nan
                     continue
 
                 # Beräkna senaste årets värde
                 latest_value = eval(definition['formula'], globals(), locals_dict)
-                ratios[f'{ratio_name}_ratio_latest'] = latest_value
+                ratios[f'{ratio_name}_latest_ratioValue'] = latest_value
 
                 # Beräkna historiska värden och trend om tillräckligt med data finns
                 if len(years) >= 2 and len(is_copy) >= 2 and len(bs_copy) >= 2 and len(cf_copy) >= 2:
@@ -306,22 +306,22 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                     y = np.array(historical_values)
 
                     if np.isinf(y).any() or np.isnan(y).all():
-                        print(f"Varning: Ogiltiga historiska värden för {ticker}'s {ratio_name}_ratio_trendSlope: {y}")
-                        ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                        print(f"Varning: Ogiltiga historiska värden för {ticker}'s {ratio_name}_trend_ratioValue: {y}")
+                        ratios[f'{ratio_name}_trend_ratioValue'] = np.nan
                     else:
                         slope, _ = np.polyfit(x[~np.isnan(y)], y[~np.isnan(y)], 1)
-                        ratios[f'{ratio_name}_ratio_trendSlope'] = slope
+                        ratios[f'{ratio_name}_trend_ratioValue'] = slope
                 else:
                     print(f"Varning: Otillräcklig data för trendberäkning för {ticker}'s {ratio_name} (bs: {len(bs_copy)}, is: {len(is_copy)}, cf: {len(cf_copy)}, years: {years})")
-                    ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                    ratios[f'{ratio_name}_trend_ratioValue'] = np.nan
                     for year in years:
                         ratios[f'{ratio_name}_year_{year}'] = np.nan
 
             except (ZeroDivisionError, TypeError, KeyError) as e:
                 print(f"Varning: Beräkningsfel för {ticker}'s {ratio_name}: {e}")
                 print(f"Variabler: {locals_dict}")
-                ratios[f'{ratio_name}_ratio_latest'] = np.nan
-                ratios[f'{ratio_name}_ratio_trendSlope'] = np.nan
+                ratios[f'{ratio_name}_latest_ratioValue'] = np.nan
+                ratios[f'{ratio_name}_trend_ratioValue'] = np.nan
                 for year in years:
                     ratios[f'{ratio_name}_year_{year}'] = np.nan
 
@@ -337,18 +337,17 @@ def calculate_all_ratios(raw_data, ratio_definitions):
 
     return calculated_ratios
 
-def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
+def rank_all_ratios(calculated_ratios, ratio_definitions):
     """
     Rankar varje nyckeltal (senaste år och trend) på en 0-100 skala.
     Använder percentilrankning och hybridmetoden för trend.
     """
     ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
     df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    #ratio_definitions = ranking_config.get('ratio_definitions', {})
 
     for column in df.columns:
-        if column.endswith('_ratio_latest'):
-            ratio_name = column.replace('_ratio_latest', '')
+        if column.endswith('_latest_ratioValue'):
+            ratio_name = column.replace('_latest_ratioValue', '')
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             #ascending = not is_better
             ranked = df[column].rank(pct=True, ascending=is_better) * 100
@@ -356,40 +355,14 @@ def rank_all_ratios(calculated_ratios, ranking_config, ratio_definitions):
             for ticker, rank in ranked.items():
                 ranked_ratios[ticker][f'{ratio_name}_latest_ratioRank'] = rank if not pd.isna(rank) else np.nan
         
-        elif column.endswith('_ratio_trendSlope'):
-            ratio_name = column.replace('_ratio_trendSlope', '')
+        elif column.endswith('_trend_ratioValue'):
+            ratio_name = column.replace('_trend_ratioValue', '')
             is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
             
             ranked = df[column].rank(pct=True, ascending=is_better) * 100
             ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
             for ticker, rank in ranked.items():
                 ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank if not pd.isna(rank) else np.nan
-
-            """
-            df_cleaned = df.loc[df[column].notna()]
-            slopes = df_cleaned[column]
-
-            if is_better:
-                positive_trend_slopes = slopes[slopes > ranking_config.get('ranking_method', {}).get('trend_zero_threshold', 0)]
-                negative_trend_slopes = slopes[slopes < -ranking_config.get('ranking_method', {}).get('trend_zero_threshold', 0)]
-            else:
-                positive_trend_slopes = slopes[slopes < -ranking_config.get('ranking_method', {}).get('trend_zero_threshold', 0)]
-                negative_trend_slopes = slopes[slopes > ranking_config.get('ranking_method', {}).get('trend_zero_threshold', 0)]
-
-            if not positive_trend_slopes.empty:
-                pos_ranks = positive_trend_slopes.rank(pct=True, ascending=True) * 50 + 50
-
-                for ticker, rank in pos_ranks.items():
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank
-            
-            if not negative_trend_slopes.empty:
-                neg_ranks = negative_trend_slopes.rank(pct=True, ascending=True) * 50
-                for ticker, rank in neg_ranks.items():
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank
-
-            for ticker in df.index:
-                if f'{ratio_name}_trend_ratioRank' not in ranked_ratios[ticker]:
-                    ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = 50"""
 
     return ranked_ratios
 
@@ -740,7 +713,7 @@ if __name__ == "__main__":
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv")
 
-            ranked_ratios = rank_all_ratios(calculated_ratios, config["ranking_method"], config["ratio_definitions"])
+            ranked_ratios = rank_all_ratios(calculated_ratios, config["ratio_definitions"])
             save_ranked_ratios_to_csv(ranked_ratios, CSV_PATH / "ranked_ratios.csv")
 
             # Step 4: Aggregate category and cluster ranks
