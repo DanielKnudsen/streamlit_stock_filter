@@ -444,7 +444,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
 
     return df_agg.to_dict(orient='index')
 
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,cagr_results,rank_decimals):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluster_ranks,rank_decimals):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
@@ -452,7 +452,7 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_ranked = pd.DataFrame.from_dict(ranked_ratios, orient='index')
     df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')
-    df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
+    #df_cagr = pd.DataFrame.from_dict(cagr_results, orient='index')
 
     # Load tickers file as defined in config
     tickers_file = CSV_PATH / config.get("input_ticker_file")
@@ -460,7 +460,7 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores,cluste
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
 
-    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks, df_cagr], axis=1)
+    final_df = pd.concat([df_calculated, df_ranked, df_scores, df_tickers, df_last_SMA, df_cluster_ranks], axis=1)
     # Force index to string type
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -751,11 +751,11 @@ if __name__ == "__main__":
             save_category_scores_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv")
 
             # Step 5: Calculate CAGR results
-            cagr_results = calculate_cagr(
+            """cagr_results = calculate_cagr(
                 config['cagr_dimension'],
                 CSV_PATH / "raw_financial_data.csv",
                 CSV_PATH / "cagr_results.csv"
-            )
+            )"""
 
             # Step 6: Combine all results and save final output
             final_results = combine_all_results(
@@ -763,7 +763,7 @@ if __name__ == "__main__":
                 ranked_ratios,
                 category_ranks,
                 cluster_ranks,
-                cagr_results,
+                #cagr_results,
                 config["rank_decimals"]
             )
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
