@@ -110,7 +110,6 @@ try:
     allCols_trend_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioRank')]
     allCols_AvgGrowth_Rank = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth_Rank')]
     allCols_AvgGrowth = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth')]
-
     # --- Create ratio-to-rank mapping dict from config['ratio_definitions'] ---
     ratio_definitions = config.get('ratio_definitions', {})
     ratio_to_rank_map = {}
@@ -170,7 +169,6 @@ try:
                 Justera inställningarna för att hitta, jämföra och spara aktier som matchar dina investeringskriterier. Resultatet uppdateras direkt i bubbelplotten och tabellen nedan.
                 """
             )
-        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
 
         # --- Reglage för totalrank (överst, nu i två kolumner) ---
         st.markdown('##### Filtrera efter Aggregerad Rank')
@@ -184,9 +182,8 @@ try:
                                                         (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
                                                         (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & 
                                                         (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
-        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter tillväxt över 4 år ---
-        st.markdown("#### Filtrera efter genomsnittlig tillväxt")
+        st.markdown("##### Filtrera efter genomsnittlig tillväxt")
 
         cagr_dimension = config.get("cagr_dimension")
         cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
@@ -218,7 +215,7 @@ try:
             ]
 
 
-        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
+        #st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
         # --- Filtrera efter SMA-differenser ---
         st.markdown("##### Filtrera efter SMA-differenser")
         col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
@@ -1055,7 +1052,7 @@ try:
                 df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank'}, inplace=True)
 
                 # Load help texts from config if available
-                ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
+                #ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
                 for cat, cat_dict in category_ratios.items():
 
                     if cat.endswith('trend_ratioRank'):
@@ -1141,7 +1138,7 @@ try:
                                         column_config={
                                             "Latest Rank": st.column_config.ProgressColumn(
                                                     "Latest Rank",
-                                                    help=ratio_help_texts.get(ratio),
+                                                    #help=ratio_help_texts.get(ratio),
                                                     min_value=0,
                                                     max_value=100,
                                                     format="%.1f",
@@ -1149,7 +1146,7 @@ try:
                                                 ),
                                             "Trend Rank": st.column_config.ProgressColumn(
                                                     "Trend Rank",
-                                                    help=ratio_help_texts.get(ratio),
+                                                    #help=ratio_help_texts.get(ratio),
                                                     min_value=0,
                                                     max_value=100,
                                                     format="%.1f",
@@ -1218,7 +1215,6 @@ try:
                     options=list(ratio_to_rank_map_temp.keys())
                 )
                 display_rank = ratio_to_rank_map_temp.get(display_ratio, None)
-                st.write(f"Data för {display_ratio}, Rank: {display_rank}")
                 col_left, col_right = st.columns(2, gap='medium', border=False)
 
                 if (
@@ -1258,7 +1254,7 @@ try:
                         marker=dict(size=8, color=marker_colors),
                         text=filtered_scatter_df.index,
                         hoverinfo='text+x+y',
-                        name=f"{display_ratio} vs {display_rank}"
+                        #name=f"{display_ratio} vs {display_rank}"
                     ))
 
                     # Add crosshair for selected_stock_ticker if present in filtered_scatter_df and has valid display_ratio value
@@ -1285,7 +1281,7 @@ try:
                         st.warning(f"Valt bolag {selected_stock_ticker} saknar giltiga värden för {display_ratio} eller {display_rank}. Ingen korslinje visas.")
 
                     scatter_fig.update_layout(
-                        title=f"Scatterplot: {display_ratio} vs {display_rank}",
+                        #title=f"Scatterplot: {display_ratio} vs {display_rank}",
                         xaxis_title=get_display_name(display_ratio),
                         yaxis_title=get_display_name(display_rank),
                         height=400,
@@ -1293,7 +1289,6 @@ try:
                     )
                     st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
                     with st.expander(f"🛟 **Hjälp om  {display_ratio}**"):
-                        st.write(f"Data för {display_ratio}")
                         st.write(get_ratio_help_text(display_rank))
 
                 elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
