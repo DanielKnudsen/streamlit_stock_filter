@@ -93,6 +93,11 @@ ratio_definitions:
     source_bs: ["Total Debt"]
     higher_is_better: True
 
+# Average growhth rate (AGR) inställningar
+agr_dimensions:
+  - "Total Revenue"
+  - "Basic EPS"
+
 # Ratios i kategorier
 category_ratios:
   Kvalitet_latest_ratioRank:
@@ -222,6 +227,12 @@ display_names:
   SMA_long: "SMA 200"
   cagrTotal_Revenue: "Omsättning trend 4 år"
   cagrBasic_EPS: "Vinst/aktie trend 4 år"
+  Total_Revenue_AvgGrowth_Rank: "Rank Omsättning tillväxt"
+  Basic_EPS_AvgGrowth_Rank: "Rank Vinst/aktie tillväxt"
+  Dividend_AvgGrowth_Rank: "Rank Utdelning tillväxt"
+  Total_Revenue_AvgGrowth: "Omsättning tillväxt"
+  Basic_EPS_AvgGrowth: "Vinst/aktie tillväxt"
+  Dividend_AvgGrowth: "Utdelning tillväxt"
 
 tooltip_texts:
   pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde indikerar att den kortare medelvärdesperioden ligger över den längre, vilket ofta ses som ett styrketecken i aktiens trend."
@@ -231,6 +242,9 @@ tooltip_texts:
   Latest_clusterRank: "Sammanlagd rankning av aktier baserat på **senaste årets** finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde visar att bolaget presterar starkt just nu inom flera nyckeltal."
   cagrTotal_Revenue: "Rankning av omsättningens trend över de senaste 4 åren. Ett högt värde indikerar att bolaget har haft en stabil och positiv tillväxt i omsättningen."
   cagrBasic_EPS: "Rankning av vinst per aktie (EPS) trend över de senaste 4 åren. Ett högt värde visar att bolaget har haft en god och växande lönsamhet per aktie över tid."
+  "Total_Revenue_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för omsättningen över de senaste 4 åren."
+  "Basic_EPS_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för vinst per aktie (EPS) över de senaste 4 åren."
+  "Dividend_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för utdelningen över de senaste 4 åren."
 
 color_ranges:
   - range: [0, 20]
