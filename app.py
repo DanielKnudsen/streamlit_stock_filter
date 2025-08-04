@@ -84,6 +84,17 @@ def create_slider(df, column_name, display_name_func, tooltip_func, step=1.0, fo
         format=format_str,
         help=tooltip_func(column_name)
     )
+def get_display_name(var_name):
+    # Try to get a pretty name, fallback to a cleaned-up version
+    return display_names.get(var_name, var_name.replace("_", " ").title())
+
+def get_tooltip_text(var_name):
+    # Try to get a tooltip text, fallback to an empty string
+    return tooltip_texts.get(var_name, "")
+
+def get_ratio_help_text(var_name):
+    # Try to get a help text, fallback to an empty string
+    return ratio_help_texts.get(var_name, "")
 # =============================
 # LOAD DATA
 # =============================
@@ -93,8 +104,8 @@ try:
     df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col=0)
     unique_values_lista = df_new_ranks['Lista'].dropna().unique().tolist()
     unique_values_sector = df_new_ranks['Sektor'].dropna().unique().tolist()
-    allCols_ratio_latest = [col for col in df_new_ranks.columns if col.endswith('_ratio_latest')]
-    allCols_ratio_trendSlope = [col for col in df_new_ranks.columns if col.endswith('_ratio_trendSlope')]
+    allCols_latest_ratioValue = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioValue')]
+    allCols_trend_ratioValue = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioValue')]
     allCols_latest_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioRank')]
     allCols_trend_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioRank')]
 
@@ -104,10 +115,10 @@ try:
     ratio_to_rank_latest_map = {}
     ratio_to_rank_trend_map = {}
     for ratio in ratio_definitions.keys():
-        ratio_to_rank_map[f"{ratio}_ratio_latest"] = f"{ratio}_latest_ratioRank"
-        ratio_to_rank_map[f"{ratio}_ratio_trendSlope"] = f"{ratio}_trend_ratioRank"
-        ratio_to_rank_latest_map[f"{ratio}_ratio_latest"] = f"{ratio}_latest_ratioRank"
-        ratio_to_rank_trend_map[f"{ratio}_ratio_trendSlope"] = f"{ratio}_trend_ratioRank"
+        ratio_to_rank_map[f"{ratio}_latest_ratioValue"] = f"{ratio}_latest_ratioRank"
+        ratio_to_rank_map[f"{ratio}_trend_ratioValue"] = f"{ratio}_trend_ratioRank"
+        ratio_to_rank_latest_map[f"{ratio}_latest_ratioValue"] = f"{ratio}_latest_ratioRank"
+        ratio_to_rank_trend_map[f"{ratio}_trend_ratioValue"] = f"{ratio}_trend_ratioRank"
 
     # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
@@ -127,6 +138,7 @@ try:
     if config:
         category_ratios = config.get("category_ratios", {})
         categories = list(category_ratios.keys())
+        
         display_names = config.get("display_names", {})
         tooltip_texts = config.get("tooltip_texts", {})
         ratio_help_texts = config.get("ratio_help_texts", {})
@@ -134,18 +146,7 @@ try:
         category_ratios = {}
         categories = []
     
-    def get_display_name(var_name):
-        # Try to get a pretty name, fallback to a cleaned-up version
-        return display_names.get(var_name, var_name.replace("_", " ").title())
-    
-    def get_tooltip_text(var_name):
-        # Try to get a tooltip text, fallback to an empty string
-        return tooltip_texts.get(var_name, "")
-    
-    def get_ratio_help_text(var_name):
-        # Try to get a help text, fallback to an empty string
-        return ratio_help_texts.get(var_name, "")
-
+    unique_category_display_names = list(set(get_display_name(cat.split("_")[0]) for cat in categories))
 
     # =============================
     # ENHETLIGT FILTERAVSNITT
@@ -335,14 +336,14 @@ try:
                                     else:
                                         st.info(f"Kolumn {r} saknas i data.")
                                     # Add filter for trendSlope, but do NOT exclude NaN values (keep them in the filtered DataFrame)
-                                    r_data = f"{r.replace('_trend_ratioRank', '_ratio_trendSlope')}"
+                                    r_data = f"{r.replace('_trend_ratioRank', '_trend_ratioValue')}"
                                     if r_data in df_filtered_by_sliders.columns:
                                         min_val = float(df_filtered_by_sliders[r_data].min(skipna=True))
                                         max_val = float(df_filtered_by_sliders[r_data].max(skipna=True))
                                         if min_val == max_val:
                                             max_val += 0.001
                                         slider_min, slider_max = st.slider(
-                                            f"Filtrera {r_data.replace('_ratio_trendSlope', ' trend Slope')}",
+                                            f"Filtrera {r_data.replace('_trend_ratioValue', ' trend Slope')}",
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
@@ -414,14 +415,14 @@ try:
                                         ]
                                     else:
                                         st.info(f"Kolumn {r} saknas i data.")
-                                    r_data = f"{r.replace('_latest_ratioRank', '_ratio_latest')}"
+                                    r_data = f"{r.replace('_latest_ratioRank', '_latest_ratioValue')}"
                                     if r_data in df_filtered_by_sliders.columns:
                                         min_val = float(df_filtered_by_sliders[r_data].min())
                                         max_val = float(df_filtered_by_sliders[r_data].max())
                                         if min_val == max_val:
                                             max_val += 0.001
                                         slider_min, slider_max = st.slider(
-                                            f"Filtrera {r_data.replace('_ratio_latest', ' senaste Värde')}",
+                                            f"Filtrera {r_data.replace('_latest_ratioValue', ' senaste Värde')}",
                                             min_value=min_val,
                                             max_value=max_val,
                                             value=(min_val, max_val),
