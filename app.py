@@ -576,18 +576,30 @@ try:
             df_display['Shortlist'] = False
 
             cols = df_display.columns.tolist()
+            cols.insert(0, cols.pop(cols.index('Lista')))
             cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
             cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
+            cols.insert(0, cols.pop(cols.index('Lista')))
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
             cols.insert(0, cols.pop(cols.index('Välj')))
-            cols.insert(0, cols.pop(cols.index('Lista')))  # Move 'Lista' to the front
+              # Move 'Lista' to the front
             df_display = df_display[cols]  # Reorder columns
             # Update rank_score_columns to reflect the new names for shortlist display
             display_rank_score_columns = df_display.columns.tolist()
             show_full_table = st.toggle("Kompakt tabell", value=False, key="show_full_table_toggle")
-            compact_columns = ['Lista', 'Välj', 'Shortlist', 'Agg. Rank trend 4 år', 'Agg. Rank sen. året']
+            # Define compact columns and rename for brevity
+            col_short = display_rank_score_columns[0:2] + display_rank_score_columns[3:5]
+            # Create a mapping for short names
+            short_name_map = {
+                "Agg. Rank trend 4 år": "Agg. R Tr.",
+                "Agg. Rank sen. året": "Agg. R Se."
+            }
             if show_full_table:
-                df_display = df_display[display_rank_score_columns[:5]]
+                # Make a copy to avoid changing original df_display
+                df_compact = df_display[col_short].copy()
+                # Rename columns for compact view
+                df_compact.rename(columns=short_name_map, inplace=True)
+                df_display = df_compact
             else:
                 df_display = df_display[display_rank_score_columns]
             edited_df = st.data_editor(
