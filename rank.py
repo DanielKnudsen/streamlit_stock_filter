@@ -674,7 +674,7 @@ def calculate_agr_for_ticker(csv_path, tickers, dimensions):
 
     return agr_results
 
-def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=5):
+def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=4):
     """
     Beräknar genomsnittlig tillväxttakt (AGR) för utdelningar per ticker.
     Hanterar 0-värden och NaN-värden så att de inte ger division-by-zero eller felaktiga tillväxttal.
@@ -693,7 +693,10 @@ def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=5):
         group = df[df['Ticker'] == ticker]
         yearly = group.groupby('Year')['Value'].sum().sort_index()
         # Only keep the last n_years
-        yearly = yearly.tail(n_years)
+        # Only keep values from the last n_years (e.g., if n_years=4, keep years >= current_year - 4)
+        current_year = pd.Timestamp.today().year
+        min_year = current_year - n_years
+        yearly = yearly[yearly.index >= min_year]
         years = yearly.index.values
         values = yearly.values
 
@@ -843,7 +846,7 @@ if __name__ == "__main__":
             agr_results = calculate_agr_for_ticker(CSV_PATH / "raw_financial_data.csv", tickers, config['agr_dimensions'])
             save_agr_results_to_csv(agr_results, CSV_PATH / "agr_results.csv")
 
-            agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 5))
+            agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 4))
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
             # Step 6: Combine all results and save final output
