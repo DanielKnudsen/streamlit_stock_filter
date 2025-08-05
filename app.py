@@ -588,7 +588,7 @@ try:
             display_rank_score_columns = df_display.columns.tolist()
             show_full_table = st.toggle("Kompakt tabell", value=False, key="show_full_table_toggle")
             # Define compact columns and rename for brevity
-            col_short = display_rank_score_columns[0:2] + display_rank_score_columns[3:5]
+            col_short = display_rank_score_columns[0:1] + display_rank_score_columns[3:5] + display_rank_score_columns[1:2]
             # Create a mapping for short names
             short_name_map = {
                 "Agg. Rank trend 4 år": "Agg. R Tr.",
@@ -620,7 +620,7 @@ try:
                         help="Lägg till aktien i din bevakningslista",
                         default=False,
                         width="small",
-                        pinned=True
+                        pinned=True if not show_full_table else False
                     ),
                     "Lista": st.column_config.TextColumn(
                         "Lista", # Header for the Lista column",
