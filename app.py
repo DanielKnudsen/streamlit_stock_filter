@@ -7,6 +7,7 @@ import numpy as np # For handling numerical operations
 import pwlf
 from pathlib import Path
 from rank import load_config
+import datetime
 
 
 
@@ -128,7 +129,7 @@ try:
     rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank','Lista']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -157,16 +158,17 @@ try:
         with st.expander('🛟**Hjälp med Filtrering**', expanded=False):
             st.markdown(
                 """
-                **Så här använder du filtreringsverktyget:**
+                **Så här använder du filtersektionen:**
 
-                - Använd reglagen nedan för att filtrera aktier utifrån **Totalrank**, **SMA-differenser** och detaljerade rankningar inom olika finansiella kategorier.
-                - **Totalrank:** Filtrera aktier baserat på deras aggregerade rank för både *trend* (de senaste fyra åren) och *senaste året*. Detta ger en snabb överblick över vilka aktier som presterar bäst enligt dina kriterier.
-                - **SMA-differenser:** Begränsa urvalet med hjälp av skillnader mellan olika glidande medelvärden (SMA). Detta hjälper dig att identifiera aktier med särskilda tekniska trender.
-                - **Utökade filter:** Expandera sektionen för avancerad filtrering på kategori- och nyckeltalsnivå. Här kan du finjustera urvalet baserat på specifika finansiella nyckeltal och deras utveckling över tid.
-                - **Lista och Sektor:** Använd färgade "pills" för att snabbt inkludera eller exkludera aktier från olika listor och sektorer.
-                - **Ticker-filtrering:** Skriv in en eller flera tickers för att endast visa dessa aktier.
+                - Justera reglagen för att filtrera aktier utifrån totalrank, tillväxt, tekniska indikatorer och detaljerade finansiella nyckeltal.
+                - **Aggregerad Rank:** Filtrera snabbt på samlad trendrank (senaste 4 åren) och senaste året för att hitta bolag med stark utveckling.
+                - **Tillväxtfilter:** Använd reglagen för genomsnittlig tillväxt (CAGR) för att fokusera på bolag med stabil och hög tillväxt inom olika mått.
+                - **SMA-differenser:** Begränsa urvalet med hjälp av skillnader mellan kurs och glidande medelvärden (SMA) för att identifiera tekniska trender.
+                - **Lista och Sektor:** Välj enkelt vilka listor och sektorer som ska ingå med färgade "pills".
+                - **Ticker-filtrering:** Skriv in en eller flera tickers för att visa endast dessa aktier.
+                - **Utökade filter:** Expandera sektionen för avancerad filtrering på kategori- och nyckeltalsnivå. Här kan du finjustera urvalet baserat på specifika nyckeltal och deras utveckling.
 
-                Justera inställningarna för att hitta, jämföra och spara aktier som matchar dina investeringskriterier. Resultatet uppdateras direkt i bubbelplotten och tabellen nedan.
+                Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
                 """
             )
 
@@ -577,11 +579,17 @@ try:
             cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
             cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
-            cols.insert(0, cols.pop(cols.index('Välj')))  # Move 'Agg. Rank trend 4 år' to the front
+            cols.insert(0, cols.pop(cols.index('Välj')))
+            cols.insert(0, cols.pop(cols.index('Lista')))  # Move 'Lista' to the front
             df_display = df_display[cols]  # Reorder columns
             # Update rank_score_columns to reflect the new names for shortlist display
             display_rank_score_columns = df_display.columns.tolist()
-
+            show_full_table = st.toggle("Kompakt tabell", value=False, key="show_full_table_toggle")
+            compact_columns = ['Lista', 'Välj', 'Shortlist', 'Agg. Rank trend 4 år', 'Agg. Rank sen. året']
+            if show_full_table:
+                df_display = df_display[display_rank_score_columns[:5]]
+            else:
+                df_display = df_display[display_rank_score_columns]
             edited_df = st.data_editor(
                 df_display,
                 use_container_width=True,
@@ -601,7 +609,13 @@ try:
                         default=False,
                         width="small",
                         pinned=True
-                    )
+                    ),
+                    "Lista": st.column_config.TextColumn(
+                        "Lista", # Header for the Lista column",
+                        default="",
+                        width="small",
+                        pinned=False
+                    ),
                 },
                 key="stock_selection_editor" # Unique key to manage state
             )
@@ -643,7 +657,9 @@ try:
                     use_container_width=True
                 )
 
-                st.download_button("Ladda ner bevakningslista", data=df_display[download_columns].to_csv(), file_name="shortlist.csv", mime="text/csv")
+                current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                file_name = f"shortlist_{current_time}.csv"
+                st.download_button("Ladda ner bevakningslista", data=df_display[download_columns].to_csv(), file_name=file_name, mime="text/csv")
             else:
                 pass
                 #st.info("Din bevakningslista är tom. Markera rutan under 'Shortlist' för att lägga till aktier.")
@@ -660,15 +676,19 @@ try:
                 - Här visas detaljerad information om den aktie du valt i tabellen ovan.
                 - Du ser aktiens **namn**, **ticker**, vilken **lista** och **sektor** den tillhör samt dess **marknadsvärde**.
                 - Under företagsnamnet finns en kort beskrivning av bolagets verksamhet. Klicka på texten för att läsa hela beskrivningen.
-                - I sektionen *Kursutveckling och Trendlinje* visas aktiens prisutveckling över tid, glidande medelvärden (SMA) och en justerbar trendlinje (PWLF). Du kan även se volymdata och jämföra kursen mot olika SMA-nivåer.
-                - Under *SMA differenser (%)* ser du stapeldiagram som visar procentuell skillnad mellan kurs och olika SMA-nivåer – användbart för att identifiera tekniska trender.
-                - I *CAGR*-sektionen visas den genomsnittliga årliga tillväxttakten för olika nyckeltal över de senaste fyra åren.
-                - Längst ner hittar du sammanvägda rankningar per kategori och detaljerade stapeldiagram för varje nyckeltal, både för trend (senaste 4 åren) och senaste året.
+                - I sektionen **Genomsnittlig årlig tillväxt (CAGR)** visas stapeldiagram för de senaste fyra åren för olika nyckeltal, samt detaljerade år-för-år-grafer för varje mått.
+                - Under **Kursutveckling och Trendlinje** ser du aktiens prisutveckling över tid, glidande medelvärden (SMA) och en justerbar trendlinje (PWLF). Volymdata visas som staplar och du kan jämföra kursen mot olika SMA-nivåer.
+                - I **SMA differenser (%)** visas stapeldiagram som visar procentuell skillnad mellan kurs och olika SMA-nivåer – användbart för att identifiera tekniska trender.
+                - Sektionen **Sammanvägd rank per kategori** visar bolagets rankningar inom olika finansiella kategorier, både för trend (senaste 4 åren) och senaste året. Färgade staplar hjälper dig snabbt se styrkor och svagheter.
+                - Under **Detaljerad Rank per kategori** hittar du stapeldiagram för varje nyckeltal, med trendlinje och rankvärden för både trend och senaste året.
+                - I **Ratio 2 Rank**-sektionen kan du visualisera sambandet mellan valda nyckeltal och deras rankvärden för alla aktier som matchar dina filter. Scatterplotten visar varje aktie som en punkt, och den valda aktien markeras med röd färg och korslinje.
+                - Längst ner kan du visa en datadump av all tillgänglig data för den valda aktien.
 
                 Använd denna information för att snabbt få en överblick över bolagets utveckling, styrkor och svagheter – och för att jämföra olika aktier på djupet.
                 """
             )
-        st.subheader(f"**{selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}**")
+        if selected_stock_dict is not None and selected_stock_ticker is not None:
+            st.subheader(f"**{selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}**")
 
         with st.container(border=True, key="stock_details"):
             if selected_stock_ticker:
@@ -689,7 +709,7 @@ try:
                         st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
         
         with st.container(border=True, key="cagr_container"):
-            st.subheader("Genomsnittlig årlig tillväxttakt över 4 år")
+            st.subheader("Genomsnittlig årlig tillväxt senaste 4 åren")
             # Only show the following sections if a stock is selected
             if selected_stock_dict is not None and selected_stock_ticker is not None:
                 # Bar plot for all cagr columns for selected_stock_ticker using selected_stock_dict
@@ -941,32 +961,32 @@ try:
                 else:
                     st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
 
-            else:
-                st.info("Markera en ruta under 'Välj' i tabellen ovan för att visa prisutvecklingen.")
+            
             # =============================
             # PERCENTAGE BAR PLOTS
             # =============================
             # Bar plot for all pct_ columns for selected_stock_ticker
-            with st.expander("SMA differenser (%)", expanded=False):
-                pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
-                if pct_cols:
-                    pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
-                    fig_pct = go.Figure(go.Bar(
-                        x=[get_display_name(col) for col in pct_cols],
-                        y=pct_values,
-                        marker_color='royalblue',
-                        text=[f"{v:.2f}%" for v in pct_values],
-                        textposition='auto',
-                    ))
-                    fig_pct.update_layout(
-                        title=f"Kursutveckling for {selected_stock_ticker}",
-                        xaxis_title="Metric",
-                        yaxis_title="Percentage",
-                        height=350,
-                        margin=dict(l=10, r=10, t=40, b=10),
-                        yaxis=dict(ticksuffix="%", tickformat=".0f")
-                    )
-                    st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
+            if selected_stock_ticker:
+                with st.expander("SMA differenser (%)", expanded=False):
+                    pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
+                    if pct_cols:
+                        pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
+                        fig_pct = go.Figure(go.Bar(
+                            x=[get_display_name(col) for col in pct_cols],
+                            y=pct_values,
+                            marker_color='royalblue',
+                            text=[f"{v:.2f}%" for v in pct_values],
+                            textposition='auto',
+                        ))
+                        fig_pct.update_layout(
+                            title=f"Kursutveckling for {selected_stock_ticker}",
+                            xaxis_title="Metric",
+                            yaxis_title="Percentage",
+                            height=350,
+                            margin=dict(l=10, r=10, t=40, b=10),
+                            yaxis=dict(ticksuffix="%", tickformat=".0f")
+                        )
+                        st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
 
             
         with st.container(border=True, key="ratios_container"):
@@ -974,9 +994,8 @@ try:
             # RANKING FOR SELECTED STOCK
             # =============================
             st.subheader("Sammanvägd rank per kategori")
-            st.markdown("**Trend senaste 4 åren & Senaste året**")
-
-            if not df_filtered_by_sliders.empty and categories:
+            if not df_filtered_by_sliders.empty and categories and selected_stock_ticker is not None:
+                st.markdown("**Trend senaste 4 åren & Senaste året**")
                 clusterRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "trend" in col.lower()}
                 df_clusterRank_trend = pd.DataFrame.from_dict(clusterRank_trend_items, orient='index', columns=['Trend Rank'])
                 df_clusterRank_trend['Kategori']= 'AGGREGERAD RANK'
@@ -1159,9 +1178,7 @@ try:
                     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
         with st.container(border=True, key="ratio_rank_container"):
             st.subheader("**Ratio 2 Rank**")
-            if selected_stock_ticker is None:
-                st.info("Ingen aktie är vald. Välj en aktie i tabellen ovan för att visa Ratio 2 Rank-sektionen.")
-            else:
+            if selected_stock_ticker is not None:
                 st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
                 with st.expander("🛟 **Hjälp om Ratio 2 Rank**", expanded=False):
                     st.markdown(
@@ -1293,12 +1310,12 @@ try:
 
                 elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
                     st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
+        if selected_stock_ticker is not None:
+            with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
+                st.write(f"Datadump av {selected_stock_ticker}")
+                st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
 
-        with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
-            st.write(f"Datadump av {selected_stock_ticker}")
-            st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
-
-                        
+                            
                 # --- END: Show ratio bar charts for each _trend_rank category ---
 
 except FileNotFoundError:
@@ -1310,7 +1327,6 @@ except Exception as e:
 
 
 st.markdown("---")
-st.subheader("About this application")
-st.info("To run this app locally: Save the code as a .py file (e.g., `app.py`) and run `streamlit run app.py` in your terminal.")
-st.caption("Make sure your CSV files are in the specified folders (`data` for the main file and `data` for the price files).")
-
+st.subheader("Om denna app")
+st.info("Denna app är i testläge och all data kommer från Yahoo Finance. Resultaten och analyserna är endast avsedda för test och demonstration.")
+# --- END: Main app logic ---
