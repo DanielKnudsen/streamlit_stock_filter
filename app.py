@@ -628,6 +628,20 @@ try:
                         width="small",
                         pinned=False
                     ),
+                    "Agg. R Se.": st.column_config.NumberColumn(
+                        "Agg. R Se.",
+                        help="Aggregated Rank for the last year",
+                        format="%.1f",
+                        default=0.0,
+                        width="small",
+                    ),
+                    "Agg. R Tr.": st.column_config.NumberColumn(
+                        "Agg. R Tr.",
+                        help="Aggregated Rank for the last 4 years",
+                        format="%.1f",
+                        default=0.0,
+                        width="small",
+                    ),
                 },
                 key="stock_selection_editor" # Unique key to manage state
             )
