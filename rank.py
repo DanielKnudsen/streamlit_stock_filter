@@ -66,7 +66,6 @@ def fetch_yfinance_data(ticker, years):
         cf = ticker_obj.cash_flow.transpose()
         info = ticker_obj.info
         dividends = ticker_obj.dividends
-        calendar = ticker_obj.calendar
         shares_outstanding = info.get('sharesOutstanding', None)
         current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
@@ -97,7 +96,6 @@ def fetch_yfinance_data(ticker, years):
             'longBusinessSummary': longBusinessSummary,
             'market_cap': market_cap,
             'dividends': dividends,
-            'calendar': calendar,
         }
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
@@ -742,29 +740,6 @@ def save_agr_results_to_csv(agr_results, csv_file_path):
     df.to_csv(csv_file_path, index=True)
     print(f"AGR-resultat sparade till {csv_file_path}")
 
-def save_calendar_data_to_csv(raw_financial_data, csv_file_path):
-    """
-    Sparar kalenderdata (t.ex. earnings dates) till en CSV-fil.
-    Args:
-        raw_financial_data (dict): Dict med rå finansiella data per ticker
-        csv_file_path (str): Sökväg till CSV-filen att spara
-    """
-    rows = []
-    for ticker, data in raw_financial_data.items():
-        if 'calendar' in data and isinstance(data['calendar'], dict):
-            calendar = data['calendar']
-            for event, date in calendar.items():
-                if isinstance(date, str):
-                    date = pd.to_datetime(date).date()
-                elif isinstance(date, pd.Timestamp):
-                    date = date.date()
-                else:
-                    continue  # Skip if date is not a valid type
-                rows.append({'Ticker': ticker, 'Event': event, 'Date': date})
-
-    df = pd.DataFrame(rows)
-    df.to_csv(csv_file_path, index=False)
-    print(f"Kalenderdata sparade till {csv_file_path}")
 
 # --- Main Execution ---
 
@@ -814,7 +789,6 @@ if __name__ == "__main__":
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
             save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
-            save_calendar_data_to_csv(raw_financial_data, CSV_PATH / "calendar_data.csv")
 
             # Step 2: Fetch and process stock price data
             
