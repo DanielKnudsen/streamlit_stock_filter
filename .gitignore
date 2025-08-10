@@ -11,7 +11,4 @@ data/local/
 # Virtual environments
 .venv
 uv.lock
-pyproject.toml
-.DS_Store
-.DS_Store
-.DS_Store
+
