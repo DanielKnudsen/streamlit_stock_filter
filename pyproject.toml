@@ -1,0 +1,15 @@
+[project]
+name = "streamlit_stock_filter"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "dotenv>=0.9.9",
+    "matplotlib>=3.10.3",
+    "plotly>=6.2.0",
+    "pwlf>=2.5.1",
+    "pyyaml>=6.0.2",
+    "streamlit>=1.48.0",
+    "tqdm>=4.67.1",
+    "yfinance>=0.2.65",
+]
