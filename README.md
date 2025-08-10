@@ -8,3 +8,9 @@ A Streamlit app for technical analysis of Stockholm Stock Exchange stocks using 
 
 ## Deployment
 Deployed on Streamlit Community Cloud.
+
+## Venv
+
+Activate with:
+source .venv/bin/activate
+
