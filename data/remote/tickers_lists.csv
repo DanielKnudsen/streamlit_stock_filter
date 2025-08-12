@@ -300,7 +300,7 @@ VPLAY-B,Viaplay Group B,Telekommunikation,MidCap
 MSON-A,Midsona A,Dagligvaror,SmallCap
 MSON-B,Midsona B,Dagligvaror,SmallCap
 CTEK,CTEK,Energi,SmallCap
-MAHA-A,Maha Energy A,Energi,SmallCap
+MAHA-A,Maha Capital,Energi,SmallCap
 ACRI-A,Acrinova A,Fastigheter,SmallCap
 ACRI-B,Acrinova B,Fastigheter,SmallCap
 ANNE-B,Annehem Fastigheter B,Fastigheter,SmallCap
@@ -559,6 +559,8 @@ MAGLE,Magle Chemoswed,Hälsovård,FirstNorthPremier
 MAGNA,Magnasense,Hälsovård,FirstNorthPremier
 MEDHLP,MedHelp Care,Hälsovård,FirstNorthPremier
 MODTX,Modus Therapeutics,Hälsovård,FirstNorthPremier
+MODTX-BTU,Modus Therapeutics Holding AB BTU,Hälsovård,FirstNorthPremier
+MODTX-UR,Modus Therapeutics Holding AB UR,Hälsovård,FirstNorthPremier
 NANEXA,Nanexa,Hälsovård,FirstNorthPremier
 NANECH,NanoEcho,Hälsovård,FirstNorthPremier
 NEOLA,Neola Medical,Hälsovård,FirstNorthPremier
