@@ -102,7 +102,7 @@ def get_ratio_help_text(var_name):
 try:
     # Load main stock evaluation CSV (index_col=0 sets Ticker as index)
     df_new_ranks = pd.read_csv(CSV_PATH / config["results_file"], index_col=0)
-    df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col=0)
+    df_dividends = pd.read_csv(CSV_PATH / "dividends.csv", index_col='Ticker')
     unique_values_lista = df_new_ranks['Lista'].dropna().unique().tolist()
     unique_values_sector = df_new_ranks['Sektor'].dropna().unique().tolist()
     allCols_latest_ratioValue = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioValue')]
@@ -110,7 +110,7 @@ try:
     allCols_latest_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_latest_ratioRank')]
     allCols_trend_ratioRank = [col for col in df_new_ranks.columns if col.endswith('_trend_ratioRank')]
     allCols_AvgGrowth_Rank = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth_Rank')]
-    allCols_AvgGrowth = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth')]
+    allCols_AvgGrowth = [col for col in df_new_ranks.columns if col.endswith('_AvgGrowth')] + ['cagr_close']
     # --- Create ratio-to-rank mapping dict from config['ratio_definitions'] ---
     ratio_definitions = config.get('ratio_definitions', {})
     ratio_to_rank_map = {}
@@ -121,7 +121,6 @@ try:
         ratio_to_rank_map[f"{ratio}_trend_ratioValue"] = f"{ratio}_trend_ratioRank"
         ratio_to_rank_latest_map[f"{ratio}_latest_ratioValue"] = f"{ratio}_latest_ratioRank"
         ratio_to_rank_trend_map[f"{ratio}_trend_ratioValue"] = f"{ratio}_trend_ratioRank"
-
     # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
     # =============================
@@ -719,21 +718,51 @@ try:
         with st.container(border=True, key="stock_details"):
             if selected_stock_ticker:
                 #st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
-                selected_stock_sektor = selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'
                 selected_stock_lista = selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'
-                left_col, right_col = st.columns([1,2], gap='medium', border=False)
+                selected_stock_sektor = selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'
+                left_col, right_col = st.columns([2,3], gap='medium', border=False)
                 with left_col:
                     
                     st.write(f"**Ticker:**   \n{selected_stock_ticker}")
                     st.write(f"**Lista:**   \n{selected_stock_lista}")
                     st.write(f"**Sektor:**   \n{selected_stock_sektor}")
                     st.write(f"**Marknadsvärde:**   \n{selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A'}")
+                    st.write(f"**Senaste årsrapport:**   \n{selected_stock_dict['LatestReportDate'] if 'LatestReportDate' in selected_stock_dict else 'N/A'}")
                 with right_col:
                     #st.subheader("Företagsbeskrivning")
-                    longBusinessSummary = df_long_business_summary.loc[selected_stock_ticker]
-                    with st.popover(f"{longBusinessSummary.values[0][0:500]}...",use_container_width=True):
-                        st.write(longBusinessSummary.values[0] if not longBusinessSummary.empty else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
-        
+                    LongBusinessSummary = selected_stock_dict['LongBusinessSummary'] if 'LongBusinessSummary' in selected_stock_dict else 'N/A'
+                    with st.popover(f"{LongBusinessSummary[0:500]}...",use_container_width=True):
+                        st.write(LongBusinessSummary if LongBusinessSummary else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
+                                # --- Plot annual dividends for selected_stock_ticker ---
+                if selected_stock_ticker is not None and 'df_dividends' in locals():
+                    dividends_df = df_dividends[df_dividends.index == selected_stock_ticker]
+                    if not dividends_df.empty:
+                        # Ensure Year and Value columns exist
+                        if 'Year' in dividends_df.columns and 'Value' in dividends_df.columns:
+                            # Convert Year to datetime for proper sorting
+                            dividends_df = dividends_df.copy()
+                            #dividends_df['Year'] = pd.to_datetime(dividends_df['Year'], errors='coerce')
+                            dividends_df.sort_values('Year', inplace=True)
+                            fig_div = go.Figure(go.Bar(
+                                x=dividends_df['Year'],
+                                y=dividends_df['Value'],
+                                marker_color='gold',
+                                text=[f"{v:.2f}" for v in dividends_df['Value']],
+                                textposition='auto',
+                            ))
+                            fig_div.update_layout(
+                                title=f"Utdelningar för {selected_stock_ticker}",
+                                xaxis_title="År",
+                                yaxis_title="SEK",
+                                height=150,
+                                margin=dict(l=10, r=10, t=40, b=10)
+                            )
+                            st.plotly_chart(fig_div, use_container_width=True, key=f"dividends_bar_{selected_stock_ticker}")
+                        else:
+                            st.info(f"Dividend-data saknar nödvändiga kolumner ('Year', 'Value') för {selected_stock_ticker}.")
+                    else:
+                        st.info(f"Ingen utdelningsdata för {selected_stock_ticker}.")
+
         with st.container(border=True, key="cagr_container"):
             st.subheader("Genomsnittlig årlig tillväxt senaste 4 åren")
             # Only show the following sections if a stock is selected

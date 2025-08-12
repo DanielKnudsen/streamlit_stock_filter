@@ -98,6 +98,29 @@ agr_dimensions:
   - "Total Revenue"
   - "Basic EPS"
 
+kategorier:
+  Kvalitet:
+    - ROE
+    - ROIC
+  Finansiell Hälsa:
+    - Soliditet
+    - Skuldsättningsgrad
+  Lönsamhet:
+    - Bruttomarginal
+    - Rörelsemarginal
+    - Vinstmarginal
+  Värdering:
+    - PE-tal
+    - PB-tal
+    - EV/EBITDA
+  Kassaflöde:
+    - Rörelseflödesmarginal
+    - Kassaflöde till Skuld
+
+cluster:
+  - latest
+  - trend
+
 # Ratios i kategorier
 category_ratios:
   Kvalitet_latest_ratioRank:
@@ -108,14 +131,10 @@ category_ratios:
     ROIC_trend_ratioRank: 1
   FinansiellHalsa_latest_ratioRank:
     Soliditet_latest_ratioRank: 1
-    # Kassalikviditet_latest_ratioRank: 1
     Skuldsättningsgrad_latest_ratioRank: 1
-    # Räntetäckningsgrad_latest_ratioRank: 1
   FinansiellHalsa_trend_ratioRank:
     Soliditet_trend_ratioRank: 1
-    # Kassalikviditet_trend_ratioRank: 1
     Skuldsättningsgrad_trend_ratioRank: 1
-    # Räntetäckningsgrad_trend_ratioRank: 1
   Lonsamhet_latest_ratioRank:
     Bruttomarginal_latest_ratioRank: 1
     Rörelsemarginal_latest_ratioRank: 1
