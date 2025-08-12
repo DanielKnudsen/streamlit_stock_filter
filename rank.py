@@ -3,6 +3,7 @@ import numpy as np
 import yfinance as yf
 import yaml
 import pickle
+import datetime
 import os
 from dotenv import load_dotenv
 from pathlib import Path
@@ -66,10 +67,19 @@ def fetch_yfinance_data(ticker, years):
         cf = ticker_obj.cash_flow.transpose()
         info = ticker_obj.info
         dividends = ticker_obj.dividends
-        shares_outstanding = info.get('sharesOutstanding', None)
-        current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
         longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
+        dividendRate = info.get('dividendRate', None)
+        lastDividendDate = info.get('lastDividendDate', None)
+
+        # Fetch the date for the latest annual report if available
+        latest_report_date = None
+        if hasattr(bs, 'index') and len(bs.index) > 0:
+            # Try to parse the first index as date
+            try:
+                latest_report_date = pd.to_datetime(bs.index[0])
+            except Exception:
+                latest_report_date = str(bs.index[0])
 
         #print(f"Ticker: {ticker}")
         """print(f"Balance sheet columns: {bs.columns.tolist() if not bs.empty else 'Empty'}")
@@ -78,7 +88,7 @@ def fetch_yfinance_data(ticker, years):
         print(f"Shares outstanding: {shares_outstanding}")
         print(f"Current price: {current_price}")"""
 
-        if not all([bs is not None, is_ is not None, cf is not None, shares_outstanding is not None, current_price is not None]):
+        if not all([bs is not None, is_ is not None, cf is not None, market_cap is not None, longBusinessSummary is not None]):
             print(f"Warning: Incomplete data for {ticker}. Skipping.")
             return None
 
@@ -91,11 +101,13 @@ def fetch_yfinance_data(ticker, years):
             'balance_sheet': bs,
             'income_statement': is_,
             'cash_flow': cf,
-            'current_price': current_price,
-            'shares_outstanding': shares_outstanding,
+            'info': info,
+            'dividendRate': dividendRate,
+            'lastDividendDate': lastDividendDate,
             'longBusinessSummary': longBusinessSummary,
             'market_cap': market_cap,
             'dividends': dividends,
+            'latest_report_date': latest_report_date,
         }
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
@@ -195,8 +207,6 @@ def calculate_all_ratios(raw_data, ratio_definitions):
             'Cash_And_Cash_Equivalents': bs_copy.loc[bs_copy.index[0], 'Cash And Cash Equivalents'] if 'Cash And Cash Equivalents' in bs_copy.columns else np.nan,
             'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
             'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
-            'sharesOutstanding': data['shares_outstanding'],
-            'currentPrice': data['current_price'],
             'marketCap': data['market_cap']
         }
         ratios.update(raw_fields)
@@ -221,8 +231,6 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                     'Basic_EPS': is_copy.loc[is_copy.index[0], 'Basic EPS'] if 'Basic EPS' in is_copy.columns else np.nan,
                     'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
                     'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
-                    'sharesOutstanding': data['shares_outstanding'],
-                    'currentPrice': data['current_price'],
                     'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
                     'marketCap': data['market_cap']
                 }
@@ -280,8 +288,6 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                                 'Basic_EPS': is_copy.loc[is_copy.index[i], 'Basic EPS'] if 'Basic EPS' in is_copy.columns else np.nan,
                                 'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[i], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
                                 'Free_Cash_Flow': cf_copy.loc[cf_copy.index[i], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
-                                'sharesOutstanding': data['shares_outstanding'],
-                                'currentPrice': data['current_price'],
                                 'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
                                 'marketCap': data['market_cap']
                             }
@@ -427,9 +433,11 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     tickers_file = CSV_PATH / config.get("input_ticker_file")
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
+    df_latest_report_dates = pd.read_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
+    df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
 
-    final_df = pd.concat([df_tickers,df_calculated, df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends], axis=1)
+    final_df = pd.concat([df_tickers,df_calculated, df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates, df_long_business_summary], axis=1)
     # Force index to string type
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -479,17 +487,57 @@ def save_longBusinessSummary_to_csv(raw_data, csv_file_path):
     
     df.to_csv(csv_file_path, index=False)
 
+def save_latest_report_dates_to_csv(raw_data, csv_file_path):
+    df = pd.DataFrame()
+    for ticker, data in raw_data.items():
+        if 'latest_report_date' in data:
+            report_date = data['latest_report_date']
+            df_temp = pd.DataFrame({'Ticker': [ticker], 'LatestReportDate': [report_date]})
+            df = pd.concat([df, df_temp], ignore_index=True)
+        else:
+            print(f"Warning: No latest_report_date for {ticker}. Skipping.")
+
+    df.to_csv(csv_file_path, index=False)
+
 def save_dividends_to_csv(raw_data, csv_file_path):
+    """
+    Saves dividend information for each ticker to a CSV file.
+    
+    Parameters:
+        raw_data (dict): Dictionary containing financial data for each ticker, including dividend info.
+        csv_file_path (str or Path): Path to the CSV file where dividend data will be saved.
+    
+    Returns:
+        None. Writes dividend data to the specified CSV file.
+    """
     rows = []
     for ticker, data in raw_data.items():
+        dividend_last_year = None
+        last_dividend_year = None
+        if 'info' in raw_data[ticker]:
+            if 'dividendRate' in raw_data[ticker]['info']:
+                dividend_last_year = raw_data[ticker]['info']['dividendRate'] if raw_data[ticker]['info']['dividendRate'] is not None else None
+            else:
+                dividend_last_year = None
+            if 'lastDividendDate' in raw_data[ticker]['info']:
+                last_dividend_year = int(datetime.datetime.fromtimestamp(raw_data[ticker]['info']['lastDividendDate']).strftime('%Y'))
+            else:
+                last_dividend_year = None
         if 'dividends' in data:
             dividends = data['dividends']
             # dividends is a pandas Series: index=date, value=dividend
             if hasattr(dividends, 'items'):
-                for date, value in dividends.items():
-                    rows.append({'Ticker': ticker, 'Date': pd.to_datetime(date).date(), 'Value': value})
-            else:
-                print(f"Warning: Dividends for {ticker} not a Series. Skipping.")
+                # Build a DataFrame for aggregation
+                div_df = pd.DataFrame(list(dividends.items()), columns=['Date', 'Value'])
+                div_df['Date'] = pd.to_datetime(div_df['Date'], errors='coerce')
+                div_df['Year'] = div_df['Date'].dt.year
+                # Aggregate by year (sum all dividends for the same year)
+                yearly = div_df.groupby('Year')['Value'].sum().reset_index()
+                for _, row in yearly.iterrows():
+                    if last_dividend_year is not None and int(row['Year']) == last_dividend_year and dividend_last_year is not None:
+                        rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': dividend_last_year})
+                    else:
+                        rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': row['Value']})
         else:
             print(f"Warning: No dividends for {ticker}. Skipping.")
 
@@ -578,7 +626,7 @@ def save_last_SMA_to_csv(read_from, save_to):
                     end_price = group['Close'].iloc[-1]
                     num_years = (group.index[-1] - group.index[0]).days / 365.25
                     if start_price > 0 and num_years > 0:
-                        cagr = (((end_price / start_price) ** (1 / num_years)) - 1) * 100  # CAGR in percent
+                        cagr = (((end_price / start_price) ** (1 / num_years)) - 1)# * 100  # CAGR in percent
                         cagr_list.append({'Ticker': ticker, 'CAGR': cagr})
                     else:
                         cagr_list.append({'Ticker': ticker, 'CAGR': 0})  # If no valid CAGR can be calculated, set to 0
@@ -682,8 +730,8 @@ def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=4):
     Returns:
         dict: AGR per ticker för utdelningar
     """
-    df = pd.read_csv(csv_path, parse_dates=['Date'])
-    df['Year'] = pd.to_datetime(df['Date'], errors='coerce').dt.year
+    df = pd.read_csv(csv_path, parse_dates=['Year'])
+    df['Year'] = pd.to_datetime(df['Year'], errors='coerce').dt.year
     agr_results = {}
 
     for ticker in tickers:
@@ -718,7 +766,6 @@ def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=4):
         agr_results[ticker] = ticker_dict
 
     return agr_results
-
 
 
 def save_agr_results_to_csv(agr_results, csv_file_path):
@@ -789,6 +836,7 @@ if __name__ == "__main__":
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
             save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
+            save_latest_report_dates_to_csv(raw_financial_data, CSV_PATH / "latest_report_dates.csv")
 
             # Step 2: Fetch and process stock price data
             
