@@ -2,7 +2,7 @@ name: Daily Stock Data Update
 
 on:
   schedule:
-    - cron: '0 5 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
+    - cron: '0 4 * * 2-6'  # Run at 05:00 UTC Tuesday through Saturday
   workflow_dispatch:  # Allow manual trigger
 
 env:
@@ -32,7 +32,7 @@ jobs:
       run: uv venv
     
     - name: Install dependencies
-      run: uv pip install -r requirements.txt
+      run: uv pip install -e .
     
     - name: Verify dependencies
       run: |
