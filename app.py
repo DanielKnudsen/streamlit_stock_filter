@@ -143,12 +143,24 @@ try:
         display_names = config.get("display_names", {})
         tooltip_texts = config.get("tooltip_texts", {})
         ratio_help_texts = config.get("ratio_help_texts", {})
+
+        # new
+        all_ratios = []
+        for category, ratios in config['kategorier'].items():
+            all_ratios.extend(ratios)
+        st.write("Ratios:", all_ratios)
+        kategorier = config.get("kategorier", {}).keys()
+        st.write("Kategorier:", kategorier)
+        kategorier_ratios = config.get("kategorier", {})
+        st.write("Kategorier med Ratios:", kategorier_ratios)
+        cluster = config.get("cluster", {})
+        st.write("Kluster:", cluster)
     else:
         category_ratios = {}
         categories = []
     
     unique_category_display_names = list(set(get_display_name(cat.split("_")[0]) for cat in categories))
-
+    
     # =============================
     # ENHETLIGT FILTERAVSNITT
     # =============================
@@ -170,7 +182,37 @@ try:
                 Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
                 """
             )
-
+        if 'Lista' in df_filtered_by_sliders.columns:
+            with st.container(border=True, key="lista_toggles"):
+                # Use pills for selection, all enabled by default
+                lista_selected = st.pills(
+                    "Välj/uteslut Lista:",
+                    options=unique_values_lista,
+                    default=unique_values_lista,
+                    selection_mode='multi',
+                    key="segmented_lista"
+                )
+                # Filter df_filtered_by_sliders by selected Lista values
+                if lista_selected:
+                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
+                else:
+                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+        # --- Sektor toggles for bubble plot ---
+        if 'Sektor' in df_filtered_by_sliders.columns:
+            with st.container(border=True, key="sektor_toggles"):       
+                # Use st.pills for multi-select, all enabled by default
+                sektor_selected = st.pills(
+                    "Välj/uteslut Sektor:",
+                    options=unique_values_sector,
+                    default=unique_values_sector,
+                    selection_mode='multi',
+                    key="pills_sektor"
+                )
+                # Filter df_filtered_by_sliders by selected Sektor values
+                if sektor_selected:
+                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
+                else:
+                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         # --- Reglage för totalrank (överst, nu i två kolumner) ---
         st.markdown('##### Filtrera efter Aggregerad Rank')
         col_total_trend, col_total_latest = st.columns(2,gap='medium',border=True)
@@ -238,37 +280,7 @@ try:
             (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])
         ]
         st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
-        if 'Lista' in df_filtered_by_sliders.columns:
-            with st.container(border=True, key="lista_toggles"):
-                # Use pills for selection, all enabled by default
-                lista_selected = st.pills(
-                    "Välj/uteslut Lista:",
-                    options=unique_values_lista,
-                    default=unique_values_lista,
-                    selection_mode='multi',
-                    key="segmented_lista"
-                )
-                # Filter df_filtered_by_sliders by selected Lista values
-                if lista_selected:
-                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
-                else:
-                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-        # --- Sektor toggles for bubble plot ---
-        if 'Sektor' in df_filtered_by_sliders.columns:
-            with st.container(border=True, key="sektor_toggles"):       
-                # Use st.pills for multi-select, all enabled by default
-                sektor_selected = st.pills(
-                    "Välj/uteslut Sektor:",
-                    options=unique_values_sector,
-                    default=unique_values_sector,
-                    selection_mode='multi',
-                    key="pills_sektor"
-                )
-                # Filter df_filtered_by_sliders by selected Sektor values
-                if sektor_selected:
-                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
-                else:
-                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+
         # --- NY: Manuell ticker-filtrering ---
         ticker_input = st.text_input(
             "Filtrera på tickers (kommaseparerade, t.ex. VOLV-A,ERIC-B,ATCO-A):",
@@ -1050,13 +1062,13 @@ try:
             # =============================
             st.subheader("Sammanvägd rank per kategori")
             if not df_filtered_by_sliders.empty and categories and selected_stock_ticker is not None:
-                st.markdown("**Trend senaste 4 åren & Senaste året**")
+                #st.markdown("**Trend senaste 4 åren & Senaste året**")
                 clusterRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "trend" in col.lower()}
                 df_clusterRank_trend = pd.DataFrame.from_dict(clusterRank_trend_items, orient='index', columns=['Trend Rank'])
                 df_clusterRank_trend['Kategori']= 'AGGREGERAD RANK'
                 catRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "trend" in col.lower()}
                 df_catRank_trend = pd.DataFrame.from_dict(catRank_trend_items, orient='index', columns=['Trend Rank']).reset_index()
-                df_catRank_trend['Kategori'] = df_catRank_trend['index'].str.split('_', expand=True)[0]#.apply(get_display_name)
+                df_catRank_trend['Kategori'] = df_catRank_trend['index'].str.replace('_trend_catRank','').str.replace('_',' ')
                 df_trend_combined = pd.concat([df_catRank_trend, df_clusterRank_trend.reset_index()], ignore_index=True, sort=False)
 
                 clusterRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "latest" in col.lower()}
@@ -1064,11 +1076,10 @@ try:
                 df_clusterRank_latest['Kategori']= 'AGGREGERAD RANK'
                 catRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "latest" in col.lower()}
                 df_catRank_latest = pd.DataFrame.from_dict(catRank_latest_items, orient='index', columns=['Latest Rank']).reset_index()
-                df_catRank_latest['Kategori'] = df_catRank_latest['index'].str.split('_', expand=True)[0]#.apply(get_display_name)
+                df_catRank_latest['Kategori'] = df_catRank_latest['index'].str.replace('_latest_catRank','').str.replace('_',' ')
                 df_latest_combined = pd.concat([df_catRank_latest, df_clusterRank_latest.reset_index()], ignore_index=True, sort=False)
                 # Merge the trend and latest DataFrames on 'Kategori'
                 df_catRank_merged = pd.merge(df_trend_combined, df_latest_combined, on='Kategori', suffixes=('_trend', '_latest'))
-        
                 # -------------------------------------------------------------
                 # PROGRESS BARS: LATEST AND TREND RANKINGS
                 # -------------------------------------------------------------
@@ -1117,20 +1128,19 @@ try:
                 # Create DataFrames for trend and latest ratio ranks
                 ratioRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "latest" in col.lower()}
                 df_ratioRank_latest = pd.DataFrame.from_dict(ratioRank_latest_items, orient='index', columns=['Rank']).reset_index()
-                df_ratioRank_latest['Ratio_name'] = df_ratioRank_latest['index'].str.split('_', expand=True)[0]
+                df_ratioRank_latest['Ratio_name'] = df_ratioRank_latest['index'].str.replace('_latest_ratioRank','')
 
                 ratioRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "trend" in col.lower()}
                 df_ratioRank_trend = pd.DataFrame.from_dict(ratioRank_trend_items, orient='index', columns=['Rank']).reset_index()
-                df_ratioRank_trend['Ratio_name'] = df_ratioRank_trend['index'].str.split('_', expand=True)[0]
+                df_ratioRank_trend['Ratio_name'] = df_ratioRank_trend['index'].str.replace('_trend_ratioRank','')
                 df_ratioRank_merged = pd.merge(df_ratioRank_trend, df_ratioRank_latest, on='Ratio_name', suffixes=('_trend', '_latest'))
                 df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank'}, inplace=True)
-
                 # Load help texts from config if available
                 #ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
                 for cat, cat_dict in category_ratios.items():
 
                     if cat.endswith('trend_ratioRank'):
-                        display_cat = cat.replace('_trend_ratioRank', '')
+                        display_cat = cat.replace('_trend_ratioRank', '').replace('_', ' ')
                         # Use a visually distinct box for each category, with extra margin for spacing
                         with st.container(border=True):
                             st.subheader(f"{get_display_name(display_cat)}")
@@ -1258,7 +1268,7 @@ try:
                         index=0,
                         key="selected_ratio_area"
                     )
-                    ratio_to_rank_map_temp = ratio_to_rank_trend_map if selected_ratio_area == 'Trend senaste 4 åren' else ratio_to_rank_latest_map
+                    ratio_to_rank_map_temp = 'trend' if selected_ratio_area == 'Trend senaste 4 åren' else 'latest'
                 with col_mid:
                     sektors_all = [selected_stock_sektor, 'Alla']
                     display_stock_sektor_selector = st.radio(
@@ -1282,11 +1292,12 @@ try:
                     display_stock_lista = [display_stock_lista] if isinstance(display_stock_lista, str) else display_stock_lista
                 # Plotly scatter plot for selected ratio and rank
                 filtered_scatter_df = df_new_ranks[df_new_ranks['Sektor'].isin(display_stock_sektor) & df_new_ranks['Lista'].isin(display_stock_lista)]
-                display_ratio = st.selectbox(
+                display_ratio_selector = st.selectbox(
                     "Välj ett nyckeltal att visa detaljerad information om:",
-                    options=list(ratio_to_rank_map_temp.keys())
+                    options=all_ratios
                 )
-                display_rank = ratio_to_rank_map_temp.get(display_ratio, None)
+                display_ratio=f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioValue"
+                display_rank = f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioRank"
                 col_left, col_right = st.columns(2, gap='medium', border=False)
 
                 if (
