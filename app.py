@@ -148,13 +148,13 @@ try:
         all_ratios = []
         for category, ratios in config['kategorier'].items():
             all_ratios.extend(ratios)
-        st.write("Ratios:", all_ratios)
+        #st.write("Ratios:", all_ratios)
         kategorier = config.get("kategorier", {}).keys()
-        st.write("Kategorier:", kategorier)
+        #st.write("Kategorier:", kategorier)
         kategorier_ratios = config.get("kategorier", {})
-        st.write("Kategorier med Ratios:", kategorier_ratios)
+        #st.write("Kategorier med Ratios:", kategorier_ratios)
         cluster = config.get("cluster", {})
-        st.write("Kluster:", cluster)
+        #st.write("Kluster:", cluster)
     else:
         category_ratios = {}
         categories = []
@@ -1365,8 +1365,8 @@ try:
 
                     scatter_fig.update_layout(
                         #title=f"Scatterplot: {display_ratio} vs {display_rank}",
-                        xaxis_title=get_display_name(display_ratio),
-                        yaxis_title=get_display_name(display_rank),
+                        xaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Värde",
+                        yaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Rank",
                         height=400,
                         margin=dict(l=10, r=10, t=40, b=10)
                     )
