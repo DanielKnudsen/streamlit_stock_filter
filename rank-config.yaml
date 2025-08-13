@@ -5,6 +5,7 @@ price_data_file: "price_data.csv"
 
 # Inställningar för datainhämtning
 data_fetch_years: 4 # Antal år av finansiella data som ska hämtas
+data_fetch_quarterly: 4 # Antal kvartal som ska hämtas
 price_data_years: 3 # Antal år av prisdata som ska hämtas
 
 # Antal decimaler för Ranks
