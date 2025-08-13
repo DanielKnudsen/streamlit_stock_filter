@@ -45,10 +45,10 @@ ratio_definitions:
     formula: "Total_Debt / Stockholders_Equity"
     source_bs: ["Total Debt", "Stockholders Equity"]
     higher_is_better: False
-  Räntetäckningsgrad:
-    formula: "EBIT / Interest_Expense"
-    source_income: ["EBIT", "Interest Expense"]
-    higher_is_better: True
+  #Räntetäckningsgrad:
+    #formula: "EBIT / Interest_Expense"
+    #source_income: ["EBIT", "Interest Expense"]
+    #higher_is_better: True
   Bruttomarginal:
     formula: "Gross_Profit / Total_Revenue"
     source_income: ["Gross Profit", "Total Revenue"]
@@ -82,12 +82,12 @@ ratio_definitions:
     source_cf: ["Operating Cash Flow"]
     source_income: ["Total Revenue"]
     higher_is_better: True
-  Fritt_Kassaflode_per_Aktie:
-    formula: "Free_Cash_Flow / sharesOutstanding"
-    source_cf: ["Free Cash Flow"]
-    source_stock: ["sharesOutstanding"]
-    higher_is_better: True
-  Kassaflode_till_Skuld:
+  #Fritt_Kassaflode_per_Aktie:
+    #formula: "Free_Cash_Flow / sharesOutstanding"
+    #source_cf: ["Free Cash Flow"]
+    #source_stock: ["sharesOutstanding"]
+    #higher_is_better: True
+  Kassaflöde_till_Skuld:
     formula: "Operating_Cash_Flow / Total_Debt"
     source_cf: ["Operating Cash Flow"]
     source_bs: ["Total Debt"]
@@ -110,12 +110,12 @@ kategorier:
     - Rörelsemarginal
     - Vinstmarginal
   Värdering:
-    - PE-tal
-    - PB-tal
-    - EV/EBITDA
+    - PE_tal
+    - PB_tal
+    - EV_EBITDA
   Kassaflöde:
     - Rörelseflödesmarginal
-    - Kassaflöde till Skuld
+    - Kassaflöde_till_Skuld
 
 cluster:
   - latest
@@ -129,36 +129,34 @@ category_ratios:
   Kvalitet_trend_ratioRank:
     ROE_trend_ratioRank: 1
     ROIC_trend_ratioRank: 1
-  FinansiellHalsa_latest_ratioRank:
+  Finansiell_Hälsa_latest_ratioRank:
     Soliditet_latest_ratioRank: 1
     Skuldsättningsgrad_latest_ratioRank: 1
-  FinansiellHalsa_trend_ratioRank:
+  Finansiell_Hälsa_trend_ratioRank:
     Soliditet_trend_ratioRank: 1
     Skuldsättningsgrad_trend_ratioRank: 1
-  Lonsamhet_latest_ratioRank:
+  Lönsamhet_latest_ratioRank:
     Bruttomarginal_latest_ratioRank: 1
     Rörelsemarginal_latest_ratioRank: 1
     Vinstmarginal_latest_ratioRank: 1
-  Lonsamhet_trend_ratioRank:
+  Lönsamhet_trend_ratioRank:
     Bruttomarginal_trend_ratioRank: 1
     Rörelsemarginal_trend_ratioRank: 1
     Vinstmarginal_trend_ratioRank: 1
-  Vardering_latest_ratioRank:
+  Värdering_latest_ratioRank:
     PE_tal_latest_ratioRank: 1
     PB_tal_latest_ratioRank: 1
     EV_EBITDA_latest_ratioRank: 1
-  Vardering_trend_ratioRank:
+  Värdering_trend_ratioRank:
     PE_tal_trend_ratioRank: 1
     PB_tal_trend_ratioRank: 1
     EV_EBITDA_trend_ratioRank: 1
-  Kassaflode_latest_ratioRank:
+  Kassaflöde_latest_ratioRank:
     Rörelseflödesmarginal_latest_ratioRank: 1
-    # Fritt_Kassaflode_per_Aktie_latest_ratioRank: 1
-    Kassaflode_till_Skuld_latest_ratioRank: 1
-  Kassaflode_trend_ratioRank:
+    Kassaflöde_till_Skuld_latest_ratioRank: 1
+  Kassaflöde_trend_ratioRank:
     Rörelseflödesmarginal_trend_ratioRank: 1
-    # Fritt_Kassaflode_per_Aktie_trend_ratioRank: 1
-    Kassaflode_till_Skuld_trend_ratioRank: 1
+    Kassaflöde_till_Skuld_trend_ratioRank: 1
 
 # Hjälptexter för nyckeltal (endast _latest_rank)
 ratio_help_texts:

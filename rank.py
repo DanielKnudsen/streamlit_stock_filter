@@ -67,6 +67,8 @@ def fetch_yfinance_data(ticker, years):
         cf = ticker_obj.cash_flow.transpose()
         info = ticker_obj.info
         dividends = ticker_obj.dividends
+        shares_outstanding = info.get('sharesOutstanding', None)
+        current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
         longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
         dividendRate = info.get('dividendRate', None)
@@ -101,6 +103,8 @@ def fetch_yfinance_data(ticker, years):
             'balance_sheet': bs,
             'income_statement': is_,
             'cash_flow': cf,
+            'current_price': current_price,
+            'shares_outstanding': shares_outstanding,
             'info': info,
             'dividendRate': dividendRate,
             'lastDividendDate': lastDividendDate,
@@ -207,6 +211,8 @@ def calculate_all_ratios(raw_data, ratio_definitions):
             'Cash_And_Cash_Equivalents': bs_copy.loc[bs_copy.index[0], 'Cash And Cash Equivalents'] if 'Cash And Cash Equivalents' in bs_copy.columns else np.nan,
             'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
             'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
+            'sharesOutstanding': data['shares_outstanding'],
+            'currentPrice': data['current_price'],
             'marketCap': data['market_cap']
         }
         ratios.update(raw_fields)
@@ -232,6 +238,8 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                     'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
                     'Free_Cash_Flow': cf_copy.loc[cf_copy.index[0], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
                     'EBITDA': is_copy.loc[is_copy.index[0], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
+                    'sharesOutstanding': data['shares_outstanding'],
+                    'currentPrice': data['current_price'],
                     'marketCap': data['market_cap']
                 }
 
@@ -289,6 +297,8 @@ def calculate_all_ratios(raw_data, ratio_definitions):
                                 'Operating_Cash_Flow': cf_copy.loc[cf_copy.index[i], 'Operating Cash Flow'] if 'Operating Cash Flow' in cf_copy.columns else np.nan,
                                 'Free_Cash_Flow': cf_copy.loc[cf_copy.index[i], 'Free Cash Flow'] if 'Free Cash Flow' in cf_copy.columns else np.nan,
                                 'EBITDA': is_copy.loc[is_copy.index[i], 'EBITDA'] if 'EBITDA' in is_copy.columns else np.nan,
+                                'sharesOutstanding': data['shares_outstanding'],
+                                'currentPrice': data['current_price'],
                                 'marketCap': data['market_cap']
                             }
                             # Kontrollera om något värde är NaN eller noll
