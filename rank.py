@@ -58,21 +58,29 @@ def read_tickers_from_csv(csv_file_path):
         print(f"Error: The file {csv_file_path} was not found.")
         return []
 
-def fetch_yfinance_data(ticker, years):
+def fetch_yfinance_data(ticker, years, period_type="annual"):
     try:
         yf_ticker = f"{ticker}.ST"
         ticker_obj = yf.Ticker(yf_ticker)
-        bs = ticker_obj.balance_sheet.transpose()
-        is_ = ticker_obj.income_stmt.transpose()
-        cf = ticker_obj.cash_flow.transpose()
-        info = ticker_obj.info
-        dividends = ticker_obj.dividends
+        if period_type == "quarterly":
+            bs = ticker_obj.quarterly_balance_sheet.transpose()
+            is_ = ticker_obj.quarterly_income_stmt.transpose()
+            cf = ticker_obj.quarterly_cash_flow.transpose()
+            info = ticker_obj.info
+        else:
+            bs = ticker_obj.balance_sheet.transpose()
+            is_ = ticker_obj.income_stmt.transpose()
+            cf = ticker_obj.cash_flow.transpose()
+            info = ticker_obj.info
+            longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
+            dividendRate = info.get('dividendRate', None)
+            lastDividendDate = info.get('lastDividendDate', None)
+            dividends = ticker_obj.dividends
+
         shares_outstanding = info.get('sharesOutstanding', None)
         current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
-        longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
-        dividendRate = info.get('dividendRate', None)
-        lastDividendDate = info.get('lastDividendDate', None)
+
 
         # Fetch the date for the latest annual report if available
         latest_report_date = None
@@ -83,14 +91,7 @@ def fetch_yfinance_data(ticker, years):
             except Exception:
                 latest_report_date = str(bs.index[0])
 
-        #print(f"Ticker: {ticker}")
-        """print(f"Balance sheet columns: {bs.columns.tolist() if not bs.empty else 'Empty'}")
-        print(f"Income statement columns: {is_.columns.tolist() if not is_.empty else 'Empty'}")
-        print(f"Cash flow columns: {cf.columns.tolist() if not cf.empty else 'Empty'}")
-        print(f"Shares outstanding: {shares_outstanding}")
-        print(f"Current price: {current_price}")"""
-
-        if not all([bs is not None, is_ is not None, cf is not None, market_cap is not None, longBusinessSummary is not None]):
+        if not all([bs is not None, is_ is not None, cf is not None, market_cap is not None, info is not None]):
             print(f"Warning: Incomplete data for {ticker}. Skipping.")
             return None
 
@@ -106,12 +107,12 @@ def fetch_yfinance_data(ticker, years):
             'current_price': current_price,
             'shares_outstanding': shares_outstanding,
             'info': info,
-            'dividendRate': dividendRate,
-            'lastDividendDate': lastDividendDate,
-            'longBusinessSummary': longBusinessSummary,
+            'dividendRate': dividendRate if period_type == "annual" else None,
+            'lastDividendDate': lastDividendDate if period_type == "annual" else None,
+            'longBusinessSummary': longBusinessSummary if period_type == "annual" else None,
             'market_cap': market_cap,
-            'dividends': dividends,
-            'latest_report_date': latest_report_date,
+            'dividends': dividends if period_type == "annual" else None,
+            'latest_report_date': latest_report_date if latest_report_date else None,
         }
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
@@ -446,8 +447,16 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     df_latest_report_dates = pd.read_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
+    # Read the quarterly calculated ratios CSV (long format)
+    df_calculated_quarterly_long = pd.read_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
 
-    final_df = pd.concat([df_tickers,df_calculated, df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates, df_long_business_summary], axis=1)
+    # Pivot to wide format: index = Ticker, columns = Metric, values = Values
+    df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
+
+    # Optional: ensure index is string type for consistency
+    df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
+
+    final_df = pd.concat([df_tickers,df_calculated, df_calculated_quarterly,df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates, df_long_business_summary], axis=1)
     # Force index to string type
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -554,10 +563,15 @@ def save_dividends_to_csv(raw_data, csv_file_path):
     df = pd.DataFrame(rows)
     df.to_csv(csv_file_path, index=False)
 
-def save_calculated_ratios_to_csv(calculated_ratios, csv_file_path):
+def save_calculated_ratios_to_csv(calculated_ratios, csv_file_path, period_type="annual"):
     df = pd.DataFrame()
-    for ticker,data in calculated_ratios.items():
-        df_metrics = pd.DataFrame(data, index=[ticker]).T
+    for ticker, data in calculated_ratios.items():
+        if period_type == "quarterly":
+            # Only keep metrics ending with '_latest_ratioValue' and rename to '_TTM'
+            filtered_data = {k.replace('_latest_ratioValue', '_TTM'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
+        else:
+            filtered_data = data
+        df_metrics = pd.DataFrame(filtered_data, index=[ticker]).T
         df_metrics.columns = ['Values']
         df_temp = df_metrics.reset_index().rename(columns={'index': 'Metric'})
         df_temp['Ticker'] = ticker
@@ -797,7 +811,61 @@ def save_agr_results_to_csv(agr_results, csv_file_path):
     df.to_csv(csv_file_path, index=True)
     print(f"AGR-resultat sparade till {csv_file_path}")
 
-
+def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly):
+    """
+    Sammanfattar kvartalsdata till årsdata genom att summera eller medelvärdesbilda beroende på segment.
+    Args:
+        raw_financial_data_quarterly (dict): Dictionary med kvartalsdata per ticker
+    Returns:
+        dict: Sammanfattad årsdata per ticker
+    """
+    # Define which metrics to sum (flow) and which to take latest (stock)
+    sum_metrics = [
+        'Net Income', 'EBIT', 'Pretax Income', 'Tax Provision', 'Interest Expense',
+        'Gross Profit', 'Total Revenue', 'Operating Income', 'Basic EPS', 'EBITDA',
+        'Operating Cash Flow', 'Free Cash Flow'
+    ]
+    latest_metrics = [
+        'Stockholders Equity', 'Total Assets', 'Total Debt', 'Cash And Cash Equivalents',
+        'sharesOutstanding', 'currentPrice', 'marketCap'
+    ]
+    summarized_data = {}
+    for ticker, data in raw_financial_data_quarterly.items():
+        if data is None:
+            summarized_data[ticker] = None
+            continue
+        # Prepare output dict for this ticker
+        summarized = {
+            'balance_sheet': pd.DataFrame(),
+            'income_statement': pd.DataFrame(),
+            'cash_flow': pd.DataFrame(),
+            'current_price': data.get('current_price'),
+            'shares_outstanding': data.get('shares_outstanding'),
+            'info': data.get('info'),
+            'market_cap': data.get('market_cap'),
+        }
+        # For each segment, aggregate as needed
+        for segment in ['balance_sheet', 'income_statement', 'cash_flow']:
+            df = data.get(segment)
+            if df is None or df.empty:
+                summarized[segment] = pd.DataFrame()
+                continue
+            # Only keep the last 4 quarters
+            df = df.head(4)
+            agg_dict = {}
+            for col in df.columns:
+                if col in sum_metrics:
+                    agg_dict[col] = df[col].sum()
+                elif col in latest_metrics:
+                    agg_dict[col] = df[col].iloc[0]
+                else:
+                    # Default: take latest
+                    agg_dict[col] = df[col].iloc[0]
+            # Create a single-row DataFrame with index as latest quarter's date
+            latest_idx = df.index[0] if len(df.index) > 0 else None
+            summarized[segment] = pd.DataFrame([agg_dict], index=[latest_idx])
+        summarized_data[ticker] = summarized
+    return summarized_data
 # --- Main Execution ---
 
 if __name__ == "__main__":
@@ -820,14 +888,18 @@ if __name__ == "__main__":
 
             if FETCH_DATA == "Yes":
                 raw_financial_data = {}
+                raw_financial_data_quarterly = {}
                 print("Fetching financial data...")
                 for ticker in tqdm(tickers, desc="Fetching financial data", disable=True if ENVIRONMENT == "remote" else False):
-                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"])
-            
-                # Save raw_financial_data as pickle for fast reload/debug
-                if ENVIRONMENT == "local":
-                    with open(CSV_PATH / "raw_financial_data.pkl", "wb") as f:
-                        pickle.dump(raw_financial_data, f)
+                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"], period_type="annual")
+                    raw_financial_data_quarterly[ticker] = fetch_yfinance_data(ticker, config["data_fetch_quarterly"], period_type="quarterly")
+
+                    # Save raw_financial_data as pickle for fast reload/debug
+                    if ENVIRONMENT == "local":
+                        with open(CSV_PATH / "raw_financial_data.pkl", "wb") as f:
+                            pickle.dump(raw_financial_data, f)
+                        with open(CSV_PATH / "raw_financial_data_quarterly.pkl", "wb") as f:
+                            pickle.dump(raw_financial_data_quarterly, f)
 
             else:
                 # Load raw financial data from pickle file
@@ -835,15 +907,19 @@ if __name__ == "__main__":
                 try:
                     with open(CSV_PATH / "raw_financial_data.pkl", "rb") as f:
                         raw_financial_data = pickle.load(f)
+                    with open(CSV_PATH / "raw_financial_data_quarterly.pkl", "rb") as f:
+                        raw_financial_data_quarterly = pickle.load(f)
                 except FileNotFoundError:
                     print("No raw financial data found. Please fetch data first.")
                     exit(1)
 
             # Remove tickers with no data
             raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
-            
+            raw_financial_data_quarterly = {ticker: data for ticker, data in raw_financial_data_quarterly.items() if data is not None}
+
             # Save raw financial data and business summaries
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
+            save_raw_data_to_csv(raw_financial_data_quarterly, CSV_PATH / "raw_financial_data_quarterly.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
             save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
             save_latest_report_dates_to_csv(raw_financial_data, CSV_PATH / "latest_report_dates.csv")
@@ -861,8 +937,13 @@ if __name__ == "__main__":
 )
 
             # Step 3: Calculate ratios and rankings
+            raw_financial_data_quarterly_summarized=summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
+
+            calculated_ratios_quarterly = calculate_all_ratios(raw_financial_data_quarterly_summarized, config["ratio_definitions"])
+            save_calculated_ratios_to_csv(calculated_ratios_quarterly, CSV_PATH / "calculated_ratios_quarterly.csv", period_type="quarterly")
+
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
-            save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv")
+            save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv", period_type="annual")
 
             ranked_ratios = rank_all_ratios(calculated_ratios, config["ratio_definitions"])
             save_ranked_ratios_to_csv(ranked_ratios, CSV_PATH / "ranked_ratios.csv")
