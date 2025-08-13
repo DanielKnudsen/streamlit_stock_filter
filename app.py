@@ -33,13 +33,31 @@ CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 # =============================
 st.set_page_config(layout="centered", page_title="Stock Evaluation", page_icon="📈")
 
-st.title("📈 Stock Screening Tool for Swedish Markets")
-st.markdown(
-    """
-    Detta verktyg ger en omfattande översikt över svenska aktier och rankar dem inom flera finansiella kategorier och trender.
-    Investerare kan använda dessa rankningar och filter för att identifiera lovande aktier, jämföra prestationer och bygga en personlig bevakningslista för vidare analys.
-    """
-)
+st.title("📈 Indicatum Insights")
+with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)", expanded=False):
+    st.markdown(
+        """
+        **Hur kan du använda detta verktyg?**
+
+        Det finns flera sätt att använda denna app för att hitta intressanta aktier och analysera deras utveckling:
+
+        - **Snabb filtrering med aggregerad rank:** Använd reglagen för *Agg. Rank trend 4 år* och *Agg. Rank sen. året* för att snabbt hitta bolag som har haft en stark utveckling över tid eller nyligen. Detta är ett effektivt sätt att sålla fram de mest intressanta aktierna ur ett stort urval.
+
+        - **Detaljerad filtrering på kategori- och nyckeltalsnivå:** Expandera *Utökade filter* för att finjustera urvalet baserat på specifika finansiella kategorier (t.ex. lönsamhet, tillväxt, värdering) och enskilda nyckeltal. Du kan även filtrera på både trend (utveckling över flera år) och senaste års värden.
+
+        - **Jämför tillväxt och värdering:** Analysera sambandet mellan tillväxtmått (t.ex. vinst per aktie, omsättning) och aktiens kursutveckling. Du kan t.ex. identifiera bolag där vinsten har ökat kraftigt, men aktiekursen inte hängt med – vilket kan indikera en undervärderad aktie.
+
+        - **Teknisk analys med SMA-differenser:** Filtrera på skillnader mellan kurs och glidande medelvärden (SMA) för att hitta aktier i tekniska trendlägen, t.ex. när kursen bryter upp över ett medelvärde.
+
+        - **Sektor- och listajämförelser:** Begränsa urvalet till specifika sektorer eller listor för att jämföra bolag inom samma bransch eller marknadssegment.
+
+        - **Bygg en personlig bevakningslista:** Markera intressanta aktier i tabellen och spara dem i din shortlist för vidare analys och export.
+
+        - **Djupanalys av enskilda aktier:** Välj en aktie för att se detaljerad information om kursutveckling, utdelningar, tillväxt, rank per kategori och nyckeltal samt jämförelser mot andra bolag.
+
+        **Tips:** Kombinera olika filter och visualiseringar för att hitta bolag som passar just din strategi – oavsett om du söker stabil tillväxt, värdecase, turnaround-kandidater eller tekniska trendbrott.
+        """
+    )
 # Logga miljö och path för felsökning
 st.write(f"Running in environment: {ENVIRONMENT}, using CSV path: {CSV_PATH}")
 # =============================
@@ -1009,7 +1027,7 @@ try:
                         title=f"Pris & Volym för {selected_stock_dict['Name']} ({selected_stock_ticker})",
                         xaxis_title="Datum",
                         yaxis_title="Pris",
-                        hovermode="x unified",
+                        hovermode=False,  # Disable all hover interactions
                         legend_title="Legend",
                         height=500,
                         yaxis2=dict(title="Volym", overlaying="y", side="right", showgrid=False),
@@ -1023,6 +1041,10 @@ try:
                             borderwidth=1
                         )
                     )
+
+                    # Remove hover for all traces
+                    for trace in fig.data:
+                        trace.update(hoverinfo="skip", hovertemplate=None)
 
                     st.plotly_chart(fig, use_container_width=True)
                 else:
