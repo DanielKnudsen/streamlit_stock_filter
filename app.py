@@ -246,10 +246,6 @@ try:
         # --- Filtrera efter tillväxt över 4 år ---
         st.markdown("##### Filtrera efter genomsnittlig tillväxt")
 
-        cagr_dimension = config.get("cagr_dimension")
-        cagr_dimension_cleaned = [f"cagr{item.replace(' ', '_')}" for item in cagr_dimension]
-        cagr_dimension_cleaned.insert(0, "cagr_close")  # Add cagr_close for consistency
-
         cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
 
         with cagr_left:
