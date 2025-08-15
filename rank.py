@@ -977,6 +977,7 @@ if __name__ == "__main__":
 
             # Step 3: Calculate ratios and rankings
             raw_financial_data_quarterly_summarized=summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
+            save_raw_data_to_csv(raw_financial_data_quarterly_summarized, CSV_PATH / "raw_financial_data_quarterly_summarized.csv")
 
             calculated_ratios_quarterly = calculate_all_ratios(raw_financial_data_quarterly_summarized, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios_quarterly, CSV_PATH / "calculated_ratios_quarterly.csv", period_type="quarterly")
