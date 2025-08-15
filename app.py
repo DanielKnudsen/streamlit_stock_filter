@@ -1195,12 +1195,12 @@ try:
                                 trend_rank_col = f"{base_ratio}_trend_ratioRank"
                                 TTM_col = f"{base_ratio}_TTM"
                                 TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
-                                TTM_pct = f"{base_ratio}_TTM_pct"
-                                TTM_pct_value = df_new_ranks.loc[selected_stock_ticker, TTM_pct] if TTM_pct in df_new_ranks.columns else None
+                                TTM_diff = f"{base_ratio}_TTM_diff"
+                                TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
                                 # st.write("All columns:", df_new_ranks.columns.tolist())
                                 # st.write(f"Looking for TTM_col:{TTM_col}", TTM_col in df_new_ranks.columns)
                                 # st.write("TTM_value:", TTM_value)
-                                # st.write("TTM_pct_value:", TTM_pct_value)
+                                # st.write("TTM_diff_value:", TTM_diff_value)
                                 with cols[idx]:
                                     if year_cols_last4:
                                         values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
@@ -1218,9 +1218,9 @@ try:
                                             bar_y.append(TTM_value)
                                             bar_colors.append('gold')
                                             # Add percent diff to TTM bar text
-                                            if TTM_pct_value is not None and not pd.isna(TTM_pct_value):
-                                                pct_text = f"{TTM_pct_value:+.1%}"
-                                                bar_text.append(f"{TTM_value:.2f}")#\n({pct_text})") # need to fix per cent calculation to get it right
+                                            if TTM_diff_value is not None and not pd.isna(TTM_diff_value):
+                                                pct_text = f"{TTM_diff_value:+.2f}"
+                                                bar_text.append(f"{TTM_value:.2f}\n({pct_text})") # need to fix per cent calculation to get it right
                                             else:
                                                 bar_text.append(f"{TTM_value:.2f}")
                                         # If no TTM, just fill bar_text to match bar_y
@@ -1259,14 +1259,15 @@ try:
                                                 showlegend=False
                                             ))
                                         # Add annotation above TTM bar if available
-                                        if ttm_label and TTM_value is not None and not pd.isna(TTM_value) and TTM_pct_value is not None and not pd.isna(TTM_pct_value):
-                                            pct_text = f"{TTM_pct_value:+.1%}"
+                                        if ttm_label and TTM_value is not None and not pd.isna(TTM_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
+                                            pct_text = f"{TTM_diff_value:+.2f}"
                                             # Use higher_is_better to determine color
                                             if higher_is_better:
-                                                color = "green" if TTM_pct_value >= 0 else "red"
+                                                color = "green" if TTM_diff_value >= 0 else "red"
                                             else:
-                                                color = "red" if TTM_pct_value >= 0 else "green"
-                                            #fig.add_annotation(x=ttm_label,y=TTM_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=20) # annotation for pct change for TTM
+                                                color = "red" if TTM_diff_value >= 0 else "green"
+                                            y_shift = 20 if TTM_value >= 0 else -20
+                                            fig.add_annotation(x=ttm_label,y=TTM_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=y_shift) # annotation for pct change for TTM
                                         fig.update_layout(title=f"{base_ratio}",
                                                         height=250,
                                                         margin=dict(l=10, r=10, t=30, b=10),
