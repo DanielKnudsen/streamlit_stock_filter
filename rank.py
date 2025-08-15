@@ -430,7 +430,7 @@ def aggregate_category_ranks(ranked_ratios, category_ratios):
 
     return df_agg.to_dict(orient='index')
 
-def combine_all_results(calculated_ratios, ranked_ratios, category_scores, cluster_ranks, rank_decimals):
+def combine_all_results(calculated_ratios, ranked_ratios, category_scores, cluster_ranks):
     """
     Slår ihop alla resultat till en enda DataFrame.
     """
@@ -445,6 +445,8 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     df_tickers = pd.read_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_latest_report_dates = pd.read_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
+    df_latest_report_dates_quarterly = pd.read_csv(CSV_PATH / "latest_report_dates_quarterly.csv", index_col='Ticker')
+
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
     # Read the quarterly calculated ratios CSV (long format)
@@ -456,14 +458,8 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     # Optional: ensure index is string type for consistency
     df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
 
-    final_df = pd.concat([df_tickers,df_calculated, df_calculated_quarterly,df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates, df_long_business_summary], axis=1)
-    # Force index to string type
-    final_df.index = final_df.index.astype(str)
-    final_df['Name'] = final_df['Name'].astype(str)
-    # Round all columns containing "Rank" to 1 decimal
-    for col in final_df.columns:
-        if "Rank" in col:
-            final_df[col] = final_df[col].round(rank_decimals)
+    final_df = pd.concat([df_tickers,df_calculated, df_calculated_quarterly,df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates,df_latest_report_dates_quarterly, df_long_business_summary], axis=1)
+
     return final_df#.sort_values(by='Total_Score', ascending=False)
 
 def save_results_to_csv(results_df, file_path):
@@ -506,12 +502,12 @@ def save_longBusinessSummary_to_csv(raw_data, csv_file_path):
     
     df.to_csv(csv_file_path, index=False)
 
-def save_latest_report_dates_to_csv(raw_data, csv_file_path):
+def save_latest_report_dates_to_csv(raw_data, csv_file_path,period_type="Y"):
     df = pd.DataFrame()
     for ticker, data in raw_data.items():
         if 'latest_report_date' in data:
             report_date = data['latest_report_date']
-            df_temp = pd.DataFrame({'Ticker': [ticker], 'LatestReportDate': [report_date]})
+            df_temp = pd.DataFrame({'Ticker': [ticker], f'LatestReportDate_{period_type}': [report_date]})
             df = pd.concat([df, df_temp], ignore_index=True)
         else:
             print(f"Warning: No latest_report_date for {ticker}. Skipping.")
@@ -866,6 +862,48 @@ def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly):
             summarized[segment] = pd.DataFrame([agg_dict], index=[latest_idx])
         summarized_data[ticker] = summarized
     return summarized_data
+
+def post_processing(final_df, rank_decimals):
+    def get_quarter(dt):
+        if pd.isnull(dt):
+            return None
+        return (dt.month - 1) // 3 + 1
+
+    def quarter_diff(row):
+        if pd.isnull(row['LatestReportDate_Q']) or pd.isnull(row['LatestReportDate_Y']):
+            return None
+        y1, q1 = row['LatestReportDate_Y'].year, get_quarter(row['LatestReportDate_Y'])
+        y2, q2 = row['LatestReportDate_Q'].year, get_quarter(row['LatestReportDate_Q'])
+        return (y2 - y1) * 4 + (q2 - q1)
+    
+    # Parse dates
+    final_df['LatestReportDate_Q'] = pd.to_datetime(final_df['LatestReportDate_Q'], errors='coerce')
+    final_df['LatestReportDate_Y'] = pd.to_datetime(final_df['LatestReportDate_Y'], errors='coerce')
+
+    # Calculate quarter difference
+    final_df['QuarterDiff'] = final_df.apply(quarter_diff, axis=1)
+    
+    
+    
+    all_ratios = []
+    for category, ratios in config['kategorier'].items():
+        all_ratios.extend(ratios)
+
+    for ratio in all_ratios:
+        final_df[f'{ratio}_TTM_pct'] = (final_df[f'{ratio}_TTM'] - final_df[f'{ratio}_latest_ratioValue']) / final_df[f'{ratio}_latest_ratioValue']
+    # ROE_latest_ratioValue
+    # ROE_TTM
+
+
+    # Force index to string type
+    final_df.index = final_df.index.astype(str)
+    final_df['Name'] = final_df['Name'].astype(str)
+    # Round all columns containing "Rank" to 1 decimal
+    for col in final_df.columns:
+        if "Rank" in col:
+            final_df[col] = final_df[col].round(rank_decimals)
+    return final_df
+
 # --- Main Execution ---
 
 if __name__ == "__main__":
@@ -903,7 +941,7 @@ if __name__ == "__main__":
 
             else:
                 # Load raw financial data from pickle file
-                print("Loading raw financial data from pickle...")
+                print("Loading raw financial data from pickles...")
                 try:
                     with open(CSV_PATH / "raw_financial_data.pkl", "rb") as f:
                         raw_financial_data = pickle.load(f)
@@ -922,7 +960,8 @@ if __name__ == "__main__":
             save_raw_data_to_csv(raw_financial_data_quarterly, CSV_PATH / "raw_financial_data_quarterly.csv")
             save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
             save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
-            save_latest_report_dates_to_csv(raw_financial_data, CSV_PATH / "latest_report_dates.csv")
+            save_latest_report_dates_to_csv(raw_financial_data, CSV_PATH / "latest_report_dates.csv", period_type="Y")
+            save_latest_report_dates_to_csv(raw_financial_data_quarterly, CSV_PATH / "latest_report_dates_quarterly.csv", period_type="Q")
 
             # Step 2: Fetch and process stock price data
             
@@ -963,13 +1002,14 @@ if __name__ == "__main__":
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
             # Step 6: Combine all results and save final output
-            final_results = combine_all_results(
+            combined_results = combine_all_results(
                 calculated_ratios,
                 ranked_ratios,
                 category_ranks,
-                cluster_ranks,
-                config["rank_decimals"]
+                cluster_ranks
             )
+
+            final_results=post_processing(combined_results,config["rank_decimals"])
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
 
             print(f"Stock evaluation completed and saved to {CSV_PATH / config['results_file']}")
