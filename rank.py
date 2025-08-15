@@ -890,7 +890,7 @@ def post_processing(final_df, rank_decimals):
         all_ratios.extend(ratios)
 
     for ratio in all_ratios:
-        final_df[f'{ratio}_TTM_pct'] = (final_df[f'{ratio}_TTM'] - final_df[f'{ratio}_latest_ratioValue']) / final_df[f'{ratio}_latest_ratioValue']
+        final_df[f'{ratio}_TTM_diff'] = (final_df[f'{ratio}_TTM'] - final_df[f'{ratio}_latest_ratioValue'])
     # ROE_latest_ratioValue
     # ROE_TTM
 
