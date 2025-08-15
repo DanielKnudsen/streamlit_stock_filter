@@ -446,6 +446,7 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_latest_report_dates = pd.read_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_latest_report_dates_quarterly = pd.read_csv(CSV_PATH / "latest_report_dates_quarterly.csv", index_col='Ticker')
+    df_ttm_values = pd.read_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
 
     df_last_SMA = pd.read_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = pd.read_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
@@ -458,7 +459,7 @@ def combine_all_results(calculated_ratios, ranked_ratios, category_scores, clust
     # Optional: ensure index is string type for consistency
     df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
 
-    final_df = pd.concat([df_tickers,df_calculated, df_calculated_quarterly,df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates,df_latest_report_dates_quarterly, df_long_business_summary], axis=1)
+    final_df = pd.concat([df_tickers,df_calculated, df_calculated_quarterly,df_ranked, df_scores, df_last_SMA, df_cluster_ranks,df_agr,df_agr_dividends,df_latest_report_dates,df_latest_report_dates_quarterly,df_ttm_values, df_long_business_summary], axis=1)
 
     return final_df#.sort_values(by='Total_Score', ascending=False)
 
@@ -787,7 +788,6 @@ def calculate_agr_dividend_for_ticker(csv_path, tickers, n_years=4):
 
     return agr_results
 
-
 def save_agr_results_to_csv(agr_results, csv_file_path):
     """
     Sparar AGR-resultat till en CSV-fil.
@@ -904,6 +904,50 @@ def post_processing(final_df, rank_decimals):
             final_df[col] = final_df[col].round(rank_decimals)
     return final_df
 
+def extract_ttm_values(csv_path, agr_dimensions,file_path):
+    """
+    Extracts the TTM (Trailing Twelve Months) values for each ticker and metric listed in agr_dimensions
+    from the summarized quarterly raw financial data CSV (wide format).
+    Saves the results to a CSV file named 'ttm_values.csv' in the same directory as csv_path.
+    """
+    df = pd.read_csv(csv_path, index_col='Ticker')
+    ttm_values = {}
+    for ticker in df.index:
+        ttm_values[ticker] = {}
+        for dim in agr_dimensions:
+            # Replace spaces with underscores to match column names if needed
+            col_name = dim.replace(" ", "_")
+            # Try both original and underscored column names
+            if dim in df.columns:
+                ttm_values[ticker][f"{col_name}_TTM"] = df.loc[ticker, dim]
+            elif col_name in df.columns:
+                ttm_values[ticker][f"{col_name}_TTM"] = df.loc[ticker, col_name]
+            else:
+                ttm_values[ticker][f"{col_name}_TTM"] = None
+    # Save to CSV
+    ttm_df = pd.DataFrame.from_dict(ttm_values, orient='index')
+    ttm_df.to_csv(file_path)
+    print(f"TTM values extracted and saved to {file_path}")
+    return ttm_values
+
+def filter_metrics_for_agr_dimensions(csv_path, agr_dimensions, output_path=None):
+    """
+    For each ticker, filter the 'Metric' column for each value in the list agr_dimensions.
+    Returns a DataFrame with only those rows. Optionally saves to output_path if provided.
+    """
+    df = pd.read_csv(csv_path)
+    # Normalize agr_dimensions to match possible column values (spaces/underscores)
+    agr_set = set(agr_dimensions) | set([dim.replace(' ', '_') for dim in agr_dimensions])
+    filtered = df[df['Metric'].isin(agr_set)]
+    
+    # Pivot: Ticker as index, Metric as columns, Value as values
+    filtered_pivot = filtered.pivot(index='Ticker', columns='Metric', values='Value')
+    # fill spaces in column names with "_" and add "<_TTM>"
+    filtered_pivot.columns = filtered_pivot.columns.str.replace(' ', '_') + "_TTM"
+    if output_path:
+        filtered_pivot.to_csv(output_path, index=True)
+    return filtered
+
 # --- Main Execution ---
 
 if __name__ == "__main__":
@@ -1002,7 +1046,12 @@ if __name__ == "__main__":
             agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 4))
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
-            # Step 6: Combine all results and save final output
+            # Step 6: Extract TTM values for agr dimensions
+            filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
+                               config['agr_dimensions'],
+                               CSV_PATH / "ttm_values.csv")
+
+            # Step 7: Combine all results and save final output
             combined_results = combine_all_results(
                 calculated_ratios,
                 ranked_ratios,
