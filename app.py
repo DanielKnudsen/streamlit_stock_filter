@@ -118,6 +118,7 @@ def get_ratio_help_text(var_name):
 # LOAD DATA
 # =============================
 try:
+
     # Load main stock evaluation CSV (index_col=0 sets Ticker as index)
     df_new_ranks = pd.read_csv(CSV_PATH / config["results_file"], index_col=0)
     df_dividends = pd.read_csv(CSV_PATH / "dividends.csv", index_col='Ticker')
@@ -1436,8 +1437,8 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10)
                     )
                     st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
-                    with st.expander(f"🛟 **Hjälp om  {display_ratio}**"):
-                        st.write(get_ratio_help_text(display_rank))
+                    with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}**"):
+                        st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
 
                 elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
                     st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
