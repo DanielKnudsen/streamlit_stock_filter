@@ -14,7 +14,12 @@ if Path('.env').exists():
 # Bestäm miljön (default till 'local')
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
 
-def Create_df_tickers(path_file_name:str):
+def Create_df_tickers(path_file_name: str) -> None:
+    """Scrape tickers from DI.se for all markets and sectors and save to CSV.
+
+    Args:
+        path_file_name (str): Path to the output CSV file.
+    """
 
     markets = {'LargeCap':['35207'],
                 'MidCap':['35208'],
@@ -36,7 +41,15 @@ def Create_df_tickers(path_file_name:str):
             'Teknik':'13',
             'Telekommunikation':'14'}
     
-    def get_tickers_from_list(links:list):
+    def get_tickers_from_list(links: list) -> list:
+        """Extract ticker symbols from a list of DI.se aktier links.
+
+        Args:
+            links (list): List of URL strings.
+
+        Returns:
+            list: List of ticker symbols.
+        """
         prefix = "/bors/aktier/"
         undantag = "investor-relations"
         kort_undantag = "/bors/aktier/" 
@@ -49,7 +62,15 @@ def Create_df_tickers(path_file_name:str):
         tickers = [item.split('/')[3].split('-')[0] if len(item.split('/')[3].split('-')) == 1 else '-'.join(item.split('/')[3].split('-')[:-1]) for item in resultat]
         return tickers
         
-    def skrapa_uppdelad_tabell(url):
+    def skrapa_uppdelad_tabell(url: str) -> pd.DataFrame:
+        """Scrape a table of stock names and URLs from a DI.se aktier page.
+
+        Args:
+            url (str): URL to scrape.
+
+        Returns:
+            pd.DataFrame: DataFrame with columns 'text' and 'url'.
+        """
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -107,6 +128,7 @@ def Create_df_tickers(path_file_name:str):
     df_tickers.to_csv(path_file_name, index=False, encoding='utf-8-sig')
 
 if __name__ == "__main__":
+    """Main entry point for scraping tickers and saving to CSV using config."""
     config = load_config("rank-config.yaml")
     if config:
         CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
