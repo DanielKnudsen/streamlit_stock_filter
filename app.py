@@ -9,8 +9,6 @@ from pathlib import Path
 from rank import load_config
 import datetime
 
-
-
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
 # =====================================================================
@@ -31,9 +29,15 @@ CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 # =============================
 # STREAMLIT APPLICATION
 # =============================
-st.set_page_config(layout="wide", page_title="Indicatum Insights", page_icon="📈")
 
 st.title("📈 Indicatum Insights")
+# Allow user to toggle between "wide" and "centered" layout
+layout_mode = st.toggle("Bredd layout (wide)?", value=True)
+st.set_page_config(
+    layout="wide" if layout_mode else "centered",
+    page_title="Indicatum Insights",
+    page_icon="📈"
+)
 with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)", expanded=False):
     st.markdown(
         """
@@ -114,6 +118,19 @@ def get_tooltip_text(var_name):
 def get_ratio_help_text(var_name):
     # Try to get a help text, fallback to an empty string
     return ratio_help_texts.get(var_name, "")
+
+# Format the annotation value to be more readable (e.g., 60B instead of 60096000000.0)
+def human_format(num):
+    if num is None or pd.isna(num):
+        return "N/A"
+    num = float(num)
+    # Use Swedish units: '', 't', 'Mkr', 'Mdkr', 'Bnkr'
+    for unit in ['', ' t', ' Mkr', ' Mdkr', ' Bnkr']:
+        if abs(num) < 1000.0:
+            return f"{num:.1f}{unit}"
+        num /= 1000.0
+    return f"{num:.1f} Bnkr"
+
 # =============================
 # LOAD DATA
 # =============================
@@ -739,7 +756,7 @@ try:
                     st.write(f"**Ticker:**   \n{selected_stock_ticker}")
                     st.write(f"**Lista:**   \n{selected_stock_lista}")
                     st.write(f"**Sektor:**   \n{selected_stock_sektor}")
-                    st.write(f"**Marknadsvärde:**   \n{selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A'}")
+                    st.write(f"**Marknadsvärde:**   \n{human_format(selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A')}")
                     st.write(f"**Senaste årsrapport:**   \n{selected_stock_dict['LatestReportDate_Y'] if 'LatestReportDate_Y' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Senaste kvartalsrapport:**   \n{selected_stock_dict['LatestReportDate_Q'] if 'LatestReportDate_Q' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Antal kvartalsrapporter efter årsrapport:**   \n{selected_stock_ttm_offset}")
@@ -770,7 +787,8 @@ try:
                                 xaxis_title="År",
                                 yaxis_title="SEK",
                                 height=150,
-                                margin=dict(l=10, r=10, t=40, b=10)
+                                margin=dict(l=10, r=10, t=40, b=10),
+                                xaxis=dict(type='category')
                             )
                             st.plotly_chart(fig_div, use_container_width=True, key=f"dividends_bar_{selected_stock_ticker}")
                         else:
@@ -815,7 +833,7 @@ try:
                                 yshift=20
                             )
                     fig_cagr.update_layout(
-                        title=f"CAGR över 4 år för {selected_stock_dict['Name']} ({selected_stock_ticker})",
+                        title=f"Genomsnittlig förändring över 4 år för {selected_stock_dict['Name']} ({selected_stock_ticker})",
                         xaxis_title="Mått",
                         yaxis_title="Procent",
                         height=350,
@@ -823,98 +841,90 @@ try:
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
                     st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
-                with st.expander("**Detaljerad CAGR-data:**", expanded=False):
+                with st.expander("**Detaljerad tillväxtdata inkl TTM:**", expanded=True):
+                    def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, TTM_diff_value,higher_is_better):
+                        year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
+                        year_cols = [col for col in year_cols if not pd.isna(df.loc[selected_stock_ticker, col])]
+                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
+                        year_cols_last4 = year_cols_sorted[-4:]
+                        higher_is_better = True if higher_is_better is None else higher_is_better
+                        if year_cols_last4:
+                            values = df.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
+                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
+                            fig = go.Figure()
+                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                            bar_text = [f"{human_format(v)}" for v in values]
+                            if ttm_value is not None and ttm_value > 0:
+                                colors.append('gold')
+                                values = np.append(values, ttm_value)
+                                TTM_label = f'TTM (+{ttm_q_offset}Q)'
+                                years.append(TTM_label)
+                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio,text=bar_text, showlegend=False))
+                            fig.add_trace(go.Scatter(
+                                x=[years[0], years[-1 if ttm_value is None else -2]],
+                                y=[values[0], values[-1 if ttm_value is None else -2]],
+                                mode='lines',
+                                name='Trend',
+                                line=dict(color='#888888', dash='dot', width=6),
+                                showlegend=False
+                            ))
+                                    # add trendline between last full year and TTM
+                            if ttm_value is not None and not pd.isna(ttm_value):
+                                fig.add_trace(go.Scatter(
+                                    x=[years[-2], TTM_label],
+                                    y=[values[-2], ttm_value],
+                                    mode='lines',
+                                    name='Trend',
+                                    line=dict(color="#0D0D0D", dash='dot', width=6),
+                                    showlegend=False
+                                ))
+                            if ttm_value is not None and not pd.isna(ttm_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
+                                pct_text = f"{TTM_diff_value:+.2f}"
+                                # Use higher_is_better to determine color
+                                if higher_is_better:
+                                    color = "green" if TTM_diff_value >= 0 else "red"
+                                else:
+                                    color = "red" if TTM_diff_value >= 0 else "green"
+                                y_shift = 20 if ttm_value >= 0 else -20
 
+                                fig.add_annotation(
+                                    x=TTM_label,
+                                    y=ttm_value,
+                                    text=f"{human_format(ttm_value)}",
+                                    showarrow=False,
+                                    font=dict(color=color, size=14, family="Arial"),
+                                    yshift=y_shift
+                                ) # annotation for pct change for TTM
+                            fig.update_layout(title=f"{base_ratio}", 
+                                            height=250, 
+                                            yaxis_title="SEK",
+                                            margin=dict(l=10, r=10, t=30, b=10), 
+                                            showlegend=False,
+                                            xaxis=dict(type='category'))
+                            st.plotly_chart(fig, use_container_width=True, key=f"{key_prefix}_{base_ratio}_cagr_bar")
                     left_col, middle_col, right_col = st.columns(3, gap='medium', border=False)
                     base_ratio_left = allCols_AvgGrowth[0].replace("_AvgGrowth", "")  # Use the first column as base for left side
                     base_ratio_middle = allCols_AvgGrowth[1].replace("_AvgGrowth", "")  # Use the second column as base for middle
                     base_ratio_right = allCols_AvgGrowth[2].replace("_AvgGrowth", "")  # Use the third column as base for right
 
                     with left_col:
-                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_left + '_year_')]
-                        # Filter out columns where the value for the selected stock is NaN
-                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
-                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
-                        year_cols_last4 = year_cols_sorted[-4:]
-                    
-                        if year_cols_last4:
-                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
-                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                            fig = go.Figure()  
-                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
-                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_left, showlegend=False))
-                            # Draw a line from the top of the first bar to the top of the last bar
-                            fig.add_trace(go.Scatter(
-                                x=[years[0], years[-1]],
-                                y=[values[0], values[-1]],
-                                mode='lines',
-                                name='Trend',
-                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
-                                showlegend=False
-                            ))
-                            fig.update_layout(title=f"{base_ratio_left}", 
-                                            height=250, 
-                                            margin=dict(l=10, r=10, t=30, b=10), 
-                                            showlegend=False)
-
-                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_left}_cagr_bar")
+                        TTM_col = f"{base_ratio_left}_TTM"
+                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
+                        TTM_diff = f"{base_ratio_left}_TTM_diff"
+                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_left, "left", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
                     with middle_col:
-                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_middle + '_year_')]
-                        # Filter out columns where the value for the selected stock is NaN
-                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
-                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
-                        year_cols_last4 = year_cols_sorted[-4:]
-                    
-                        if year_cols_last4:
-                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
-                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                            fig = go.Figure()  
-                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
-                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_middle, showlegend=False))
-                            # Draw a line from the top of the first bar to the top of the last bar
-                            fig.add_trace(go.Scatter(
-                                x=[years[0], years[-1]],
-                                y=[values[0], values[-1]],
-                                mode='lines',
-                                name='Trend',
-                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
-                                showlegend=False
-                            ))
-                            fig.update_layout(title=f"{base_ratio_middle}", 
-                                            height=250, 
-                                            margin=dict(l=10, r=10, t=30, b=10), 
-                                            showlegend=False)
-
-                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_middle}_cagr_bar")
-
-
+                        TTM_col = f"{base_ratio_middle}_TTM"
+                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
+                        TTM_diff = f"{base_ratio_middle}_TTM_diff"
+                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_middle, "middle", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
                     with right_col:
-                        year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio_right + '_year_')]
-                        # Filter out columns where the value for the selected stock is NaN
-                        year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
-                        year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
-                        year_cols_last4 = year_cols_sorted[-4:]
-                    
-                        if year_cols_last4:
-                            values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
-                            years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                            fig = go.Figure()  # Detta gör grafen statisk
-                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
-                            fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio_right, showlegend=False))
-                            fig.add_trace(go.Scatter(
-                                x=[years[0], years[-1]] ,
-                                y=[values[0], values[-1]],
-                                mode='lines', 
-                                name='Trend',
-                                line=dict(color='#888888', dash='dot', width=6),  # Medium-dark gray
-                                showlegend=False
-                            ))
-                            fig.update_layout(title=f"{base_ratio_right}", 
-                                            height=250, 
-                                            margin=dict(l=10, r=10, t=30, b=10), 
-                                            showlegend=False)
-
-                            st.plotly_chart(fig, use_container_width=True, key=f"{base_ratio_right}_cagr_bar")
+                        TTM_col = f"{base_ratio_right}_TTM"
+                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
+                        TTM_diff = f"{base_ratio_right}_TTM_diff"
+                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_right, "right", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
 
         with st.container(border=True, key="stock_price_trend_container"):
             st.subheader("Kursutveckling och Trendlinje")
@@ -1211,11 +1221,11 @@ try:
                                         bar_y = list(values)
                                         bar_colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
                                         bar_text = [f"{v:.2f}" for v in bar_y]
-                                        ttm_label = None
+                                        TTM_label = None
                                         # Add TTM if available
                                         if TTM_value is not None and not pd.isna(TTM_value):
-                                            ttm_label = f'TTM (+{selected_stock_ttm_offset}Q)'
-                                            bar_x.append(ttm_label)
+                                            TTM_label = f'TTM (+{selected_stock_ttm_offset}Q)'
+                                            bar_x.append(TTM_label)
                                             bar_y.append(TTM_value)
                                             bar_colors.append('gold')
                                             # Add percent diff to TTM bar text
@@ -1250,9 +1260,9 @@ try:
                                             trend_vals = values
 
                                         # add trendline between last full year and TTM
-                                        if ttm_label and TTM_value is not None and not pd.isna(TTM_value):
+                                        if TTM_label and TTM_value is not None and not pd.isna(TTM_value):
                                             fig.add_trace(go.Scatter(
-                                                x=[years[-1], ttm_label],
+                                                x=[years[-1], TTM_label],
                                                 y=[values[-1], TTM_value],
                                                 mode='lines',
                                                 name='Trend',
@@ -1260,7 +1270,7 @@ try:
                                                 showlegend=False
                                             ))
                                         # Add annotation above TTM bar if available
-                                        if ttm_label and TTM_value is not None and not pd.isna(TTM_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
+                                        if TTM_label and TTM_value is not None and not pd.isna(TTM_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
                                             pct_text = f"{TTM_diff_value:+.2f}"
                                             # Use higher_is_better to determine color
                                             if higher_is_better:
@@ -1268,15 +1278,15 @@ try:
                                             else:
                                                 color = "red" if TTM_diff_value >= 0 else "green"
                                             y_shift = 20 if TTM_value >= 0 else -20
-                                            fig.add_annotation(x=ttm_label,y=TTM_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=y_shift) # annotation for pct change for TTM
+                                            fig.add_annotation(x=TTM_label,y=TTM_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=y_shift) # annotation for pct change for TTM
                                         fig.update_layout(title=f"{base_ratio}",
                                                         height=250,
                                                         margin=dict(l=10, r=10, t=30, b=10),
                                                         showlegend=False,
                                                         xaxis=dict(type='category'))
                                         st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
-                                        latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
-                                        trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
+                                        #latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
+                                        #trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
                                     else:
                                         st.warning(f"Ingen data för de senaste 4 åren för {base_ratio}. Trend Rank och Latest Rank sätts till 50 (neutral).")
                                     # Bullet plots for the two ranks in two columns: trend (left), latest (right)
