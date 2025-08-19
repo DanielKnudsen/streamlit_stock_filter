@@ -340,14 +340,6 @@ def calculate_all_ratios(raw_data, ratio_definitions):
 
         calculated_ratios[ticker] = ratios
 
-    # Konvertera calculated_ratios till en DataFrame och spara till CSV
-    """df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    try:
-        df.to_csv(output_csv)
-        print(f"Resultat sparade till {output_csv}")
-    except Exception as e:
-        print(f"Fel vid skrivning till CSV {output_csv}: {e}")"""
-
     return calculated_ratios
 
 def rank_all_ratios(calculated_ratios, ratio_definitions):
@@ -376,6 +368,15 @@ def rank_all_ratios(calculated_ratios, ratio_definitions):
             ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
             for ticker, rank in ranked.items():
                 ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank if not pd.isna(rank) else np.nan
+        
+        elif column.endswith('_TTM'):
+            ratio_name = column.replace('_TTM', '')
+            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
+            
+            ranked = df[column].rank(pct=True, ascending=is_better) * 100
+            ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
+            for ticker, rank in ranked.items():
+                ranked_ratios[ticker][f'{ratio_name}_TTM_ratioRank'] = rank if not pd.isna(rank) else np.nan
 
     return ranked_ratios
 
@@ -863,7 +864,7 @@ def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly):
         summarized_data[ticker] = summarized
     return summarized_data
 
-def post_processing(final_df, rank_decimals):
+def post_processing(final_df, rank_decimals, ratio_definitions):
     def get_quarter(dt):
         if pd.isnull(dt):
             return None
@@ -884,7 +885,6 @@ def post_processing(final_df, rank_decimals):
     final_df['QuarterDiff'] = final_df.apply(quarter_diff, axis=1)
     
     
-    
     all_ratios = []
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(ratios)
@@ -894,6 +894,30 @@ def post_processing(final_df, rank_decimals):
     # ROE_latest_ratioValue
     # ROE_TTM
 
+    for agr_temp in config['agr_dimensions']:
+        agr = agr_temp.replace(" ", "_")
+        # Safely get the latest full year value for each row, handling missing columns or years
+        latest_full_year_value = final_df.apply(
+            lambda row: row.get(f"{agr}_year_{row['LatestReportDate_Y'].year}") if pd.notnull(row['LatestReportDate_Y']) and f"{agr}_year_{row['LatestReportDate_Y'].year}" in final_df.columns else np.nan,
+            axis=1
+        )
+        # Calculate TTM difference, filling missing values with NaN
+        final_df[f'{agr}_TTM_diff'] = final_df.get(f'{agr}_TTM', pd.Series(np.nan, index=final_df.index)) - latest_full_year_value
+
+    # find all columns ending with "_TTM_diff" 
+    all_ratios = []
+    for category, ratios in config['kategorier'].items():
+        all_ratios.extend(f"{ratio}_TTM_diff" for ratio in ratios)
+    #ttm_diff_columns = [col for col in final_df.columns if col.endswith('_TTM_diff')]
+    for col in all_ratios:
+        ratio_name = col.replace('_TTM_diff', '')
+        is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
+        #ascending = not is_better
+        ranked = final_df[col].rank(pct=True, ascending=is_better) * 100
+        ranked = ranked.fillna(50)  # Fyller NaN med 50 för att representera medelvärde
+        # Ensure all tickers are present in ranked_ratios, even if missing from ranked
+        # Add the TTM diff rank as a new column in final_df
+        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)
 
     # Force index to string type
     final_df.index = final_df.index.astype(str)
@@ -1059,7 +1083,7 @@ if __name__ == "__main__":
                 cluster_ranks
             )
 
-            final_results=post_processing(combined_results,config["rank_decimals"])
+            final_results=post_processing(combined_results,config["rank_decimals"],config["ratio_definitions"])
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
 
             print(f"Stock evaluation completed and saved to {CSV_PATH / config['results_file']}")
