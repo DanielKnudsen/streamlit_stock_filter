@@ -629,9 +629,9 @@ try:
 
             cols = df_display.columns.tolist()
             cols.insert(0, cols.pop(cols.index('Lista')))
-            cols.insert(0, cols.pop(cols.index('Agg. Rank ttm diff vs sen. året')))
-            cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
+            cols.insert(0, cols.pop(cols.index('Agg. Rank ttm diff')))
             cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
+            cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
             cols.insert(0, cols.pop(cols.index('Välj')))
               # Move 'Lista' to the front
@@ -1093,7 +1093,7 @@ try:
                 #st.markdown("**Trend senaste 4 åren & Senaste året**")
                 clusterRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "trend" in col.lower()}
                 df_clusterRank_trend = pd.DataFrame.from_dict(clusterRank_trend_items, orient='index', columns=['Trend Rank'])
-                df_clusterRank_trend['Kategori']= 'AGGREGERAD RANK'
+                df_clusterRank_trend['Kategori']= 'AGG. RANK'
                 catRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "trend" in col.lower()}
                 df_catRank_trend = pd.DataFrame.from_dict(catRank_trend_items, orient='index', columns=['Trend Rank']).reset_index()
                 df_catRank_trend['Kategori'] = df_catRank_trend['index'].str.replace('_trend_catRank','').str.replace('_',' ')
@@ -1101,51 +1101,57 @@ try:
 
                 clusterRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "latest" in col.lower()}
                 df_clusterRank_latest = pd.DataFrame.from_dict(clusterRank_latest_items, orient='index', columns=['Latest Rank'])
-                df_clusterRank_latest['Kategori']= 'AGGREGERAD RANK'
+                df_clusterRank_latest['Kategori']= 'AGG. RANK'
                 catRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "latest" in col.lower()}
                 df_catRank_latest = pd.DataFrame.from_dict(catRank_latest_items, orient='index', columns=['Latest Rank']).reset_index()
                 df_catRank_latest['Kategori'] = df_catRank_latest['index'].str.replace('_latest_catRank','').str.replace('_',' ')
                 df_latest_combined = pd.concat([df_catRank_latest, df_clusterRank_latest.reset_index()], ignore_index=True, sort=False)
+
+                clusterRank_ttm_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "ttm" in col.lower()}
+                df_clusterRank_ttm = pd.DataFrame.from_dict(clusterRank_ttm_items, orient='index', columns=['TTM Rank'])
+                df_clusterRank_ttm['Kategori']= 'AGG. RANK'
+                catRank_ttm_items = {col: val for col, val in selected_stock_dict.items() if "_catRank" in col and "ttm" in col.lower()}
+                df_catRank_ttm = pd.DataFrame.from_dict(catRank_ttm_items, orient='index', columns=['TTM Rank']).reset_index()
+                df_catRank_ttm['Kategori'] = df_catRank_ttm['index'].str.replace('_ttm_catRank','').str.replace('_',' ')
+                df_ttm_combined = pd.concat([df_catRank_ttm, df_clusterRank_ttm.reset_index()], ignore_index=True, sort=False)
+
                 # Merge the trend and latest DataFrames on 'Kategori'
                 df_catRank_merged = pd.merge(df_trend_combined, df_latest_combined, on='Kategori', suffixes=('_trend', '_latest'))
+                df_catRank_merged = pd.merge(df_catRank_merged, df_ttm_combined, on='Kategori', suffixes=('', '_ttm'))
                 # -------------------------------------------------------------
                 # PROGRESS BARS: LATEST AND TREND RANKINGS
                 # -------------------------------------------------------------
-                col_left, col_right = st.columns(2, gap='medium', border=False)
 
-                with col_left:
-                    st.dataframe(
-                        df_catRank_merged[['Kategori', 'Trend Rank']] # Select columns first
-                        .style.map(color_progress, subset=['Trend Rank']), # Apply progress bar coloring
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "Trend Rank": st.column_config.ProgressColumn(
-                                    "Trend Rank",
-                                    help="Rankingvärde (0-100)",
-                                    min_value=0,
-                                    max_value=100,
-                                    format="%.1f"
-                                ),
-                        }
-                    )
+                st.dataframe(
+                    df_catRank_merged[['Kategori', 'Trend Rank', 'Latest Rank', 'TTM Rank']]
+                    .style.map(color_progress, subset=['Trend Rank', 'Latest Rank', 'TTM Rank']),
+                    hide_index=True,
+                    use_container_width=True,
+                    column_config={
+                        "Trend Rank": st.column_config.ProgressColumn(
+                                "Trend Rank",
+                                help="Rankingvärde (0-100)",
+                                min_value=0,
+                                max_value=100,
+                                format="%.1f"
+                            ),
+                        "Latest Rank": st.column_config.ProgressColumn(
+                                "Latest Rank",
+                                help="Rankingvärde (0-100)",
+                                min_value=0,
+                                max_value=100,
+                                format="%.1f"
+                            ),
+                        "TTM Rank": st.column_config.ProgressColumn(
+                                "TTM Rank",
+                                help="Rankingvärde (0-100)",
+                                min_value=0,
+                                max_value=100,
+                                format="%.1f"
+                            ),
+                    }
+                )
 
-                with col_right:
-                    st.dataframe(
-                        df_catRank_merged[['Kategori', 'Latest Rank']] # Select columns first
-                        .style.map(color_progress, subset=['Latest Rank']), # Apply progress bar coloring
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "Latest Rank": st.column_config.ProgressColumn(
-                                    "Latest Rank",
-                                    help="Rankingvärde (0-100)",
-                                    min_value=0,
-                                    max_value=100,
-                                    format="%.1f"
-                                ),
-                        }
-                    )
 
                 # -------------------------------------------------------------
                 # TREND RATIO BREAKDOWN BAR CHARTS
@@ -1161,8 +1167,14 @@ try:
                 ratioRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "trend" in col.lower()}
                 df_ratioRank_trend = pd.DataFrame.from_dict(ratioRank_trend_items, orient='index', columns=['Rank']).reset_index()
                 df_ratioRank_trend['Ratio_name'] = df_ratioRank_trend['index'].str.replace('_trend_ratioRank','')
+
+                ratioRank_ttm_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "ttm" in col.lower()}
+                df_ratioRank_ttm = pd.DataFrame.from_dict(ratioRank_ttm_items, orient='index', columns=['Rank']).reset_index()
+                df_ratioRank_ttm['Ratio_name'] = df_ratioRank_ttm['index'].str.replace('_ttm_ratioRank','')
+
                 df_ratioRank_merged = pd.merge(df_ratioRank_trend, df_ratioRank_latest, on='Ratio_name', suffixes=('_trend', '_latest'))
-                df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank'}, inplace=True)
+                df_ratioRank_merged = pd.merge(df_ratioRank_merged, df_ratioRank_ttm, on='Ratio_name', suffixes=('', '_ttm'))
+                df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank', 'Rank': 'TTM Rank'}, inplace=True)
                 # Load help texts from config if available
                 #ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
                 for cat, cat_dict in category_ratios.items():
@@ -1174,7 +1186,7 @@ try:
                             st.subheader(f"{get_display_name(display_cat)}")
                             st.markdown("**Rank för Trend senaste 4 åren & Senaste året**")
                             st.dataframe(
-                                df_catRank_merged[df_catRank_merged['Kategori'] == display_cat][[ 'Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
+                                df_catRank_merged[df_catRank_merged['Kategori'] == display_cat][[ 'Trend Rank', 'Latest Rank', 'TTM Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank', 'TTM Rank']),
                                 hide_index=True,
                                 use_container_width=True,
                                 column_config={
@@ -1188,6 +1200,14 @@ try:
                                         ),
                                     "Trend Rank": st.column_config.ProgressColumn(
                                             "Trend Rank",
+                                            help="Rankingvärde (0-100)",
+                                            min_value=0,
+                                            max_value=100,
+                                            format="%.1f",
+                                            width="small"
+                                        ),
+                                    "TTM Rank": st.column_config.ProgressColumn(
+                                            "TTM Rank",
                                             help="Rankingvärde (0-100)",
                                             min_value=0,
                                             max_value=100,
@@ -1303,7 +1323,7 @@ try:
                                     # Bullet plots for the two ranks in two columns: trend (left), latest (right)
                                     #st.write(f"**{ratio}**")
                                     st.dataframe(
-                                        df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank']),
+                                        df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank','TTM Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank','TTM Rank']),
                                         hide_index=True,
                                         use_container_width=True,
                                         column_config={
@@ -1317,6 +1337,14 @@ try:
                                                 ),
                                             "Trend Rank": st.column_config.ProgressColumn(
                                                     "Trend Rank",
+                                                    #help=ratio_help_texts.get(ratio),
+                                                    min_value=0,
+                                                    max_value=100,
+                                                    format="%.1f",
+                                                    width="small"
+                                                ),
+                                            "TTM Rank": st.column_config.ProgressColumn(
+                                                    "TTM Rank",
                                                     #help=ratio_help_texts.get(ratio),
                                                     min_value=0,
                                                     max_value=100,
