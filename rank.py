@@ -9,7 +9,7 @@ from tqdm import tqdm
 from io_utils import load_yaml, load_csv, save_csv, load_pickle, save_pickle
 from data_fetcher import fetch_yfinance_data, read_tickers_from_csv, get_price_data
 from ratios import calculate_all_ratios
-from ranking import rank_all_ratios, aggregate_category_ranks, aggregate_cluster_ranks
+from ranking import rank_all_ratios, aggregate_category_ranks, aggregate_cluster_ranks, create_ratios_to_ranks
 
 # Ladda .env-filen endast om den finns
 if Path('.env').exists():
@@ -42,9 +42,7 @@ def load_config(config_file_path: str) -> Optional[Dict[str, Any]]:
 
 def combine_all_results(
     calculated_ratios: Dict[str, Dict[str, Any]],
-    ranked_ratios: Dict[str, Dict[str, Any]],
-    category_scores: Dict[str, Dict[str, Any]],
-    cluster_ranks: Dict[str, Dict[str, Any]]
+    complete_ranks: Dict[str, Dict[str, Any]]
 ) -> pd.DataFrame:
     """
     Combine all results into a single DataFrame.
@@ -59,9 +57,9 @@ def combine_all_results(
         pd.DataFrame: Combined results DataFrame.
     """
     df_calculated = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    df_ranked = pd.DataFrame.from_dict(ranked_ratios, orient='index')
-    df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
-    df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')
+    df_complete_ranks = pd.DataFrame.from_dict(complete_ranks, orient='index')
+    """df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
+    df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')"""
     df_agr = load_csv(CSV_PATH / "agr_results.csv", index_col=0)
     df_agr_dividends = load_csv(CSV_PATH / "agr_dividend_results.csv", index_col=0)
     tickers_file = CSV_PATH / config.get("input_ticker_file")
@@ -76,7 +74,7 @@ def combine_all_results(
     df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
     df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
     final_df = pd.concat([
-        df_tickers, df_calculated, df_calculated_quarterly, df_ranked, df_scores, df_last_SMA, df_cluster_ranks,
+        df_tickers, df_calculated, df_calculated_quarterly, df_complete_ranks, df_last_SMA,
         df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_ttm_values, df_long_business_summary
     ], axis=1)
     return final_df
@@ -213,14 +211,19 @@ def save_calculated_ratios_to_csv(calculated_ratios: Dict[str, Any], csv_file_pa
     df = pd.DataFrame()
     for ticker, data in calculated_ratios.items():
         if period_type == "quarterly":
-            # Only keep metrics ending with '_latest_ratioValue' and rename to '_TTM'
-            filtered_data = {k.replace('_latest_ratioValue', '_TTM'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
+            # Only keep metrics ending with '_latest_ratioValue' and rename to '_ttm'
+            filtered_data = {k.replace('_latest_ratioValue', '_ttm'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
         else:
             filtered_data = data
         df_metrics = pd.DataFrame(filtered_data, index=[ticker]).T
         df_metrics.columns = ['Values']
         df_temp = df_metrics.reset_index().rename(columns={'index': 'Metric'})
         df_temp['Ticker'] = ticker
+        # Reorder columns to put 'Ticker' first
+        cols = df_temp.columns.tolist()
+        if 'Ticker' in cols:
+            cols.insert(0, cols.pop(cols.index('Ticker')))
+            df_temp = df_temp[cols]
         df = pd.concat([df, df_temp], ignore_index=False)
     save_csv(df, csv_file_path, index=False)
 
@@ -290,7 +293,7 @@ def save_last_SMA_to_csv(read_from: str, save_to: str) -> None:
 
 def extract_ttm_values(csv_path: str, agr_dimensions: List[str], file_path: str) -> Dict[str, Dict[str, Any]]:
     """
-    Extract TTM values for each ticker and metric in agr_dimensions from summarized quarterly data and save to CSV.
+    Extract ttm values for each ticker and metric in agr_dimensions from summarized quarterly data and save to CSV.
 
     Args:
         csv_path (str): Path to the summarized quarterly data CSV.
@@ -298,7 +301,7 @@ def extract_ttm_values(csv_path: str, agr_dimensions: List[str], file_path: str)
         file_path (str): Path to the output CSV file.
 
     Returns:
-        Dict[str, Dict[str, Any]]: TTM values per ticker and metric.
+        Dict[str, Dict[str, Any]]: ttm values per ticker and metric.
     """
     df = load_csv(csv_path, index_col='Ticker')
     ttm_values = {}
@@ -309,15 +312,15 @@ def extract_ttm_values(csv_path: str, agr_dimensions: List[str], file_path: str)
             col_name = dim.replace(" ", "_")
             # Try both original and underscored column names
             if dim in df.columns:
-                ttm_values[ticker][f"{col_name}_TTM"] = df.loc[ticker, dim]
+                ttm_values[ticker][f"{col_name}_ttm"] = df.loc[ticker, dim]
             elif col_name in df.columns:
-                ttm_values[ticker][f"{col_name}_TTM"] = df.loc[ticker, col_name]
+                ttm_values[ticker][f"{col_name}_ttm"] = df.loc[ticker, col_name]
             else:
-                ttm_values[ticker][f"{col_name}_TTM"] = None
+                ttm_values[ticker][f"{col_name}_ttm"] = None
     # Save to CSV
     ttm_df = pd.DataFrame.from_dict(ttm_values, orient='index')
     save_csv(ttm_df, file_path, index=True)
-    print(f"TTM values extracted and saved to {file_path}")
+    print(f"ttm values extracted and saved to {file_path}")
     return ttm_values
 
 def filter_metrics_for_agr_dimensions(csv_path: str, agr_dimensions: List[str], output_path: Optional[str] = None) -> pd.DataFrame:
@@ -339,8 +342,8 @@ def filter_metrics_for_agr_dimensions(csv_path: str, agr_dimensions: List[str], 
     
     # Pivot: Ticker as index, Metric as columns, Value as values
     filtered_pivot = filtered.pivot(index='Ticker', columns='Metric', values='Value')
-    # fill spaces in column names with "_" and add "<_TTM>"
-    filtered_pivot.columns = filtered_pivot.columns.str.replace(' ', '_') + "_TTM"
+    # fill spaces in column names with "_" and add "<_ttm>"
+    filtered_pivot.columns = filtered_pivot.columns.str.replace(' ', '_') + "_ttm"
     if output_path:
         save_csv(filtered_pivot, output_path, index=True)
     return filtered
@@ -536,19 +539,19 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(ratios)
     for ratio in all_ratios:
-        final_df[f'{ratio}_TTM_diff'] = (final_df[f'{ratio}_TTM'] - final_df[f'{ratio}_latest_ratioValue'])
+        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm'] - final_df[f'{ratio}_latest_ratioValue'])
     for agr_temp in config['agr_dimensions']:
         agr = agr_temp.replace(" ", "_")
         latest_full_year_value = final_df.apply(
             lambda row: row.get(f"{agr}_year_{row['LatestReportDate_Y'].year}") if pd.notnull(row['LatestReportDate_Y']) and f"{agr}_year_{row['LatestReportDate_Y'].year}" in final_df.columns else np.nan,
             axis=1
         )
-        final_df[f'{agr}_TTM_diff'] = final_df.get(f'{agr}_TTM', pd.Series(np.nan, index=final_df.index)) - latest_full_year_value
+        final_df[f'{agr}_ttm_diff'] = final_df.get(f'{agr}_ttm', pd.Series(np.nan, index=final_df.index)) - latest_full_year_value
     all_ratios = []
     for category, ratios in config['kategorier'].items():
-        all_ratios.extend(f"{ratio}_TTM_diff" for ratio in ratios)
+        all_ratios.extend(f"{ratio}_ttm_diff" for ratio in ratios)
     for col in all_ratios:
-        ratio_name = col.replace('_TTM_diff', '')
+        ratio_name = col.replace('_ttm_diff', '')
         is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
         ranked = final_df[col].rank(pct=True, ascending=is_better) * 100
         ranked = ranked.fillna(50)
@@ -560,6 +563,48 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
         if "Rank" in col:
             final_df[col] = final_df[col].round(rank_decimals)
     return final_df
+
+def trim_unused_columns(final_results: pd.DataFrame, config: dict) -> pd.DataFrame:
+    """
+    Remove columns from final_results that are not used in app.py.
+
+    Args:
+        final_results (pd.DataFrame): The full results DataFrame.
+        config (dict): The configuration dictionary (for dynamic columns).
+
+    Returns:
+        pd.DataFrame: DataFrame with only used columns.
+    """
+    # Always keep these columns if present
+    keep_cols = {
+        'Lista', 'Sektor', 'Trend_clusterRank', 'Latest_clusterRank', 
+        'marketCap', 'cagr_close', 'Name', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long',
+        'QuarterDiff', 'LatestReportDate_Q', 'LatestReportDate_Y'
+    }
+    # Add columns ending with these patterns
+    patterns = [
+        '_latest_ratioValue', '_trend_ratioValue',
+        '_latest_ratioRank', '_trend_ratioRank',
+        '_AvgGrowth_Rank', '_AvgGrowth', 'catRank', 
+        '_ttm_diff', '_ttm_ratioRank'
+    ]
+    # Add dynamically from config
+    if 'category_ratios' in config:
+        for cat, ratios in config['category_ratios'].items():
+            keep_cols.add(cat)
+            keep_cols.update(ratios)
+    if 'kategorier' in config:
+        for cat, ratios in config['kategorier'].items():
+            keep_cols.add(cat)
+            keep_cols.update(ratios)
+    # Add all columns matching patterns
+    for col in final_results.columns:
+        if any(col.endswith(pat) for pat in patterns) or any(pat in col for pat in patterns):
+            keep_cols.add(col)
+    # Only keep columns that exist in the DataFrame
+    keep_cols = [col for col in keep_cols if col in final_results.columns]
+    final_result_trimmed = final_results[keep_cols].copy()
+    return final_result_trimmed
 
 # --- Main Execution ---
 
@@ -624,7 +669,7 @@ if __name__ == "__main__":
                 save_to=CSV_PATH / "last_SMA.csv"
 )
 
-            # Step 3: Calculate ratios and rankings
+            # Step 3: Calculate ratios and rasnkings
             raw_financial_data_quarterly_summarized=summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
             save_raw_data_to_csv(raw_financial_data_quarterly_summarized, CSV_PATH / "raw_financial_data_quarterly_summarized.csv")
 
@@ -634,7 +679,11 @@ if __name__ == "__main__":
             calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv", period_type="annual")
 
-            ranked_ratios = rank_all_ratios(calculated_ratios, config["ratio_definitions"])
+            # Create ratios to ranks 
+            complete_ranks = create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,config["ratio_definitions"],config["category_ratios"])
+            save_dict_of_dicts_to_csv(complete_ranks, CSV_PATH / "complete_ranks.csv")
+
+            """ranked_ratios = rank_all_ratios(calculated_ratios, config["ratio_definitions"])
             save_dict_of_dicts_to_csv(ranked_ratios, CSV_PATH / "ranked_ratios.csv", index_col_name="Rank", index=False)
 
             # Step 4: Aggregate category and cluster ranks
@@ -642,7 +691,7 @@ if __name__ == "__main__":
             save_dict_of_dicts_to_csv(category_ranks, CSV_PATH / "category_ranks.csv", index_col_name="Category", index=True)
 
             cluster_ranks = aggregate_cluster_ranks(category_ranks)
-            save_dict_of_dicts_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv", index_col_name="Category", index=True)
+            save_dict_of_dicts_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv", index_col_name="Category", index=True)"""
 
             # Step 5: Calculate AGR results
             agr_results = calculate_agr_for_ticker(CSV_PATH / "raw_financial_data.csv", tickers, config['agr_dimensions'])
@@ -651,7 +700,7 @@ if __name__ == "__main__":
             agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 4))
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
-            # Step 6: Extract TTM values for agr dimensions
+            # Step 6: Extract ttm values for agr dimensions
             filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
                                config['agr_dimensions'],
                                CSV_PATH / "ttm_values.csv")
@@ -659,12 +708,11 @@ if __name__ == "__main__":
             # Step 7: Combine all results and save final output
             combined_results = combine_all_results(
                 calculated_ratios,
-                ranked_ratios,
-                category_ranks,
-                cluster_ranks
+                complete_ranks
             )
 
-            final_results=post_processing(combined_results,config["rank_decimals"],config["ratio_definitions"])
+            final_results = post_processing(combined_results, config["rank_decimals"], config["ratio_definitions"])
+            #final_results_trimmed = trim_unused_columns(final_results, config)  # Trim unused columns
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
 
             print(f"Stock evaluation completed and saved to {CSV_PATH / config['results_file']}")
