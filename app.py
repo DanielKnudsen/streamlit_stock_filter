@@ -164,7 +164,7 @@ try:
     rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank','Lista']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -253,17 +253,21 @@ try:
 
 
 
-        col_total_trend, col_total_latest = st.columns(2,gap='medium',border=True)
+        col_total_trend, col_total_latest, col_total_ttm = st.columns(3,gap='medium',border=True)
         with col_total_trend:
             trend_range = create_slider(df_new_ranks,'Trend_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
         with col_total_latest:
             latest_range = create_slider(df_new_ranks,'Latest_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
-        
+        with col_total_ttm:
+            ttm_range = create_slider(df_new_ranks,'TTM_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
+
         df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & 
                                                         (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
                                                         (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & 
-                                                        (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1])]
-        
+                                                        (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1]) &
+                                                        (df_filtered_by_sliders['TTM_clusterRank'] >= ttm_range[0]) & 
+                                                        (df_filtered_by_sliders['TTM_clusterRank'] <= ttm_range[1])]
+
         # bubble plot
         with st.container(border=True, key="bubble_plot_container"):
             show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
@@ -625,6 +629,7 @@ try:
 
             cols = df_display.columns.tolist()
             cols.insert(0, cols.pop(cols.index('Lista')))
+            cols.insert(0, cols.pop(cols.index('Agg. Rank ttm diff vs sen. året')))
             cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
             cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
@@ -795,7 +800,10 @@ try:
                             st.info(f"Dividend-data saknar nödvändiga kolumner ('Year', 'Value') för {selected_stock_ticker}.")
                     else:
                         st.info(f"Ingen utdelningsdata för {selected_stock_ticker}.")
-
+        if selected_stock_ticker is not None:
+            with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
+                st.write(f"Datadump av {selected_stock_ticker}")
+                st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
         with st.container(border=True, key="cagr_container"):
             st.subheader("Genomsnittlig årlig tillväxt senaste 4 åren")
             # Only show the following sections if a stock is selected
@@ -841,8 +849,8 @@ try:
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
                     st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
-                with st.expander("**Detaljerad tillväxtdata inkl TTM:**", expanded=True):
-                    def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, TTM_diff_value,higher_is_better):
+                with st.expander("**Detaljerad tillväxtdata inkl ttm:**", expanded=True):
+                    def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, ttm_diff_value,higher_is_better):
                         year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
                         year_cols = [col for col in year_cols if not pd.isna(df.loc[selected_stock_ticker, col])]
                         year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
@@ -854,11 +862,11 @@ try:
                             fig = go.Figure()
                             colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
                             bar_text = [f"{human_format(v)}" for v in values]
-                            if ttm_value is not None and ttm_value > 0:
+                            if ttm_value is not None:
                                 colors.append('gold')
                                 values = np.append(values, ttm_value)
-                                TTM_label = f'TTM (+{ttm_q_offset}Q)'
-                                years.append(TTM_label)
+                                ttm_label = f'ttm (+{ttm_q_offset}Q)'
+                                years.append(ttm_label)
                             fig.add_trace(go.Bar(x=years, y=values, marker_color=colors, name=base_ratio,text=bar_text, showlegend=False))
                             fig.add_trace(go.Scatter(
                                 x=[years[0], years[-1 if ttm_value is None else -2]],
@@ -868,33 +876,33 @@ try:
                                 line=dict(color='#888888', dash='dot', width=6),
                                 showlegend=False
                             ))
-                                    # add trendline between last full year and TTM
+                                    # add trendline between last full year and ttm
                             if ttm_value is not None and not pd.isna(ttm_value):
                                 fig.add_trace(go.Scatter(
-                                    x=[years[-2], TTM_label],
+                                    x=[years[-2], ttm_label],
                                     y=[values[-2], ttm_value],
                                     mode='lines',
                                     name='Trend',
                                     line=dict(color="#0D0D0D", dash='dot', width=6),
                                     showlegend=False
                                 ))
-                            if ttm_value is not None and not pd.isna(ttm_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
-                                pct_text = f"{TTM_diff_value:+.2f}"
+                            if ttm_value is not None and not pd.isna(ttm_value) and ttm_diff_value is not None and not pd.isna(ttm_diff_value):
+                                pct_text = f"{ttm_diff_value:+.2f}"
                                 # Use higher_is_better to determine color
                                 if higher_is_better:
-                                    color = "green" if TTM_diff_value >= 0 else "red"
+                                    color = "green" if ttm_diff_value >= 0 else "red"
                                 else:
-                                    color = "red" if TTM_diff_value >= 0 else "green"
+                                    color = "red" if ttm_diff_value >= 0 else "green"
                                 y_shift = 20 if ttm_value >= 0 else -20
 
                                 fig.add_annotation(
-                                    x=TTM_label,
+                                    x=ttm_label,
                                     y=ttm_value,
                                     text=f"{human_format(ttm_value)}",
                                     showarrow=False,
                                     font=dict(color=color, size=14, family="Arial"),
                                     yshift=y_shift
-                                ) # annotation for pct change for TTM
+                                ) # annotation for pct change for ttm
                             fig.update_layout(title=f"{base_ratio}", 
                                             height=250, 
                                             yaxis_title="SEK",
@@ -908,23 +916,26 @@ try:
                     base_ratio_right = allCols_AvgGrowth[2].replace("_AvgGrowth", "")  # Use the third column as base for right
 
                     with left_col:
-                        TTM_col = f"{base_ratio_left}_TTM"
-                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
-                        TTM_diff = f"{base_ratio_left}_TTM_diff"
-                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
-                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_left, "left", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
+                        ttm_col = f"{base_ratio_left}_ttm"
+                        ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
+                        ttm_diff = f"{base_ratio_left}_ttm_diff"
+                        ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_left, "left", selected_stock_ttm_offset, ttm_value, ttm_diff_value, higher_is_better=True)
                     with middle_col:
-                        TTM_col = f"{base_ratio_middle}_TTM"
-                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
-                        TTM_diff = f"{base_ratio_middle}_TTM_diff"
-                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
-                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_middle, "middle", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
+                        ttm_col = f"{base_ratio_middle}_ttm"
+                        ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
+                        #st.write(f"ttm_value: {ttm_value}")
+                        ttm_diff = f"{base_ratio_middle}_ttm_diff"
+                        ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
+                        #st.write(f"ttm_diff_value: {ttm_diff_value}")
+                        #st.write(f"selected_stock_ttm_offset: {selected_stock_ttm_offset}")
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_middle, "middle", selected_stock_ttm_offset, ttm_value, ttm_diff_value, higher_is_better=True)
                     with right_col:
-                        TTM_col = f"{base_ratio_right}_TTM"
-                        TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
-                        TTM_diff = f"{base_ratio_right}_TTM_diff"
-                        TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
-                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_right, "right", selected_stock_ttm_offset, TTM_value, TTM_diff_value, higher_is_better=True)
+                        ttm_col = f"{base_ratio_right}_ttm"
+                        ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
+                        ttm_diff = f"{base_ratio_right}_ttm_diff"
+                        ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
+                        plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_right, "right", selected_stock_ttm_offset, ttm_value, ttm_diff_value, higher_is_better=True)
 
         with st.container(border=True, key="stock_price_trend_container"):
             st.subheader("Kursutveckling och Trendlinje")
@@ -1204,44 +1215,44 @@ try:
                                 year_cols_last4 = year_cols_sorted[-4:]
                                 latest_rank_col = f"{base_ratio}_latest_ratioRank"
                                 trend_rank_col = f"{base_ratio}_trend_ratioRank"
-                                TTM_col = f"{base_ratio}_TTM"
-                                TTM_value = df_new_ranks.loc[selected_stock_ticker, TTM_col] if TTM_col in df_new_ranks.columns else None
-                                TTM_diff = f"{base_ratio}_TTM_diff"
-                                TTM_diff_value = df_new_ranks.loc[selected_stock_ticker, TTM_diff] if TTM_diff in df_new_ranks.columns else None
+                                ttm_col = f"{base_ratio}_ttm"
+                                ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
+                                ttm_diff = f"{base_ratio}_ttm_diff"
+                                ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
                                 # st.write("All columns:", df_new_ranks.columns.tolist())
-                                # st.write(f"Looking for TTM_col:{TTM_col}", TTM_col in df_new_ranks.columns)
-                                # st.write("TTM_value:", TTM_value)
-                                # st.write("TTM_diff_value:", TTM_diff_value)
+                                # st.write(f"Looking for ttm_col:{ttm_col}", ttm_col in df_new_ranks.columns)
+                                # st.write("ttm_value:", ttm_value)
+                                # st.write("ttm_diff_value:", ttm_diff_value)
                                 with cols[idx]:
                                     if year_cols_last4:
                                         values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
                                         years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                                        # Prepare bar data: 4 years + TTM if available
+                                        # Prepare bar data: 4 years + ttm if available
                                         bar_x = [str(x) for x in years]
                                         bar_y = list(values)
                                         bar_colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
                                         bar_text = [f"{v:.2f}" for v in bar_y]
-                                        TTM_label = None
-                                        # Add TTM if available
-                                        if TTM_value is not None and not pd.isna(TTM_value):
-                                            TTM_label = f'TTM (+{selected_stock_ttm_offset}Q)'
-                                            bar_x.append(TTM_label)
-                                            bar_y.append(TTM_value)
+                                        ttm_label = None  # Ensure ttm_label is always defined
+                                        # Add ttm if available
+                                        if ttm_value is not None and not pd.isna(ttm_value):
+                                            ttm_label = f'ttm (+{selected_stock_ttm_offset}Q)'
+                                            bar_x.append(ttm_label)
+                                            bar_y.append(ttm_value)
                                             bar_colors.append('gold')
-                                            # Add percent diff to TTM bar text
-                                            if TTM_diff_value is not None and not pd.isna(TTM_diff_value):
-                                                pct_text = f"{TTM_diff_value:+.2f}"
-                                                bar_text.append(f"{TTM_value:.2f}\n({pct_text})") # need to fix per cent calculation to get it right
+                                            # Add percent diff to ttm bar text
+                                            if ttm_diff_value is not None and not pd.isna(ttm_diff_value):
+                                                pct_text = f"{ttm_diff_value:+.2f}"
+                                                bar_text.append(f"{ttm_value:.2f}\n({pct_text})") # need to fix per cent calculation to get it right
                                             else:
-                                                bar_text.append(f"{TTM_value:.2f}")
-                                        # If no TTM, just fill bar_text to match bar_y
+                                                bar_text.append(f"{ttm_value:.2f}")
+                                        # If no ttm, just fill bar_text to match bar_y
                                         else:
                                             bar_text = [f"{v:.2f}" for v in bar_y]
                                         # st.write("bar_x:", bar_x)
                                         # st.write("bar_y:", bar_y)
                                         # st.write("bar_colors:", bar_colors)
                                         fig = go.Figure()
-                                        # Add bars for 4 years + TTM (if present)
+                                        # Add bars for 4 years + ttm (if present)
                                         fig.add_trace(go.Bar(x=bar_x, y=bar_y, marker_color=bar_colors, name=base_ratio, showlegend=False, text=bar_text, textposition='auto'))
                                         # Add trend line (only for the 4 years)
                                         if len(years) > 1:
@@ -1259,26 +1270,26 @@ try:
                                         else:
                                             trend_vals = values
 
-                                        # add trendline between last full year and TTM
-                                        if TTM_label and TTM_value is not None and not pd.isna(TTM_value):
+                                        # add trendline between last full year and ttm
+                                        if ttm_label and ttm_value is not None and not pd.isna(ttm_value):
                                             fig.add_trace(go.Scatter(
-                                                x=[years[-1], TTM_label],
-                                                y=[values[-1], TTM_value],
+                                                x=[years[-1], ttm_label],
+                                                y=[values[-1], ttm_value],
                                                 mode='lines',
                                                 name='Trend',
                                                 line=dict(color="#0D0D0D", dash='dot', width=6),
                                                 showlegend=False
                                             ))
-                                        # Add annotation above TTM bar if available
-                                        if TTM_label and TTM_value is not None and not pd.isna(TTM_value) and TTM_diff_value is not None and not pd.isna(TTM_diff_value):
-                                            pct_text = f"{TTM_diff_value:+.2f}"
+                                        # Add annotation above ttm bar if available
+                                        if ttm_label and ttm_value is not None and not pd.isna(ttm_value) and ttm_diff_value is not None and not pd.isna(ttm_diff_value):
+                                            pct_text = f"{ttm_diff_value:+.2f}"
                                             # Use higher_is_better to determine color
                                             if higher_is_better:
-                                                color = "green" if TTM_diff_value >= 0 else "red"
+                                                color = "green" if ttm_diff_value >= 0 else "red"
                                             else:
-                                                color = "red" if TTM_diff_value >= 0 else "green"
-                                            y_shift = 20 if TTM_value >= 0 else -20
-                                            fig.add_annotation(x=TTM_label,y=TTM_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=y_shift) # annotation for pct change for TTM
+                                                color = "red" if ttm_diff_value >= 0 else "green"
+                                            y_shift = 20 if ttm_value >= 0 else -20
+                                            fig.add_annotation(x=ttm_label,y=ttm_value,text=pct_text,showarrow=False,font=dict(color=color, size=14, family="Arial"),yshift=y_shift) # annotation for pct change for ttm
                                         fig.update_layout(title=f"{base_ratio}",
                                                         height=250,
                                                         margin=dict(l=10, r=10, t=30, b=10),

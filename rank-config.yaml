@@ -130,12 +130,18 @@ category_ratios:
   Kvalitet_trend_ratioRank:
     ROE_trend_ratioRank: 1
     ROIC_trend_ratioRank: 1
+  Kvalitet_ttm_ratioRank:
+    ROE_ttm_ratioRank: 1
+    ROIC_ttm_ratioRank: 1
   Finansiell_Hälsa_latest_ratioRank:
     Soliditet_latest_ratioRank: 1
     Skuldsättningsgrad_latest_ratioRank: 1
   Finansiell_Hälsa_trend_ratioRank:
     Soliditet_trend_ratioRank: 1
     Skuldsättningsgrad_trend_ratioRank: 1
+  Finansiell_Hälsa_ttm_ratioRank:
+    Soliditet_ttm_ratioRank: 1
+    Skuldsättningsgrad_ttm_ratioRank: 1
   Lönsamhet_latest_ratioRank:
     Bruttomarginal_latest_ratioRank: 1
     Rörelsemarginal_latest_ratioRank: 1
@@ -144,6 +150,10 @@ category_ratios:
     Bruttomarginal_trend_ratioRank: 1
     Rörelsemarginal_trend_ratioRank: 1
     Vinstmarginal_trend_ratioRank: 1
+  Lönsamhet_ttm_ratioRank:
+    Bruttomarginal_ttm_ratioRank: 1
+    Rörelsemarginal_ttm_ratioRank: 1
+    Vinstmarginal_ttm_ratioRank: 1
   Värdering_latest_ratioRank:
     PE_tal_latest_ratioRank: 1
     PB_tal_latest_ratioRank: 1
@@ -152,12 +162,19 @@ category_ratios:
     PE_tal_trend_ratioRank: 1
     PB_tal_trend_ratioRank: 1
     EV_EBITDA_trend_ratioRank: 1
+  Värdering_ttm_ratioRank:
+    PE_tal_ttm_ratioRank: 1
+    PB_tal_ttm_ratioRank: 1
+    EV_EBITDA_ttm_ratioRank: 1
   Kassaflöde_latest_ratioRank:
     Rörelseflödesmarginal_latest_ratioRank: 1
     Kassaflöde_till_Skuld_latest_ratioRank: 1
   Kassaflöde_trend_ratioRank:
     Rörelseflödesmarginal_trend_ratioRank: 1
     Kassaflöde_till_Skuld_trend_ratioRank: 1
+  Kassaflöde_ttm_ratioRank:
+    Rörelseflödesmarginal_ttm_ratioRank: 1
+    Kassaflöde_till_Skuld_ttm_ratioRank: 1
 
 # Hjälptexter för nyckeltal (endast _latest_rank)
 ratio_help_texts:
@@ -217,6 +234,7 @@ display_names:
   pct_Close_vs_SMA_short: "Pris vs SMA 10 (%)"
   Trend_clusterRank: "Agg. Rank trend 4 år"
   Latest_clusterRank: "Agg. Rank sen. året"
+  TTM_clusterRank: "Agg. Rank ttm diff vs sen. året"
   cagr_close: "CAGR Aktiekurs"
   cagrTotal_Revenue: "CAGR omsättning"
   cagrBasic_EPS: "CAGR vinst/aktie"
