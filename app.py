@@ -32,9 +32,9 @@ CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
 st.title("📈 Indicatum Insights")
 # Allow user to toggle between "wide" and "centered" layout
-layout_mode = st.toggle("Bredd layout (wide)?", value=True)
+layout_mode = 'wide'#st.toggle("Bredd layout (wide)?", value=True)
 st.set_page_config(
-    layout="wide" if layout_mode else "centered",
+    layout="wide" if layout_mode == 'wide' else "centered",
     page_title="Indicatum Insights",
     page_icon="📈"
 )
