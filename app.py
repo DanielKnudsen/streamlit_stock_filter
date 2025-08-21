@@ -30,7 +30,7 @@ CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 # STREAMLIT APPLICATION
 # =============================
 
-st.title("📈 Indicatum Insights")
+
 # Allow user to toggle between "wide" and "centered" layout
 layout_mode = 'wide'#st.toggle("Bredd layout (wide)?", value=True)
 st.set_page_config(
@@ -38,6 +38,7 @@ st.set_page_config(
     page_title="Indicatum Insights",
     page_icon="📈"
 )
+st.title("📈 Indicatum Insights")
 with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)", expanded=False):
     st.markdown(
         """
