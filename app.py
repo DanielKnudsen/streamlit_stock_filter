@@ -46,11 +46,11 @@ with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)
 
         Det finns flera sätt att använda denna app för att hitta intressanta aktier och analysera deras utveckling:
 
-        - **Snabb filtrering med aggregerad rank:** Använd reglagen för *Agg. Rank trend 4 år* och *Agg. Rank sen. året* för att snabbt hitta bolag som har haft en stark utveckling över tid eller nyligen. Detta är ett effektivt sätt att sålla fram de mest intressanta aktierna ur ett stort urval.
+        - **Snabb filtrering med aggregerad rank:** Använd reglagen för *Agg. Rank trend 4 år*, *Agg. Rank sen. året* och *Agg. Rank ttm* (senaste rapportperioden) för att snabbt hitta bolag som har haft en stark utveckling över tid, nyligen eller i den allra senaste perioden. Detta är ett effektivt sätt att sålla fram de mest intressanta aktierna ur ett stort urval.
 
-        - **Detaljerad filtrering på kategori- och nyckeltalsnivå:** Expandera *Utökade filter* för att finjustera urvalet baserat på specifika finansiella kategorier (t.ex. lönsamhet, tillväxt, värdering) och enskilda nyckeltal. Du kan även filtrera på både trend (utveckling över flera år) och senaste års värden.
+        - **Detaljerad filtrering på kategori- och nyckeltalsnivå:** Expandera *Utökade filter* för att finjustera urvalet baserat på specifika finansiella kategorier (t.ex. lönsamhet, tillväxt, värdering) och enskilda nyckeltal. Du kan även filtrera på både trend (utveckling över flera år), senaste års värden och ttm-värden (trailing twelve months).
 
-        - **Jämför tillväxt och värdering:** Analysera sambandet mellan tillväxtmått (t.ex. vinst per aktie, omsättning) och aktiens kursutveckling. Du kan t.ex. identifiera bolag där vinsten har ökat kraftigt, men aktiekursen inte hängt med – vilket kan indikera en undervärderad aktie.
+        - **Jämför tillväxt och värdering:** Analysera sambandet mellan tillväxtmått (t.ex. vinst per aktie, omsättning) och aktiens kursutveckling. Du kan t.ex. identifiera bolag där vinsten har ökat kraftigt, men aktiekursen inte hängt med – vilket kan indikera en undervärderad aktie. Titta även på ttm-data för att se den allra senaste utvecklingen.
 
         - **Teknisk analys med SMA-differenser:** Filtrera på skillnader mellan kurs och glidande medelvärden (SMA) för att hitta aktier i tekniska trendlägen, t.ex. när kursen bryter upp över ett medelvärde.
 
@@ -58,9 +58,9 @@ with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)
 
         - **Bygg en personlig bevakningslista:** Markera intressanta aktier i tabellen och spara dem i din shortlist för vidare analys och export.
 
-        - **Djupanalys av enskilda aktier:** Välj en aktie för att se detaljerad information om kursutveckling, utdelningar, tillväxt, rank per kategori och nyckeltal samt jämförelser mot andra bolag.
+        - **Djupanalys av enskilda aktier:** Välj en aktie för att se detaljerad information om kursutveckling, utdelningar, tillväxt, rank per kategori och nyckeltal samt jämförelser mot andra bolag. Du kan även se ttm-värden och hur dessa skiljer sig från tidigare år.
 
-        **Tips:** Kombinera olika filter och visualiseringar för att hitta bolag som passar just din strategi – oavsett om du söker stabil tillväxt, värdecase, turnaround-kandidater eller tekniska trendbrott.
+        **Tips:** Kombinera olika filter och visualiseringar för att hitta bolag som passar just din strategi – oavsett om du söker stabil tillväxt, värdecase, turnaround-kandidater eller tekniska trendbrott. Ttm-funktionerna hjälper dig att snabbt fånga upp bolag med stark eller svag utveckling i den allra senaste rapportperioden.
         """
     )
 # Logga miljö och path för felsökning
@@ -165,6 +165,7 @@ try:
     rank_score_columns = [col for col in df_new_ranks.columns if "catRank" in col]
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
+    ttm_columns = [col for col in rank_score_columns if "ttm" in col.lower()]
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
@@ -250,9 +251,7 @@ try:
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         # --- Reglage för totalrank (överst, nu i två kolumner) ---
-        st.markdown('##### Filtrera efter Aggregerad Rank eller Kategori Rank')
-
-
+        st.markdown('##### Filtrera efter Trend, Senaste och TTM Rank')
 
         col_total_trend, col_total_latest, col_total_ttm = st.columns(3,gap='medium',border=True)
         with col_total_trend:
@@ -298,10 +297,32 @@ try:
 
                 # --- Robust handling of NaN values for bubble plot ---
                 # Drop rows with NaN in required columns for the plot
-                required_cols = ['Trend_clusterRank', 'Latest_clusterRank']
+                required_cols = ['Trend_clusterRank', 'Latest_clusterRank', 'TTM_clusterRank']
+                # Let user decide which two dimensions to plot using st.segmented_control
+                axis_options = [
+                    ('Trend_clusterRank', 'Latest_clusterRank'),
+                    ('Trend_clusterRank', 'TTM_clusterRank'),
+                    ('Latest_clusterRank', 'TTM_clusterRank')
+                ]
+                axis_labels = [
+                    'Trend vs Senaste',
+                    'Trend vs TTM',
+                    'Senaste vs TTM'
+                ]
+                selected_axis = st.segmented_control(
+                    'Välj axlar för bubbelplotten:',
+                    options=axis_labels,
+                    selection_mode='single',
+                    default=axis_labels[0],
+                    key='bubble_axis_selector'
+                )
+                # Map selection to axis columns
+                axis_map = dict(zip(axis_labels, axis_options))
+                x_col, y_col = axis_map[selected_axis]
+                plot_required_cols = [x_col, y_col]
                 if 'Lista' in df_filtered_by_sliders.columns:
-                    required_cols.append('Lista')
-                plot_df = df_filtered_by_sliders.dropna(subset=required_cols, how='any').copy()
+                    plot_required_cols.append('Lista')
+                plot_df = df_filtered_by_sliders.dropna(subset=plot_required_cols, how='any').copy()
                 # Handle marketCap for size
                 if 'marketCap' in plot_df.columns:
                     size_raw = plot_df['marketCap'].fillna(20)
@@ -312,8 +333,8 @@ try:
                 if len(plot_df) > 0:
                     bubble_fig = px.scatter(
                         plot_df,
-                        x='Trend_clusterRank',
-                        y='Latest_clusterRank',
+                        x=x_col,
+                        y=y_col,
                         color='Lista' if 'Lista' in plot_df.columns else None,
                         color_discrete_map=color_discrete_map,
                         hover_name=plot_df.index if show_tickers else None,
@@ -321,8 +342,8 @@ try:
                         size=size_raw, # if 'marketCap' in plot_df.columns else [20]*len(plot_df),
                         hover_data={},
                         labels={
-                            'Trend_clusterRank': get_display_name('Trend_clusterRank'),
-                            'Latest_clusterRank': get_display_name('Latest_clusterRank'),
+                            x_col: get_display_name(x_col),
+                            y_col: get_display_name(y_col),
                             'Lista': get_display_name('Lista'),
                             #'hover_summary': 'Summary',
                             'size': 'Market Cap'
@@ -350,6 +371,9 @@ try:
                     st.info('No stocks in the selected score range (after removing rows with saknade värden).')
             else:
                 st.info('No stocks in the selected score range.')
+
+
+
         # --- Filtrera efter tillväxt över 4 år ---
         st.markdown("##### Filtrera efter genomsnittlig tillväxt")
 
@@ -411,9 +435,8 @@ try:
         if ticker_input.strip():
             tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
             df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
-        
         with st.expander('**Utökade filtermöjligheter**', expanded=False):
-            col_filter_left, col_filter_right = st.columns(2,gap='medium',border=True)
+            col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
             with col_filter_left:
                 st.markdown("###### Filtrera för kategori Trend-rankningar")
                 if trend_columns:
@@ -494,7 +517,7 @@ try:
 
                 else:
                     st.info("Inga 'trend'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
-            with col_filter_right:
+            with col_filter_mid:
                 st.markdown("###### Filtrera för kategori Senaste-rankningar")
                 if latest_columns:
                     for col in latest_columns:
@@ -572,8 +595,84 @@ try:
                                         st.info(f"Kolumn {r_data} saknas i data.")
                 else:
                     st.info("Inga 'senaste'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
-        # --- Reglage för kategoripoäng: En expander per kategori (ingen nästling) ---
-        #st.write("Antal kvarvarande aktier efter filtrering:", df_filtered_by_sliders.shape[0])
+            with col_filter_right:
+                st.markdown("###### Filtrera för kategori ttm-rankningar")
+                if ttm_columns:
+                    for col in ttm_columns:
+                        with st.container(border=True,key=f"container_trend_{col}"):
+                            min_val = df_filtered_by_sliders[col].min()
+                            max_val = df_filtered_by_sliders[col].max()
+                            slider_min = float(min_val)
+                            slider_max = float(max_val)
+                            if slider_min == slider_max:
+                                slider_max += 0.001
+                            current_min, current_max = st.slider(
+                                f"{col.replace('_ttm_catRank', ' ttm Rank')}",
+                                min_value=slider_min,
+                                max_value=slider_max,
+                                value=(slider_min, slider_max),
+                                key=f"slider_ttm_{col}",
+                                step=1.0,
+                                format="%d"
+                            )
+                            df_filtered_by_sliders = df_filtered_by_sliders[
+                                (df_filtered_by_sliders[col] >= current_min) &
+                                (df_filtered_by_sliders[col] <= current_max)
+                            ]
+                            category_name = col.replace("catRank", "ratioRank")
+                            # Dynamiskt skapa flikar för varje ttm kategori med nyckeltalsnamn
+                            ratio_name = [r for r in category_ratios[category_name]]
+                            ratio_name_display = [r.replace("_ttm_ratioRank", "") for r in ratio_name] 
+                            tab_labels = ['Info'] + ratio_name_display
+                            tabs = st.tabs(tab_labels)
+                            tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_ttm_ratioRank', '')}:")
+                            # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt)
+                            for i, r in enumerate(ratio_name):
+                                with tabs[i+1]:
+                                    if r in df_filtered_by_sliders.columns:
+                                        min_val = float(df_filtered_by_sliders[r].min())
+                                        max_val = float(df_filtered_by_sliders[r].max())
+                                        if min_val == max_val:
+                                            max_val += 0.001
+                                        slider_min, slider_max = st.slider(
+                                            f"Filtrera {r.replace('_ttm_ratioRank', ' ttm Rank')} ",
+                                            min_value=min_val,
+                                            max_value=max_val,
+                                            value=(min_val, max_val),
+                                            key=f"slider_tab_ttm_{category_name}_{r}",
+                                            step=1.0,
+                                            format="%d"
+                                        )
+                                        df_filtered_by_sliders = df_filtered_by_sliders[
+                                            (df_filtered_by_sliders[r] >= slider_min) &
+                                            (df_filtered_by_sliders[r] <= slider_max)
+                                        ]
+                                    else:
+                                        st.info(f"Kolumn {r} saknas i data.")
+                                    r_data = f"{r.replace('_ttm_ratioRank', '_ttm_ratioValue')}"
+                                    if r_data in df_filtered_by_sliders.columns:
+                                        min_val = float(df_filtered_by_sliders[r_data].min())
+                                        max_val = float(df_filtered_by_sliders[r_data].max())
+                                        if min_val == max_val:
+                                            max_val += 0.001
+                                        slider_min, slider_max = st.slider(
+                                            f"Filtrera {r_data.replace('_ttm_ratioValue', ' ttm Värde')}",
+                                            min_value=min_val,
+                                            max_value=max_val,
+                                            value=(min_val, max_val),
+                                            key=f"slider_tab_ttm_{r_data}",
+                                            step=0.1,
+                                            format="%.1f"
+                                        )
+                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                        )
+                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
+                                    else:
+                                        st.info(f"Kolumn {r_data} saknas i data.")
+                else:
+                    st.info("Inga 'ttm'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
 
     # =============================
     # FILTERED RESULTS AND BUBBLE PLOT
