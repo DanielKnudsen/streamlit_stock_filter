@@ -397,7 +397,7 @@ try:
                 tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
                 df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
 
-            with st.expander('**Detaljerade filtermöjligheter** (Klicka för att visa)', expanded=False):
+            with st.popover('**Detaljerade filtermöjligheter** (Klicka för att visa)',width="stretch"):
                 col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
                 with col_filter_left:
                     st.markdown("###### Filtrera för kategori Trend-rankningar")
