@@ -39,7 +39,7 @@ st.set_page_config(
     page_icon="📈"
 )
 st.title("📈 Indicatum Insights")
-with st.expander("🛟 Hur kan du använda detta verktyg? (Klicka för att visa)", expanded=False):
+with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att visa)", expanded=False):
     st.markdown(
         """
         **Hur kan du använda detta verktyg?**
@@ -166,7 +166,7 @@ try:
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
     ttm_columns = [col for col in rank_score_columns if "ttm" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -203,7 +203,7 @@ try:
     # =============================
     with st.container(border=True, key="filter_section"):
         st.subheader("Aktiefilter")
-        with st.expander('🛟**Hjälp med Filtrering**', expanded=False):
+        with st.expander('🛟 **Hjälp med Filtrering** (Klicka för att visa)', expanded=False):
             st.markdown(
                 """
                 **Så här använder du filtersektionen:**
@@ -219,8 +219,10 @@ try:
                 Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
                 """
             )
-        if 'Lista' in df_filtered_by_sliders.columns:
-            with st.container(border=True, key="lista_toggles"):
+        col_lista, col_sektor= st.columns(2,gap='medium',border=True)
+        with col_lista:
+            if 'Lista' in df_filtered_by_sliders.columns:
+                
                 # Use pills for selection, all enabled by default
                 lista_selected = st.pills(
                     "Välj/uteslut Lista:",
@@ -234,9 +236,10 @@ try:
                     df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-        # --- Sektor toggles for bubble plot ---
-        if 'Sektor' in df_filtered_by_sliders.columns:
-            with st.container(border=True, key="sektor_toggles"):       
+        with col_sektor:
+            # --- Sektor toggles for bubble plot ---
+            if 'Sektor' in df_filtered_by_sliders.columns:
+                      
                 # Use st.pills for multi-select, all enabled by default
                 sektor_selected = st.pills(
                     "Välj/uteslut Sektor:",
@@ -250,23 +253,416 @@ try:
                     df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-        # --- Reglage för totalrank (överst, nu i två kolumner) ---
-        st.markdown('##### Filtrera efter Trend, Senaste och TTM Rank')
+        with st.expander("**Förenklad filtrering** (Klicka för att visa)", expanded=True):
+            st.markdown("### Mata in din personliga viktning")
 
-        col_total_trend, col_total_latest, col_total_ttm = st.columns(3,gap='medium',border=True)
-        with col_total_trend:
-            trend_range = create_slider(df_new_ranks,'Trend_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
-        with col_total_latest:
-            latest_range = create_slider(df_new_ranks,'Latest_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
-        with col_total_ttm:
-            ttm_range = create_slider(df_new_ranks,'TTM_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
+            # Skapa session state för att spara slider-värden
 
-        df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & 
-                                                        (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
-                                                        (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & 
-                                                        (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1]) &
-                                                        (df_filtered_by_sliders['TTM_clusterRank'] >= ttm_range[0]) & 
-                                                        (df_filtered_by_sliders['TTM_clusterRank'] <= ttm_range[1])]
+            # Tre sliders för preliminära värden
+            col_trend, col_latest, col_ttm = st.columns(3, gap='medium', border=True)
+            with col_trend:
+                trend = st.slider("Viktning för Trend (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="trend_slider")
+            with col_latest:
+                latest = st.slider("Viktning för Senaste (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="latest_slider")
+            with col_ttm:
+                ttm = st.slider("Viktning för TTM (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="ttm_slider")
+
+            # Beräkna summan av preliminära värden
+            total = trend + latest + ttm
+
+            # Normalisera värdena om summan inte är noll
+            if total > 0:
+                norm_trend = (trend / total) * 100
+                norm_latest = (latest / total) * 100
+                norm_ttm = (ttm / total) * 100
+            else:
+                # Om alla värden är 0, sätt normaliserade värden till 0
+                norm_trend = 0.0
+                norm_latest = 0.0
+                norm_ttm = 0.0
+
+            # Visa normaliserade värden
+            #st.write(f"Trend: {norm_trend:.1f}%, Senaste: {norm_latest:.1f}%, TTM: {norm_ttm:.1f}%")
+
+
+            # Varning om summan är 0
+            if total == 0:
+                st.warning("Alla preliminära värden är 0. Välj minst ett värde större än 0 för att normalisera.")
+
+            # get input from user on how many stocks they like to see
+
+            num_stocks_options = ["5", "10", "20", "50", "Alla"]
+
+            selected_num_stocks = st.segmented_control(
+                "Hur många aktier vill du se i resultat-tabellen?",
+                options=num_stocks_options,
+                selection_mode='single',
+                default="Alla",
+                key="num_stocks_input"
+            )
+
+
+            # calculate personal weights from and add column personal_weights to df_filtered_by_sliders
+            df_filtered_by_sliders['personal_weights'] = (
+                df_filtered_by_sliders['Trend_clusterRank'] * norm_trend +
+                df_filtered_by_sliders['Latest_clusterRank'] * norm_latest +
+                df_filtered_by_sliders['TTM_clusterRank'] * norm_ttm
+            ) / 100
+            df_filtered_by_sliders.sort_values(by='personal_weights', ascending=False, inplace=True)
+            # filter the DataFrame based on the selected number of stocks
+            if selected_num_stocks != "Alla":
+                df_filtered_by_sliders = df_filtered_by_sliders.head(int(selected_num_stocks))
+
+        with st.expander('**Utökade filtermöjligheter** (Klicka för att visa)', expanded=False):
+            # --- Reglage för totalrank (överst, nu i två kolumner) ---
+            st.markdown('##### Filtrera efter Trend, Senaste och TTM Rank')
+
+            col_total_trend, col_total_latest, col_total_ttm = st.columns(3,gap='medium',border=True)
+            with col_total_trend:
+                trend_range = create_slider(df_new_ranks,'Trend_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
+            with col_total_latest:
+                latest_range = create_slider(df_new_ranks,'Latest_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
+            with col_total_ttm:
+                ttm_range = create_slider(df_new_ranks,'TTM_clusterRank',get_display_name,get_tooltip_text,1.0,"%d")
+
+            df_filtered_by_sliders = df_filtered_by_sliders[(df_filtered_by_sliders['Trend_clusterRank'] >= trend_range[0]) & 
+                                                            (df_filtered_by_sliders['Trend_clusterRank'] <= trend_range[1]) &
+                                                            (df_filtered_by_sliders['Latest_clusterRank'] >= latest_range[0]) & 
+                                                            (df_filtered_by_sliders['Latest_clusterRank'] <= latest_range[1]) &
+                                                            (df_filtered_by_sliders['TTM_clusterRank'] >= ttm_range[0]) & 
+                                                            (df_filtered_by_sliders['TTM_clusterRank'] <= ttm_range[1])]
+
+            
+
+
+            # --- Filtrera efter tillväxt över 4 år ---
+            st.markdown("##### Filtrera efter genomsnittlig tillväxt")
+
+            cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
+
+            with cagr_left:
+                cagr_range_left = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[0],get_display_name,get_tooltip_text,0.1,"%.1f")
+
+                df_filtered_by_sliders = df_filtered_by_sliders[
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] >= cagr_range_left[0]) & 
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] <= cagr_range_left[1])
+                ]
+            with cagr_middle:
+                cagr_range_middle = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[1],get_display_name,get_tooltip_text,0.1,"%.1f")
+
+                df_filtered_by_sliders = df_filtered_by_sliders[
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] >= cagr_range_middle[0]) & 
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] <= cagr_range_middle[1])
+                ]
+
+            with cagr_right:
+                cagr_range_right = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[2],get_display_name,get_tooltip_text,0.1,"%.1f")
+
+                df_filtered_by_sliders = df_filtered_by_sliders[
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] >= cagr_range_right[0]) & 
+                    (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] <= cagr_range_right[1])
+                ]
+
+
+            #st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
+            # --- Filtrera efter SMA-differenser ---
+            st.markdown("##### Filtrera efter SMA-differenser")
+            col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
+            with col_diff_long_medium:
+                diff_long_medium_range = create_slider(df_new_ranks,'pct_SMA_medium_vs_SMA_long',get_display_name,get_tooltip_text,1.0,"%d%%")
+
+            with col_diff_short_medium:
+                diff_short_medium_range = create_slider(df_new_ranks,'pct_SMA_short_vs_SMA_medium',get_display_name,get_tooltip_text,1.0,"%d%%")
+
+            with col_diff_price_short:
+                diff_price_short_range = create_slider(df_new_ranks,'pct_Close_vs_SMA_short',get_display_name,get_tooltip_text,1.0,"%d%%")
+
+            df_filtered_by_sliders = df_filtered_by_sliders[
+                (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & 
+                (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
+                (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & 
+                (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
+                (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & 
+                (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])
+            ]
+            st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
+
+            # --- NY: Manuell ticker-filtrering ---
+            ticker_input = st.text_input(
+                "Filtrera på tickers (kommaseparerade, t.ex. VOLV-A,ERIC-B,ATCO-A):",
+                value="",
+                help="Skriv in en eller flera tickers separerade med komma för att endast visa dessa aktier."
+            )
+            if ticker_input.strip():
+                tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
+                df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
+
+            with st.expander('**Detaljerade filtermöjligheter** (Klicka för att visa)', expanded=False):
+                col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
+                with col_filter_left:
+                    st.markdown("###### Filtrera för kategori Trend-rankningar")
+                    if trend_columns:
+                        for col in trend_columns:
+                            with st.container(border=True,key=f"container_trend_{col}"):
+                                min_val = df_filtered_by_sliders[col].min()
+                                max_val = df_filtered_by_sliders[col].max()
+                                slider_min = float(min_val)
+                                slider_max = float(max_val)
+                                if slider_min == slider_max:
+                                    slider_max += 0.001
+                                current_min, current_max = st.slider(
+                                    f"{col.replace('_trend_catRank', ' trend Rank')}",
+                                    min_value=slider_min,
+                                    max_value=slider_max,
+                                    value=(slider_min, slider_max),
+                                    key=f"slider_trend_{col}",
+                                    step=1.0,
+                                    format="%d"
+                                )
+                                df_filtered_by_sliders = df_filtered_by_sliders[
+                                    (df_filtered_by_sliders[col] >= current_min) &
+                                    (df_filtered_by_sliders[col] <= current_max)
+                                ]
+                                category_name = col.replace("catRank", "ratioRank")
+                                # Dynamiskt skapa flikar för varje trendkategori med nyckeltalsnamn
+                                ratio_name = [r for r in category_ratios[category_name]]
+                                ratio_name_display = [r.replace("_trend_ratioRank", "") for r in ratio_name] 
+                                tab_labels = ['Info'] + ratio_name_display
+                                tabs = st.tabs(tab_labels)
+                                tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_trend_ratioRank', '')}:")
+                                # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt) trend_slope
+                                for i, r in enumerate(ratio_name):
+                                    with tabs[i+1]:
+                                        if r in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r].min())
+                                            max_val = float(df_filtered_by_sliders[r].max())
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r.replace('_trend_ratioRank', ' trend Rank')} ",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_trend_{category_name}_{r}",
+                                                step=1.0,
+                                                format="%d"
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[
+                                                (df_filtered_by_sliders[r] >= slider_min) &
+                                                (df_filtered_by_sliders[r] <= slider_max)
+                                            ]
+                                        else:
+                                            st.info(f"Kolumn {r} saknas i data.")
+                                        # Add filter for trendSlope, but do NOT exclude NaN values (keep them in the filtered DataFrame)
+                                        r_data = f"{r.replace('_trend_ratioRank', '_trend_ratioValue')}"
+                                        if r_data in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r_data].min(skipna=True))
+                                            max_val = float(df_filtered_by_sliders[r_data].max(skipna=True))
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r_data.replace('_trend_ratioValue', ' trend Slope')}",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_latest_{r_data}",
+                                                step=0.1,
+                                                format="%.1f"
+                                            )
+                                            # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                            mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                                (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[mask]
+                                        else:
+                                            st.info(f"Kolumn {r_data} saknas i data.")
+
+                    else:
+                        st.info("Inga 'trend'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
+                with col_filter_mid:
+                    st.markdown("###### Filtrera för kategori Senaste-rankningar")
+                    if latest_columns:
+                        for col in latest_columns:
+                            with st.container(border=True,key=f"container_trend_{col}"):
+                                min_val = df_filtered_by_sliders[col].min()
+                                max_val = df_filtered_by_sliders[col].max()
+                                slider_min = float(min_val)
+                                slider_max = float(max_val)
+                                if slider_min == slider_max:
+                                    slider_max += 0.001
+                                current_min, current_max = st.slider(
+                                    f"{col.replace('_latest_catRank', ' senaste Rank')}",
+                                    min_value=slider_min,
+                                    max_value=slider_max,
+                                    value=(slider_min, slider_max),
+                                    key=f"slider_latest_{col}",
+                                    step=1.0,
+                                    format="%d"
+                                )
+                                df_filtered_by_sliders = df_filtered_by_sliders[
+                                    (df_filtered_by_sliders[col] >= current_min) &
+                                    (df_filtered_by_sliders[col] <= current_max)
+                                ]
+                                category_name = col.replace("catRank", "ratioRank")
+                                # Dynamiskt skapa flikar för varje senaste kategori med nyckeltalsnamn
+                                ratio_name = [r for r in category_ratios[category_name]]
+                                ratio_name_display = [r.replace("_latest_ratioRank", "") for r in ratio_name] 
+                                tab_labels = ['Info'] + ratio_name_display
+                                tabs = st.tabs(tab_labels)
+                                tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_latest_ratioRank', '')}:")
+                                # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt)
+                                for i, r in enumerate(ratio_name):
+                                    with tabs[i+1]:
+                                        if r in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r].min())
+                                            max_val = float(df_filtered_by_sliders[r].max())
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r.replace('_latest_ratioRank', ' senaste Rank')} ",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_latest_{category_name}_{r}",
+                                                step=1.0,
+                                                format="%d"
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[
+                                                (df_filtered_by_sliders[r] >= slider_min) &
+                                                (df_filtered_by_sliders[r] <= slider_max)
+                                            ]
+                                        else:
+                                            st.info(f"Kolumn {r} saknas i data.")
+                                        r_data = f"{r.replace('_latest_ratioRank', '_latest_ratioValue')}"
+                                        if r_data in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r_data].min())
+                                            max_val = float(df_filtered_by_sliders[r_data].max())
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r_data.replace('_latest_ratioValue', ' senaste Värde')}",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_latest_{r_data}",
+                                                step=0.1,
+                                                format="%.1f"
+                                            )
+                                            # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                            mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                                (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[mask]
+                                        else:
+                                            st.info(f"Kolumn {r_data} saknas i data.")
+                    else:
+                        st.info("Inga 'senaste'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
+                with col_filter_right:
+                    st.markdown("###### Filtrera för kategori ttm-rankningar")
+                    if ttm_columns:
+                        for col in ttm_columns:
+                            with st.container(border=True,key=f"container_trend_{col}"):
+                                min_val = df_filtered_by_sliders[col].min()
+                                max_val = df_filtered_by_sliders[col].max()
+                                slider_min = float(min_val)
+                                slider_max = float(max_val)
+                                if slider_min == slider_max:
+                                    slider_max += 0.001
+                                current_min, current_max = st.slider(
+                                    f"{col.replace('_ttm_catRank', ' ttm Rank')}",
+                                    min_value=slider_min,
+                                    max_value=slider_max,
+                                    value=(slider_min, slider_max),
+                                    key=f"slider_ttm_{col}",
+                                    step=1.0,
+                                    format="%d"
+                                )
+                                df_filtered_by_sliders = df_filtered_by_sliders[
+                                    (df_filtered_by_sliders[col] >= current_min) &
+                                    (df_filtered_by_sliders[col] <= current_max)
+                                ]
+                                category_name = col.replace("catRank", "ratioRank")
+                                # Dynamiskt skapa flikar för varje ttm kategori med nyckeltalsnamn
+                                ratio_name = [r for r in category_ratios[category_name]]
+                                ratio_name_display = [r.replace("_ttm_ratioRank", "") for r in ratio_name] 
+                                tab_labels = ['Info'] + ratio_name_display
+                                tabs = st.tabs(tab_labels)
+                                tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_ttm_ratioRank', '')}:")
+                                # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt)
+                                for i, r in enumerate(ratio_name):
+                                    with tabs[i+1]:
+                                        if r in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r].min())
+                                            max_val = float(df_filtered_by_sliders[r].max())
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r.replace('_ttm_ratioRank', ' ttm Rank')} ",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_ttm_{category_name}_{r}",
+                                                step=1.0,
+                                                format="%d"
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[
+                                                (df_filtered_by_sliders[r] >= slider_min) &
+                                                (df_filtered_by_sliders[r] <= slider_max)
+                                            ]
+                                        else:
+                                            st.info(f"Kolumn {r} saknas i data.")
+                                        r_data = f"{r.replace('_ttm_ratioRank', '_ttm_ratioValue')}"
+                                        if r_data in df_filtered_by_sliders.columns:
+                                            min_val = float(df_filtered_by_sliders[r_data].min())
+                                            max_val = float(df_filtered_by_sliders[r_data].max())
+                                            if min_val == max_val:
+                                                max_val += 0.001
+                                            slider_min, slider_max = st.slider(
+                                                f"Filtrera {r_data.replace('_ttm_ratioValue', ' ttm Värde')}",
+                                                min_value=min_val,
+                                                max_value=max_val,
+                                                value=(min_val, max_val),
+                                                key=f"slider_tab_ttm_{r_data}",
+                                                step=0.1,
+                                                format="%.1f"
+                                            )
+                                            # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
+                                            mask = (df_filtered_by_sliders[r_data].isna()) | (
+                                                (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
+                                            )
+                                            df_filtered_by_sliders = df_filtered_by_sliders[mask]
+                                        else:
+                                            st.info(f"Kolumn {r_data} saknas i data.")
+                    else:
+                        st.info("Inga 'ttm'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
+
+    # =============================
+    # FILTERED RESULTS AND BUBBLE PLOT
+    # =============================
+    st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
+
+    with st.container(border=True, key="filtered_results"):
+        # Get the number of stocks after filtering by sliders
+        #num_filtered_stocks = len(df_display)
+        st.subheader(f"Resultat av filtrering: {df_filtered_by_sliders.shape[0]} aktier")
+        with st.expander('🛟 **Hjälp med filtreringsresultat** (Klicka för att visa)', expanded=False):
+                    st.markdown(
+                        """
+                        **Så här använder du filtreringsresultatet:**
+
+                        - **Bubbelplotten** visar alla aktier som matchar dina filter. Varje bubbla representerar en aktie, där positionen visar dess totalrank för trend (x-axel) och senaste året (y-axel). Bubblans storlek motsvarar marknadsvärdet och färgen visar vilken lista aktien tillhör. Du kan välja att visa eller dölja tickers i plotten.
+
+                        - **Resultattabellen** under plotten visar alla filtrerade aktier med deras respektive rankningar. Här kan du:
+                          - Markera rutan under **'Välj'** för en aktie för att visa detaljerad kursutveckling och nyckeltal nedanför tabellen (endast en aktie åt gången).
+                          - Markera rutan under **'Shortlist'** för att lägga till aktien i din personliga bevakningslista.
+
+                        - **Bevakningslistan** ("Your Shortlist") samlar de aktier du markerat. Du kan ladda ner listan som CSV för vidare analys.
+
+                        - När du valt en aktie via **'Välj'** visas detaljerad information, kursdiagram och nyckeltalsgrafer längre ner på sidan.
+
+                        Använd dessa funktioner för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
+                        """
+                    )
 
         # bubble plot
         with st.container(border=True, key="bubble_plot_container"):
@@ -348,7 +744,7 @@ try:
                             #'hover_summary': 'Summary',
                             'size': 'Market Cap'
                         },
-                        title='Aggregerad Rank för Trend senaste 4 åren och Senaste året',
+                        title='Bubbeldiagram',
                         width=900,
                         height=600
                     )
@@ -373,336 +769,6 @@ try:
                 st.info('No stocks in the selected score range.')
 
 
-
-        # --- Filtrera efter tillväxt över 4 år ---
-        st.markdown("##### Filtrera efter genomsnittlig tillväxt")
-
-        cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
-
-        with cagr_left:
-            cagr_range_left = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[0],get_display_name,get_tooltip_text,0.1,"%.1f")
-
-            df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] >= cagr_range_left[0]) & 
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[0]] <= cagr_range_left[1])
-            ]
-        with cagr_middle:
-            cagr_range_middle = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[1],get_display_name,get_tooltip_text,0.1,"%.1f")
-
-            df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] >= cagr_range_middle[0]) & 
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[1]] <= cagr_range_middle[1])
-            ]
-
-        with cagr_right:
-            cagr_range_right = create_slider(df_new_ranks,allCols_AvgGrowth_Rank[2],get_display_name,get_tooltip_text,0.1,"%.1f")
-
-            df_filtered_by_sliders = df_filtered_by_sliders[
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] >= cagr_range_right[0]) & 
-                (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] <= cagr_range_right[1])
-            ]
-
-
-        #st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
-        # --- Filtrera efter SMA-differenser ---
-        st.markdown("##### Filtrera efter SMA-differenser")
-        col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3,gap='medium',border=True)
-        with col_diff_long_medium:
-            diff_long_medium_range = create_slider(df_new_ranks,'pct_SMA_medium_vs_SMA_long',get_display_name,get_tooltip_text,1.0,"%d%%")
-
-        with col_diff_short_medium:
-            diff_short_medium_range = create_slider(df_new_ranks,'pct_SMA_short_vs_SMA_medium',get_display_name,get_tooltip_text,1.0,"%d%%")
-
-        with col_diff_price_short:
-            diff_price_short_range = create_slider(df_new_ranks,'pct_Close_vs_SMA_short',get_display_name,get_tooltip_text,1.0,"%d%%")
-
-        df_filtered_by_sliders = df_filtered_by_sliders[
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) & 
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) & 
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
-            (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) & 
-            (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])
-        ]
-        st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
-
-        # --- NY: Manuell ticker-filtrering ---
-        ticker_input = st.text_input(
-            "Filtrera på tickers (kommaseparerade, t.ex. VOLV-A,ERIC-B,ATCO-A):",
-            value="",
-            help="Skriv in en eller flera tickers separerade med komma för att endast visa dessa aktier."
-        )
-        if ticker_input.strip():
-            tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
-            df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
-        with st.expander('**Utökade filtermöjligheter**', expanded=False):
-            col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
-            with col_filter_left:
-                st.markdown("###### Filtrera för kategori Trend-rankningar")
-                if trend_columns:
-                    for col in trend_columns:
-                        with st.container(border=True,key=f"container_trend_{col}"):
-                            min_val = df_filtered_by_sliders[col].min()
-                            max_val = df_filtered_by_sliders[col].max()
-                            slider_min = float(min_val)
-                            slider_max = float(max_val)
-                            if slider_min == slider_max:
-                                slider_max += 0.001
-                            current_min, current_max = st.slider(
-                                f"{col.replace('_trend_catRank', ' trend Rank')}",
-                                min_value=slider_min,
-                                max_value=slider_max,
-                                value=(slider_min, slider_max),
-                                key=f"slider_trend_{col}",
-                                step=1.0,
-                                format="%d"
-                            )
-                            df_filtered_by_sliders = df_filtered_by_sliders[
-                                (df_filtered_by_sliders[col] >= current_min) &
-                                (df_filtered_by_sliders[col] <= current_max)
-                            ]
-                            category_name = col.replace("catRank", "ratioRank")
-                            # Dynamiskt skapa flikar för varje trendkategori med nyckeltalsnamn
-                            ratio_name = [r for r in category_ratios[category_name]]
-                            ratio_name_display = [r.replace("_trend_ratioRank", "") for r in ratio_name] 
-                            tab_labels = ['Info'] + ratio_name_display
-                            tabs = st.tabs(tab_labels)
-                            tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_trend_ratioRank', '')}:")
-                            # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt) trend_slope
-                            for i, r in enumerate(ratio_name):
-                                with tabs[i+1]:
-                                    if r in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r].min())
-                                        max_val = float(df_filtered_by_sliders[r].max())
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r.replace('_trend_ratioRank', ' trend Rank')} ",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_trend_{category_name}_{r}",
-                                            step=1.0,
-                                            format="%d"
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[
-                                            (df_filtered_by_sliders[r] >= slider_min) &
-                                            (df_filtered_by_sliders[r] <= slider_max)
-                                        ]
-                                    else:
-                                        st.info(f"Kolumn {r} saknas i data.")
-                                    # Add filter for trendSlope, but do NOT exclude NaN values (keep them in the filtered DataFrame)
-                                    r_data = f"{r.replace('_trend_ratioRank', '_trend_ratioValue')}"
-                                    if r_data in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r_data].min(skipna=True))
-                                        max_val = float(df_filtered_by_sliders[r_data].max(skipna=True))
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r_data.replace('_trend_ratioValue', ' trend Slope')}",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{r_data}",
-                                            step=0.1,
-                                            format="%.1f"
-                                        )
-                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
-                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
-                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
-                                    else:
-                                        st.info(f"Kolumn {r_data} saknas i data.")
-
-                else:
-                    st.info("Inga 'trend'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
-            with col_filter_mid:
-                st.markdown("###### Filtrera för kategori Senaste-rankningar")
-                if latest_columns:
-                    for col in latest_columns:
-                        with st.container(border=True,key=f"container_trend_{col}"):
-                            min_val = df_filtered_by_sliders[col].min()
-                            max_val = df_filtered_by_sliders[col].max()
-                            slider_min = float(min_val)
-                            slider_max = float(max_val)
-                            if slider_min == slider_max:
-                                slider_max += 0.001
-                            current_min, current_max = st.slider(
-                                f"{col.replace('_latest_catRank', ' senaste Rank')}",
-                                min_value=slider_min,
-                                max_value=slider_max,
-                                value=(slider_min, slider_max),
-                                key=f"slider_latest_{col}",
-                                step=1.0,
-                                format="%d"
-                            )
-                            df_filtered_by_sliders = df_filtered_by_sliders[
-                                (df_filtered_by_sliders[col] >= current_min) &
-                                (df_filtered_by_sliders[col] <= current_max)
-                            ]
-                            category_name = col.replace("catRank", "ratioRank")
-                            # Dynamiskt skapa flikar för varje senaste kategori med nyckeltalsnamn
-                            ratio_name = [r for r in category_ratios[category_name]]
-                            ratio_name_display = [r.replace("_latest_ratioRank", "") for r in ratio_name] 
-                            tab_labels = ['Info'] + ratio_name_display
-                            tabs = st.tabs(tab_labels)
-                            tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_latest_ratioRank', '')}:")
-                            # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt)
-                            for i, r in enumerate(ratio_name):
-                                with tabs[i+1]:
-                                    if r in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r].min())
-                                        max_val = float(df_filtered_by_sliders[r].max())
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r.replace('_latest_ratioRank', ' senaste Rank')} ",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{category_name}_{r}",
-                                            step=1.0,
-                                            format="%d"
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[
-                                            (df_filtered_by_sliders[r] >= slider_min) &
-                                            (df_filtered_by_sliders[r] <= slider_max)
-                                        ]
-                                    else:
-                                        st.info(f"Kolumn {r} saknas i data.")
-                                    r_data = f"{r.replace('_latest_ratioRank', '_latest_ratioValue')}"
-                                    if r_data in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r_data].min())
-                                        max_val = float(df_filtered_by_sliders[r_data].max())
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r_data.replace('_latest_ratioValue', ' senaste Värde')}",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_latest_{r_data}",
-                                            step=0.1,
-                                            format="%.1f"
-                                        )
-                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
-                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
-                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
-                                    else:
-                                        st.info(f"Kolumn {r_data} saknas i data.")
-                else:
-                    st.info("Inga 'senaste'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
-            with col_filter_right:
-                st.markdown("###### Filtrera för kategori ttm-rankningar")
-                if ttm_columns:
-                    for col in ttm_columns:
-                        with st.container(border=True,key=f"container_trend_{col}"):
-                            min_val = df_filtered_by_sliders[col].min()
-                            max_val = df_filtered_by_sliders[col].max()
-                            slider_min = float(min_val)
-                            slider_max = float(max_val)
-                            if slider_min == slider_max:
-                                slider_max += 0.001
-                            current_min, current_max = st.slider(
-                                f"{col.replace('_ttm_catRank', ' ttm Rank')}",
-                                min_value=slider_min,
-                                max_value=slider_max,
-                                value=(slider_min, slider_max),
-                                key=f"slider_ttm_{col}",
-                                step=1.0,
-                                format="%d"
-                            )
-                            df_filtered_by_sliders = df_filtered_by_sliders[
-                                (df_filtered_by_sliders[col] >= current_min) &
-                                (df_filtered_by_sliders[col] <= current_max)
-                            ]
-                            category_name = col.replace("catRank", "ratioRank")
-                            # Dynamiskt skapa flikar för varje ttm kategori med nyckeltalsnamn
-                            ratio_name = [r for r in category_ratios[category_name]]
-                            ratio_name_display = [r.replace("_ttm_ratioRank", "") for r in ratio_name] 
-                            tab_labels = ['Info'] + ratio_name_display
-                            tabs = st.tabs(tab_labels)
-                            tabs[0].write(f"Detaljerad filtrering för *nyckeltal* i {category_name.replace('_ttm_ratioRank', '')}:")
-                            # Lägg till reglage för varje nyckeltalsflik (från index 1 och uppåt)
-                            for i, r in enumerate(ratio_name):
-                                with tabs[i+1]:
-                                    if r in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r].min())
-                                        max_val = float(df_filtered_by_sliders[r].max())
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r.replace('_ttm_ratioRank', ' ttm Rank')} ",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_ttm_{category_name}_{r}",
-                                            step=1.0,
-                                            format="%d"
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[
-                                            (df_filtered_by_sliders[r] >= slider_min) &
-                                            (df_filtered_by_sliders[r] <= slider_max)
-                                        ]
-                                    else:
-                                        st.info(f"Kolumn {r} saknas i data.")
-                                    r_data = f"{r.replace('_ttm_ratioRank', '_ttm_ratioValue')}"
-                                    if r_data in df_filtered_by_sliders.columns:
-                                        min_val = float(df_filtered_by_sliders[r_data].min())
-                                        max_val = float(df_filtered_by_sliders[r_data].max())
-                                        if min_val == max_val:
-                                            max_val += 0.001
-                                        slider_min, slider_max = st.slider(
-                                            f"Filtrera {r_data.replace('_ttm_ratioValue', ' ttm Värde')}",
-                                            min_value=min_val,
-                                            max_value=max_val,
-                                            value=(min_val, max_val),
-                                            key=f"slider_tab_ttm_{r_data}",
-                                            step=0.1,
-                                            format="%.1f"
-                                        )
-                                        # Only filter rows where the value is NOT NaN; keep NaN rows unfiltered
-                                        mask = (df_filtered_by_sliders[r_data].isna()) | (
-                                            (df_filtered_by_sliders[r_data] >= slider_min) & (df_filtered_by_sliders[r_data] <= slider_max)
-                                        )
-                                        df_filtered_by_sliders = df_filtered_by_sliders[mask]
-                                    else:
-                                        st.info(f"Kolumn {r_data} saknas i data.")
-                else:
-                    st.info("Inga 'ttm'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
-
-    # =============================
-    # FILTERED RESULTS AND BUBBLE PLOT
-    # =============================
-    st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
-
-    with st.container(border=True, key="filtered_results"):
-        # Get the number of stocks after filtering by sliders
-        #num_filtered_stocks = len(df_display)
-        st.subheader(f"Resultat av filtrering: {df_filtered_by_sliders.shape[0]} aktier")
-        with st.expander('🛟**Hjälp med filtreringsresultat**', expanded=False):
-                    st.markdown(
-                        """
-                        **Så här använder du filtreringsresultatet:**
-
-                        - **Bubbelplotten** visar alla aktier som matchar dina filter. Varje bubbla representerar en aktie, där positionen visar dess totalrank för trend (x-axel) och senaste året (y-axel). Bubblans storlek motsvarar marknadsvärdet och färgen visar vilken lista aktien tillhör. Du kan välja att visa eller dölja tickers i plotten.
-
-                        - **Resultattabellen** under plotten visar alla filtrerade aktier med deras respektive rankningar. Här kan du:
-                          - Markera rutan under **'Välj'** för en aktie för att visa detaljerad kursutveckling och nyckeltal nedanför tabellen (endast en aktie åt gången).
-                          - Markera rutan under **'Shortlist'** för att lägga till aktien i din personliga bevakningslista.
-
-                        - **Bevakningslistan** ("Your Shortlist") samlar de aktier du markerat. Du kan ladda ner listan som CSV för vidare analys.
-
-                        - När du valt en aktie via **'Välj'** visas detaljerad information, kursdiagram och nyckeltalsgrafer längre ner på sidan.
-
-                        Använd dessa funktioner för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
-                        """
-                    )
-
-
         # =============================
         # MAIN TABLE DISPLAY
         # =============================
@@ -712,7 +778,7 @@ try:
             # This DataFrame is now based on the slider-filtered data
             # and contains only 'rank_Score' columns, keeping the Ticker as index.
             df_display = df_filtered_by_sliders[rank_score_columns].copy() # Keep index
-            df_display.sort_index(inplace=True)
+            #df_display.sort_index(inplace=True)
 
             # Rename the rank_Score columns for display
             # Create a dictionary for renaming using get_display_name
@@ -827,7 +893,7 @@ try:
 
     with st.container(border=True, key="stock_details_container"):
         st.subheader("**Detaljerad information om vald aktie**")
-        with st.expander("🛟**Hjälp om aktieinformation**", expanded=False):
+        with st.expander("🛟 **Hjälp om aktieinformation** (Klicka för att visa)", expanded=False):
             st.markdown(
                 """
                 **Så här tolkar du aktieinformationen:**
@@ -949,7 +1015,7 @@ try:
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
                     st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
-                with st.expander("**Detaljerad tillväxtdata inkl ttm:**", expanded=True):
+                with st.expander("**Detaljerad tillväxtdata inkl ttm:** (Klicka för att visa)", expanded=True):
                     def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, ttm_diff_value,higher_is_better):
                         year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
                         year_cols = [col for col in year_cols if not pd.isna(df.loc[selected_stock_ticker, col])]
@@ -1162,7 +1228,7 @@ try:
             # =============================
             # Bar plot for all pct_ columns for selected_stock_ticker
             if selected_stock_ticker:
-                with st.expander("SMA differenser (%)", expanded=False):
+                with st.expander("**SMA differenser (%)** (Klicka för att visa)", expanded=False):
                     pct_cols = [col for col in selected_stock_dict.keys() if col.startswith('pct_')]
                     if pct_cols:
                         pct_values = [float(selected_stock_dict.get(col, float('nan'))) for col in pct_cols]
@@ -1460,7 +1526,7 @@ try:
             st.subheader("**Ratio 2 Rank**")
             if selected_stock_ticker is not None:
                 st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
-                with st.expander("🛟 **Hjälp om Ratio 2 Rank**", expanded=False):
+                with st.expander("🛟 **Hjälp om Ratio 2 Rank** (Klicka för att visa)", expanded=False):
                     st.markdown(
                         """
                         **Så här använder du Ratio 2 Rank-sektionen:**
@@ -1479,11 +1545,16 @@ try:
                 with col_left:
                     selected_ratio_area = st.radio(
                         "Välj område att visa:",
-                        options=['Trend senaste 4 åren', 'Senaste året'],
+                        options=['Trend senaste 4 åren', 'Senaste året', 'Diff ttm mot senaste året'],
                         index=0,
                         key="selected_ratio_area"
                     )
-                    ratio_to_rank_map_temp = 'trend' if selected_ratio_area == 'Trend senaste 4 åren' else 'latest'
+                    temp_map = {
+                        'Trend senaste 4 åren': 'trend',
+                        'Senaste året': 'latest',
+                        'Diff ttm mot senaste året': 'ttm'
+                    }
+                    ratio_to_rank_map_temp = temp_map.get(selected_ratio_area, 'trend')
                 with col_mid:
                     sektors_all = [selected_stock_sektor, 'Alla']
                     display_stock_sektor_selector = st.radio(
@@ -1586,7 +1657,7 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10)
                     )
                     st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
-                    with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}**"):
+                    with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}** (Klicka för att visa)"):
                         st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
 
                 elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
