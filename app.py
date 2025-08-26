@@ -26,6 +26,8 @@ config = load_config("rank-config.yaml")
 # --- Get directories for CSV files ---
 CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
+show_Ratio_to_Rank =False
+
 # =============================
 # STREAMLIT APPLICATION
 # =============================
@@ -39,6 +41,17 @@ st.set_page_config(
     page_icon="📈"
 )
 st.title("📈 Indicatum Insights")
+# Introduce the app and its purpose
+# This app helps users analyze and filter stocks based on various financial metrics and trends.
+st.write(
+    "✨ **Välkommen till Indicatum Insights!** ✨\n\n"
+    "Upptäck kraften i smart aktieanalys – här får du ett unikt verktyg för att filtrera, jämföra och visualisera svenska aktier med några få klick. "
+    "Oavsett om du är nybörjare eller erfaren investerare hjälper appen dig att hitta guldkornen på marknaden och fatta bättre beslut.\n\n"
+    "💡 **Tips:** Håll utkik efter livbojen 🛟 och hjälptexter i varje sektion – där hittar du inspiration, smarta knep och tydliga instruktioner för att få ut mesta möjliga av filtren, tabellerna och graferna. "
+    "Börja utforska, experimentera och låt datan guida dig mot nya insikter!\n\n"
+    "🚀 Lycka till med din aktiejakt!"
+)
+
 with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att visa)", expanded=False):
     st.markdown(
         """
@@ -208,13 +221,23 @@ try:
                 """
                 **Så här använder du filtersektionen:**
 
-                - Justera reglagen för att filtrera aktier utifrån totalrank, tillväxt, tekniska indikatorer och detaljerade finansiella nyckeltal.
-                - **Aggregerad Rank:** Filtrera snabbt på samlad trendrank (senaste 4 åren) och senaste året för att hitta bolag med stark utveckling.
-                - **Tillväxtfilter:** Använd reglagen för genomsnittlig tillväxt (CAGR) för att fokusera på bolag med stabil och hög tillväxt inom olika mått.
-                - **SMA-differenser:** Begränsa urvalet med hjälp av skillnader mellan kurs och glidande medelvärden (SMA) för att identifiera tekniska trender.
+                Det finns **två huvudsakliga sätt att använda filtren**:
+
+                1. **Förenklad filtrering:**  
+                   - Bygg ditt eget filter genom att ange hur mycket vikt du vill lägga på trend (senaste 4 åren), senaste året och TTM (Trailing Twelve Months efter senaste årsrapporten).
+                   - Resultattabellen visar de aktier som bäst matchar din valda viktning.
+                   - Välj även hur många aktier du vill se i resultatet.
+                   - Perfekt för dig som snabbt vill hitta de mest intressanta aktierna utifrån din strategi.
+
+                2. **Utökade filtermöjligheter:**  
+                   - Expandera sektionen för avancerad filtrering på kategori- och nyckeltalsnivå.
+                   - Här kan du finjustera urvalet baserat på specifika nyckeltal och deras utveckling, både för trend, senaste året och TTM.
+                   - Använd reglagen för totalrank, tillväxt (CAGR), tekniska indikatorer (SMA-differenser), samt detaljerade filter på kategori- och nyckeltalsnivå via popover-funktionen och flikar.
+                   - Kombinera flera filter för att hitta bolag med exakt de egenskaper du söker.
+
+                **Övriga filter:**
                 - **Lista och Sektor:** Välj enkelt vilka listor och sektorer som ska ingå med färgade "pills".
                 - **Ticker-filtrering:** Skriv in en eller flera tickers för att visa endast dessa aktier.
-                - **Utökade filter:** Expandera sektionen för avancerad filtrering på kategori- och nyckeltalsnivå. Här kan du finjustera urvalet baserat på specifika nyckeltal och deras utveckling.
 
                 Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
                 """
@@ -254,18 +277,27 @@ try:
                 else:
                     df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
         with st.expander("**Förenklad filtrering** (Klicka för att visa)", expanded=True):
-            st.markdown("### Mata in din personliga viktning")
+            # --- Reglage för personlig viktning ---
+            st.markdown("### Bygg ditt egna filter med din personliga viktning")
+            # skriv ut instruktioner
+            st.write(
+                "Ange själv vad du anser vara önskvärt för de aktier du vill filtrera fram. "
+                "Använd reglagen nedan för att sätta din personliga viktning för trendstyrka (senaste 4 åren), senaste årets resultat samt TTM-resultat."
+                "Det är helt upp till dig att bestämma vilka egenskaper som är viktigast för just din strategi."
+            )
 
-            # Skapa session state för att spara slider-värden
 
             # Tre sliders för preliminära värden
             col_trend, col_latest, col_ttm = st.columns(3, gap='medium', border=True)
             with col_trend:
-                trend = st.slider("Viktning för Trend (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="trend_slider")
+                label = "Viktning för Trend (%)"
+                trend = st.slider(label, label_visibility="visible", help=get_tooltip_text(label), min_value=0.0, max_value=100.0, value=33.3, step=1.0, key="trend_slider")
             with col_latest:
-                latest = st.slider("Viktning för Senaste (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="latest_slider")
+                label = "Viktning för Senaste (%)"
+                latest = st.slider(label, label_visibility="visible", help=get_tooltip_text(label), min_value=0.0, max_value=100.0, value=33.3, step=1.0, key="latest_slider")
             with col_ttm:
-                ttm = st.slider("Viktning för TTM (%)", min_value=0.0, max_value=100.0, value=50.0, step=1.0, key="ttm_slider")
+                label = "Viktning för TTM (%)"
+                ttm = st.slider(label, label_visibility="visible", help=get_tooltip_text(label), min_value=0.0, max_value=100.0, value=33.3, step=1.0, key="ttm_slider")
 
             # Beräkna summan av preliminära värden
             total = trend + latest + ttm
@@ -397,7 +429,7 @@ try:
                 tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
                 df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
 
-            with st.popover('**Detaljerade filtermöjligheter** (Klicka för att visa)',width="stretch"):
+            with st.popover('**Detaljerade filtermöjligheter** (Klicka för att visa)',use_container_width=True):
                 col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
                 with col_filter_left:
                     st.markdown("###### Filtrera för kategori Trend-rankningar")
@@ -648,19 +680,20 @@ try:
         with st.expander('🛟 **Hjälp med filtreringsresultat** (Klicka för att visa)', expanded=False):
                     st.markdown(
                         """
-                        **Så här använder du filtreringsresultatet:**
+                        **Så här tolkar du filtreringsresultatet:**
 
-                        - **Bubbelplotten** visar alla aktier som matchar dina filter. Varje bubbla representerar en aktie, där positionen visar dess totalrank för trend (x-axel) och senaste året (y-axel). Bubblans storlek motsvarar marknadsvärdet och färgen visar vilken lista aktien tillhör. Du kan välja att visa eller dölja tickers i plotten.
+                        - **Bubbelplotten** visar alla aktier som matchar dina valda filter. Varje bubbla representerar en aktie, där x- och y-axlarna kan justeras för att visa olika kombinationer av totalrank (trend, senaste året eller TTM). Bubblans storlek motsvarar marknadsvärdet och färgen visar vilken lista aktien tillhör. Du kan välja att visa eller dölja tickers direkt i plotten.
 
-                        - **Resultattabellen** under plotten visar alla filtrerade aktier med deras respektive rankningar. Här kan du:
-                          - Markera rutan under **'Välj'** för en aktie för att visa detaljerad kursutveckling och nyckeltal nedanför tabellen (endast en aktie åt gången).
+                        - **Resultattabellen** under plotten visar de filtrerade aktierna med deras respektive rankningar och nyckeltal. Här kan du:
+                          - Markera rutan under **'Välj'** för att visa detaljerad kursutveckling, tillväxt och nyckeltalsgrafer för en aktie längre ner på sidan (endast en aktie åt gången).
                           - Markera rutan under **'Shortlist'** för att lägga till aktien i din personliga bevakningslista.
+                          - **Tips:** Du kan sortera tabellen genom att klicka på kolumnnamnet för att sortera stigande eller fallande.
 
-                        - **Bevakningslistan** ("Your Shortlist") samlar de aktier du markerat. Du kan ladda ner listan som CSV för vidare analys.
+                        - **Bevakningslistan** samlar de aktier du markerat med 'Shortlist'. Du kan enkelt ladda ner listan som CSV för vidare analys eller bevakning.
 
-                        - När du valt en aktie via **'Välj'** visas detaljerad information, kursdiagram och nyckeltalsgrafer längre ner på sidan.
+                        - När du valt en aktie via **'Välj'** visas detaljerad information om bolaget, kurs- och volymdiagram, utdelningshistorik, tillväxt, rank per kategori och detaljerade nyckeltalsgrafer längre ner på sidan.
 
-                        Använd dessa funktioner för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
+                        Använd filtren och visualiseringarna för att snabbt hitta, jämföra och spara intressanta aktier utifrån din strategi. Kombinera olika filter och analysera både helhet och detaljer för att hitta de bolag som passar dig bäst.
                         """
                     )
 
@@ -1341,8 +1374,7 @@ try:
                 df_ratioRank_merged = pd.merge(df_ratioRank_trend, df_ratioRank_latest, on='Ratio_name', suffixes=('_trend', '_latest'))
                 df_ratioRank_merged = pd.merge(df_ratioRank_merged, df_ratioRank_ttm, on='Ratio_name', suffixes=('', '_ttm'))
                 df_ratioRank_merged.rename(columns={'Rank_trend': 'Trend Rank', 'Rank_latest': 'Latest Rank', 'Rank': 'TTM Rank'}, inplace=True)
-                # Load help texts from config if available
-                #ratio_help_texts = config.get('ratio_help_texts', {}) if 'config' in locals() or 'config' in globals() else {}
+                
                 for cat, cat_dict in category_ratios.items():
 
                     if cat.endswith('trend_ratioRank'):
@@ -1401,7 +1433,7 @@ try:
                                 year_cols_last4 = year_cols_sorted[-4:]
                                 latest_rank_col = f"{base_ratio}_latest_ratioRank"
                                 trend_rank_col = f"{base_ratio}_trend_ratioRank"
-                                ttm_col = f"{base_ratio}_ttm"
+                                ttm_col = f"{base_ratio}_ttm_ratioValue"
                                 ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
                                 ttm_diff = f"{base_ratio}_ttm_diff"
                                 ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
@@ -1522,146 +1554,147 @@ try:
                                     
                     # Clear the empty space before each category
                     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
-        with st.container(border=True, key="ratio_rank_container"):
-            st.subheader("**Ratio 2 Rank**")
-            if selected_stock_ticker is not None:
-                st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
-                with st.expander("🛟 **Hjälp om Ratio 2 Rank** (Klicka för att visa)", expanded=False):
-                    st.markdown(
-                        """
-                        **Så här använder du Ratio 2 Rank-sektionen:**
+        if show_Ratio_to_Rank:
+            with st.container(border=True, key="ratio_rank_container"):
+                st.subheader("**Ratio 2 Rank**")
+                if selected_stock_ticker is not None:
+                    st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
+                    with st.expander("🛟 **Hjälp om Ratio 2 Rank** (Klicka för att visa)", expanded=False):
+                        st.markdown(
+                            """
+                            **Så här använder du Ratio 2 Rank-sektionen:**
 
-                        - Här kan du visualisera sambandet mellan valda nyckeltal (*ratio*) och deras respektive rankvärden för alla aktier som matchar dina filter.
-                        - Välj område (*Trend senaste 4 åren* eller *Senaste året*) för att se hur bolagen presterar över tid eller i det senaste året.
-                        - Använd reglagen för att filtrera på sektor och lista, så att du kan jämföra bolag inom samma bransch eller marknadssegment.
-                        - I scatterplotten visas varje aktie som en punkt, där x-axeln visar det valda nyckeltalet och y-axeln visar dess rankvärde. Den valda aktien markeras med röd färg och korslinje.
-                        - Bakgrundsfärgerna i diagrammet hjälper dig att snabbt se vilka rankvärden som är svaga, medel eller starka enligt färgskalan.
-                        - Använd denna sektion för att identifiera bolag med intressanta egenskaper, jämföra prestationer och hitta potentiella investeringsmöjligheter.
+                            - Här kan du visualisera sambandet mellan valda nyckeltal (*ratio*) och deras respektive rankvärden för alla aktier som matchar dina filter.
+                            - Välj område (*Trend senaste 4 åren* eller *Senaste året*) för att se hur bolagen presterar över tid eller i det senaste året.
+                            - Använd reglagen för att filtrera på sektor och lista, så att du kan jämföra bolag inom samma bransch eller marknadssegment.
+                            - I scatterplotten visas varje aktie som en punkt, där x-axeln visar det valda nyckeltalet och y-axeln visar dess rankvärde. Den valda aktien markeras med röd färg och korslinje.
+                            - Bakgrundsfärgerna i diagrammet hjälper dig att snabbt se vilka rankvärden som är svaga, medel eller starka enligt färgskalan.
+                            - Använd denna sektion för att identifiera bolag med intressanta egenskaper, jämföra prestationer och hitta potentiella investeringsmöjligheter.
 
-                        Justera inställningarna för att utforska olika samband och få en djupare förståelse för hur nyckeltal och rankvärden samverkar för de aktier du är intresserad av.
-                        """
-                    )
-                col_left, col_mid, col_right = st.columns(3, gap='medium', border=False)
-                with col_left:
-                    selected_ratio_area = st.radio(
-                        "Välj område att visa:",
-                        options=['Trend senaste 4 åren', 'Senaste året', 'Diff ttm mot senaste året'],
-                        index=0,
-                        key="selected_ratio_area"
-                    )
-                    temp_map = {
-                        'Trend senaste 4 åren': 'trend',
-                        'Senaste året': 'latest',
-                        'Diff ttm mot senaste året': 'ttm'
-                    }
-                    ratio_to_rank_map_temp = temp_map.get(selected_ratio_area, 'trend')
-                with col_mid:
-                    sektors_all = [selected_stock_sektor, 'Alla']
-                    display_stock_sektor_selector = st.radio(
-                        "Välj Sektor att visa:",
-                        options=sektors_all,
-                        index=sektors_all.index(selected_stock_sektor) if selected_stock_sektor in sektors_all else 0,
-                        key="display_stock_sektor"
-                    )
-                    display_stock_sektor = display_stock_sektor_selector if display_stock_sektor_selector != 'Alla' else unique_values_sector
-                    display_stock_sektor = [display_stock_sektor] if isinstance(display_stock_sektor, str) else display_stock_sektor
-
-                with col_right:
-                    lists_all = [selected_stock_lista, 'Alla']
-                    display_stock_lista_selector = st.radio(
-                        "Välj Lista att visa:",
-                        options=lists_all,
-                        index=lists_all.index(selected_stock_lista) if selected_stock_lista in lists_all else 0,
-                        key="display_stock_lista"
-                    )
-                    display_stock_lista = display_stock_lista_selector if display_stock_lista_selector != 'Alla' else unique_values_lista
-                    display_stock_lista = [display_stock_lista] if isinstance(display_stock_lista, str) else display_stock_lista
-                # Plotly scatter plot for selected ratio and rank
-                filtered_scatter_df = df_new_ranks[df_new_ranks['Sektor'].isin(display_stock_sektor) & df_new_ranks['Lista'].isin(display_stock_lista)]
-                display_ratio_selector = st.selectbox(
-                    "Välj ett nyckeltal att visa detaljerad information om:",
-                    options=all_ratios
-                )
-                display_ratio=f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioValue"
-                display_rank = f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioRank"
-                col_left, col_right = st.columns(2, gap='medium', border=False)
-
-                if (
-                    display_ratio and display_rank and
-                    display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns and
-                    not filtered_scatter_df.empty
-                ):
-                    # Create color array: red for selected_stock_ticker, royalblue for others
-                    marker_colors = [
-                        'red' if idx == selected_stock_ticker else 'royalblue'
-                        for idx in filtered_scatter_df.index
-                    ]
-                    scatter_fig = go.Figure()
-
-                    # Add horizontal background color bars for Rank value ranges
-                    color_ranges = config.get('color_ranges', [])
-                    x_min = filtered_scatter_df[display_ratio].min()
-                    x_max = filtered_scatter_df[display_ratio].max()
-                    for cr in color_ranges:
-                        y0 = cr['range'][0]
-                        y1 = cr['range'][1]
-                        scatter_fig.add_shape(
-                            type="rect",
-                            x0=x_min, x1=x_max,
-                            y0=y0, y1=y1,
-                            fillcolor=cr['color'],
-                            opacity=0.25,
-                            line=dict(width=0),
-                            layer="below"
+                            Justera inställningarna för att utforska olika samband och få en djupare förståelse för hur nyckeltal och rankvärden samverkar för de aktier du är intresserad av.
+                            """
                         )
+                    col_left, col_mid, col_right = st.columns(3, gap='medium', border=False)
+                    with col_left:
+                        selected_ratio_area = st.radio(
+                            "Välj område att visa:",
+                            options=['Trend senaste 4 åren', 'Senaste året', 'Diff ttm mot senaste året'],
+                            index=0,
+                            key="selected_ratio_area"
+                        )
+                        temp_map = {
+                            'Trend senaste 4 åren': 'trend',
+                            'Senaste året': 'latest',
+                            'Diff ttm mot senaste året': 'ttm'
+                        }
+                        ratio_to_rank_map_temp = temp_map.get(selected_ratio_area, 'trend')
+                    with col_mid:
+                        sektors_all = [selected_stock_sektor, 'Alla']
+                        display_stock_sektor_selector = st.radio(
+                            "Välj Sektor att visa:",
+                            options=sektors_all,
+                            index=sektors_all.index(selected_stock_sektor) if selected_stock_sektor in sektors_all else 0,
+                            key="display_stock_sektor"
+                        )
+                        display_stock_sektor = display_stock_sektor_selector if display_stock_sektor_selector != 'Alla' else unique_values_sector
+                        display_stock_sektor = [display_stock_sektor] if isinstance(display_stock_sektor, str) else display_stock_sektor
 
-                    # Add scatter points
-                    scatter_fig.add_trace(go.Scatter(
-                        x=filtered_scatter_df[display_ratio],
-                        y=filtered_scatter_df[display_rank],
-                        mode='markers',
-                        marker=dict(size=8, color=marker_colors),
-                        text=filtered_scatter_df.index,
-                        hoverinfo='text+x+y',
-                        #name=f"{display_ratio} vs {display_rank}"
-                    ))
+                    with col_right:
+                        lists_all = [selected_stock_lista, 'Alla']
+                        display_stock_lista_selector = st.radio(
+                            "Välj Lista att visa:",
+                            options=lists_all,
+                            index=lists_all.index(selected_stock_lista) if selected_stock_lista in lists_all else 0,
+                            key="display_stock_lista"
+                        )
+                        display_stock_lista = display_stock_lista_selector if display_stock_lista_selector != 'Alla' else unique_values_lista
+                        display_stock_lista = [display_stock_lista] if isinstance(display_stock_lista, str) else display_stock_lista
+                    # Plotly scatter plot for selected ratio and rank
+                    filtered_scatter_df = df_new_ranks[df_new_ranks['Sektor'].isin(display_stock_sektor) & df_new_ranks['Lista'].isin(display_stock_lista)]
+                    display_ratio_selector = st.selectbox(
+                        "Välj ett nyckeltal att visa detaljerad information om:",
+                        options=all_ratios
+                    )
+                    display_ratio=f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioValue"
+                    display_rank = f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioRank"
+                    col_left, col_right = st.columns(2, gap='medium', border=False)
 
-                    # Add crosshair for selected_stock_ticker if present in filtered_scatter_df and has valid display_ratio value
                     if (
-                        selected_stock_ticker in filtered_scatter_df.index and
-                        pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_ratio]) and
-                        pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_rank])
+                        display_ratio and display_rank and
+                        display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns and
+                        not filtered_scatter_df.empty
                     ):
-                        x_val = filtered_scatter_df.loc[selected_stock_ticker, display_ratio]
-                        y_val = filtered_scatter_df.loc[selected_stock_ticker, display_rank]
-                        scatter_fig.add_shape(
-                            type="line",
-                            x0=x_val, x1=x_val,
-                            y0=filtered_scatter_df[display_rank].min(), y1=filtered_scatter_df[display_rank].max(),
-                            line=dict(color="red", width=2, dash="dot"),
-                        )
-                        scatter_fig.add_shape(
-                            type="line",
-                            x0=filtered_scatter_df[display_ratio].min(), x1=filtered_scatter_df[display_ratio].max(),
-                            y0=y_val, y1=y_val,
-                            line=dict(color="red", width=2, dash="dot"),
-                        )
-                    else:
-                        st.warning(f"Valt bolag {selected_stock_ticker} saknar giltiga värden för {display_ratio} eller {display_rank}. Ingen korslinje visas.")
+                        # Create color array: red for selected_stock_ticker, royalblue for others
+                        marker_colors = [
+                            'red' if idx == selected_stock_ticker else 'royalblue'
+                            for idx in filtered_scatter_df.index
+                        ]
+                        scatter_fig = go.Figure()
 
-                    scatter_fig.update_layout(
-                        #title=f"Scatterplot: {display_ratio} vs {display_rank}",
-                        xaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Värde",
-                        yaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Rank",
-                        height=400,
-                        margin=dict(l=10, r=10, t=40, b=10)
-                    )
-                    st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
-                    with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}** (Klicka för att visa)"):
-                        st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
+                        # Add horizontal background color bars for Rank value ranges
+                        color_ranges = config.get('color_ranges', [])
+                        x_min = filtered_scatter_df[display_ratio].min()
+                        x_max = filtered_scatter_df[display_ratio].max()
+                        for cr in color_ranges:
+                            y0 = cr['range'][0]
+                            y1 = cr['range'][1]
+                            scatter_fig.add_shape(
+                                type="rect",
+                                x0=x_min, x1=x_max,
+                                y0=y0, y1=y1,
+                                fillcolor=cr['color'],
+                                opacity=0.25,
+                                line=dict(width=0),
+                                layer="below"
+                            )
 
-                elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
-                    st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
+                        # Add scatter points
+                        scatter_fig.add_trace(go.Scatter(
+                            x=filtered_scatter_df[display_ratio],
+                            y=filtered_scatter_df[display_rank],
+                            mode='markers',
+                            marker=dict(size=8, color=marker_colors),
+                            text=filtered_scatter_df.index,
+                            hoverinfo='text+x+y',
+                            #name=f"{display_ratio} vs {display_rank}"
+                        ))
+
+                        # Add crosshair for selected_stock_ticker if present in filtered_scatter_df and has valid display_ratio value
+                        if (
+                            selected_stock_ticker in filtered_scatter_df.index and
+                            pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_ratio]) and
+                            pd.notna(filtered_scatter_df.loc[selected_stock_ticker, display_rank])
+                        ):
+                            x_val = filtered_scatter_df.loc[selected_stock_ticker, display_ratio]
+                            y_val = filtered_scatter_df.loc[selected_stock_ticker, display_rank]
+                            scatter_fig.add_shape(
+                                type="line",
+                                x0=x_val, x1=x_val,
+                                y0=filtered_scatter_df[display_rank].min(), y1=filtered_scatter_df[display_rank].max(),
+                                line=dict(color="red", width=2, dash="dot"),
+                            )
+                            scatter_fig.add_shape(
+                                type="line",
+                                x0=filtered_scatter_df[display_ratio].min(), x1=filtered_scatter_df[display_ratio].max(),
+                                y0=y_val, y1=y_val,
+                                line=dict(color="red", width=2, dash="dot"),
+                            )
+                        else:
+                            st.warning(f"Valt bolag {selected_stock_ticker} saknar giltiga värden för {display_ratio} eller {display_rank}. Ingen korslinje visas.")
+
+                        scatter_fig.update_layout(
+                            #title=f"Scatterplot: {display_ratio} vs {display_rank}",
+                            xaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Värde",
+                            yaxis_title=f"{display_ratio_selector} {ratio_to_rank_map_temp} Rank",
+                            height=400,
+                            margin=dict(l=10, r=10, t=40, b=10)
+                        )
+                        st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
+                        with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}** (Klicka för att visa)"):
+                            st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
+
+                    elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
+                        st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
         if selected_stock_ticker is not None:
             with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
                 st.write(f"Datadump av {selected_stock_ticker}")

@@ -9,7 +9,7 @@ from tqdm import tqdm
 from io_utils import load_yaml, load_csv, save_csv, load_pickle, save_pickle
 from data_fetcher import fetch_yfinance_data, read_tickers_from_csv, get_price_data
 from ratios import calculate_all_ratios
-from ranking import rank_all_ratios, aggregate_category_ranks, aggregate_cluster_ranks, create_ratios_to_ranks
+from ranking import create_ratios_to_ranks
 
 # Ladda .env-filen endast om den finns
 if Path('.env').exists():
@@ -212,7 +212,7 @@ def save_calculated_ratios_to_csv(calculated_ratios: Dict[str, Any], csv_file_pa
     for ticker, data in calculated_ratios.items():
         if period_type == "quarterly":
             # Only keep metrics ending with '_latest_ratioValue' and rename to '_ttm'
-            filtered_data = {k.replace('_latest_ratioValue', '_ttm'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
+            filtered_data = {k.replace('_latest_ratioValue', '_ttm_ratioValue'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
         else:
             filtered_data = data
         df_metrics = pd.DataFrame(filtered_data, index=[ticker]).T
@@ -539,7 +539,7 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(ratios)
     for ratio in all_ratios:
-        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm'] - final_df[f'{ratio}_latest_ratioValue'])
+        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])
     for agr_temp in config['agr_dimensions']:
         agr = agr_temp.replace(" ", "_")
         latest_full_year_value = final_df.apply(
@@ -667,10 +667,10 @@ if __name__ == "__main__":
             save_last_SMA_to_csv(
                 read_from=CSV_PATH / config["price_data_file"],
                 save_to=CSV_PATH / "last_SMA.csv"
-)
+            )
 
-            # Step 3: Calculate ratios and rasnkings
-            raw_financial_data_quarterly_summarized=summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
+            # Step 3: Calculate ratios and rankings
+            raw_financial_data_quarterly_summarized = summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
             save_raw_data_to_csv(raw_financial_data_quarterly_summarized, CSV_PATH / "raw_financial_data_quarterly_summarized.csv")
 
             calculated_ratios_quarterly = calculate_all_ratios(raw_financial_data_quarterly_summarized, config["ratio_definitions"])
@@ -682,16 +682,6 @@ if __name__ == "__main__":
             # Create ratios to ranks 
             complete_ranks = create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,config["ratio_definitions"],config["category_ratios"])
             save_dict_of_dicts_to_csv(complete_ranks, CSV_PATH / "complete_ranks.csv")
-
-            """ranked_ratios = rank_all_ratios(calculated_ratios, config["ratio_definitions"])
-            save_dict_of_dicts_to_csv(ranked_ratios, CSV_PATH / "ranked_ratios.csv", index_col_name="Rank", index=False)
-
-            # Step 4: Aggregate category and cluster ranks
-            category_ranks = aggregate_category_ranks(ranked_ratios, config["category_ratios"])
-            save_dict_of_dicts_to_csv(category_ranks, CSV_PATH / "category_ranks.csv", index_col_name="Category", index=True)
-
-            cluster_ranks = aggregate_cluster_ranks(category_ranks)
-            save_dict_of_dicts_to_csv(cluster_ranks, CSV_PATH / "cluster_ranks.csv", index_col_name="Category", index=True)"""
 
             # Step 5: Calculate AGR results
             agr_results = calculate_agr_for_ticker(CSV_PATH / "raw_financial_data.csv", tickers, config['agr_dimensions'])
