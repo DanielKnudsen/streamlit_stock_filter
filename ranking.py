@@ -75,47 +75,6 @@ def create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,ratio_d
             complete_ranks[ticker].update(cluster_ranks[ticker])
     return complete_ranks
 
-
-def rank_all_ratios(
-    calculated_ratios: dict,
-    ratio_definitions: dict
-) -> dict:
-    """
-    Rank each ratio (latest year and trend) on a 0-100 scale using percentile ranking and hybrid method for trend.
-
-    Args:
-        calculated_ratios (dict): Calculated ratios per ticker.
-        ratio_definitions (dict): Ratio definitions.
-
-    Returns:
-        dict: Ranked ratios per ticker.
-    """
-    ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
-    df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    for column in df.columns:
-        if column.endswith('_latest_ratioValue'):
-            ratio_name = column.replace('_latest_ratioValue', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_latest_ratioRank'] = rank if not pd.isna(rank) else np.nan
-        elif column.endswith('_trend_ratioValue'):
-            ratio_name = column.replace('_trend_ratioValue', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank if not pd.isna(rank) else np.nan
-        elif column.endswith('_ttm'):
-            ratio_name = column.replace('_ttm', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_ttm_ratioRank'] = rank if not pd.isna(rank) else np.nan
-    return ranked_ratios
-
 def aggregate_category_ranks(
     ranked_ratios: dict,
     category_ratios: dict

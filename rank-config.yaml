@@ -287,6 +287,9 @@ tooltip_texts:
   "Total_Revenue_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för omsättningen över de senaste 4 åren."
   "Basic_EPS_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för vinst per aktie (EPS) över de senaste 4 åren."
   "Dividend_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för utdelningen över de senaste 4 åren."
+  "Viktning för Trend (%)": "Viktning av **trend över de senaste 4 åren** i den övergripande rankningen."
+  "Viktning för Senaste (%)": "Viktning av **senaste årets resultat** i den övergripande rankningen."
+  "Viktning för TTM (%)": "Viktning av **TTM-förändring** jämfört med senaste årsresultat i den övergripande rankningen. (Trailing Twelve Months, TTM)"
 
 color_ranges:
   - range: [0, 20]
