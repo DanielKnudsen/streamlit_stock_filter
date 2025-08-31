@@ -26,7 +26,7 @@ config = load_config("rank-config.yaml")
 # --- Get directories for CSV files ---
 CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
-show_Ratio_to_Rank =False
+show_Ratio_to_Rank =True
 
 # =============================
 # STREAMLIT APPLICATION
@@ -1578,7 +1578,7 @@ try:
                     with col_left:
                         selected_ratio_area = st.radio(
                             "Välj område att visa:",
-                            options=['Trend senaste 4 åren', 'Senaste året', 'Diff ttm mot senaste året'],
+                            options=['Trend senaste 4 åren', 'Senaste året'],#, 'Diff ttm mot senaste året'],
                             index=0,
                             key="selected_ratio_area"
                         )
