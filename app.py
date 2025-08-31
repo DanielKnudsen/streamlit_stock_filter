@@ -179,7 +179,7 @@ try:
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
     ttm_columns = [col for col in rank_score_columns if "ttm" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights','QuarterDiff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
