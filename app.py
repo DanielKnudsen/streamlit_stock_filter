@@ -1695,10 +1695,7 @@ try:
 
                     elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
                         st.info("Ingen data att visa för scatterplotten med nuvarande filter.")
-        if selected_stock_ticker is not None:
-            with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
-                st.write(f"Datadump av {selected_stock_ticker}")
-                st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
+
 
                             
                 # --- END: Show ratio bar charts for each _trend_rank category ---
