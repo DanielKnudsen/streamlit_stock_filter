@@ -1,9 +1,59 @@
 import numpy as np
 import pandas as pd
 
-def create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,ratio_definitions,category_ratios):
+def create_ratios_to_ranks(
+    calculated_ratios: dict,
+    calculated_ratios_quarterly: dict,
+    ratio_definitions: dict,
+    category_ratios: dict
+) -> dict:
+    """
+    Calculate percentile ranks for financial ratios (latest, trend, and TTM) for each ticker, aggregate them by category, and compute cluster-level ranks.
+
+    This function processes annual and quarterly calculated ratios for a set of tickers, computes percentile-based ranks for each ratio (higher or lower is better depending on the definition), and aggregates these ranks into category and cluster scores. The output is a nested dictionary with all computed ranks for each ticker.
+
+    Args:
+        calculated_ratios (dict):
+            Dictionary mapping ticker symbols to their annual calculated ratios. Each value is a dict of ratio names to values.
+        calculated_ratios_quarterly (dict):
+            Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
+        ratio_definitions (dict):
+            Dictionary defining each ratio's properties, including whether a higher value is better (key: 'higher_is_better').
+        category_ratios (dict):
+            Dictionary mapping category names to lists of ratio names that belong to each category.
+
+    Returns:
+        dict: Nested dictionary where each key is a ticker symbol and each value is a dict containing:
+            - Individual ratio ranks (e.g., 'PE_latest_ratioRank', 'PE_trend_ratioRank', 'PE_ttm_ratioRank')
+            - Aggregated category average and rank (e.g., 'Profitability_catAvg', 'Profitability_catRank')
+            - Cluster-level average and rank (e.g., 'Latest_clusterAvg', 'Latest_clusterRank')
+
+    Example:
+        >>> create_ratios_to_ranks(
+                {'AAPL': {'PE_latest_ratioValue': 20, ...}},
+                {'AAPL': {'PE_latest_ratioValue': 22, ...}},
+                {'PE': {'higher_is_better': False}},
+                {'Profitability': ['PE_latest_ratioRank', ...]}
+            )
+        {'AAPL': {
+            'PE_latest_ratioRank': 80.0,
+            'PE_ttm_ratioRank': 75.0,
+            'Profitability_catAvg': 77.5,
+            'Profitability_catRank': 90.0,
+            'Latest_clusterAvg': 77.5,
+            'Latest_clusterRank': 95.0,
+            ...
+        }}
+
+    Notes:
+        - Percentile ranks are on a 0-100 scale, with 100 being best (unless 'higher_is_better' is False).
+        - TTM (Trailing Twelve Months) values are computed as the difference between quarterly and annual values for each ratio.
+        - NaN values are filled with 50 for ranking purposes.
+        - The function expects ratio keys to follow the naming convention: '<ratio>_latest_ratioValue', '<ratio>_trend_ratioValue', etc.
+    """
     ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
 
+    # Create DataFrame from calculated_ratios
     df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
     # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
     df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
@@ -11,6 +61,7 @@ def create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,ratio_d
     df.columns = df.columns.str.replace('_latest_ratioValue', '_latest')
     df.columns = df.columns.str.replace('_trend_ratioValue', '_trend')
 
+    # Create DataFrame from calculated_ratios_quarterly
     df_quarterly = pd.DataFrame.from_dict(calculated_ratios_quarterly, orient='index')
     # only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
     df_quarterly = df_quarterly[df_quarterly.columns[df_quarterly.columns.str.endswith('_latest_ratioValue')]]
@@ -29,8 +80,8 @@ def create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,ratio_d
             if ttm_col in df_merged.columns:
                 diff_col = base + '_ttm_diff'
                 df_merged[diff_col] = df_merged[ttm_col] - df_merged[col]
-    
-    # drop columns ending with '_ttm' and rename columns ending with '_ttm_diff' to '_ttm'
+
+    # drop columns ending with '_ttm' and rename columns ending with '_ttm_diff' to '_ttm' (this is to keep the column names consistent)
     df_merged = df_merged.drop(columns=[col for col in df_merged.columns if col.endswith('_ttm')])
     df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})
 
