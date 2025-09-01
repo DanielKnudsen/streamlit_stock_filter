@@ -1710,5 +1710,5 @@ except Exception as e:
 
 st.markdown("---")
 st.subheader("Om denna app")
-st.info("Denna app är i testläge och all data kommer från Yahoo Finance. Resultaten och analyserna är endast avsedda för test och demonstration.")
+st.info("Denna app är i testläge och all data hämtas från Yahoo Finance. Resultaten och analyserna är endast avsedda för test och demonstration.")
 # --- END: Main app logic ---
