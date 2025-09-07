@@ -8,6 +8,10 @@ import pwlf
 from pathlib import Path
 from rank import load_config
 import datetime
+import time
+import stripe
+from auth import register_user, login_user, get_current_user, logout_user
+
 
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
@@ -19,6 +23,11 @@ import datetime
 
 # Load environment variables
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+if ENVIRONMENT == 'local':
+    base_url = 'http://localhost:8501'
+else:
+    base_url = 'https://indicatum-insights.streamlit.app'  # Replace with your actual cloud URL
+
 
 # Load configuration from YAML file
 config = load_config("rank-config.yaml")
@@ -41,6 +50,82 @@ st.set_page_config(
     page_icon="📈"
 )
 st.title("📈 Indicatum Insights")
+stripe.api_key = st.secrets["STRIPE_SECRET_KEY"]
+
+# --- Authentication UI ---
+st.subheader("Logga in eller registrera dig")
+user = get_current_user()
+st.write(f"Current user: {user.email if user else 'None'}")
+if not user:
+    auth_mode = st.radio("Välj inloggningsläge:", ["Logga in", "Registrera"], horizontal=True)
+    email = st.text_input("E-post")
+    password = st.text_input("Lösenord", type="password")
+    if auth_mode == "Logga in":
+        if st.button("Logga in"):
+            result = login_user(email, password)
+            #st.write("Debug: login result:", result)
+            user_after_login = get_current_user()
+            #st.write(f"Debug: user after login: {user_after_login}")
+            if user_after_login:
+                st.success("Inloggning lyckades!")
+                #time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Fel e-post eller lösenord.")
+    else:
+        if st.button("Registrera"):
+            result = register_user(email, password)
+            #st.write("Debug: registration result:", result)
+            user_after_reg = get_current_user()
+            #st.write(f"Debug: user after registration: {user_after_reg}")
+            if user_after_reg:
+                st.success("Registrering lyckades! Kontrollera din e-post för bekräftelse.")
+                #time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Registrering misslyckades. Prova igen.")
+    st.stop()
+else:
+    st.write(f"Inloggad som: {user.email}")
+    if st.button("Logga ut"):
+        logout_user()
+        time.sleep(1)
+        st.rerun()
+    # --- Stripe payment wall ---
+    # Replace this with your real subscription check logic
+    def user_has_active_subscription(user):
+        # Check Supabase user profile for subscription status
+        # Assumes you have a 'profiles' table with a 'subscription_active' boolean field
+        try:
+            from supabase import create_client
+            url = st.secrets["SUPABASE_URL"]
+            key = st.secrets["SUPABASE_KEY"]
+            supabase = create_client(url, key)
+            response = supabase.table("profiles").select("subscription_active").eq("email", user.email).execute()
+            if response.data and len(response.data) > 0:
+                return bool(response.data[0].get("subscription_active", False))
+            return False
+        except Exception as e:
+            st.error(f"Kunde inte kontrollera prenumerationsstatus: {e}")
+            return False
+
+    if not user_has_active_subscription(user):
+        st.warning("Du behöver en aktiv prenumeration för att använda premiumfunktionerna.")
+        if st.button("Betala med Stripe för att få tillgång"):
+            import stripe
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[{
+                    "price": "price_1S4nv8Aee8NhTXrImFNXR6om",
+                    "quantity": 1,
+                }],
+                mode="subscription",
+                success_url=f"{base_url}/?payment=success",
+                cancel_url=f"{base_url}/?payment=cancel",
+                customer_email=user.email,
+            )
+            st.markdown(f"[Fortsätt till betalning]({checkout_session.url})", unsafe_allow_html=True)
+
 # Introduce the app and its purpose
 # This app helps users analyze and filter stocks based on various financial metrics and trends.
 st.write(
