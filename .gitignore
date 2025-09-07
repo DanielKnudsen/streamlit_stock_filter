@@ -13,3 +13,4 @@ data/local/
 uv.lock
 [secrets.toml](http://_vscodecontentref_/3)
 
+.streamlit/secrets.toml
