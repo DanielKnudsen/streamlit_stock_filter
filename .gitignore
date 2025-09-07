@@ -11,4 +11,5 @@ data/local/
 # Virtual environments
 .venv
 uv.lock
+[secrets.toml](http://_vscodecontentref_/3)
 
