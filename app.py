@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import os
 import plotly.graph_objects as go # Import Plotly
 import plotly.express as px # Import Plotly Express for bubble plot
 import numpy as np # For handling numerical operations
@@ -8,30 +7,12 @@ import pwlf
 from pathlib import Path
 from rank import load_config
 import datetime
+import time
+from auth import register_user, login_user, get_current_user, logout_user, check_membership_status_by_email, reset_password
 
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
 # =====================================================================
-
-# =============================
-# IMPORTS AND SETUP
-# =============================
-
-# Load environment variables
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
-
-# Load configuration from YAML file
-config = load_config("rank-config.yaml")
-
-# --- Get directories for CSV files ---
-CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
-
-show_Ratio_to_Rank =True
-
-# =============================
-# STREAMLIT APPLICATION
-# =============================
-
 
 # Allow user to toggle between "wide" and "centered" layout
 layout_mode = 'wide'#st.toggle("Bredd layout (wide)?", value=True)
@@ -41,6 +22,89 @@ st.set_page_config(
     page_icon="📈"
 )
 st.title("📈 Indicatum Insights")
+# =============================
+# IMPORTS AND SETUP
+# =============================
+
+# Load environment variables
+ENVIRONMENT = st.secrets["ENVIRONMENT"]
+
+# Load configuration from YAML file
+config = load_config("rank-config.yaml")
+
+# --- Get directories for CSV files ---
+CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
+
+show_Ratio_to_Rank =True
+
+
+# --- Authentication UI ---
+
+user = get_current_user()
+#st.write(f"Current user: {user.email if user else 'None'}")
+if not user:
+    st.subheader("Logga in eller registrera dig")
+    auth_mode = st.radio("Välj inloggningsläge:", ["Logga in", "Registrera", "Återställ lösenord"], horizontal=True)
+    email = st.text_input("E-post")
+    
+    if auth_mode == "Logga in":
+        password = st.text_input("Lösenord", type="password")
+        if st.button("Logga in"):
+            result = login_user(email, password)
+            #st.write("Debug: login result:", result)
+            user_after_login = get_current_user()
+            #st.write(f"Debug: user after login: {user_after_login}")
+            if user_after_login:
+                #st.success("Inloggning lyckades!")
+                progress_text = "Inloggning lyckades! Skickar dig till startsidan. Vänligen vänta."
+                my_bar = st.progress(0, text=progress_text)
+
+                for percent_complete in range(100):
+                    time.sleep(0.015)
+                    my_bar.progress(percent_complete + 1, text=progress_text)
+                my_bar.empty()
+                
+                st.rerun()
+            else:
+                st.error("Fel e-post eller lösenord.")
+                time.sleep(4)
+                st.rerun()
+    elif auth_mode == "Registrera":
+        password = st.text_input("Lösenord", type="password")
+        if st.button("Registrera"):
+            result = register_user(email, password)
+            if result:
+                st.success("Registrering lyckades! Kontrollera din e-post för bekräftelse.")
+                time.sleep(3)
+                st.rerun()
+            else:
+                st.error("Registrering misslyckades. Prova igen.")
+    else:  # Reset password
+        if st.button("Skicka återställningslänk"):
+            if email:
+                result = reset_password(email)
+                if result:
+                    st.success("En återställningslänk har skickats till din e-post.")
+                else:
+                    st.error("Det gick inte att skicka återställningslänken. Kontrollera din e-postadress.")
+            else:
+                st.error("Vänligen ange din e-postadress.")
+
+    st.stop()
+else:
+    #st.write(f"Inloggad som: {user.email}")
+    #st.write("Kontrollerar medlemskapsstatus...")
+    # Exempelanvändning
+    is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
+    if is_valid:
+        st.write(f"Hej {user.email} du har ett giltigt abonnemang: {membership_name}, med startdatum: {iso_start_date}, och slutdatum: {iso_end_date}")
+    else:
+        st.write(f"Hej {user.email}, tyvärr har du inget giltigt abonnemang. Läs mer på https://indicatum.se/")
+        st.stop()
+    if st.button("Logga ut"):
+        logout_user()
+        time.sleep(1)
+        st.rerun()
 # Introduce the app and its purpose
 # This app helps users analyze and filter stocks based on various financial metrics and trends.
 st.write(

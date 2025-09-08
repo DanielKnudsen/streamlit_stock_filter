@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "requests>=2.32.4",
     "streamlit>=1.48.0",
+    "supabase>=2.18.1",
     "tqdm>=4.67.1",
     "yfinance>=0.2.65",
 ]
