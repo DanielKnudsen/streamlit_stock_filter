@@ -43,68 +43,89 @@ show_Ratio_to_Rank =True
 user = get_current_user()
 #st.write(f"Current user: {user.email if user else 'None'}")
 if not user:
-    st.subheader("Logga in eller registrera dig")
-    auth_mode = st.radio("Välj inloggningsläge:", ["Logga in", "Registrera", "Återställ lösenord"], horizontal=True)
-    email = st.text_input("E-post")
-    
-    if auth_mode == "Logga in":
-        password = st.text_input("Lösenord", type="password")
-        if st.button("Logga in"):
-            result = login_user(email, password)
-            #st.write("Debug: login result:", result)
-            user_after_login = get_current_user()
-            #st.write(f"Debug: user after login: {user_after_login}")
-            if user_after_login:
-                #st.success("Inloggning lyckades!")
-                progress_text = "Inloggning lyckades! Skickar dig till startsidan. Vänligen vänta."
-                my_bar = st.progress(0, text=progress_text)
+    @st.dialog("Logga in eller registrera dig")
+    def show_auth_dialog():
+        auth_mode = st.radio("Välj inloggningsläge:", ["Logga in", "Registrera", "Återställ lösenord"], horizontal=True)
+        email = st.text_input("E-post")
+        
+        if auth_mode == "Logga in":
+            password = st.text_input("Lösenord", type="password")
+            if st.button("Logga in", use_container_width=True):
+                result = login_user(email, password)
+                user_after_login = get_current_user()
+                if user_after_login:
+                    progress_text = "Inloggning lyckades! Skickar dig till startsidan. Vänligen vänta."
+                    my_bar = st.progress(0, text=progress_text)
 
-                for percent_complete in range(100):
-                    time.sleep(0.015)
-                    my_bar.progress(percent_complete + 1, text=progress_text)
-                my_bar.empty()
-                
-                st.rerun()
-            else:
-                st.error("Fel e-post eller lösenord.")
-                time.sleep(4)
-                st.rerun()
-    elif auth_mode == "Registrera":
-        password = st.text_input("Lösenord", type="password")
-        if st.button("Registrera"):
-            result = register_user(email, password)
-            if result:
-                st.success("Registrering lyckades! Kontrollera din e-post för bekräftelse.")
-                time.sleep(3)
-                st.rerun()
-            else:
-                st.error("Registrering misslyckades. Prova igen.")
-    else:  # Reset password
-        if st.button("Skicka återställningslänk"):
-            if email:
-                result = reset_password(email)
-                if result:
-                    st.success("En återställningslänk har skickats till din e-post.")
+                    for percent_complete in range(100):
+                        time.sleep(0.015)
+                        my_bar.progress(percent_complete + 1, text=progress_text)
+                    my_bar.empty()
+                    
+                    st.rerun()
                 else:
-                    st.error("Det gick inte att skicka återställningslänken. Kontrollera din e-postadress.")
-            else:
-                st.error("Vänligen ange din e-postadress.")
+                    st.error("Fel e-post eller lösenord.")
+                    time.sleep(4)
+                    st.rerun()
+        elif auth_mode == "Registrera":
+            password = st.text_input("Lösenord", type="password")
+            if st.button("Registrera", use_container_width=True):
+                result = register_user(email, password)
+                if result:
+                    st.success("Registrering lyckades! Kontrollera din e-post för bekräftelse.")
+                    time.sleep(3)
+                    st.rerun()
+                else:
+                    st.error("Registrering misslyckades. Prova igen.")
+        else:  # Reset password
+            if st.button("Skicka återställningslänk", use_container_width=True):
+                if email:
+                    result = reset_password(email)
+                    if result:
+                        st.success("En återställningslänk har skickats till din e-post.")
+                    else:
+                        st.error("Det gick inte att skicka återställningslänken. Kontrollera din e-postadress.")
+                else:
+                    st.error("Vänligen ange din e-postadress.")
 
+    show_auth_dialog()
     st.stop()
 else:
-    #st.write(f"Inloggad som: {user.email}")
-    #st.write("Kontrollerar medlemskapsstatus...")
-    # Exempelanvändning
+    @st.dialog("Kontoinformation")
+    def show_account_dialog():
+        st.write(f"**Inloggad som:** {user.email}")
+        
+        # Check membership status
+        is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
+        
+        if is_valid:
+            st.success(f"✅ **Giltigt abonnemang:** {membership_name}")
+            st.write(f"**Startdatum:** {iso_start_date}")
+            st.write(f"**Slutdatum:** {iso_end_date}")
+        else:
+            st.error("❌ **Inget giltigt abonnemang**")
+            st.write("Läs mer på [indicatum.se](https://indicatum.se/)")
+            
+        st.divider()
+        
+        if st.button("Logga ut", use_container_width=True, type="primary"):
+            logout_user()
+            time.sleep(1)
+            st.rerun()
+    
+    # Check if user has valid subscription for app access
     is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
-    if is_valid:
-        st.write(f"Hej {user.email} du har ett giltigt abonnemang: {membership_name}, med startdatum: {iso_start_date}, och slutdatum: {iso_end_date}")
-    else:
-        st.write(f"Hej {user.email}, tyvärr har du inget giltigt abonnemang. Läs mer på https://indicatum.se/")
+    if not is_valid:
+        st.error(f"Hej {user.email}, tyvärr har du inget giltigt abonnemang. Läs mer på https://indicatum.se/")
+        if st.button("Kontoinformation", type="secondary"):
+            show_account_dialog()
         st.stop()
-    if st.button("Logga ut"):
-        logout_user()
-        time.sleep(1)
-        st.rerun()
+    
+    # Add account info button in sidebar or header
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("👤 Konto", help="Visa kontoinformation"):
+            show_account_dialog()
 # Introduce the app and its purpose
 # This app helps users analyze and filter stocks based on various financial metrics and trends.
 st.write(
