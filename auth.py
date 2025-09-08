@@ -114,3 +114,97 @@ def check_membership_status_by_email(email):
     except Exception as e:
         #print(f"Fel vid API-anrop: {e}")
         return False, None, None, None, None
+
+def save_portfolio(user_id: str, name: str, tickers: list, filter_settings: dict, description: str = ""):
+    """Save a portfolio for the user"""
+    supabase: Client = get_supabase_client()
+    
+    # Get the current session to ensure proper authentication context
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to save portfolios")
+        return None
+    
+    # Set the auth context for the supabase client
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        response = supabase.table('portfolios').insert({
+            'user_id': user_id,
+            'name': name,
+            'description': description,
+            'tickers': tickers,
+            'filter_settings': filter_settings
+        }).execute()
+        return response.data
+    except Exception as e:
+        error_msg = str(e)
+        if "row-level security policy" in error_msg:
+            st.error("Authentication error. Please try logging out and logging back in.")
+        elif "does not exist" in error_msg or "relation" in error_msg:
+            st.error("Portfolio table does not exist. Please contact administrator to set up the database.")
+        else:
+            st.error(f"Error saving portfolio: {error_msg}")
+        print(f"Full error details: {e}")  # For debugging
+        return None
+
+def get_user_portfolios(user_id: str):
+    """Get all portfolios for the user"""
+    supabase: Client = get_supabase_client()
+    
+    # Get the current session to ensure proper authentication context
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to view portfolios")
+        return []
+    
+    # Set the auth context for the supabase client
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        response = supabase.table('portfolios').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Error fetching portfolios: {e}")
+        return []
+
+def delete_portfolio(portfolio_id: str):
+    """Delete a portfolio"""
+    supabase: Client = get_supabase_client()
+    
+    # Get the current session to ensure proper authentication context
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to delete portfolios")
+        return False
+    
+    # Set the auth context for the supabase client
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        supabase.table('portfolios').delete().eq('id', portfolio_id).execute()
+        return True
+    except Exception as e:
+        st.error(f"Error deleting portfolio: {e}")
+        return False
+
+def update_portfolio(portfolio_id: str, name: str = None, description: str = None, tickers: list = None):
+    """Update a portfolio"""
+    supabase: Client = get_supabase_client()
+    try:
+        update_data = {}
+        if name is not None:
+            update_data['name'] = name
+        if description is not None:
+            update_data['description'] = description
+        if tickers is not None:
+            update_data['tickers'] = tickers
+        
+        if update_data:
+            update_data['updated_at'] = 'NOW()'
+            response = supabase.table('portfolios').update(update_data).eq('id', portfolio_id).execute()
+            return response.data
+        return None
+    except Exception as e:
+        st.error(f"Error updating portfolio: {e}")
+        return None

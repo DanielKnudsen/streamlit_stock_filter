@@ -8,7 +8,7 @@ from pathlib import Path
 from rank import load_config
 import datetime
 import time
-from auth import register_user, login_user, get_current_user, logout_user, check_membership_status_by_email, reset_password
+from auth import register_user, login_user, get_current_user, logout_user, check_membership_status_by_email, reset_password, save_portfolio, get_user_portfolios, delete_portfolio
 
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
@@ -105,7 +105,57 @@ else:
         else:
             st.error("❌ **Inget giltigt abonnemang**")
             st.write("Läs mer på [indicatum.se](https://indicatum.se/)")
-            
+        
+        st.divider()
+        
+        # Portfolio Management Section
+        st.subheader("📁 Mina Portföljer")
+        
+        # Note: You'll need to implement get_user_portfolios function in auth.py
+        portfolios = get_user_portfolios(user.id)
+        
+        if portfolios:
+            for portfolio in portfolios:
+                with st.expander(f"📊 {portfolio['name']} ({len(portfolio['tickers'])} aktier)"):
+                    st.write(f"**Skapad:** {portfolio['created_at'][:10]}")
+                    if portfolio.get('description'):
+                        st.write(f"**Beskrivning:** {portfolio['description']}")
+                    
+                    # Show ticker list
+                    tickers_text = ", ".join(portfolio['tickers'])
+                    st.text_area("Aktier:", value=tickers_text, height=100, disabled=True)
+                    
+                    col1, col2, col3 = st.columns([1, 1, 1])
+                    with col1:
+                        if st.button("🔍 Ladda portfölj", key=f"load_{portfolio['id']}", help="Visa endast aktier från denna portfölj i resultattabellen"):
+                            st.session_state.loaded_portfolio = {
+                                'tickers': portfolio['tickers'],
+                                'name': portfolio['name']
+                            }
+                            st.success(f"Portfölj '{portfolio['name']}' laddad som filter!")
+                            st.rerun()
+                    
+                    with col2:
+                        if st.button("🗑️ Ta bort", key=f"delete_{portfolio['id']}"):
+                            if delete_portfolio(portfolio['id']):
+                                st.success("Portfölj borttagen!")
+                                st.rerun()
+                            else:
+                                st.error("Det gick inte att ta bort portföljen.")
+                    
+                    with col3:
+                        # Create CSV data for download
+                        csv_data = "\n".join(portfolio['tickers'])
+                        st.download_button(
+                            "📥 Ladda ner",
+                            data=csv_data,
+                            file_name=f"{portfolio['name'].replace(' ', '_')}.csv",
+                            mime="text/csv",
+                            key=f"download_{portfolio['id']}"
+                        )
+        else:
+            st.info("Du har inga sparade portföljer ännu. Skapa en bevakningslista och spara den som portfölj!")
+        
         st.divider()
         
         if st.button("Logga ut", use_container_width=True, type="primary"):
@@ -267,6 +317,29 @@ try:
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights','QuarterDiff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
+
+    # =============================
+    # PORTFOLIO FILTER
+    # =============================
+    # Check if a portfolio is loaded as filter
+    if 'loaded_portfolio' in st.session_state:
+        loaded_portfolio = st.session_state.loaded_portfolio
+        portfolio_tickers = [ticker.upper() for ticker in loaded_portfolio['tickers']]
+        
+        # Create a container to show portfolio filter status
+        with st.container(border=True):
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.info(f"🔍 **Portföljfilter aktiv:** {loaded_portfolio['name']} ({len(portfolio_tickers)} aktier)")
+            with col2:
+                if st.button("❌ Ta bort filter", key="remove_portfolio_filter"):
+                    del st.session_state.loaded_portfolio
+                    st.rerun()
+        
+        # Apply portfolio filter to the dataframe
+        df_filtered_by_sliders = df_filtered_by_sliders[
+            df_filtered_by_sliders.index.str.upper().isin(portfolio_tickers)
+        ]
 
     # =============================
     # LOAD RANKING CATEGORIES FROM CONFIG
@@ -992,12 +1065,56 @@ try:
 
                     current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                     file_name = f"shortlist_{current_time}.csv"
-                    st.download_button(
-                        "Ladda ner bevakningslista",
-                        data=df_display[download_columns].to_csv(),
-                        file_name=file_name,
-                        mime="text/csv"
-                    )
+                    
+                    col1, col2 = st.columns([1, 1])
+                    with col1:
+                        st.download_button(
+                            "📥 Ladda ner som CSV",
+                            data=df_display[download_columns].to_csv(),
+                            file_name=file_name,
+                            mime="text/csv",
+                            use_container_width=True
+                        )
+                    
+                    with col2:
+                        if st.button("💾 Spara som portfölj", use_container_width=True):
+                            st.session_state.show_save_portfolio = True
+                    
+                    # Portfolio save dialog
+                    if st.session_state.get('show_save_portfolio', False):
+                        with st.form("save_portfolio_form"):
+                            st.write("**Spara bevakningslista som portfölj**")
+                            portfolio_name = st.text_input("Portföljnamn:", value=f"Portfölj {current_time}")
+                            portfolio_description = st.text_area("Beskrivning (valfritt):", height=100)
+                            
+                            col_save, col_cancel = st.columns([1, 1])
+                            with col_save:
+                                if st.form_submit_button("Spara portfölj", use_container_width=True):
+                                    if portfolio_name.strip():
+                                        # Get current filter settings (you'll need to implement this)
+                                        filter_settings = {
+                                            "timestamp": current_time,
+                                            "num_stocks": len(df_display),
+                                            # Add other relevant filter settings here
+                                        }
+                                        
+                                        # Save portfolio
+                                        tickers_list = df_display.index.tolist()
+                                        result = save_portfolio(user.id, portfolio_name, tickers_list, filter_settings, portfolio_description)
+                                        
+                                        if result:
+                                            st.success(f"Portfölj '{portfolio_name}' sparad!")
+                                            st.session_state.show_save_portfolio = False
+                                            st.rerun()
+                                        else:
+                                            st.error("Det gick inte att spara portföljen. Försök igen.")
+                                    else:
+                                        st.error("Vänligen ange ett portföljnamn.")
+                            
+                            with col_cancel:
+                                if st.form_submit_button("Avbryt", use_container_width=True):
+                                    st.session_state.show_save_portfolio = False
+                                    st.rerun()
                 else:
                     pass
 
