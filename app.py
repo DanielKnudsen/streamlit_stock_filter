@@ -140,8 +140,8 @@ with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att v
         **Tips:** Kombinera olika filter och visualiseringar för att hitta bolag som passar just din strategi – oavsett om du söker stabil tillväxt, värdecase, turnaround-kandidater eller tekniska trendbrott. Ttm-funktionerna hjälper dig att snabbt fånga upp bolag med stark eller svag utveckling i den allra senaste rapportperioden.
         """
     )
-# Logga miljö och path för felsökning
-st.write(f"Running in environment: {ENVIRONMENT}, using CSV path: {CSV_PATH}")
+# Logga miljö och path för felsökning, samt datum för när filen stock_evaluations_result.csv senast uppdaterades   
+st.write(f"Running in environment: {ENVIRONMENT}, using CSV path: {CSV_PATH}, data last updated: {pd.to_datetime(datetime.datetime.fromtimestamp(Path(CSV_PATH / config['results_file']).stat().st_mtime)).strftime('%Y-%m-%d %H:%M:%S')}")
 # =============================
 # HELPER FUNCTIONS
 # =============================
@@ -317,35 +317,36 @@ try:
 
         tab1, tab2, tab3, tab4 = st.tabs(["🛟 Info", "Förenklad filtrering", "Utökade filtermöjligheter", "Avancerad filtrering"])
         with tab1:
-                     st.markdown("""
-                     ### Hjälp med Filtrering
+            with st.expander("🛟 **Hjälp med Filtrering?** (Klicka för att visa)", expanded=False):
+                st.markdown("""
+                
 
-                     **Så här använder du filtersektionen:**
+                **Så här använder du filtersektionen:**
 
-                     Det finns **tre huvudsakliga sätt att använda filtren, via flikarna ovan**:
+                Det finns **tre huvudsakliga sätt att använda filtren, via flikarna ovan**:
 
-                     1. **Förenklad filtrering:**  
-                         - Bygg din egen aktielista genom att ange hur mycket vikt du vill lägga på trend (senaste 4 åren), senaste året och TTM (senaste rapportperioden).
-                         - Resultattabellen visar de aktier som bäst matchar din valda viktning.
-                         - Perfekt för dig som snabbt vill hitta de mest intressanta aktierna utifrån din strategi.
+                1. **Förenklad filtrering:**  
+                    - Bygg din egen aktielista genom att ange hur mycket vikt du vill lägga på trend (senaste 4 åren), senaste året och TTM (senaste rapportperioden).
+                    - Resultattabellen visar de aktier som bäst matchar din valda viktning.
+                    - Perfekt för dig som snabbt vill hitta de mest intressanta aktierna utifrån din strategi.
 
-                     2. **Utökade filtermöjligheter:**  
-                         - Finjustera urvalet baserat på totalrank, tillväxt (CAGR) och tekniska indikatorer (SMA-differenser).
-                         - Filtrera även på genomsnittlig årlig tillväxt och skillnader mellan kurs och glidande medelvärden.
-                         - Skriv in en eller flera tickers för att visa endast dessa aktier.
-                         - Resultatet uppdateras direkt i tabellen och bubbelplotten nedan. Kombinera flera filter för att hitta bolag som matchar dina kriterier.
+                2. **Utökade filtermöjligheter:**  
+                    - Finjustera urvalet baserat på totalrank, tillväxt (CAGR) och tekniska indikatorer (SMA-differenser).
+                    - Filtrera även på genomsnittlig årlig tillväxt och skillnader mellan kurs och glidande medelvärden.
+                    - Skriv in en eller flera tickers för att visa endast dessa aktier.
+                    - Resultatet uppdateras direkt i tabellen och bubbelplotten nedan. Kombinera flera filter för att hitta bolag som matchar dina kriterier.
 
-                     3. **Avancerad filtrering:**  
-                         - Använd avancerade och detaljerade filter på kategori- och nyckeltalsnivå.
-                         - Expandera popover för att finjustera urvalet och kombinera flera filter för att hitta bolag med exakt de egenskaper du söker.
-                         - Använd denna flik för djupanalys och skräddarsydd filtrering av aktier.
+                3. **Avancerad filtrering:**  
+                    - Använd avancerade och detaljerade filter på kategori- och nyckeltalsnivå.
+                    - Expandera popover för att finjustera urvalet och kombinera flera filter för att hitta bolag med exakt de egenskaper du söker.
+                    - Använd denna flik för djupanalys och skräddarsydd filtrering av aktier.
 
-                     **Övriga filter:**
-                     - **Lista och Sektor:** Välj enkelt vilka listor och sektorer som ska ingå med färgade "pills".
-                     - **Ticker-filtrering:** Skriv in en eller flera tickers för att visa endast dessa aktier.
+                **Övriga filter:**
+                - **Lista och Sektor:** Välj enkelt vilka listor och sektorer som ska ingå med färgade "pills".
+                - **Ticker-filtrering:** Skriv in en eller flera tickers för att visa endast dessa aktier.
 
-                     Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
-                     """)
+                Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
+                """)
         with tab2:
             st.markdown("""
             ### Skapa din egen ranking och aktielista utifrån personliga viktningar
