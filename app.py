@@ -50,7 +50,7 @@ if not user:
         
         if auth_mode == "Logga in":
             password = st.text_input("Lösenord", type="password")
-            if st.button("Logga in", use_container_width=True):
+            if st.button("Logga in", width="stretch"):
                 result = login_user(email, password)
                 user_after_login = get_current_user()
                 if user_after_login:
@@ -69,7 +69,7 @@ if not user:
                     st.rerun()
         elif auth_mode == "Registrera":
             password = st.text_input("Lösenord", type="password")
-            if st.button("Registrera", use_container_width=True):
+            if st.button("Registrera", width="stretch"):
                 result = register_user(email, password)
                 if result:
                     st.success("Registrering lyckades! Kontrollera din e-post för bekräftelse.")
@@ -78,7 +78,7 @@ if not user:
                 else:
                     st.error("Registrering misslyckades. Prova igen.")
         else:  # Reset password
-            if st.button("Skicka återställningslänk", use_container_width=True):
+            if st.button("Skicka återställningslänk", width="stretch"):
                 if email:
                     result = reset_password(email)
                     if result:
@@ -154,11 +154,11 @@ else:
                             key=f"download_{portfolio['id']}"
                         )
         else:
-            st.info("Du har inga sparade portföljer ännu. Skapa en bevakningslista och spara den som portfölj!")
+            st.info("📂 Inga sparade portföljer ännu. Använd shortlist-funktionen för att skapa din första!")
         
         st.divider()
         
-        if st.button("Logga ut", use_container_width=True, type="primary"):
+        if st.button("Logga ut", width="stretch", type="primary"):
             logout_user()
             time.sleep(1)
             st.rerun()
@@ -177,38 +177,42 @@ else:
         if st.button("👤 Konto", help="Visa kontoinformation"):
             show_account_dialog()
 # Introduce the app and its purpose
-# This app helps users analyze and filter stocks based on various financial metrics and trends.
+# Smart stock analysis for Swedish markets
 st.write(
     "✨ **Välkommen till Indicatum Insights!** ✨\n\n"
-    "Upptäck kraften i smart aktieanalys – här får du ett unikt verktyg för att filtrera, jämföra och visualisera svenska aktier med några få klick. "
-    "Oavsett om du är nybörjare eller erfaren investerare hjälper appen dig att hitta guldkornen på marknaden och fatta bättre beslut.\n\n"
-    "💡 **Tips:** Håll utkik efter livbojen 🛟 och hjälptexter i varje sektion – där hittar du inspiration, smarta knep och tydliga instruktioner för att få ut mesta möjliga av filtren, tabellerna och graferna. "
-    "Börja utforska, experimentera och låt datan guida dig mot nya insikter!\n\n"
-    "🚀 Lycka till med din aktiejakt!"
+    "Hitta morgondagens vinnare innan marknaden gör det. Smart filtrering + djup analys = bättre beslut.\n\n"
+    "💡 **Pro-tips:** Kolla livbojen 🛟 i varje sektion för smarta knep och genvägar. "
+    "Data + intuition = framgång!\n\n"
+    "🎯 **Börja filtrera → Analysera → Investera**"
 )
 
 with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att visa)", expanded=False):
     st.markdown(
         """
-        **Hur kan du använda detta verktyg?**
+        **🚀 Från nybörjare till aktieproffs – här är din roadmap:**
 
-        Det finns flera sätt att använda denna app för att hitta intressanta aktier och analysera deras utveckling:
+        **🎯 För snabba resultat:**
+        • Aggregerad rank-reglage → Upptäck topp-prestanda direkt
+        • TTM-data → Fånga hetaste trenderna nu
+        • Trend 4 år → Hitta långsiktiga vinnare
 
-        - **Snabb filtrering med aggregerad rank:** Använd reglagen för *Agg. Rank trend 4 år*, *Agg. Rank sen. året* och *Agg. Rank ttm* (senaste rapportperioden) för att snabbt hitta bolag som har haft en stark utveckling över tid, nyligen eller i den allra senaste perioden. Detta är ett effektivt sätt att sålla fram de mest intressanta aktierna ur ett stort urval.
+        **🔍 För detektiv-analys:**
+        • Kategori-filter → Lönsamhet, tillväxt, värdering
+        • Teknisk analys → SMA-breakouts och momentum
+        • Sector rotation → Vad är hett just nu?
 
-        - **Detaljerad filtrering på kategori- och nyckeltalsnivå:** Expandera *Utökade filter* för att finjustera urvalet baserat på specifika finansiella kategorier (t.ex. lönsamhet, tillväxt, värdering) och enskilda nyckeltal. Du kan även filtrera på både trend (utveckling över flera år), senaste års värden och ttm-värden (trailing twelve months).
+        **💰 Smart investeringsstrategier:**
+        • **Value hunting:** Stark tillväxt + låg kurs = underskattat?
+        • **Growth hacking:** TTM-acceleration + trend = raket på väg upp?
+        • **Turnaround plays:** Dålig historik + stark TTM = comeback?
+        • **Momentum riding:** Teknisk breakout + fundamental styrka = perfekt timing?
 
-        - **Jämför tillväxt och värdering:** Analysera sambandet mellan tillväxtmått (t.ex. vinst per aktie, omsättning) och aktiens kursutveckling. Du kan t.ex. identifiera bolag där vinsten har ökat kraftigt, men aktiekursen inte hängt med – vilket kan indikera en undervärderad aktie. Titta även på ttm-data för att se den allra senaste utvecklingen.
+        **🎨 Pro-workflow:**
+        1. **Filtrera** brett → **Shortlista** favoriter → **Djupdykning** per aktie
+        2. **Jämför** sektorer → **Identifiera** avvikare → **Validera** med teknisk analys
+        3. **Exportera** shortlist → **Bevaka** utveckling → **Uppdatera** regelbundet
 
-        - **Teknisk analys med SMA-differenser:** Filtrera på skillnader mellan kurs och glidande medelvärden (SMA) för att hitta aktier i tekniska trendlägen, t.ex. när kursen bryter upp över ett medelvärde.
-
-        - **Sektor- och listajämförelser:** Begränsa urvalet till specifika sektorer eller listor för att jämföra bolag inom samma bransch eller marknadssegment.
-
-        - **Bygg en personlig bevakningslista:** Markera intressanta aktier i tabellen och spara dem i din shortlist för vidare analys och export.
-
-        - **Djupanalys av enskilda aktier:** Välj en aktie för att se detaljerad information om kursutveckling, utdelningar, tillväxt, rank per kategori och nyckeltal samt jämförelser mot andra bolag. Du kan även se ttm-värden och hur dessa skiljer sig från tidigare år.
-
-        **Tips:** Kombinera olika filter och visualiseringar för att hitta bolag som passar just din strategi – oavsett om du söker stabil tillväxt, värdecase, turnaround-kandidater eller tekniska trendbrott. Ttm-funktionerna hjälper dig att snabbt fånga upp bolag med stark eller svag utveckling i den allra senaste rapportperioden.
+        **💡 Secret sauce:** TTM + Trend = magisk kombination för early detection!
         """
     )
 # Logga miljö och path för felsökning, samt datum för när filen stock_evaluations_result.csv senast uppdaterades   
@@ -373,7 +377,7 @@ try:
     # ENHETLIGT FILTERAVSNITT
     # =============================
     with st.container(border=True, key="filter_section"):
-        st.subheader("Aktiefilter")
+        st.subheader("🎯 Aktiefilter – Hitta dina favoriter")
         col_lista, col_sektor= st.columns(2,gap='medium',border=True)
         with col_lista:
             if 'Lista' in df_filtered_by_sliders.columns:
@@ -413,41 +417,38 @@ try:
         with tab1:
             with st.expander("🛟 **Hjälp med Filtrering?** (Klicka för att visa)", expanded=False):
                 st.markdown("""
-                
+                **Tre sätt att hitta dina ideala aktier:**
 
-                **Så här använder du filtersektionen:**
+                **1. 🚀 Förenklad filtrering:**  
+                • Viktning av trend vs senaste året vs TTM
+                • Perfekt för snabb överblick
+                • Smart algoritm rankar åt dig
 
-                Det finns **tre huvudsakliga sätt att använda filtren, via flikarna ovan**:
+                **2. 🎯 Utökade filtermöjligheter:**  
+                • Finjustera med totalrank + tillväxt + teknisk analys
+                • Skriv in specifika tickers
+                • Resultatet uppdateras live
 
-                1. **Förenklad filtrering:**  
-                    - Bygg din egen aktielista genom att ange hur mycket vikt du vill lägga på trend (senaste 4 åren), senaste året och TTM (senaste rapportperioden).
-                    - Resultattabellen visar de aktier som bäst matchar din valda viktning.
-                    - Perfekt för dig som snabbt vill hitta de mest intressanta aktierna utifrån din strategi.
+                **3. 🔬 Avancerad filtrering:**  
+                • Djupdykning i kategorier & nyckeltal
+                • För experter som vill ha full kontroll
+                • Skräddarsydda kombinationer
 
-                2. **Utökade filtermöjligheter:**  
-                    - Finjustera urvalet baserat på totalrank, tillväxt (CAGR) och tekniska indikatorer (SMA-differenser).
-                    - Filtrera även på genomsnittlig årlig tillväxt och skillnader mellan kurs och glidande medelvärden.
-                    - Skriv in en eller flera tickers för att visa endast dessa aktier.
-                    - Resultatet uppdateras direkt i tabellen och bubbelplotten nedan. Kombinera flera filter för att hitta bolag som matchar dina kriterier.
-
-                3. **Avancerad filtrering:**  
-                    - Använd avancerade och detaljerade filter på kategori- och nyckeltalsnivå.
-                    - Expandera popover för att finjustera urvalet och kombinera flera filter för att hitta bolag med exakt de egenskaper du söker.
-                    - Använd denna flik för djupanalys och skräddarsydd filtrering av aktier.
-
-                **Övriga filter:**
-                - **Lista och Sektor:** Välj enkelt vilka listor och sektorer som ska ingå med färgade "pills".
-                - **Ticker-filtrering:** Skriv in en eller flera tickers för att visa endast dessa aktier.
-
-                Resultatet uppdateras direkt i bubbelplotten och tabellen nedan. Använd filtren för att snabbt hitta, jämföra och spara intressanta aktier för vidare analys.
+                **🎨 Extra-tips:**
+                • **Lista/Sektor:** Klicka färgade "pills" för snabbval
+                • **Ticker-sök:** Skriv flera tickers separerade med komma
+                • **Kombination:** Använd flera filter samtidigt för laser-precision
                 """)
+
         with tab2:
             st.markdown("""
-            ### Skapa din egen ranking och aktielista utifrån personliga viktningar
+            ### 🎯 Din egen smarta ranking – väg ihop som du vill!
 
-            - Här kan du skapa din egen aktielista genom att själv välja hur mycket vikt du vill lägga på trend (senaste 4 åren), senaste året och TTM (senaste rapportperioden).
-            - Justera reglagen nedan för att sätta din personliga viktning – resultatet blir en lista med de aktier som bäst matchar din strategi och prioriteringar.
-            - Resultatet uppdateras direkt i tabellen och bubbelplotten nedan.
+            • **Trend:** Hur bra var bolaget senaste 4 åren?
+            • **Senaste året:** Vad händer just nu?  
+            • **TTM:** Senaste kvartalen (heta signaler!)
+
+            **Justera reglagen → Se resultatet live → Hitta dina favoriter!**
             """)
             # Tre sliders för preliminära värden
             col_trend, col_latest, col_ttm = st.columns(3, gap='medium', border=True)
@@ -475,7 +476,7 @@ try:
                 norm_ttm = 0.0
 
             if total == 0:
-                st.warning("Alla preliminära värden är 0. Välj minst ett värde större än 0 för att normalisera.")
+                st.warning("⚠️ Alla viktningar är 0! Sätt minst en viktning > 0 för att få resultat.")
 
             df_filtered_by_sliders['personal_weights'] = (
             df_filtered_by_sliders['Trend_clusterRank'] * norm_trend +
@@ -486,13 +487,17 @@ try:
 
         with tab3:
             st.markdown("""
-            ### Filtrera efter Trend, Senaste och TTM Rank
+            ### 🎚️ Finjustera med precision – mer kontroll!
 
-            - Här kan du finjustera urvalet baserat på totalrank, tillväxt och tekniska indikatorer.
-            - Justera reglagen för att filtrera aktier utifrån deras sammanvägda rank för de senaste fyra åren, senaste året och senaste rapportperioden (TTM).
-            - Filtrera även på genomsnittlig årlig tillväxt (CAGR) och skillnader mellan kurs och glidande medelvärden (SMA) för att hitta tekniska trender.
-            - Du kan även skriva in en eller flera tickers för att visa endast dessa aktier.
-            - Resultatet uppdateras direkt i tabellen och bubbelplotten nedan. Kombinera flera filter för att hitta bolag som matchar dina kriterier.
+            **Totalrank-reglage:**
+            • Trend, Senaste, TTM – sätt min/max gränser
+
+            **Extra filter:**
+            • CAGR-tillväxt för långsiktiga trender
+            • SMA-tekniska indikatorer för timing
+            • Ticker-sök för specifika bolag
+
+            **Kombinera filter → Smalna av resultatet → Hitta pärlorna!**
             """)
             col_total_trend, col_total_latest, col_total_ttm = st.columns(3, gap='medium', border=True)
             with col_total_trend:
@@ -562,10 +567,14 @@ try:
 
         with tab4:
             st.markdown("""
-                        ### Filtrera efter detaljer på nyckeltal
-            - Här kan du använda avancerade och detaljerade filter på kategori- och nyckeltalsnivå.
-            - Finjustera urvalet och kombinera flera filter för att hitta bolag med exakt de egenskaper du söker.
-            - Använd denna flik för djupanalys och skräddarsydd filtrering av aktier.
+            ### 🔬 Expertnivå – full kontroll över varje nyckeltal!
+
+            **För dig som vill micro-managea:**
+            • Filtrera på kategori-nivå (Trend, Senaste, TTM)
+            • Detaljstyrning av varje enskilt nyckeltal
+            • Skapa helt skräddarsydda urval
+
+            **Varning:** Här kan du gå ner i kaninhålet och komma fram 3 timmar senare! 🐰
             """)
             col_filter_left, col_filter_mid, col_filter_right = st.columns(3,gap='medium',border=True)
             with col_filter_left:
@@ -813,26 +822,34 @@ try:
     with st.container(border=True, key="filtered_results"):
         # Get the number of stocks after filtering by sliders
         #num_filtered_stocks = len(df_display)
-        st.subheader(f"Resultat av filtrering: {df_filtered_by_sliders.shape[0]} aktier")
+        st.subheader(f"🎉 Träffar: {df_filtered_by_sliders.shape[0]} aktier som matchar dina filter!")
 
         with st.expander('🛟 **Hjälp med filtreringsresultat** (Klicka för att visa)', expanded=False):
                                         st.markdown(
                                                 """
-                                                **Så här tolkar du filtreringsresultatet:**
+                                                **Dina filtrerade aktier – nu kör vi!**
 
-                                                - **Bubbelplotten** visar alla aktier som matchar dina valda filter. Varje bubbla representerar en aktie, där x- och y-axlarna kan justeras för att visa olika kombinationer av totalrank (trend, senaste året eller TTM). Bubblans storlek motsvarar marknadsvärdet och färgen visar vilken lista aktien tillhör. Du kan välja att visa eller dölja tickers direkt i plotten.
+                                                **📊 Bubbelplotten:**
+                                                • Varje bubbla = en aktie som matchar dina filter
+                                                • Storlek = marknadsvärde, färg = börs-lista
+                                                • Anpassa axlarna för att hitta dolda mönster
+                                                • Toggle tickers på/av för renare vy
 
-                                                - **Resultattabellen** under plotten visar de filtrerade aktierna med deras respektive rankningar och nyckeltal. Här kan du:
-                                                    - Markera rutan under **'Välj'** för att visa detaljerad kursutveckling, tillväxt och nyckeltalsgrafer för en aktie längre ner på sidan (endast en aktie åt gången).
-                                                    - Markera rutan under **'Shortlist'** för att lägga till aktien i din personliga bevakningslista.
-                                                    - Ange hur många aktier du vill visa i tabellen med hjälp av segmentreglaget ovanför tabellen.
-                                                    - **Tips:** Du kan sortera tabellen genom att klicka på kolumnnamnet för att sortera stigande eller fallande.
+                                                **📋 Resultattabellen:**
+                                                • **'Välj'** → Djupdykning i en aktie (grafer + analys)
+                                                • **'Shortlist'** → Lägg till i din bevakningslista
+                                                • **Sortering:** Klicka kolumnnamn för stigande/fallande
+                                                • **Antal rader:** Justera med segmentreglaget
 
-                                                - **Bevakningslistan** samlar de aktier du markerat med 'Shortlist'. Du kan enkelt ladda ner listan som CSV för vidare analys eller bevakning.
+                                                **⭐ Bevakningslistan:**
+                                                • Samlar dina utvalda aktier
+                                                • Ladda ner som CSV för vidare analys
+                                                • Perfect för att hålla koll på favoriter
 
-                                                - När du valt en aktie via **'Välj'** visas detaljerad information om bolaget, kurs- och volymdiagram, utdelningshistorik, tillväxt, rank per kategori och detaljerade nyckeltalsgrafer längre ner på sidan.
+                                                **🔬 Detaljanalys:**
+                                                När du väljer en aktie får du: kurscharts, tillväxtgrafer, ranking breakdown och teknisk analys.
 
-                                                Använd filtren och visualiseringarna för att snabbt hitta, jämföra och spara intressanta aktier utifrån din strategi. Kombinera olika filter och analysera både helhet och detaljer för att hitta de bolag som passar dig bäst.
+                                                **Pro-tips:** Kombinera filter → Analysera bubblor → Shortlista kandidater → Djupdykning per aktie!
                                                 """
                     )
 
@@ -934,7 +951,7 @@ try:
                     bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
                     if show_tickers:
                         bubble_fig.update_traces(textposition='top center')
-                    st.plotly_chart(bubble_fig, use_container_width=True)
+                    st.plotly_chart(bubble_fig, width="stretch")
                 else:
                     st.info('No stocks in the selected score range (after removing rows with saknade värden).')
             else:
@@ -993,7 +1010,7 @@ try:
             df_display = df_display[display_rank_score_columns]
             edited_df = st.data_editor(
                 df_display,
-                use_container_width=True,
+                width="stretch",
                 hide_index=False, # Set to False to always show the index (Ticker)
                 column_config={
                     # No need to configure "Ticker" as it's now the index
@@ -1060,7 +1077,7 @@ try:
                     st.dataframe(
                         df_display[download_columns], # Ticker is already the index
                         hide_index=False,
-                        use_container_width=True
+                        width="stretch"
                     )
 
                     current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1073,11 +1090,11 @@ try:
                             data=df_display[download_columns].to_csv(),
                             file_name=file_name,
                             mime="text/csv",
-                            use_container_width=True
+                            width="stretch"
                         )
                     
                     with col2:
-                        if st.button("💾 Spara som portfölj", use_container_width=True):
+                        if st.button("💾 Spara som portfölj", width="stretch"):
                             st.session_state.show_save_portfolio = True
                     
                     # Portfolio save dialog
@@ -1089,7 +1106,7 @@ try:
                             
                             col_save, col_cancel = st.columns([1, 1])
                             with col_save:
-                                if st.form_submit_button("Spara portfölj", use_container_width=True):
+                                if st.form_submit_button("Spara portfölj", width="stretch"):
                                     if portfolio_name.strip():
                                         # Get current filter settings (you'll need to implement this)
                                         filter_settings = {
@@ -1112,7 +1129,7 @@ try:
                                         st.error("Vänligen ange ett portföljnamn.")
                             
                             with col_cancel:
-                                if st.form_submit_button("Avbryt", use_container_width=True):
+                                if st.form_submit_button("Avbryt", width="stretch"):
                                     st.session_state.show_save_portfolio = False
                                     st.rerun()
                 else:
@@ -1121,24 +1138,37 @@ try:
     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
 
     with st.container(border=True, key="stock_details_container"):
-        st.subheader("**Detaljerad information om vald aktie**")
+        st.subheader("🔍 **Djupdykning i din valda aktie**")
         with st.expander("🛟 **Hjälp om aktieinformation** (Klicka för att visa)", expanded=False):
             st.markdown(
                 """
-                **Så här tolkar du aktieinformationen:**
+                **Djupdykning i din valda aktie – här är guiden:**
 
-                - Här visas detaljerad information om den aktie du valt i tabellen ovan.
-                - Du ser aktiens **namn**, **ticker**, vilken **lista** och **sektor** den tillhör samt dess **marknadsvärde**.
-                - Under företagsnamnet finns en kort beskrivning av bolagets verksamhet. Klicka på texten för att läsa hela beskrivningen.
-                - I sektionen **Genomsnittlig årlig tillväxt (CAGR)** visas stapeldiagram för de senaste fyra åren för olika nyckeltal, samt detaljerade år-för-år-grafer för varje mått.
-                - Under **Kursutveckling och Trendlinje** ser du aktiens prisutveckling över tid, glidande medelvärden (SMA) och en justerbar trendlinje (PWLF). Volymdata visas som staplar och du kan jämföra kursen mot olika SMA-nivåer.
-                - I **SMA differenser (%)** visas stapeldiagram som visar procentuell skillnad mellan kurs och olika SMA-nivåer – användbart för att identifiera tekniska trender.
-                - Sektionen **Sammanvägd rank per kategori** visar bolagets rankningar inom olika finansiella kategorier, både för trend (senaste 4 åren) och senaste året. Färgade staplar hjälper dig snabbt se styrkor och svagheter.
-                - Under **Detaljerad Rank per kategori** hittar du stapeldiagram för varje nyckeltal, med trendlinje och rankvärden för både trend och senaste året.
-                - I **Ratio 2 Rank**-sektionen kan du visualisera sambandet mellan valda nyckeltal och deras rankvärden för alla aktier som matchar dina filter. Scatterplotten visar varje aktie som en punkt, och den valda aktien markeras med röd färg och korslinje.
-                - Längst ner kan du visa en datadump av all tillgänglig data för den valda aktien.
+                **📋 Grundinfo:**
+                • Ticker, sektor, lista, marknadsvärde
+                • Klicka företagsbeskrivningen för hela storyn
 
-                Använd denna information för att snabbt få en överblick över bolagets utveckling, styrkor och svagheter – och för att jämföra olika aktier på djupet.
+                **📈 Tillväxtanalys (CAGR):**
+                • Stapeldiagram för 4-årsperioden
+                • Expandera för detaljvy med TTM-data
+                • Grönt/rött = bra/dålig TTM-utveckling
+
+                **💹 Kursutveckling:**
+                • Prisgraf med volym och glidande medelvärden
+                • Justerbar trendlinje (PWLF) med standardavvikelser
+                • SMA-differenser i procent
+
+                **🏆 Ranking breakdown:**
+                • **Sammanvägd:** Totalbild per kategori
+                • **Detaljerad:** Varje nyckeltal med trendutveckling
+                • Färgkodade staplar: Röd = svag, Grön = stark
+
+                **🎯 Ratio 2 Rank:**
+                • Scatterplot: Ditt bolag vs konkurrenterna
+                • Röd korslinje = din valda aktie
+                • Bakgrundsfärger = ranking-zoner
+
+                **💡 Smart-tips:** Datadump längst ner för full transparens!
                 """
             )
         if selected_stock_dict is not None and selected_stock_ticker is not None:
@@ -1163,7 +1193,7 @@ try:
                 with right_col:
                     #st.subheader("Företagsbeskrivning")
                     LongBusinessSummary = selected_stock_dict['LongBusinessSummary'] if 'LongBusinessSummary' in selected_stock_dict else 'N/A'
-                    with st.popover(f"{LongBusinessSummary[0:500]}...",use_container_width=True):
+                    with st.popover(f"{LongBusinessSummary[0:500]}...",width="stretch"):
                         st.write(LongBusinessSummary if LongBusinessSummary else "Ingen lång företagsbeskrivning tillgänglig för denna aktie.")
                                 # --- Plot annual dividends for selected_stock_ticker ---
                 if selected_stock_ticker is not None and 'df_dividends' in locals():
@@ -1190,17 +1220,17 @@ try:
                                 margin=dict(l=10, r=10, t=40, b=10),
                                 xaxis=dict(type='category')
                             )
-                            st.plotly_chart(fig_div, use_container_width=True, key=f"dividends_bar_{selected_stock_ticker}")
+                            st.plotly_chart(fig_div, width="stretch", key=f"dividends_bar_{selected_stock_ticker}")
                         else:
                             st.info(f"Dividend-data saknar nödvändiga kolumner ('Year', 'Value') för {selected_stock_ticker}.")
                     else:
                         st.info(f"Ingen utdelningsdata för {selected_stock_ticker}.")
         if selected_stock_ticker is not None:
-            with st.popover(f"Datadump av {selected_stock_ticker}", use_container_width=True):
+            with st.popover(f"Datadump av {selected_stock_ticker}", width="stretch"):
                 st.write(f"Datadump av {selected_stock_ticker}")
                 st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
         with st.container(border=True, key="cagr_container"):
-            st.subheader("Genomsnittlig årlig tillväxt senaste 4 åren")
+            st.subheader("📈 Tillväxthistorik senaste 4 åren")
             # Only show the following sections if a stock is selected
             if selected_stock_dict is not None and selected_stock_ticker is not None:
                 # Bar plot for all cagr columns for selected_stock_ticker using selected_stock_dict
@@ -1243,8 +1273,8 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10),
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
-                    st.plotly_chart(fig_cagr, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
-                with st.expander("**Detaljerad tillväxtdata inkl ttm:** (Klicka för att visa)", expanded=True):
+                    st.plotly_chart(fig_cagr, width="stretch", key=f"cagr_bar_{selected_stock_ticker}")
+                with st.expander("**📊 Detaljerade tillväxtgrafer + TTM-signaler** (Klicka för att dölja)", expanded=True):
                     def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, ttm_diff_value,higher_is_better):
                         year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
                         year_cols = [col for col in year_cols if not pd.isna(df.loc[selected_stock_ticker, col])]
@@ -1304,7 +1334,7 @@ try:
                                             margin=dict(l=10, r=10, t=30, b=10), 
                                             showlegend=False,
                                             xaxis=dict(type='category'))
-                            st.plotly_chart(fig, use_container_width=True, key=f"{key_prefix}_{base_ratio}_cagr_bar")
+                            st.plotly_chart(fig, width="stretch", key=f"{key_prefix}_{base_ratio}_cagr_bar")
                     left_col, middle_col, right_col = st.columns(3, gap='medium', border=False)
                     base_ratio_left = allCols_AvgGrowth[0].replace("_AvgGrowth", "")  # Use the first column as base for left side
                     base_ratio_middle = allCols_AvgGrowth[1].replace("_AvgGrowth", "")  # Use the second column as base for middle
@@ -1333,7 +1363,7 @@ try:
                         plot_cagr_bar(df_new_ranks, selected_stock_ticker, base_ratio_right, "right", selected_stock_ttm_offset, ttm_value, ttm_diff_value, higher_is_better=True)
 
         with st.container(border=True, key="stock_price_trend_container"):
-            st.subheader("Kursutveckling och Trendlinje")
+            st.subheader("💹 Kursutveckling & Smart Trendanalys")
 
             if selected_stock_ticker:
                 # Add slider for PWLF
@@ -1447,7 +1477,7 @@ try:
                     for trace in fig.data:
                         trace.update(hoverinfo="skip", hovertemplate=None)
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
                 else:
                     st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
 
@@ -1476,14 +1506,14 @@ try:
                             margin=dict(l=10, r=10, t=40, b=10),
                             yaxis=dict(ticksuffix="%", tickformat=".0f")
                         )
-                        st.plotly_chart(fig_pct, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
+                        st.plotly_chart(fig_pct, width="stretch", key=f"pct_bar_{selected_stock_ticker}")
 
             
         with st.container(border=True, key="ratios_container"):
             # =============================
             # RANKING FOR SELECTED STOCK
             # =============================
-            st.subheader("Sammanvägd rank per kategori")
+            st.subheader("🏆 Ranking breakdown – Var står bolaget?")
             if not df_filtered_by_sliders.empty and categories and selected_stock_ticker is not None:
                 #st.markdown("**Trend senaste 4 åren & Senaste året**")
                 clusterRank_trend_items = {col: val for col, val in selected_stock_dict.items() if "_clusterRank" in col and "trend" in col.lower()}
@@ -1521,7 +1551,7 @@ try:
                     df_catRank_merged[['Kategori', 'Trend Rank', 'Latest Rank', 'TTM Rank']]
                     .style.map(color_progress, subset=['Trend Rank', 'Latest Rank', 'TTM Rank']),
                     hide_index=True,
-                    use_container_width=True,
+                    width="stretch",
                     column_config={
                         "Trend Rank": st.column_config.ProgressColumn(
                                 "Trend Rank",
@@ -1552,7 +1582,7 @@ try:
                 # TREND RATIO BREAKDOWN BAR CHARTS
                 # -------------------------------------------------------------
                 st.markdown('---')
-                st.subheader('Detaljerad Rank per kategori')
+                st.subheader('🔬 Detaljerad ranking per kategori')
                 st.markdown("**Trend senaste 4 åren & Senaste året**")
                 # Create DataFrames for trend and latest ratio ranks
                 ratioRank_latest_items = {col: val for col, val in selected_stock_dict.items() if "_ratioRank" in col and "latest" in col.lower()}
@@ -1582,7 +1612,7 @@ try:
                             st.dataframe(
                                 df_catRank_merged[df_catRank_merged['Kategori'] == display_cat][[ 'Trend Rank', 'Latest Rank', 'TTM Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank', 'TTM Rank']),
                                 hide_index=True,
-                                use_container_width=True,
+                                width="stretch",
                                 column_config={
                                     "Latest Rank": st.column_config.ProgressColumn(
                                             "Latest Rank",
@@ -1709,7 +1739,7 @@ try:
                                                         margin=dict(l=10, r=10, t=30, b=10),
                                                         showlegend=False,
                                                         xaxis=dict(type='category'))
-                                        st.plotly_chart(fig, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
+                                        st.plotly_chart(fig, width="stretch", key=f"{cat}_{base_ratio}_bar")
                                         #latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
                                         #trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
                                     else:
@@ -1719,7 +1749,7 @@ try:
                                     st.dataframe(
                                         df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank','TTM Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank','TTM Rank']),
                                         hide_index=True,
-                                        use_container_width=True,
+                                        width="stretch",
                                         column_config={
                                             "Latest Rank": st.column_config.ProgressColumn(
                                                     "Latest Rank",
@@ -1752,22 +1782,36 @@ try:
                     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
         if show_Ratio_to_Rank:
             with st.container(border=True, key="ratio_rank_container"):
-                st.subheader("**Ratio 2 Rank**")
+                st.subheader("**🎯 Ratio 2 Rank – Hitta avvikarna!**")
                 if selected_stock_ticker is not None:
                     st.markdown(f"**{selected_stock_ticker}, {selected_stock_lista}, {selected_stock_sektor}**")
                     with st.expander("🛟 **Hjälp om Ratio 2 Rank** (Klicka för att visa)", expanded=False):
                         st.markdown(
                             """
-                            **Så här använder du Ratio 2 Rank-sektionen:**
+                            **Scatterplot-magi: Hitta avvikarna och guldkornen!**
 
-                            - Här kan du visualisera sambandet mellan valda nyckeltal (*ratio*) och deras respektive rankvärden för alla aktier som matchar dina filter.
-                            - Välj område (*Trend senaste 4 åren* eller *Senaste året*) för att se hur bolagen presterar över tid eller i det senaste året.
-                            - Använd reglagen för att filtrera på sektor och lista, så att du kan jämföra bolag inom samma bransch eller marknadssegment.
-                            - I scatterplotten visas varje aktie som en punkt, där x-axeln visar det valda nyckeltalet och y-axeln visar dess rankvärde. Den valda aktien markeras med röd färg och korslinje.
-                            - Bakgrundsfärgerna i diagrammet hjälper dig att snabbt se vilka rankvärden som är svaga, medel eller starka enligt färgskalan.
-                            - Använd denna sektion för att identifiera bolag med intressanta egenskaper, jämföra prestationer och hitta potentiella investeringsmöjligheter.
+                            **🎯 Vad du ser:**
+                            • X-axel = Nyckeltalet (faktiska värdet)
+                            • Y-axel = Ranking (0-100, högre = bättre)
+                            • Din aktie = röd punkt med korslinje
+                            • Alla andra = blå punkter
 
-                            Justera inställningarna för att utforska olika samband och få en djupare förståelse för hur nyckeltal och rankvärden samverkar för de aktier du är intresserad av.
+                            **🎨 Bakgrundsfärger:**
+                            • Röd = svag ranking (0-33)
+                            • Gul = okej ranking (34-66)  
+                            • Grön = stark ranking (67-100)
+
+                            **🔧 Kontroller:**
+                            • **Område:** Trend (4 år) vs Senaste året
+                            • **Sektor/Lista:** Jämför äpplen med äpplen
+                            • **Nyckeltal:** Välj vad du vill analysera
+
+                            **💰 Guldfynd att leta efter:**
+                            • Högt värde + låg ranking = underskattat
+                            • Lågt värde + hög ranking = övervärderat  
+                            • Din aktie långt från klustret = intressant avvikare
+
+                            **Pro-tips:** Perfekt för att hitta fel-pricade aktier!
                             """
                         )
                     col_left, col_mid, col_right = st.columns(3, gap='medium', border=False)
@@ -1885,8 +1929,8 @@ try:
                             height=400,
                             margin=dict(l=10, r=10, t=40, b=10)
                         )
-                        st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
-                        with st.expander(f"🛟 **Hjälp om  {f"{display_ratio_selector}_{ratio_to_rank_map_temp}"}** (Klicka för att visa)"):
+                        st.plotly_chart(scatter_fig, width="stretch", key=f"scatter_{display_ratio}_{display_rank}")
+                        with st.expander(f"🛟 **Hjälp om  {{display_ratio_selector}}_{ratio_to_rank_map_temp}** (Klicka för att visa)"):
                             st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
 
                     elif display_ratio and display_rank and display_ratio in df_new_ranks.columns and display_rank in df_new_ranks.columns:
@@ -1905,6 +1949,6 @@ except Exception as e:
 
 
 st.markdown("---")
-st.subheader("Om denna app")
-st.info("Denna app är i testläge och all data hämtas från Yahoo Finance. Resultaten och analyserna är endast avsedda för test och demonstration.")
+st.subheader("ℹ️ Om Indicatum Insights")
+st.info("🧪 **Beta-läge:** Data från Yahoo Finance | Endast för analys & utbildning | Inte finansiell rådgivning | Investera smart & ansvarsfullt!")
 # --- END: Main app logic ---
