@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        ".streamlit/config.toml": "plaintext"
+    },
+    "toml.schema.enabled": false,
+    "toml.schema.associations": {
+        "**/config.toml": ""
+    }
+}
