@@ -22,5 +22,12 @@ dependencies = [
     "yfinance>=0.2.65",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["data*", "planning*", ".github*", "__pycache__*"]
+
 [tool.uv]
 package = false
