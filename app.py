@@ -246,9 +246,6 @@ if user:
 
 with st.container(border=True):
     
-    # Enhanced workflow section with expanded features
-    st.markdown("---")
-    
     # Header section
     st.markdown("""
     <div style="text-align: center; padding: 25px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%); 
@@ -1288,8 +1285,8 @@ try:
                 • SMA-differenser i procent  
 
                 **🏆 Ranking breakdown:**  
-                • **Sammanvägd:** Totalbild per kategori  
-                • **Detaljerad:** Varje nyckeltal med trendutveckling  
+                • Sammanvägd: Totalbild per kategori  
+                • Detaljerad: Varje nyckeltal med trendutveckling  
                 • Färgkodade staplar: Röd = svag, Grön = stark  
 
                 **🎯 Ratio 2 Rank:**  
