@@ -67,7 +67,20 @@ st.set_page_config(
     page_title="Indicatum Insights",
     page_icon="📈"
 )
-st.title("📈 Indicatum Insights")
+# Introduce the app and its purpose with enhanced visual appeal
+with st.container(border=True):
+    st.markdown("""
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                border-radius: 10px; color: white; margin-bottom: 20px;">
+        <h1 style="color: white; margin-bottom: 15px;">✨ Välkommen till Indicatum Insights! ✨</h1>
+        <h3 style="color: #f0f0f0; font-weight: normal; margin-bottom: 20px;">
+            Hitta morgondagens vinnare innan marknaden gör det
+        </h3>
+        <p style="font-size: 18px; color: #e0e0e0;">
+            Smart filtrering + djup analys = bättre investeringsbeslut
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 # =============================
 # IMPORTS AND SETUP
 # =============================
@@ -216,8 +229,11 @@ else:
         if st.button("Kontoinformation", type="secondary"):
             show_account_dialog()
         st.stop()
-    
-    # Add account info button in sidebar or header
+            
+
+
+# Add account info and stats buttons after the welcome section
+if user:
     col1, col2, col3 = st.columns([5, 1, 1])
     with col2:
         if st.button("👤 Konto", help="Visa kontoinformation"):
@@ -227,37 +243,71 @@ else:
         if st.button("📊", help="Användningsstatistik"):
             concurrent = get_concurrent_users()
             st.info(f"Aktiva användare: {concurrent}\nSession: {st.session_state.user_id[:8]}")
-            
-# Introduce the app and its purpose with enhanced visual appeal
+
 with st.container(border=True):
+    
+    # Enhanced workflow section with expanded features
+    st.markdown("---")
+    
+    # Header section
     st.markdown("""
-    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                border-radius: 10px; color: white; margin-bottom: 20px;">
-        <h1 style="color: white; margin-bottom: 15px;">✨ Välkommen till Indicatum Insights! ✨</h1>
-        <h3 style="color: #f0f0f0; font-weight: normal; margin-bottom: 20px;">
-            Hitta morgondagens vinnare innan marknaden gör det
-        </h3>
-        <p style="font-size: 18px; color: #e0e0e0;">
-            Smart filtrering + djup analys = bättre investeringsbeslut
-        </p>
+    <div style="text-align: center; padding: 25px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%); 
+                border-radius: 15px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h3 style="color: #343a40; margin-bottom: 25px; font-weight: 600;">🚀 Din väg till smarta investeringar</h3>
     </div>
     """, unsafe_allow_html=True)
     
-    # Action-oriented call-to-action
-    st.markdown("---")
-    col_left, col_center, col_right = st.columns([1, 2, 1])
-    with col_center:
+    # Three-step workflow cards using Streamlit columns
+    col1, col2, col3 = st.columns(3, gap="medium")
+    
+    with col1:
         st.markdown("""
-        <div style="text-align: center; padding: 15px;">
-            <h4>🚀 Tre steg till framgång</h4>
-            <p style="font-size: 16px; margin: 10px 0;">
-                <strong>1. Filtrera</strong> → <strong>2. Analysera</strong> → <strong>3. Investera</strong>
-            </p>
-            <p style="color: #666; font-style: italic;">
-                💡 Kolla livbojen 🛟 i varje sektion för smarta tips och genvägar!
+        <div style="padding: 20px; background: white; border-radius: 12px; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: #667eea; margin: 10px 0;">1. Filtrera</h4>
+            <p style="color: #666; font-size: 14px; line-height: 1.5;">
+                Välj bland 500+ svenska aktier med smarta filter för sektor, storlek och prestanda
             </p>
         </div>
         """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="padding: 20px; background: white; border-radius: 12px; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #28a745; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+            <h4 style="color: #28a745; margin: 10px 0;">2. Analysera</h4>
+            <p style="color: #666; font-size: 14px; line-height: 1.5;">
+                Djupdyk i nyckeltal, trender och teknisk analys för varje aktie som fångar ditt intresse
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="padding: 20px; background: white; border-radius: 12px; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #ffc107; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 10px;">💎</div>
+            <h4 style="color: #e67e00; margin: 10px 0;">3. Investera</h4>
+            <p style="color: #666; font-size: 14px; line-height: 1.5;">
+                Bygg din bevakningslista och fatta välgrundade beslut baserat på data och trender
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Pro-tips section
+    st.markdown("""
+    <div style="margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); 
+                border-radius: 10px; border: 1px solid #e1bee7; text-align: center;">
+        <p style="color: #4a148c; font-size: 16px; margin: 5px 0; font-weight: 500;">
+            💡 <strong>Pro-tips:</strong> Använd livbojen 🛟 i varje sektion för experttips och genvägar!
+        </p>
+        <p style="color: #6a1b9a; font-size: 14px; margin: 5px 0;">
+            🎯 Kombinera flera filter → 📈 Analysera bubbeldiagram → ⭐ Shortlista favoriter → 🔍 Djupdykning per aktie
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att visa)", expanded=False):
     st.markdown(
