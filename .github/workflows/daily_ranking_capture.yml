@@ -1,0 +1,104 @@
+name: Quarterly Ranking Capture
+
+on:
+  schedule:
+    - cron: '30 4 * * 2-6'  # Run at 05:30 UTC, 30 minutes after main workflow
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  ENVIRONMENT: remote
+
+jobs:
+  capture-rankings:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT }}
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: '0.4.18'
+    
+    - name: Install dependencies
+      run: |
+        uv sync
+    
+    - name: Check if stock data exists
+      run: |
+        if [ ! -f "data/remote/stock_evaluation_results.csv" ]; then
+          echo "❌ Stock evaluation results not found. Main workflow may have failed."
+          echo "Checking file existence:"
+          ls -la data/remote/ || echo "data/remote/ directory not found"
+          exit 1
+        else
+          echo "✅ Stock evaluation results found"
+          echo "File info:"
+          ls -la data/remote/stock_evaluation_results.csv
+        fi
+    
+    - name: Capture quarterly ranking changes
+      run: |
+        echo "🚀 Starting quarterly-triggered ranking capture..."
+        uv run python daily_capture.py
+        echo "✅ Quarterly ranking capture completed"
+    
+    - name: Show database status
+      run: |
+        echo "📊 Database status after capture:"
+        uv run python -c "
+        from ranking_history_tracker import RankingHistoryTracker
+        tracker = RankingHistoryTracker()
+        dates = tracker.get_available_dates()
+        dimensions = tracker.get_available_dimensions()
+        print(f'📅 Total dates: {len(dates)}')
+        print(f'📏 Total dimensions: {len(dimensions)}')
+        if dates:
+            print(f'📈 Latest date: {dates[0]}')
+            print(f'📉 Earliest date: {dates[-1]}')
+        "
+    
+    - name: Commit and push ranking database
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if there are any changes to commit
+        if [ -f "data/local/ranking_history.db" ]; then
+          # Add the database file
+          git add data/local/ranking_history.db
+          
+          # Check if there are any changes
+          if git diff --staged --quiet; then
+            echo "📝 No ranking database changes to commit"
+          else
+            # Commit the changes
+            git commit -m "📊 Daily ranking capture $(date +'%Y-%m-%d %H:%M:%S')"
+            
+            # Push the changes
+            git push
+            echo "✅ Ranking database updated and pushed"
+          fi
+        else
+          echo "❌ Ranking database not found after capture"
+          exit 1
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+    
+    - name: Upload logs as artifact (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ranking-capture-logs
+        path: logs/
+        retention-days: 7

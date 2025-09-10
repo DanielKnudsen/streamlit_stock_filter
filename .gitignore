@@ -11,9 +11,25 @@ data/local/
 # Virtual environments
 .venv
 uv.lock
-[secrets.toml](http://_vscodecontentref_/3)
+secrets.toml
 
 .streamlit/secrets.toml
 notes.txt
 
 # User activity logs
+logs/
+
+# Generated reports and analysis files
+before_after_analysis.txt
+quarterly_ranking_report.txt
+*_analysis.txt
+*_report.txt
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary and experimental files
+quarterly_improvements.py
+ranking_analytics.py

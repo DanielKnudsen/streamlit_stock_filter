@@ -1768,7 +1768,7 @@ try:
                             )
                             
                             ratios = [ratio for ratio in cat_dict]
-                            st.markdown(f"Ingående Nyckeltal för **{get_display_name(display_cat)}** med Rank för *Trend senaste 4 åren* samt *Senaste året*")
+                            st.markdown(f"Ingående Nyckeltal för **{get_display_name(display_cat)}** med Rank för *Trend senaste 4 åren*, *Senaste året* samt *TTM* (om tillgänglig)")
                             cols = st.columns(len(ratios), border=True,gap="small") if ratios else []
                             for idx, ratio in enumerate(ratios):
                                 
