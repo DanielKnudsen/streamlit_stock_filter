@@ -8,11 +8,57 @@ from pathlib import Path
 from rank import load_config
 import datetime
 import time
+import uuid
+import json
 from auth import register_user, login_user, get_current_user, logout_user, check_membership_status_by_email, reset_password, save_portfolio, get_user_portfolios, delete_portfolio
 
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
 # =====================================================================
+
+# Basic user tracking
+def init_user_tracking():
+    """Initialize basic user tracking"""
+    if 'user_id' not in st.session_state:
+        st.session_state.user_id = str(uuid.uuid4())
+        st.session_state.session_start = datetime.datetime.now()
+    
+    # Log user activity
+    try:
+        log_entry = {
+            'user_id': st.session_state.user_id,
+            'timestamp': datetime.datetime.now().isoformat(),
+            'action': 'page_view'
+        }
+        
+        with open(f'user_logs_{ENVIRONMENT}.jsonl', 'a') as f:
+            f.write(json.dumps(log_entry) + '\n')
+    except Exception:
+        pass  # Fail silently if logging fails
+
+def get_concurrent_users():
+    """Get approximate concurrent users (active in last 5 minutes)"""
+    try:
+        from datetime import timedelta
+        active_threshold = datetime.datetime.now() - timedelta(minutes=5)
+        active_users = set()
+        
+        with open(f'user_logs_{ENVIRONMENT}.jsonl', 'r') as f:
+            for line in f.readlines()[-200:]:  # Check last 200 entries
+                try:
+                    log = json.loads(line.strip())
+                    log_time = datetime.datetime.fromisoformat(log['timestamp'])
+                    if log_time > active_threshold:
+                        active_users.add(log['user_id'])
+                except Exception:
+                    continue
+                    
+        return len(active_users)
+    except Exception:
+        return 0
+
+# Initialize user tracking
+init_user_tracking()
 
 # Allow user to toggle between "wide" and "centered" layout
 layout_mode = 'wide'#st.toggle("Bredd layout (wide)?", value=True)
@@ -172,47 +218,74 @@ else:
         st.stop()
     
     # Add account info button in sidebar or header
-    col1, col2 = st.columns([6, 1])
+    col1, col2, col3 = st.columns([5, 1, 1])
     with col2:
         if st.button("👤 Konto", help="Visa kontoinformation"):
             show_account_dialog()
-# Introduce the app and its purpose
-# Smart stock analysis for Swedish markets
-st.write(
-    "✨ **Välkommen till Indicatum Insights!** ✨\n\n"
-    "Hitta morgondagens vinnare innan marknaden gör det. Smart filtrering + djup analys = bättre beslut.\n\n"
-    "💡 **Pro-tips:** Kolla livbojen 🛟 i varje sektion för smarta knep och genvägar. "
-    "Data + intuition = framgång!\n\n"
-    "🎯 **Börja filtrera → Analysera → Investera**"
-)
+    with col3:
+        # Simple user monitoring (development mode)
+        if st.button("📊", help="Användningsstatistik"):
+            concurrent = get_concurrent_users()
+            st.info(f"Aktiva användare: {concurrent}\nSession: {st.session_state.user_id[:8]}")
+            
+# Introduce the app and its purpose with enhanced visual appeal
+with st.container(border=True):
+    st.markdown("""
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                border-radius: 10px; color: white; margin-bottom: 20px;">
+        <h1 style="color: white; margin-bottom: 15px;">✨ Välkommen till Indicatum Insights! ✨</h1>
+        <h3 style="color: #f0f0f0; font-weight: normal; margin-bottom: 20px;">
+            Hitta morgondagens vinnare innan marknaden gör det
+        </h3>
+        <p style="font-size: 18px; color: #e0e0e0;">
+            Smart filtrering + djup analys = bättre investeringsbeslut
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Action-oriented call-to-action
+    st.markdown("---")
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+    with col_center:
+        st.markdown("""
+        <div style="text-align: center; padding: 15px;">
+            <h4>🚀 Tre steg till framgång</h4>
+            <p style="font-size: 16px; margin: 10px 0;">
+                <strong>1. Filtrera</strong> → <strong>2. Analysera</strong> → <strong>3. Investera</strong>
+            </p>
+            <p style="color: #666; font-style: italic;">
+                💡 Kolla livbojen 🛟 i varje sektion för smarta tips och genvägar!
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 with st.expander("🛟 **Hur kan du använda detta verktyg?** (Klicka för att visa)", expanded=False):
     st.markdown(
         """
         **🚀 Från nybörjare till aktieproffs – här är din roadmap:**
 
-        **🎯 För snabba resultat:**
-        • Aggregerad rank-reglage → Upptäck topp-prestanda direkt
-        • TTM-data → Fånga hetaste trenderna nu
-        • Trend 4 år → Hitta långsiktiga vinnare
+        **🎯 För snabba resultat:**  
+        • Aggregerad rank-reglage → Upptäck topp-prestanda direkt  
+        • TTM-data → Fånga hetaste trenderna nu  
+        • Trend 4 år → Hitta långsiktiga vinnare  
 
-        **🔍 För detektiv-analys:**
-        • Kategori-filter → Lönsamhet, tillväxt, värdering
-        • Teknisk analys → SMA-breakouts och momentum
-        • Sector rotation → Vad är hett just nu?
+        **🔍 För detektiv-analys:**  
+        • Kategori-filter → Lönsamhet, tillväxt, värdering  
+        • Teknisk analys → SMA-breakouts och momentum  
+        • Sector rotation → Vad är hett just nu?  
 
-        **💰 Smart investeringsstrategier:**
-        • **Value hunting:** Stark tillväxt + låg kurs = underskattat?
-        • **Growth hacking:** TTM-acceleration + trend = raket på väg upp?
-        • **Turnaround plays:** Dålig historik + stark TTM = comeback?
-        • **Momentum riding:** Teknisk breakout + fundamental styrka = perfekt timing?
+        **💰 Smart investeringsstrategier:**  
+        • **Value hunting:** Stark tillväxt + låg kurs = underskattat?  
+        • **Growth hacking:** TTM-acceleration + trend = raket på väg upp?  
+        • **Turnaround plays:** Dålig historik + stark TTM = comeback?  
+        • **Momentum riding:** Teknisk breakout + fundamental styrka = perfekt timing?  
 
-        **🎨 Pro-workflow:**
-        1. **Filtrera** brett → **Shortlista** favoriter → **Djupdykning** per aktie
-        2. **Jämför** sektorer → **Identifiera** avvikare → **Validera** med teknisk analys
-        3. **Exportera** shortlist → **Bevaka** utveckling → **Uppdatera** regelbundet
+        **🎨 Pro-workflow:**  
+        1. **Filtrera** brett → **Shortlista** favoriter → **Djupdykning** per aktie  
+        2. **Jämför** sektorer → **Identifiera** avvikare → **Validera** med teknisk analys  
+        3. **Exportera** shortlist → **Bevaka** utveckling → **Uppdatera** regelbundet  
 
-        **💡 Secret sauce:** TTM + Trend = magisk kombination för early detection!
+        **💡 Secret sauce:** TTM + Trend = magisk kombination för early detection!  
         """
     )
 # Logga miljö och path för felsökning, samt datum för när filen stock_evaluations_result.csv senast uppdaterades   
@@ -420,33 +493,33 @@ try:
                 **Tre sätt att hitta dina ideala aktier:**
 
                 **1. 🚀 Förenklad filtrering:**  
-                • Viktning av trend vs senaste året vs TTM
-                • Perfekt för snabb överblick
-                • Smart algoritm rankar åt dig
+                • Viktning av trend vs senaste året vs TTM  
+                • Perfekt för snabb överblick  
+                • Smart algoritm rankar åt dig  
 
                 **2. 🎯 Utökade filtermöjligheter:**  
-                • Finjustera med totalrank + tillväxt + teknisk analys
-                • Skriv in specifika tickers
-                • Resultatet uppdateras live
+                • Finjustera med totalrank + tillväxt + teknisk analys  
+                • Skriv in specifika tickers  
+                • Resultatet uppdateras live  
 
                 **3. 🔬 Avancerad filtrering:**  
-                • Djupdykning i kategorier & nyckeltal
-                • För experter som vill ha full kontroll
-                • Skräddarsydda kombinationer
+                • Djupdykning i kategorier & nyckeltal  
+                • För experter som vill ha full kontroll  
+                • Skräddarsydda kombinationer  
 
-                **🎨 Extra-tips:**
-                • **Lista/Sektor:** Klicka färgade "pills" för snabbval
-                • **Ticker-sök:** Skriv flera tickers separerade med komma
-                • **Kombination:** Använd flera filter samtidigt för laser-precision
+                **🎨 Extra-tips:**  
+                • **Lista/Sektor:** Klicka färgade "pills" för snabbval  
+                • **Ticker-sök:** Skriv flera tickers separerade med komma  
+                • **Kombination:** Använd flera filter samtidigt för laser-precision  
                 """)
 
         with tab2:
             st.markdown("""
             ### 🎯 Din egen smarta ranking – väg ihop som du vill!
 
-            • **Trend:** Hur bra var bolaget senaste 4 åren?
+            • **Trend:** Hur bra var bolaget senaste 4 åren?  
             • **Senaste året:** Vad händer just nu?  
-            • **TTM:** Senaste kvartalen (heta signaler!)
+            • **TTM:** Senaste kvartalen (heta signaler!)  
 
             **Justera reglagen → Se resultatet live → Hitta dina favoriter!**
             """)
@@ -489,13 +562,13 @@ try:
             st.markdown("""
             ### 🎚️ Finjustera med precision – mer kontroll!
 
-            **Totalrank-reglage:**
-            • Trend, Senaste, TTM – sätt min/max gränser
+            **Totalrank-reglage:**  
+            • Trend, Senaste, TTM – sätt min/max gränser  
 
-            **Extra filter:**
-            • CAGR-tillväxt för långsiktiga trender
-            • SMA-tekniska indikatorer för timing
-            • Ticker-sök för specifika bolag
+            **Extra filter:**  
+            • CAGR-tillväxt för långsiktiga trender  
+            • SMA-tekniska indikatorer för timing  
+            • Ticker-sök för specifika bolag  
 
             **Kombinera filter → Smalna av resultatet → Hitta pärlorna!**
             """)
@@ -569,10 +642,10 @@ try:
             st.markdown("""
             ### 🔬 Expertnivå – full kontroll över varje nyckeltal!
 
-            **För dig som vill micro-managea:**
-            • Filtrera på kategori-nivå (Trend, Senaste, TTM)
-            • Detaljstyrning av varje enskilt nyckeltal
-            • Skapa helt skräddarsydda urval
+            **För dig som vill micro-managea:**  
+            • Filtrera på kategori-nivå (Trend, Senaste, TTM)  
+            • Detaljstyrning av varje enskilt nyckeltal  
+            • Skapa helt skräddarsydda urval  
 
             **Varning:** Här kan du gå ner i kaninhålet och komma fram 3 timmar senare! 🐰
             """)
@@ -827,29 +900,35 @@ try:
         with st.expander('🛟 **Hjälp med filtreringsresultat** (Klicka för att visa)', expanded=False):
                                         st.markdown(
                                                 """
-                                                **Dina filtrerade aktier – nu kör vi!**
+                                                **Dina filtrerade aktier – nu kör vi!**  
 
-                                                **📊 Bubbelplotten:**
-                                                • Varje bubbla = en aktie som matchar dina filter
-                                                • Storlek = marknadsvärde, färg = börs-lista
-                                                • Anpassa axlarna för att hitta dolda mönster
-                                                • Toggle tickers på/av för renare vy
+                                                **📊 Bubbelplotten:**  
+                                                • Varje bubbla = en aktie som matchar dina filter  
+                                                • Storlek = marknadsvärde, färg = börs-lista  
+                                                • Anpassa axlarna för att hitta dolda mönster  
+                                                • Toggle tickers på/av för renare vy  
 
-                                                **📋 Resultattabellen:**
-                                                • **'Välj'** → Djupdykning i en aktie (grafer + analys)
-                                                • **'Shortlist'** → Lägg till i din bevakningslista
-                                                • **Sortering:** Klicka kolumnnamn för stigande/fallande
-                                                • **Antal rader:** Justera med segmentreglaget
+                                                **📋 Resultattabellen:**  
+                                                • 'Välj' → Djupdykning i en aktie (grafer + analys)  
+                                                • 'Shortlist' → Lägg till i din bevakningslista  
+                                                • Sortering: Klicka kolumnnamn för stigande/fallande  
+                                                • Antal rader: Justera med segmentreglaget  
 
-                                                **⭐ Bevakningslistan:**
-                                                • Samlar dina utvalda aktier
-                                                • Ladda ner som CSV för vidare analys
-                                                • Perfect för att hålla koll på favoriter
+                                                **⭐ Bevakningslistan:**  
+                                                • Samlar dina utvalda aktier  
+                                                • Ladda ner som CSV för vidare analys  
+                                                • Spara som portfölj för framtida filtrering  
+                                                • Perfect för att hålla koll på favoriter  
 
-                                                **🔬 Detaljanalys:**
-                                                När du väljer en aktie får du: kurscharts, tillväxtgrafer, ranking breakdown och teknisk analys.
+                                                **💾 Portföljhantering:**  
+                                                • Spara din shortlist som namngiven portfölj  
+                                                • Ladda tidigare sparade portföljer som filter  
+                                                • Kombinera portföljfilter med andra filter  
 
-                                                **Pro-tips:** Kombinera filter → Analysera bubblor → Shortlista kandidater → Djupdykning per aktie!
+                                                **🔬 Detaljanalys:**  
+                                                När du väljer en aktie får du: kurscharts, tillväxtgrafer, ranking breakdown och teknisk analys.  
+
+                                                **💡 Pro-tips:** Kombinera filter → Analysera bubblor → Shortlista kandidater → Djupdykning per aktie!  
                                                 """
                     )
 
@@ -1144,31 +1223,31 @@ try:
                 """
                 **Djupdykning i din valda aktie – här är guiden:**
 
-                **📋 Grundinfo:**
-                • Ticker, sektor, lista, marknadsvärde
-                • Klicka företagsbeskrivningen för hela storyn
+                **📋 Grundinfo:**  
+                • Ticker, sektor, lista, marknadsvärde  
+                • Klicka företagsbeskrivningen för hela storyn  
 
-                **📈 Tillväxtanalys (CAGR):**
-                • Stapeldiagram för 4-årsperioden
-                • Expandera för detaljvy med TTM-data
-                • Grönt/rött = bra/dålig TTM-utveckling
+                **📈 Tillväxtanalys (CAGR):**  
+                • Stapeldiagram för 4-årsperioden  
+                • Expandera för detaljvy med TTM-data  
+                • Grönt/rött = bra/dålig TTM-utveckling  
 
-                **💹 Kursutveckling:**
-                • Prisgraf med volym och glidande medelvärden
-                • Justerbar trendlinje (PWLF) med standardavvikelser
-                • SMA-differenser i procent
+                **💹 Kursutveckling:**  
+                • Prisgraf med volym och glidande medelvärden  
+                • Justerbar trendlinje (PWLF) med standardavvikelser  
+                • SMA-differenser i procent  
 
-                **🏆 Ranking breakdown:**
-                • **Sammanvägd:** Totalbild per kategori
-                • **Detaljerad:** Varje nyckeltal med trendutveckling
-                • Färgkodade staplar: Röd = svag, Grön = stark
+                **🏆 Ranking breakdown:**  
+                • **Sammanvägd:** Totalbild per kategori  
+                • **Detaljerad:** Varje nyckeltal med trendutveckling  
+                • Färgkodade staplar: Röd = svag, Grön = stark  
 
-                **🎯 Ratio 2 Rank:**
-                • Scatterplot: Ditt bolag vs konkurrenterna
-                • Röd korslinje = din valda aktie
-                • Bakgrundsfärger = ranking-zoner
+                **🎯 Ratio 2 Rank:**  
+                • Scatterplot: Ditt bolag vs konkurrenterna  
+                • Röd korslinje = din valda aktie  
+                • Bakgrundsfärger = ranking-zoner  
 
-                **💡 Smart-tips:** Datadump längst ner för full transparens!
+                **💡 Smart-tips:** Datadump längst ner för full transparens!  
                 """
             )
         if selected_stock_dict is not None and selected_stock_ticker is not None:
@@ -1790,28 +1869,35 @@ try:
                             """
                             **Scatterplot-magi: Hitta avvikarna och guldkornen!**
 
-                            **🎯 Vad du ser:**
-                            • X-axel = Nyckeltalet (faktiska värdet)
-                            • Y-axel = Ranking (0-100, högre = bättre)
-                            • Din aktie = röd punkt med korslinje
-                            • Alla andra = blå punkter
+                            **🎯 Vad du ser:**  
+                            • X-axel = Nyckeltalet (faktiska värdet)  
+                            • Y-axel = Ranking (0-100, högre = bättre)  
+                            • Din aktie = röd punkt med korslinje  
+                            • Alla andra = blå punkter  
 
-                            **🎨 Bakgrundsfärger:**
-                            • Röd = svag ranking (0-33)
-                            • Gul = okej ranking (34-66)  
-                            • Grön = stark ranking (67-100)
+                            **🎨 Bakgrundsfärger (5 zoner):**  
+                            • Mörkröd = mycket svag ranking (0-20)  
+                            • Röd = svag ranking (21-40)  
+                            • Gul = okej ranking (41-60)  
+                            • Ljusgrön = bra ranking (61-80)  
+                            • Mörkgrön = utmärkt ranking (81-100)  
 
-                            **🔧 Kontroller:**
-                            • **Område:** Trend (4 år) vs Senaste året
-                            • **Sektor/Lista:** Jämför äpplen med äpplen
-                            • **Nyckeltal:** Välj vad du vill analysera
+                            **🔧 Kontroller:**  
+                            • **Område:** Trend (4 år) vs Senaste året  
+                            • **Sektor/Lista:** Jämför äpplen med äpplen  
+                            • **Nyckeltal:** Välj vad du vill analysera  
 
-                            **💰 Guldfynd att leta efter:**
-                            • Högt värde + låg ranking = underskattat
-                            • Lågt värde + hög ranking = övervärderat  
-                            • Din aktie långt från klustret = intressant avvikare
+                            **💰 Vad du kan upptäcka:**  
+                            • Din aktie i grön zon = stark prestanda inom detta nyckeltal  
+                            • Din aktie i röd zon = svag prestanda, kanske förbättringspotential  
+                            • Outliers (avvikare) = aktier som sticker ut från mängden  
+                            • Kluster = grupper av aktier med liknande prestanda  
+                            • Jämförelse inom sektor/lista = hur din aktie presterar mot liknande bolag  
 
-                            **Pro-tips:** Perfekt för att hitta fel-pricade aktier!
+                            **🔍 Viktigt att komma ihåg:**  
+                            Plotten visar din aktie jämfört med andra aktier i samma sektor eller börs-lista - så du jämför verkligen äpplen med äpplen!  
+
+                            **Pro-tips:** Använd olika nyckeltal för att få en helhetsbild av bolagets styrkor och svagheter!  
                             """
                         )
                     col_left, col_mid, col_right = st.columns(3, gap='medium', border=False)
