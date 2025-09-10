@@ -6,7 +6,7 @@
 **"Hitta morgondagens vinnare innan marknaden gör det"**
 
 ### Subheadline
-Smart aktieanalys för svenska investerare. Filtrera 400+ aktier med AI-driven ranking och teknisk analys.
+Smart aktieanalys för svenska investerare. Filtrera 750+ aktier med AI-driven ranking och teknisk analys.
 
 ### CTA Button
 **"Börja analysera gratis →"**
@@ -18,7 +18,7 @@ Smart aktieanalys för svenska investerare. Filtrera 400+ aktier med AI-driven r
 ### The Problem
 **"Vilka aktier ska du satsa på?"**
 
-- 🔍 **För många val:** 400+ svenska aktier - vilka är värda din tid?
+- 🔍 **För många val:** 750+ svenska aktier - vilka är värda din tid?
 - 📊 **Spretig data:** Finansiell information överallt, men ingen tydlig bild
 - ⏰ **Tidsbrist:** Timmar av research för att hitta rätt aktier
 - 🎯 **Ingen struktur:** Svårt att jämföra äpplen med äpplen
@@ -31,6 +31,7 @@ Vår plattform analyserar alla svenska aktier dagligen och rangordnar dem enligt
 - ⚡ **Snabb filtrering:** Hitta perfekta aktier på sekunder
 - 🧠 **Smart ranking:** AI-baserad poängsättning av alla bolag
 - 📈 **Live TTM-data:** Senaste kvartalsdata för early detection
+- 🔍 **Tillväxtavvikelser:** Upptäck när fundamenta växer snabbare än kursen
 - 🎯 **Personlig viktning:** Skapa din egen investeringsstrategi
 
 ---
@@ -38,7 +39,7 @@ Vår plattform analyserar alla svenska aktier dagligen och rangordnar dem enligt
 ## Key Features Section
 
 ### 🎯 **Smart Filtrering**
-**"Från 400 aktier till dina favoriter på 30 sekunder"**
+**"Från 750 aktier till dina favoriter på 30 sekunder"**
 
 - Tre filtreringsnivåer: Enkel → Avancerad → Expert
 - Anpassningsbara viktningar för din strategi
@@ -65,29 +66,43 @@ Vår plattform analyserar alla svenska aktier dagligen och rangordnar dem enligt
 
 *[Screenshot: Ranking tables with progress bars]*
 
-### 🎯 **Ratio 2 Rank - Hitta Avvikarna**
-**"Upptäck felprisade aktier med scatterplot-analys"**
+### 🎯 **Ratio 2 Rank - Förstå Rankingsystemet**
+**"Se hur dina finansiella nyckeltal blir till rankingar"**
 
-- Visualisera sambandet mellan värde och ranking
-- Hitta undervärderade pärlor
-- Identifiera övervärderade fallgropar
+- Visualisera sambandet mellan faktiska värden och rankings
+- Förstå var din aktie står i förhållande till andra
+- Transparens i hur AI-rankingen fungerar
 
 *[Screenshot: Scatter plot analysis]*
 
+### 🔍 **Tillväxtavvikelser - Hitta Dolda Pärlor**
+**"Upptäck bolag där fundamenta växer snabbare än aktiekursen"**
+
+- Jämför 4-års genomsnittlig tillväxt: Omsättning vs EPS vs Aktiekurs
+- Identifiera bolag med stark fundamental utveckling men eftersläpande kursutveckling
+- Visuell analys av tillväxtgap som indikerar undervärderade möjligheter
+
+*[Screenshot: Growth comparison charts showing divergence]*
+
 ---
 
-## Social Proof Section
+## Beta Access Section
 
-### **"Redan 200+ aktiva användare"**
+### **"Få exklusiv tillgång till beta-versionen"**
 
-*"Indicatum har revolutionerat min aktieanalys. Tidigare tog det timmar att hitta bra bolag - nu tar det minuter."*
-**- Marcus L., Privat investerare**
+**Bli en av de första att testa Sveriges smartaste aktieanalys-verktyg**
 
-*"TTM-funktionen hjälper mig fånga trender innan marknaden reagerar. Fantastiskt verktyg!"*
-**- Anna K., Daytrader**
+✨ **Begränsat antal beta-användare** - Registrera dig för tidig tillgång och hjälp oss förbättra produkten
 
-*"Perfekt för oss som vill ha djup analys utan att spendera hela dagen på research."*
-**- David S., Portföljförvaltare**
+🎯 **Direkt tillgång** - Inga köer, inga väntetider
+📊 **Gratis under beta** - Full funktionalitet utan kostnad
+💬 **Direkt kontakt** - Din feedback formar produkten
+
+### **"750+ svenska aktier analyserade dagligen"**
+
+*Omfattande databas med 50+ finansiella nyckeltal för varje börsnoterat bolag*
+
+**Senaste finansiella data från Yahoo Finance** • **Dagliga uppdateringar** • **Komplett fundamental analys**
 
 ---
 
@@ -95,27 +110,22 @@ Vår plattform analyserar alla svenska aktier dagligen och rangordnar dem enligt
 
 ### **Starta gratis, uppgradera när du är redo**
 
-#### 🆓 **Free Trial**
-**0 kr / 14 dagar**
+#### 🆓 **Gratis Beta-Access**
+**0 kr under beta-perioden**
 - Alla funktioner inkluderade
-- Begränsad till 10 aktier per dag
-- Grundläggande ranking
-
-#### 💎 **Pro**
-**299 kr / månad**
 - Obegränsat antal aktier
-- Alla ranking-kategorier
-- Portfolio management
-- TTM early detection
-- E-post support
+- Full tillgång till alla ranking-kategorier
+- Tillväxtavvikelse-analys
+- Community-access för feedback
 
-#### 🚀 **Premium**
-**599 kr / månad**
-- Allt i Pro +
+#### 💎 **Premium**
+**349 kr / månad** *(efter beta)*
+- Fortsatt full tillgång till alla funktioner
+- Portfolio management & tracking
+- TTM early detection
 - Automatiska marknadsinsights
-- Anpassade alerts
-- Sektor-rotationsanalys
-- Prioriterad support
+- E-post support
+- Prioriterat inflytande över nya funktioner
 
 ---
 
@@ -181,12 +191,14 @@ A: Trailing Twelve Months - de senaste 12 månadernas resultat. Perfect för att
 3. **Stock Deep Dive:** Individual stock analysis with charts and growth data
 4. **Ranking Tables:** The color-coded progress bars showing rankings
 5. **Scatter Plot:** The Ratio 2 Rank analysis tool
+6. **Growth Divergence:** Charts showing Revenue/EPS/Stock Price growth comparison revealing undervalued opportunities
 
 ### Copy Strategy:
 - **Swedish focus:** All copy in Swedish, targeting Swedish investors
 - **Problem-first approach:** Start with the pain points investors face
 - **Benefit-driven:** Focus on outcomes (finding winners) rather than features
-- **Social proof:** Build trust with testimonials and user numbers
+- **Beta positioning:** Build exclusivity and early adopter appeal
+- **Data credibility:** Emphasize comprehensive market coverage (750+ stocks)
 - **Clear value prop:** "Find tomorrow's winners before the market does"
 
 ### SEO Keywords to Target:
