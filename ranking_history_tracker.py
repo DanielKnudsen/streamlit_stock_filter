@@ -198,7 +198,7 @@ class RankingHistoryTracker:
                             before_date = capture_date - timedelta(days=1)
                             for dimension, value in previous_data:
                                 conn.execute("""
-                                    INSERT INTO ranking_history 
+                                    INSERT OR REPLACE INTO ranking_history 
                                     (ticker, date, dimension, value, capture_type, quarter_diff)
                                     VALUES (?, ?, ?, ?, ?, ?)
                                 """, (ticker, before_date, dimension, value, 'before_quarterly', change['old_quarter_diff']))
@@ -223,8 +223,16 @@ class RankingHistoryTracker:
                 
                 logging.info(f"Pivoted to {len(normalized_df)} normalized records for AFTER quarterly changes")
                 
-                # Insert "after" ranking data
-                normalized_df.to_sql('ranking_history', conn, if_exists='append', index=False)
+                # Insert "after" ranking data with conflict resolution
+                # Use INSERT OR REPLACE to handle existing records gracefully
+                for _, row in normalized_df.iterrows():
+                    conn.execute("""
+                        INSERT OR REPLACE INTO ranking_history 
+                        (ticker, date, dimension, value, capture_type, quarter_diff)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (row['ticker'], row['date'], row['dimension'], row['value'], 
+                          row['capture_type'], row['quarter_diff']))
+                
                 total_records_inserted += len(normalized_df)
                 after_captures = len(changed_tickers)
                 
