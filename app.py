@@ -498,40 +498,7 @@ try:
     # =============================
     with st.container(border=True, key="filter_section"):
         st.subheader("🎯 Aktiefilter – Hitta dina favoriter")
-        col_lista, col_sektor= st.columns(2,gap='medium',border=True)
-        with col_lista:
-            if 'Lista' in df_filtered_by_sliders.columns:
-                
-                # Use pills for selection, all enabled by default
-                lista_selected = st.pills(
-                    "Välj/uteslut Lista:",
-                    options=unique_values_lista,
-                    default=unique_values_lista,
-                    selection_mode='multi',
-                    key="segmented_lista"
-                )
-                # Filter df_filtered_by_sliders by selected Lista values
-                if lista_selected:
-                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
-                else:
-                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
-        with col_sektor:
-            # --- Sektor toggles for bubble plot ---
-            if 'Sektor' in df_filtered_by_sliders.columns:
-                      
-                # Use st.pills for multi-select, all enabled by default
-                sektor_selected = st.pills(
-                    "Välj/uteslut Sektor:",
-                    options=unique_values_sector,
-                    default=unique_values_sector,
-                    selection_mode='multi',
-                    key="pills_sektor"
-                )
-                # Filter df_filtered_by_sliders by selected Sektor values
-                if sektor_selected:
-                    df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
-                else:
-                    df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+
 
         tab1, tab2, tab3, tab4 = st.tabs(["🛟 Info", "Förenklad filtrering", "Utökade filtermöjligheter", "Avancerad filtrering"])
         with tab1:
@@ -933,6 +900,41 @@ try:
                                             st.info(f"Kolumn {r_data} saknas i data.")
                     else:
                         st.info("Inga 'ttm'-kolumner hittades bland 'rank_Score'-kolumner för filtrering.")
+        with st.expander("Välj eller uteslut från sektor eller lista (klicka på färgade 'pills')"):
+            col_lista, col_sektor = st.columns(2, gap='medium', border=True)
+            with col_lista:
+                if 'Lista' in df_filtered_by_sliders.columns:
+
+                    # Use pills for selection, all enabled by default
+                    lista_selected = st.pills(
+                        "Välj/uteslut Lista:",
+                        options=unique_values_lista,
+                        default=unique_values_lista,
+                        selection_mode='multi',
+                        key="segmented_lista"
+                    )
+                    # Filter df_filtered_by_sliders by selected Lista values
+                    if lista_selected:
+                        df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
+                    else:
+                        df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+            with col_sektor:
+                # --- Sektor toggles for bubble plot ---
+                if 'Sektor' in df_filtered_by_sliders.columns:
+
+                    # Use st.pills for multi-select, all enabled by default
+                    sektor_selected = st.pills(
+                        "Välj/uteslut Sektor:",
+                        options=unique_values_sector,
+                        default=unique_values_sector,
+                        selection_mode='multi',
+                        key="pills_sektor"
+                    )
+                    # Filter df_filtered_by_sliders by selected Sektor values
+                    if sektor_selected:
+                        df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
+                    else:
+                        df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
 
     # =============================
     # FILTERED RESULTS AND BUBBLE PLOT
