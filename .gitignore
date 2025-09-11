@@ -6,8 +6,13 @@ dist/
 wheels/
 *.egg-info
 *.DS_Store
-data/local/
+
+# Data directories - ignore most content but allow specific files  
+data/local/*
+!data/local/ranking_history.db
+
 .env
+
 # Virtual environments
 .venv
 uv.lock
@@ -25,12 +30,10 @@ quarterly_ranking_report.txt
 *_analysis.txt
 *_report.txt
 
-# Database files
+# Database files (but not the ranking history)
 *.db
-*.sqlite
+*.sqlite  
 *.sqlite3
-
-# Exception: Allow ranking history database
 !data/local/ranking_history.db
 
 # Temporary and experimental files
