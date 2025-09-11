@@ -27,22 +27,28 @@ def setup_logging():
 def detect_environment():
     """Detect if running locally or in GitHub Actions"""
     is_github_actions = os.getenv('GITHUB_ACTIONS', 'false').lower() == 'true'
+    environment = os.getenv('ENVIRONMENT', 'local')
     
     if is_github_actions:
         workspace = os.getenv('GITHUB_WORKSPACE', '/github/workspace')
-        csv_path = os.path.join(workspace, 'data', 'local', 'stock_evaluation_results.csv')
-        db_path = os.path.join(workspace, 'data', 'local', 'ranking_history.db')
+        # Use remote path when in GitHub Actions (following app.py pattern)
+        data_dir = 'remote' if environment != 'local' else 'local'
+        csv_path = os.path.join(workspace, 'data', data_dir, 'stock_evaluation_results.csv')
+        db_path = os.path.join(workspace, 'data', 'local', 'ranking_history.db')  # DB always in local
     else:
         # Local development paths
         base_path = Path(__file__).parent
-        csv_path = base_path / 'data' / 'local' / 'stock_evaluation_results.csv'
-        db_path = base_path / 'data' / 'local' / 'ranking_history.db'
+        data_dir = 'local' if environment == 'local' else 'remote'
+        csv_path = base_path / 'data' / data_dir / 'stock_evaluation_results.csv'
+        db_path = base_path / 'data' / 'local' / 'ranking_history.db'  # DB always in local
     
     return {
         'is_github_actions': is_github_actions,
         'csv_path': str(csv_path),
         'db_path': str(db_path),
-        'workspace': workspace if is_github_actions else str(base_path)
+        'workspace': workspace if is_github_actions else str(base_path),
+        'environment': environment,
+        'data_dir': data_dir
     }
 
 def main():
@@ -51,6 +57,8 @@ def main():
     # Detect environment
     env = detect_environment()
     logging.info(f"Environment: {'GitHub Actions' if env['is_github_actions'] else 'Local Development'}")
+    logging.info(f"Environment variable: {env['environment']}")
+    logging.info(f"Data directory: {env['data_dir']}")
     logging.info(f"Workspace: {env['workspace']}")
     logging.info(f"CSV Path: {env['csv_path']}")
     logging.info(f"DB Path: {env['db_path']}")
