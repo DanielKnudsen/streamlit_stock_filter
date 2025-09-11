@@ -7,33 +7,46 @@ Merge lean marketing approach with automated content generation using your stock
 
 ## Content Generation Strategy
 
-### **1. Data-Driven Content Types**
+### **1. Three-Tier Analysis System**
 
 #### **Weekly Market Reports** → **PUBLIC (Lead Generation)**
-- **Source:** Your GitHub Actions weekly fundamentals analysis
-- **Content:** "Veckans Vinnare & Förlorare" - Top/bottom performers by category
+- **Data Source:** Current `stock_evaluation_results.csv` rankings (static snapshot)
+- **Content:** "Veckans Topp 10" - Current market leaders by category
+- **Analysis Type:** 
+  - Top 10 by overall ranking (`Latest_clusterRank`)
+  - Top 10 by sector performance
+  - Top 10 by financial health, profitability, valuation categories
+  - Technical momentum leaders (SMA positioning)
 - **Format:** Blog post + Email newsletter (all subscribers)
-- **Automation:** Generate from ranking changes, growth metrics
+- **Purpose:** Show "what's hot right now" - simple snapshot marketing content
 - **Competitive angle:** "5 minuter till insikt vs timmar av Excel-analys"
 - **Distribution:** Wide - Blog, social media, SEO content
-- **Teaser strategy:** Show top 3, full rankings require signup
-
-#### **Quarterly Report Alerts** → **PREMIUM ONLY (Key Differentiator)**
-- **Source:** Real-time TTM data changes detection
-- **Content:** "Kvartalsrapport Alert: [Company] Visar Stark TTM-Förbättring"
-- **Format:** Immediate email alerts to premium users only
-- **Automation:** Trigger when new quarterly data shows significant improvements
-- **Competitive angle:** "Automatisk analys och ranking - medan andra fortfarande läser rapporten manuellt"
-- **Distribution:** Premium subscribers only - within hours of data becoming available
-- **Public teaser:** "Premium users got automated analysis while others were still reading the report"
+- **Teaser strategy:** Show positions 4-10 publicly, top 3 require free signup
 
 #### **Monthly Sector Analysis** → **PUBLIC (Authority Building)**
-- **Source:** Aggregate sector performance data 
-- **Content:** "Sektoranalys: Vart går marknaden?"
+- **Data Source:** `ranking_history.db` time-series data analysis
+- **Content:** "Sektoranalys: Marknadsrörelser & Trender"
+- **Analysis Type:**
+  - Sector ranking movements month-over-month
+  - Which sectors/stocks are improving/declining over time
+  - Market trend analysis and momentum detection
 - **Format:** In-depth blog post + Email series (all subscribers)
-- **Automation:** Compare sector rankings, identify trends
-- **Competitive angle:** "Fokuserad analys vs 1000+ förvirrande nyckeltal"
+- **Purpose:** Track market changes and sector rotations for strategic insights
+- **Competitive angle:** "Fokuserad trendanalys vs 1000+ förvirrande nyckeltal"
 - **Distribution:** Wide - Full blog posts, social sharing, SEO content
+
+#### **Automated Earnings Impact Analysis** → **PREMIUM ONLY (Key Differentiator)**
+- **Data Source:** `QuarterDiff` triggered analysis of TTM metric changes
+- **Content:** "ANALYS: [Company] Kvartalsrapport Visar Betydande TTM-förbättring"
+- **Analysis Type:**
+  - Automated detection and ranking of significant TTM changes
+  - ROE, Revenue, EPS impact analysis with clear rankings and context
+  - Digestible insights from complex quarterly data (what matters vs noise)
+- **Format:** Structured email analysis to premium users only
+- **Purpose:** Transform complex quarterly reports into clear, ranked investment insights
+- **Competitive angle:** "Automatisk analys och ranking - medan andra fortfarande läser rapporten manuellt"
+- **Distribution:** Premium subscribers only - triggered when significant improvements detected
+- **Public teaser:** "Premium users got automated analysis while others were still reading the report"
 
 #### **"Smart Simplicity" Series** → **PUBLIC (Competitive Positioning)**
 - **Source:** User behavior data, competitive comparisons
@@ -42,6 +55,17 @@ Merge lean marketing approach with automated content generation using your stock
 - **Automation:** Monthly competitive positioning content
 - **Competitive angle:** Direct positioning against Börsdata complexity
 - **Distribution:** Maximum reach - Blog, LinkedIn, Reddit, wherever competitors' users gather
+
+#### **"Mobile-First Analysis" Series** → **PUBLIC (Platform Advantage)**
+- **Source:** User behavior patterns, mobile usage analytics
+- **Content:** "Aktieanalys på språng vs kedjade vid skrivbordet"
+- **Analysis Type:**
+  - Mobile stock screening while commuting vs desktop-bound analysis
+  - "Lunchpausen-analys" - quick mobile insights vs hours at computer
+  - Usage pattern data: when and where users actually analyze stocks
+- **Format:** Blog posts, social content, app store positioning
+- **Competitive angle:** "Börsdata kräver skrivbord. Vi fungerar på tunnelbanan."
+- **Distribution:** Mobile-focused channels, app store optimization, commuter-targeted content
 
 ---
 
@@ -53,18 +77,18 @@ Merge lean marketing approach with automated content generation using your stock
 #### **Top of Funnel (Awareness):**
 - **"Smart Simplicity" Series** - Attract frustrated Börsdata users
 - **Monthly Sector Analysis** - SEO content for Swedish stock searchers
-- **Social media teasers** - "Here's what our Premium users saw 3 hours early..."
+- **Social media teasers** - "Here's what our Premium users understood while others were still confused..."
 
 #### **Middle of Funnel (Interest):**
 - **Weekly Market Reports** - Show AI ranking capabilities
-- **Email signup incentive** - "Get weekly insights + early access to quarterly alerts"
+- **Email signup incentive** - "Get weekly insights + automated earnings analysis"
 - **Beta access positioning** - "Join exclusive beta community"
 
 ### **Premium Content → Conversion & Retention**
 **Goal:** Justify subscription and reduce churn
 
 #### **Bottom of Funnel (Decision):**
-- **Quarterly Report Alerts** - Exclusive real-time advantage
+- **Automated Earnings Impact Analysis** - Exclusive analytical advantage
 - **Premium email templates** - "This insight saved Premium user $X,000"
 - **Community access** - Early feature feedback, priority support
 
@@ -75,7 +99,8 @@ Merge lean marketing approach with automated content generation using your stock
 
 ### **Content Teasers for Conversion**
 - **Blog posts:** "Premium users got automated analysis while others were still reading the 40-page report"
-- **Social media:** "Our AI analyzed this quarterly report in seconds. Others are still on page 5. 🤖"
+- **Social media:** "Our AI ranked this quarterly report's impact instantly. Others are still on page 5. 🤖"
+- **Mobile advantage:** "Börsdata users are chained to their desks. Our users analyze on the train. 📱"
 - **Email footers:** "Upgrade to Premium for automated quarterly analysis"
 - **App integration:** "This stock just triggered an automated improvement alert - upgrade to see analysis"
 
@@ -118,9 +143,56 @@ Merge lean marketing approach with automated content generation using your stock
 - Include charts comparing time-to-insight
 
 #### **YouTube/TikTok (Future)**
-- **New channel idea:** "5-Minute Stock Analysis" 
-- Show Indicatum insights vs Börsdata complexity side-by-side
-- "Same stock, 5 minutes vs 5 hours" content series
+- **New channel idea:** "5-Minute Mobile Stock Analysis" 
+- Show Indicatum mobile insights vs Börsdata desktop complexity side-by-side
+- "Clear insights vs information overload" content series
+- **Mobile focus:** "Aktieanalys på pendeltåget vs 3 timmar vid skrivbordet"
+
+---
+
+## Mobile-First Competitive Strategy
+
+### **Platform Positioning Against Börsdata**
+**Core Message:** "While competitors keep you chained to your desk, we put market insights in your pocket"
+
+#### **Behavioral Advantages:**
+- **Commute Analysis:** Users can screen stocks during train rides, not just at desktop
+- **Lunch Break Insights:** Quick mobile filtering vs hours of desktop spreadsheet analysis  
+- **Anywhere Access:** Beach vacation stock check vs office-bound analysis
+- **Real Usage Patterns:** People check phones 100+ times/day, rarely sit at computers for hours
+
+#### **Content Messaging:**
+- **"Tunnelbane-analys vs Skrivbords-slaveri"** - Mobile freedom vs desktop chains
+- **"5 minuter på mobilen vs 3 timmar vid datorn"** - Time efficiency through mobile simplicity
+- **"Börsdata kräver kontorsstol. Vi fungerar i hängmattan."** - Lifestyle positioning
+
+#### **Marketing Channels for Mobile Message:**
+- **LinkedIn commuter content:** Target during peak commute hours (07:00-09:00, 17:00-19:00)
+- **Instagram Stories:** Show real mobile usage scenarios
+- **App Store optimization:** "Mobile stock analysis" vs "Desktop financial tools"
+- **Podcast advertising:** Target commuter-heavy shows
+
+---
+
+## System Architecture for Three-Tier Analysis
+
+### **Data Flow Implementation**
+```
+Weekly Snapshots    Monthly Trends         Automated Analysis
+     ↓                   ↓                      ↓
+stock_evaluation_   ranking_history.db   QuarterDiff triggers
+results.csv         (time-series)        (TTM changes)
+     ↓                   ↓                      ↓
+Top 10 Lists       Trend Analysis        Impact Analysis
+     ↓                   ↓                      ↓
+Public Content     Authority Content     Premium Insights
+```
+
+### **Content Generation Efficiency**
+- **Weekly:** Simple ranking extracts from existing CSV - minimal processing
+- **Monthly:** Time-series queries on existing database - leverages current infrastructure  
+- **Automated Analysis:** Triggered by existing `QuarterDiff` system whenever significant changes detected
+- **All three:** Use existing data sources - no new data collection needed
 
 ---
 
@@ -151,7 +223,7 @@ def generate_quarterly_alerts(detected_stocks):
 ```
 
 #### **Alert Content Templates:**
-- **Immediate Email:** "🚨 Automatisk Analys: [Company] TTM-förbättring upptäckt"
+- **Structured Email:** "🎯 Automatisk Analys: [Company] TTM-ranking förbättrad"
 - **Blog Post:** "AI-Analys: [Company] Kvartalsrapport visar stark utveckling"
 - **Weekly Roundup:** "Veckans Kvartalsrapporter: 5 Bolag Som Överraskade Positivt"
 
@@ -206,7 +278,7 @@ WordPress → Zapier/Make.com → LinkedIn/Twitter/Other Channels
 ### **Monthly**
 - **First Monday:** Generate monthly sector analysis
 - **Mid-month:** Quarterly report roundup if sufficient data
-- **As needed:** Real-time quarterly alerts (can happen any day)
+- **As needed:** Automated quarterly analysis (triggered when significant changes detected)
 
 ---
 
@@ -250,7 +322,7 @@ Content:
 - Key Discovery: "Vår AI upptäckte automatiskt: TTM EPS +34%, Revenue +18%"
 - Ranking Impact: "Ranking jump: Lönsamhet #67 → #31"
 - Competitive Advantage: "Medan andra läser 40-sidors rapport manuellt, får du key insights på 30 sekunder"
-- Analysis Speed: "Automatisk analys av 50+ nyckeltal vs timmar av manuell läsning"
+- Analysis Quality: "Automatisk ranking av 50+ nyckeltal vs timmar av förvirring"
 - Link to analyze: "Se fullständig automatisk analys i appen"
 - Disclaimer: "Data från Yahoo Finance, analys från Indicatum AI"
 ```
