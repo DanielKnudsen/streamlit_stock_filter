@@ -270,7 +270,7 @@ class ContentGenerator:
             'title': content.title,
             'content': self._format_wordpress_content(content),
             'status': 'publish',  # Change to 'draft' for manual review
-            'categories': [1],  # Update with actual category ID for "Aktieanalys"
+            'categories': [75],  # Kvartalsrapporter category
             'tags': content.tags,
             'excerpt': content.introduction[:150] + "...",
             'meta': {
