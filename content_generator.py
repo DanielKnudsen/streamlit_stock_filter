@@ -255,6 +255,59 @@ class ContentGenerator:
         
         return highlights
     
+    def _get_or_create_tag_ids(self, tag_names: List[str]) -> List[int]:
+        """Convert tag names to tag IDs, create tags if they don't exist"""
+        tag_ids = []
+        
+        for tag_name in tag_names:
+            try:
+                # First, try to find existing tag
+                search_url = f"{self.wp_url}/wp-json/wp/v2/tags"
+                search_params = {'search': tag_name}
+                
+                response = requests.get(
+                    search_url,
+                    params=search_params,
+                    auth=(self.wp_user, self.wp_password),
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    existing_tags = response.json()
+                    
+                    # Check if exact match exists
+                    for tag in existing_tags:
+                        if tag['name'].lower() == tag_name.lower():
+                            tag_ids.append(tag['id'])
+                            logging.info(f"Found existing tag: {tag_name} (ID: {tag['id']})")
+                            break
+                    else:
+                        # Tag doesn't exist, create it
+                        create_url = f"{self.wp_url}/wp-json/wp/v2/tags"
+                        tag_data = {'name': tag_name}
+                        
+                        create_response = requests.post(
+                            create_url,
+                            json=tag_data,
+                            auth=(self.wp_user, self.wp_password),
+                            timeout=10
+                        )
+                        
+                        if create_response.status_code == 201:
+                            new_tag = create_response.json()
+                            tag_ids.append(new_tag['id'])
+                            logging.info(f"Created new tag: {tag_name} (ID: {new_tag['id']})")
+                        else:
+                            logging.warning(f"Failed to create tag '{tag_name}': {create_response.status_code}")
+                else:
+                    logging.warning(f"Failed to search for tag '{tag_name}': {response.status_code}")
+                    
+            except Exception as e:
+                logging.warning(f"Error processing tag '{tag_name}': {e}")
+                continue
+        
+        return tag_ids
+    
     def publish_to_wordpress(self, content: ContentTemplate) -> bool:
         """Publish blog post to WordPress via REST API"""
         if not all([self.wp_user, self.wp_password]):
@@ -265,13 +318,16 @@ class ContentGenerator:
         # WordPress REST API endpoint
         api_url = f"{self.wp_url}/wp-json/wp/v2/posts"
         
+        # Convert tag names to tag IDs
+        tag_ids = self._get_or_create_tag_ids(content.tags)
+        
         # Prepare post data
         post_data = {
             'title': content.title,
             'content': self._format_wordpress_content(content),
             'status': 'publish',  # Change to 'draft' for manual review
             'categories': [75],  # Kvartalsrapporter category
-            'tags': content.tags,
+            'tags': tag_ids,  # Now using tag IDs instead of names
             'excerpt': content.introduction[:150] + "...",
             'meta': {
                 'description': f"Analys av svenska aktier efter kvartalsrapporter - {datetime.now().strftime('%B %Y')}"
