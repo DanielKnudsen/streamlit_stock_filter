@@ -29,7 +29,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         lfs: true
-        token: ${{ secrets.PAT_TOKEN }}
+        token: ${{ secrets.PAT }}
+    
+    - name: Configure Git LFS
+      run: |
+        git lfs install
+        git lfs pull
     
     - name: Setup Python with uv
       uses: actions/setup-python@v4
