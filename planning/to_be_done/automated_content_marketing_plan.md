@@ -7,33 +7,40 @@ Merge lean marketing approach with automated content generation using your stock
 
 ## Content Generation Strategy
 
-### **1. Three-Tier Analysis System**
+### **1. Two-Tier Analysis System**
 
 #### **Weekly Market Reports** → **PUBLIC (Lead Generation)**
-- **Data Source:** Current `stock_evaluation_results.csv` rankings (static snapshot)
-- **Content:** "Veckans Topp 10" - Current market leaders by category
+- **Data Source:** `stock_evaluation_results.csv` (fundamental rankings) + weekly price data
+- **Content:** "Veckans Marknadsavvikelser" - Fundamental vs price divergences within sectors
 - **Analysis Type:** 
-  - Top 10 by overall ranking (`Latest_clusterRank`)
-  - Top 10 by sector performance
-  - Top 10 by financial health, profitability, valuation categories
-  - Technical momentum leaders (SMA positioning)
+  - **Undervalued Movers:** High sector ranking + below sector average price performance
+  - **Overvalued Warnings:** Low sector ranking + above sector average price performance  
+  - **Hidden Gems:** High sector ranking + significantly below sector average performance
+  - **Sector Momentum:** Which sectors show best fundamental + price alignment
+- **Timeframe:** Rolling 4-week lookback for price performance, published weekly
 - **Format:** Blog post + Email newsletter (all subscribers)
-- **Purpose:** Show "what's hot right now" - simple snapshot marketing content
-- **Competitive angle:** "5 minuter till insikt vs timmar av Excel-analys"
+- **Purpose:** Identify market inefficiencies where price doesn't match fundamental strength
+- **Competitive angle:** "Smarta avvikelser på 5 minuter vs timmar av sektoranalys"
 - **Distribution:** Wide - Blog, social media, SEO content
 - **Teaser strategy:** Show positions 4-10 publicly, top 3 require free signup
 
-#### **Monthly Sector Analysis** → **PUBLIC (Authority Building)**
-- **Data Source:** `ranking_history.db` time-series data analysis
-- **Content:** "Sektoranalys: Marknadsrörelser & Trender"
-- **Analysis Type:**
-  - Sector ranking movements month-over-month
-  - Which sectors/stocks are improving/declining over time
-  - Market trend analysis and momentum detection
-- **Format:** In-depth blog post + Email series (all subscribers)
-- **Purpose:** Track market changes and sector rotations for strategic insights
-- **Competitive angle:** "Fokuserad trendanalys vs 1000+ förvirrande nyckeltal"
-- **Distribution:** Wide - Full blog posts, social sharing, SEO content
+##### **Content Template:**
+```
+Title: "Veckans Marknadsavvikelser: [Date] - Smarta Möjligheter i 5 Minuter"
+
+Content Structure:
+1. Executive Summary (market vs fundamentals overview)
+2. Undervärderada Rörelser (positions 4-10 shown publicly)
+   → "Stark fundamenta, sektorn har inte hängt med än - upptäckt med AI-analys"
+3. Övervärderingsvarningar (risky stocks outperforming sector despite weak fundamentals)
+   → "Svag fundamenta, priset sprungit före verkligheten - vårt system varnade tidigt"
+4. Dolda Pärlor (excellent fundamentals, temporarily underperforming sector)
+   → "Marknadspanik möter stark fundamenta - kontrariska möjligheter"
+5. Sektormomentum (sectors with best fundamental + price alignment)
+   → "Sektorrotation i realtid - inte månader senare"
+6. CTA: "Se topp 3 i varje kategori + analysera själv - registrera dig gratis"
+```
+
 
 #### **Automated Earnings Impact Analysis** → **PREMIUM ONLY (Key Differentiator)**
 - **Data Source:** `QuarterDiff` triggered analysis of TTM metric changes
@@ -47,6 +54,20 @@ Merge lean marketing approach with automated content generation using your stock
 - **Competitive angle:** "Automatisk analys och ranking - medan andra fortfarande läser rapporten manuellt"
 - **Distribution:** Premium subscribers only - triggered when significant improvements detected
 - **Public teaser:** "Premium users got automated analysis while others were still reading the report"
+
+##### **Content Template:**
+```
+Subject: "🎯 Automatisk Analys: [Company] TTM-Förbättring Identifierad"
+
+Content:
+- Alert Details: Quarterly report published [Date], data now in Yahoo Finance
+- Key Discovery: "Vår AI upptäckte automatiskt: TTM EPS +34%, Revenue +18%"
+- Ranking Impact: "Ranking jump: Lönsamhet #67 → #31"
+- Competitive Advantage: "Medan andra läser 40-sidors rapport manuellt, får du key insights på 30 sekunder"
+- Analysis Quality: "Automatisk ranking av 50+ nyckeltal vs timmar av förvirring"
+- Link to analyze: "Se fullständig automatisk analys i appen"
+- Disclaimer: "Data från Yahoo Finance, analys från Indicatum AI"
+```
 
 #### **"Smart Simplicity" Series** → **PUBLIC (Competitive Positioning)**
 - **Source:** User behavior data, competitive comparisons
@@ -279,66 +300,6 @@ WordPress → Zapier/Make.com → LinkedIn/Twitter/Other Channels
 - **First Monday:** Generate monthly sector analysis
 - **Mid-month:** Quarterly report roundup if sufficient data
 - **As needed:** Automated quarterly analysis (triggered when significant changes detected)
-
----
-
-## Content Examples
-
-### **Weekly Report Template (Competitive Edition)**
-```
-Title: "Veckans Aktieanalys: [Date] - Smart Analys på 5 Minuter"
-
-Content Structure:
-1. Executive Summary (auto-generated from top movers)
-2. Veckans Vinnare (top 5 ranking improvements) 
-   → "Upptäckta med AI-ranking, inte Excel-ark"
-3. Veckans Förlorare (biggest drops)
-   → "Tidiga varningssignaler vårt system fångade"
-4. Sektortrends (which sectors performed best)
-   → "4 kategorier som ger klarhet, inte 1000+ nyckeltal"
-5. Tillväxtavvikelser (stocks with fundamental vs price gaps)
-   → "Dolda pärlor som komplex screening missar"
-6. CTA: "Analysera själv på 5 minuter - inte 5 timmar"
-```
-
-### **Competitive Positioning Email Template (NEW)**
-```
-Subject: "🎯 Varför 50 Nyckeltal Slår 1000+ - Indicatum vs Komplexitet"
-
-Content:
-- The Problem: "Börsdata ger dig 1000+ nyckeltal. Vi ger dig de 50 som spelar roll."
-- Time Comparison: "5 minuter till insikt vs timmar av spreadsheet-analys"
-- Real Example: Show same stock analysis - Indicatum (quick) vs complex tool (overwhelming)
-- Success Stories: "Från Börsdata till Indicatum: Varför jag bytte"
-- CTA: "Testa själv - gratis beta-access"
-```
-
-### **Quarterly Alert Email Template (Enhanced)**
-```
-Subject: "🚨 Automatisk Analys: [Company] TTM-Förbättring Identifierad"
-
-Content:
-- Alert Details: Quarterly report published [Date], data now in Yahoo Finance
-- Key Discovery: "Vår AI upptäckte automatiskt: TTM EPS +34%, Revenue +18%"
-- Ranking Impact: "Ranking jump: Lönsamhet #67 → #31"
-- Competitive Advantage: "Medan andra läser 40-sidors rapport manuellt, får du key insights på 30 sekunder"
-- Analysis Quality: "Automatisk ranking av 50+ nyckeltal vs timmar av förvirring"
-- Link to analyze: "Se fullständig automatisk analys i appen"
-- Disclaimer: "Data från Yahoo Finance, analys från Indicatum AI"
-```
-
-### **Weekly Roundup Template**
-```
-Title: "Veckans Kvartalsrapporter: 5 Bolag Som Överraskade Positivt"
-
-Content Structure:
-1. Executive Summary (number of reports, overall trends)
-2. Top 3 TTM Improvements (biggest metric improvements)
-3. Ranking Climbers (stocks that jumped most positions)
-4. Sector Analysis (which sectors reported strong quarters)
-5. Early Detection Wins (stocks caught before market reaction)
-6. CTA: "Få alerts direkt i din inkorg"
-```
 
 ---
 
