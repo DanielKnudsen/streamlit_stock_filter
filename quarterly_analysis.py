@@ -96,11 +96,11 @@ def generate_quarterly_report(db_path: str, csv_path: str, days_back: int = 7) -
     report.append("")
     
     if not financial_analysis.empty:
-        # Sort by TTM performance indicators
-        if 'ROE_ttm_diff' in financial_analysis.columns:
-            financial_analysis = financial_analysis.sort_values('ROE_ttm_diff', ascending=False)
+        # Sort by TTM cluster ranking (higher score = better performance, 100 is best)
+        if 'TTM_clusterRank' in financial_analysis.columns:
+            financial_analysis = financial_analysis.sort_values('TTM_clusterRank', ascending=False)
         
-        report.append("🎯 TOP QUARTERLY PERFORMERS (by ROE TTM change):")
+        report.append("🎯 TOP QUARTERLY PERFORMERS (by TTM Cluster Ranking):")
         report.append("-" * 50)
         
         for i, (_, row) in enumerate(financial_analysis.head(10).iterrows()):
@@ -109,14 +109,19 @@ def generate_quarterly_report(db_path: str, csv_path: str, days_back: int = 7) -
             sector = row.get('Sektor', 'N/A')
             
             # Key performance indicators
-            roe_ttm_diff = row.get('ROE_ttm_diff', 0)
+            ttm_rank = row.get('TTM_clusterRank', 999)
+            latest_rank = row.get('Latest_clusterRank', 999)
+            rank_improvement = latest_rank - ttm_rank  # Positive = rank improved (lower number)
             revenue_ttm_diff = row.get('Total_Revenue_ttm_diff', 0)
             eps_ttm_diff = row.get('Basic_EPS_ttm_diff', 0)
             quarter_diff = row.get('QuarterDiff', 0)
             
             report.append(f"#{i+1:2d}. {ticker} - {name}")
             report.append(f"     🏭 Sector: {sector}")
-            report.append(f"     📈 ROE TTM Change: {roe_ttm_diff:+.3f}")
+            report.append(f"     🏆 TTM Cluster Rank: #{ttm_rank:.0f}")
+            if rank_improvement != 0:
+                improvement_text = f"📈 +{rank_improvement:.0f}" if rank_improvement > 0 else f"📉 {rank_improvement:.0f}"
+                report.append(f"     {improvement_text} rank positions vs Latest")
             report.append(f"     💰 Revenue TTM Change: {revenue_ttm_diff:+.0f}")
             report.append(f"     💎 EPS TTM Change: {eps_ttm_diff:+.3f}")
             report.append(f"     📊 Quarter Diff: {quarter_diff}")
