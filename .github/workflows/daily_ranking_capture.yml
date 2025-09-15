@@ -72,6 +72,15 @@ jobs:
             print(f'📉 Earliest date: {dates[-1]}')
         "
     
+    - name: Check for quarterly changes and trigger content
+      run: |
+        echo "🔍 Checking if quarterly changes warrant content generation..."
+        uv run python quarterly_notifications.py
+      env:
+        WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
+        WORDPRESS_USER: ${{ secrets.WORDPRESS_USER }}
+        WORDPRESS_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}
+
     - name: Commit and push ranking database
       run: |
         # Configure git
@@ -80,8 +89,11 @@ jobs:
         
         # Check if there are any changes to commit
         if [ -f "data/local/ranking_history.db" ]; then
-          # Add the database file
+          # Add the database file and any content generation logs
           git add data/local/ranking_history.db
+          git add data/remote/content_generation_log.txt || echo "No content log to add"
+          git add quarterly_ranking_report.txt || echo "No ranking report to add"
+          git add quarterly_changes_analysis.txt || echo "No quarterly analysis to add"
           
           # Check if there are any changes
           if git diff --staged --quiet; then
