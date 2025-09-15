@@ -1,0 +1,88 @@
+name: Automated Content Generation
+
+on:
+  # Can be triggered by other workflows
+  workflow_call:
+    inputs:
+      trigger_source:
+        description: 'Source that triggered content generation'
+        required: true
+        type: string
+        default: 'quarterly_analysis'
+  
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      force_content:
+        description: 'Force content generation (bypass thresholds)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  generate_content:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout with LFS
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+        token: ${{ secrets.PAT_TOKEN }}
+    
+    - name: Setup Python with uv
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install uv
+      run: pip install uv
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Pull LFS files
+      run: git lfs pull
+    
+    - name: Run quarterly analysis first
+      env:
+        ENVIRONMENT: remote
+      run: |
+        echo "🔍 Running quarterly analysis to generate fresh data..."
+        uv run python quarterly_analysis.py
+    
+    - name: Generate and publish content
+      env:
+        ENVIRONMENT: remote
+        WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
+        WORDPRESS_USER: ${{ secrets.WORDPRESS_USER }}
+        WORDPRESS_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}
+        FORCE_CONTENT: ${{ inputs.force_content || 'false' }}
+      run: |
+        echo "🤖 Running automated content generation..."
+        uv run python content_generator.py
+    
+    - name: Commit content generation logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add any new log files
+        git add data/remote/content_generation_log.txt || echo "No content log to add"
+        git add quarterly_changes_analysis.txt || echo "No analysis file to add"
+        
+        # Commit changes if any
+        if git diff --staged --quiet; then
+          echo "📝 No changes to commit"
+        else
+          git commit -m "📝 Automated content generation log update [skip ci]"
+          git push
+          echo "✅ Committed content generation logs"
+        fi
+    
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Content generation workflow failed"
+        echo "Check logs for details and verify WordPress credentials"
