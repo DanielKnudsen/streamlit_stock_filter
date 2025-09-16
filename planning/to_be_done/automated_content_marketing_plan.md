@@ -1,5 +1,25 @@
 # Automated Content Marketing Plan for Indicatum
 
+## ⚠️ **IMPORTANT DATA COMPATIBILITY NOTE**
+**This content marketing plan was created based on the current system outputs and requires updates to align with the new PIPELINE_REDESIGN architecture.**
+
+### **Data Source Validation Required**
+Before implementing any content generation features:
+1. **Verify data availability** against the PIPELINE_REDESIGN document outputs
+2. **Check field compatibility** between expected content inputs and actual pipeline outputs  
+3. **Update data mappings** to match new three-temporal-perspective structure
+4. **Confirm trigger mechanisms** exist in the redesigned pipeline for content automation
+
+### **Current Misalignments Identified:**
+- Content plan expects `stock_evaluation_results.csv` → Pipeline outputs `cluster_rankings.pkl`
+- Content plan expects `QuarterDiff` field → Not defined in PIPELINE_REDESIGN
+- Content plan expects single rankings → Pipeline has three perspectives per ratio
+- Content plan expects traditional column names → Pipeline has new naming convention
+
+**Always reference PIPELINE_REDESIGN document before implementing content features to ensure data compatibility.**
+
+---
+
 ## Overview
 Merge lean marketing approach with automated content generation using your stock analysis data to create a self-sustaining marketing engine.
 
