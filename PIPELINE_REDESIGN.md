@@ -17,6 +17,87 @@ The existing pipeline compares TTM (quarterly-rolling) data with Latest (annual 
 
 ---
 
+## Data Storage Strategy
+
+### Environment-Based File Organization
+The pipeline uses dual-path environment detection for data files, with different storage strategies based on file type and usage patterns.
+
+```python
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
+BASE_DATA_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
+```
+
+### Storage Categories
+
+#### **Transient Data Files** (`data/{environment}/`)
+Files that change frequently and can be regenerated. Environment-specific for development vs production separation.
+
+| File Type | Path Pattern | Purpose | Environment |
+|-----------|-------------|---------|-------------|
+| Ticker metadata | `data/{environment}/tickers_metadata.csv` | Current ticker list | Both |
+| Raw financial data | `data/{environment}/quarterly_financials_raw.pkl` | yfinance downloads | Both |
+| Price data | `data/{environment}/price_data_comprehensive.pkl` | Current/historical prices | Both |
+| TTM calculations | `data/{environment}/ttm_current.pkl` | Latest TTM values | Both |
+| Calculated ratios | `data/{environment}/calculated_ratios_ttm.pkl` | Ratio values | Both |
+| Final rankings | `data/{environment}/stock_evaluation_results.csv` | Pipeline output | Both |
+
+#### **Persistent Database Files** (`data/local/` always)
+Long-term historical data that must persist across environments. Always stored locally even in GitHub Actions.
+
+| Database | Path | Purpose | Persistence |
+|----------|------|---------|-------------|
+| TTM History | `data/local/ttm_history.db` | Historical TTM snapshots | Permanent |
+| Quarterly Tracking | `data/local/quarterly_report_tracking.db` | Report availability tracking | Permanent |
+| Ranking History | `data/local/ranking_history.db` | Time-series rankings | Permanent |
+
+#### **Log and Metadata Files** (`logs/` directory)
+Diagnostic and operational files for debugging and monitoring.
+
+| File Type | Path | Purpose |
+|-----------|------|---------|
+| Error logs | `logs/quarterly_data_errors.log` | API and processing errors |
+| Debug logs | `logs/ratio_calculation_debug.log` | Ratio calculation issues |
+| Performance logs | `logs/pipeline_performance.log` | Timing and memory usage |
+
+### File Access Patterns
+
+```python
+class DataPathManager:
+    """Centralized data path management for consistent file access"""
+    
+    def __init__(self):
+        self.environment = os.getenv('ENVIRONMENT', 'local')
+        self.transient_base = Path('data') / ('local' if self.environment == 'local' else 'remote')
+        self.persistent_base = Path('data/local')  # Always local
+        self.logs_base = Path('logs')
+    
+    def get_transient_path(self, filename: str) -> Path:
+        """Get path for environment-specific transient data"""
+        return self.transient_base / filename
+    
+    def get_persistent_path(self, filename: str) -> Path:
+        """Get path for persistent database files (always local)"""
+        return self.persistent_base / filename
+    
+    def get_log_path(self, filename: str) -> Path:
+        """Get path for log files"""
+        return self.logs_base / filename
+
+# Usage examples:
+paths = DataPathManager()
+quarterly_data_path = paths.get_transient_path('quarterly_financials_raw.pkl')
+ttm_history_path = paths.get_persistent_path('ttm_history.db')
+error_log_path = paths.get_log_path('quarterly_data_errors.log')
+```
+
+### Rationale
+
+1. **Transient Files**: Environment separation allows development/testing without affecting production data
+2. **Persistent Databases**: Always local ensures Git LFS tracking and prevents data loss in CI/CD
+3. **Logs**: Centralized logging for debugging across all environments
+
+---
+
 ## Stage 1: Ticker Discovery and Classification
 
 ### Purpose
@@ -248,6 +329,258 @@ class DataQualityMetrics:
 ### Environment Configuration
 ```python
 # Rate limiting for yfinance API
+YFINANCE_RATE_LIMIT = {
+    'requests_per_minute': 120,  # Conservative limit
+    'batch_size': 50,           # Process tickers in batches
+    'retry_delay': 2,           # Seconds between retries
+    'max_retries': 3            # Maximum retry attempts
+}
+
+# Environment-based storage paths
+STORAGE_PATHS = {
+    'quarterly_data': 'data/{environment}/quarterly_financials_raw.pkl',
+    'data_summary': 'data/{environment}/quarterly_financials_summary.csv', 
+    'fetch_log': 'data/{environment}/data_fetch_log.json',
+    'error_log': 'logs/quarterly_data_errors.log'
+}
+```
+
+### Daily Monitoring System
+
+The quarterly data fetcher includes a sophisticated monitoring system that checks daily for new quarterly reports and maintains a comprehensive tracking database.
+
+#### Quarterly Report Tracking Database
+**File**: `data/local/quarterly_report_tracking.db` (always local for persistence)
+
+```sql
+CREATE TABLE quarterly_report_tracking (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticker TEXT NOT NULL,
+    fiscal_quarter TEXT NOT NULL,  -- Format: "2025-Q3"
+    report_period_end DATE NOT NULL,
+    yfinance_first_available DATE,  -- When yfinance first had this data
+    our_first_processed DATE,       -- When we first downloaded it
+    ttm_impact_calculated BOOLEAN DEFAULT FALSE,
+    ttm_change_notification_sent BOOLEAN DEFAULT FALSE,
+    data_quality_score REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(ticker, fiscal_quarter)
+);
+
+CREATE INDEX idx_ticker_quarter ON quarterly_report_tracking(ticker, fiscal_quarter);
+CREATE INDEX idx_yfinance_available ON quarterly_report_tracking(yfinance_first_available);
+CREATE INDEX idx_ttm_impact ON quarterly_report_tracking(ttm_impact_calculated, ttm_change_notification_sent);
+```
+
+#### Database Initialization Functions
+
+```python
+class DatabaseManager:
+    """Centralized database initialization and management"""
+    
+    def __init__(self, data_path_manager: DataPathManager):
+        self.paths = data_path_manager
+    
+    def initialize_all_databases(self) -> Dict[str, bool]:
+        """Initialize all required databases for the pipeline"""
+        results = {}
+        
+        try:
+            results['quarterly_tracking'] = self.initialize_quarterly_tracking_db()
+            results['ttm_history'] = self.initialize_ttm_history_db()
+            results['ranking_history'] = self.initialize_ranking_history_db()
+            
+            # Create log directories
+            self.paths.logs_base.mkdir(exist_ok=True)
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Database initialization failed: {e}")
+            return results
+    
+    def initialize_quarterly_tracking_db(self) -> bool:
+        """Initialize quarterly report tracking database"""
+        db_path = self.paths.get_persistent_path('quarterly_report_tracking.db')
+        
+        try:
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Create quarterly_report_tracking table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS quarterly_report_tracking (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        ticker TEXT NOT NULL,
+                        fiscal_quarter TEXT NOT NULL,
+                        report_period_end DATE NOT NULL,
+                        yfinance_first_available DATE,
+                        our_first_processed DATE,
+                        ttm_impact_calculated BOOLEAN DEFAULT FALSE,
+                        ttm_change_notification_sent BOOLEAN DEFAULT FALSE,
+                        data_quality_score REAL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(ticker, fiscal_quarter)
+                    )
+                """)
+                
+                # Create indexes
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_ticker_quarter ON quarterly_report_tracking(ticker, fiscal_quarter)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_yfinance_available ON quarterly_report_tracking(yfinance_first_available)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_ttm_impact ON quarterly_report_tracking(ttm_impact_calculated, ttm_change_notification_sent)")
+                
+                conn.commit()
+                logger.info(f"Quarterly tracking database initialized: {db_path}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize quarterly tracking database: {e}")
+            return False
+    
+    def initialize_ttm_history_db(self) -> bool:
+        """Initialize TTM history database"""
+        db_path = self.paths.get_persistent_path('ttm_history.db')
+        
+        try:
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Create ttm_snapshots table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS ttm_snapshots (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        ticker TEXT NOT NULL,
+                        snapshot_date DATE NOT NULL,
+                        metric_name TEXT NOT NULL,
+                        metric_value REAL,
+                        data_quality_score REAL,
+                        calculation_method TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(ticker, snapshot_date, metric_name)
+                    )
+                """)
+                
+                # Create indexes for performance
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_ticker_date ON ttm_snapshots(ticker, snapshot_date)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_metric_date ON ttm_snapshots(metric_name, snapshot_date)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_ticker_metric ON ttm_snapshots(ticker, metric_name)")
+                
+                conn.commit()
+                logger.info(f"TTM history database initialized: {db_path}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize TTM history database: {e}")
+            return False
+    
+    def initialize_ranking_history_db(self) -> bool:
+        """Initialize ranking history database (if not already exists)"""
+        db_path = self.paths.get_persistent_path('ranking_history.db')
+        
+        try:
+            # Check if database already exists and has data
+            if db_path.exists():
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ranking_history'")
+                    if cursor.fetchone():
+                        logger.info(f"Ranking history database already exists: {db_path}")
+                        return True
+            
+            # Initialize new database using existing RankingHistoryTracker
+            from ranking_history_tracker import RankingHistoryTracker
+            tracker = RankingHistoryTracker(str(db_path))
+            logger.info(f"Ranking history database initialized: {db_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize ranking history database: {e}")
+            return False
+    
+    def verify_database_integrity(self) -> Dict[str, Dict[str, Any]]:
+        """Verify all databases are properly initialized and accessible"""
+        verification_results = {}
+        
+        databases = {
+            'quarterly_tracking': 'quarterly_report_tracking.db',
+            'ttm_history': 'ttm_history.db', 
+            'ranking_history': 'ranking_history.db'
+        }
+        
+        for db_name, db_file in databases.items():
+            db_path = self.paths.get_persistent_path(db_file)
+            
+            try:
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    
+                    # Check if database file exists and is accessible
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = [row[0] for row in cursor.fetchall()]
+                    
+                    # Count total records across all tables
+                    total_records = 0
+                    for table in tables:
+                        cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                        total_records += cursor.fetchone()[0]
+                    
+                    verification_results[db_name] = {
+                        'status': 'healthy',
+                        'path': str(db_path),
+                        'tables': tables,
+                        'total_records': total_records,
+                        'file_size_mb': db_path.stat().st_size / (1024 * 1024) if db_path.exists() else 0
+                    }
+                    
+            except Exception as e:
+                verification_results[db_name] = {
+                    'status': 'error',
+                    'path': str(db_path),
+                    'error': str(e)
+                }
+        
+        return verification_results
+
+# Usage example for pipeline initialization:
+def initialize_pipeline_databases():
+    """Initialize all databases required for the pipeline"""
+    import logging
+    
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    # Initialize path manager and database manager
+    path_manager = DataPathManager()
+    db_manager = DatabaseManager(path_manager)
+    
+    # Initialize all databases
+    logger.info("Initializing pipeline databases...")
+    results = db_manager.initialize_all_databases()
+    
+    # Verify initialization
+    verification = db_manager.verify_database_integrity()
+    
+    # Report results
+    for db_name, success in results.items():
+        status = "✅ SUCCESS" if success else "❌ FAILED"
+        logger.info(f"{db_name}: {status}")
+    
+    # Report verification
+    logger.info("\nDatabase verification:")
+    for db_name, info in verification.items():
+        if info['status'] == 'healthy':
+            logger.info(f"{db_name}: {len(info['tables'])} tables, {info['total_records']} records, {info['file_size_mb']:.1f}MB")
+        else:
+            logger.error(f"{db_name}: ERROR - {info['error']}")
+    
+    return all(results.values())
+```
+
+This completes **Stage 2: Quarterly Financial Data Acquisition** with comprehensive data collection, quality controls, and monitoring systems.
+
+---
 API_DELAY = 0.1  # seconds between requests
 BATCH_SIZE = 50  # tickers per batch
 MAX_RETRIES = 3  # retry failed requests
@@ -606,7 +939,7 @@ def collect_comprehensive_price_data(tickers: List[str], quarterly_dates: List[p
     Collect both historical quarterly-aligned prices and current prices for valuation calculations
     
     Strategy:
-    1. Historical Alignment: Get prices ~1 week after each quarter end (when reports typically published)
+    1. Historical Alignment: Get prices on or right after the end of quarter date
     2. Current Pricing: Get most recent price for current valuation assessment
     3. Daily Price Series: Maintain complete price history for technical analysis
     
@@ -651,9 +984,9 @@ def get_quarterly_aligned_prices(daily_prices: pd.DataFrame, quarterly_dates: Li
     Extract historical stock prices aligned with quarterly report publication dates
     
     Timing Strategy:
-    - Use price from ~7 business days after quarter end
-    - This represents when quarterly data first becomes publicly available
-    - Ensures price reflects market's access to quarterly information
+    - Use price on or right after the end of quarter date
+    - This represents market pricing at the time of quarterly data
+    - Ensures temporal alignment between price and financial data
     
     Fallback Strategy:
     - If exact date unavailable (weekends/holidays), use nearest business day
@@ -662,8 +995,8 @@ def get_quarterly_aligned_prices(daily_prices: pd.DataFrame, quarterly_dates: Li
     aligned_prices = {}
     
     for quarter_end in quarterly_dates:
-        # Calculate target pricing date (7 business days after quarter end)
-        target_date = add_business_days(quarter_end, 7)
+        # Calculate target pricing date (on or right after quarter end date)
+        target_date = get_next_business_day(quarter_end)
         
         # Find actual price using fallback strategy
         actual_price = find_nearest_business_day_price(daily_prices, target_date)
@@ -764,10 +1097,10 @@ price_data = {
         'quarterly_aligned': {
             '2025-Q3': {
                 'quarter_end_date': pd.Timestamp('2025-09-30'),
-                'pricing_date': pd.Timestamp('2025-10-09'),  # 7 business days later
+                'pricing_date': pd.Timestamp('2025-10-01'),  # Right after quarter end
                 'close_price': 285.50,
                 'volume': 1_250_000,
-                'days_after_quarter_end': 9
+                'days_after_quarter_end': 1
             },
             '2025-Q2': { ... },
             # ... 16 quarters of historical alignment
@@ -784,7 +1117,7 @@ price_data = {
             'daily_coverage_pct': 98.5,  # % of trading days with data
             'quarterly_alignment_success_rate': 93.75,  # 15/16 quarters aligned
             'missing_quarters': ['2022-Q1'],  # List of quarters without aligned prices
-            'average_days_after_quarter': 8.2  # Average alignment delay
+            'average_days_after_quarter': 1.2  # Average alignment delay
         }
     }
 }
@@ -1198,29 +1531,94 @@ Replace string eval() with type-safe functions:
 
 ```python
 # ratio_functions.py - Secure, testable calculation functions
+
+# === QUALITY RATIOS (Kvalitet) ===
 def roe(net_income: float, stockholders_equity: float) -> float:
-    """Return on Equity = Net Income / Stockholders Equity"""
+    """Return on Equity = Net Income / Stockholders Equity (Avkastning på eget kapital)"""
     if pd.isna(stockholders_equity) or stockholders_equity == 0:
         return np.nan
-    return net_income / stockholders_equity
+    if pd.isna(net_income):
+        return np.nan
+    return (net_income / stockholders_equity) * 100  # Return as percentage
 
 def roic(ebit: float, tax_provision: float, pretax_income: float, 
          total_debt: float, stockholders_equity: float) -> float:
-    """Return on Invested Capital"""
+    """Return on Invested Capital (Avkastning på investerat kapital)"""
     if pd.isna(pretax_income) or pretax_income == 0:
+        return np.nan
+    if pd.isna(ebit) or pd.isna(tax_provision):
         return np.nan
     
     tax_rate = tax_provision / pretax_income
     nopat = ebit * (1 - tax_rate)  # Net Operating Profit After Tax
-    invested_capital = total_debt + stockholders_equity
+    invested_capital = (total_debt if not pd.isna(total_debt) else 0) + (stockholders_equity if not pd.isna(stockholders_equity) else 0)
     
     if invested_capital == 0:
         return np.nan
-    return nopat / invested_capital
+    return (nopat / invested_capital) * 100  # Return as percentage
 
-# Valuation ratio functions with dual pricing support
+# === PROFITABILITY RATIOS (Lönsamhet) ===
+def bruttomarginal(gross_profit: float, total_revenue: float) -> float:
+    """Gross Margin = Gross Profit / Total Revenue (Bruttomarginal)"""
+    if pd.isna(total_revenue) or total_revenue == 0:
+        return np.nan
+    if pd.isna(gross_profit):
+        return np.nan
+    return (gross_profit / total_revenue) * 100  # Return as percentage
+
+def rorelsemarginal(operating_income: float, total_revenue: float) -> float:
+    """Operating Margin = Operating Income / Total Revenue (Rörelsemarginal)"""
+    if pd.isna(total_revenue) or total_revenue == 0:
+        return np.nan
+    if pd.isna(operating_income):
+        return np.nan
+    return (operating_income / total_revenue) * 100  # Return as percentage
+
+def vinstmarginal(net_income: float, total_revenue: float) -> float:
+    """Net Margin = Net Income / Total Revenue (Vinstmarginal)"""
+    if pd.isna(total_revenue) or total_revenue == 0:
+        return np.nan
+    if pd.isna(net_income):
+        return np.nan
+    return (net_income / total_revenue) * 100  # Return as percentage
+
+# === FINANCIAL HEALTH RATIOS (Finansiell Hälsa) ===
+def soliditet(stockholders_equity: float, total_assets: float) -> float:
+    """Equity Ratio = Stockholders Equity / Total Assets (Soliditet)"""
+    if pd.isna(total_assets) or total_assets == 0:
+        return np.nan
+    if pd.isna(stockholders_equity):
+        return np.nan
+    return (stockholders_equity / total_assets) * 100  # Return as percentage
+
+def skuldsattningsgrad(total_debt: float, stockholders_equity: float) -> float:
+    """Debt-to-Equity Ratio = Total Debt / Stockholders Equity (Skuldsättningsgrad)"""
+    if pd.isna(stockholders_equity) or stockholders_equity == 0:
+        return np.nan
+    if pd.isna(total_debt):
+        return np.nan
+    return (total_debt / stockholders_equity) * 100  # Return as percentage
+
+# === CASH FLOW RATIOS (Kassaflöde) ===
+def rorelseflodesmarginal(operating_cash_flow: float, total_revenue: float) -> float:
+    """Operating Cash Flow Margin = Operating Cash Flow / Total Revenue (Rörelseflödesmarginal)"""
+    if pd.isna(total_revenue) or total_revenue == 0:
+        return np.nan
+    if pd.isna(operating_cash_flow):
+        return np.nan
+    return (operating_cash_flow / total_revenue) * 100  # Return as percentage
+
+def kassaflode_till_skuld(operating_cash_flow: float, total_debt: float) -> float:
+    """Cash Flow to Debt Ratio = Operating Cash Flow / Total Debt (Kassaflöde till skuld)"""
+    if pd.isna(total_debt) or total_debt == 0:
+        return np.nan
+    if pd.isna(operating_cash_flow):
+        return np.nan
+    return (operating_cash_flow / total_debt) * 100  # Return as percentage
+
+# === VALUATION RATIOS (Värdering) ===
 def pe_ratio(price: float, basic_eps_ttm: float) -> float:
-    """Price-to-Earnings ratio = Stock Price / Earnings Per Share (TTM)"""
+    """Price-to-Earnings ratio = Stock Price / Earnings Per Share (TTM) (P/E-tal)"""
     if pd.isna(basic_eps_ttm) or basic_eps_ttm <= 0:
         return np.nan
     if pd.isna(price) or price <= 0:
@@ -1228,7 +1626,7 @@ def pe_ratio(price: float, basic_eps_ttm: float) -> float:
     return price / basic_eps_ttm
 
 def pb_ratio(price: float, book_value_per_share: float) -> float:
-    """Price-to-Book ratio = Stock Price / Book Value Per Share"""
+    """Price-to-Book ratio = Stock Price / Book Value Per Share (P/B-tal)"""
     if pd.isna(book_value_per_share) or book_value_per_share <= 0:
         return np.nan
     if pd.isna(price) or price <= 0:
@@ -1236,7 +1634,7 @@ def pb_ratio(price: float, book_value_per_share: float) -> float:
     return price / book_value_per_share
 
 def ev_ebitda_ratio(market_cap: float, total_debt: float, cash: float, ebitda_ttm: float) -> float:
-    """Enterprise Value / EBITDA ratio = (Market Cap + Debt - Cash) / EBITDA (TTM)"""
+    """Enterprise Value / EBITDA ratio = (Market Cap + Debt - Cash) / EBITDA (TTM) (EV/EBITDA)"""
     if pd.isna(ebitda_ttm) or ebitda_ttm <= 0:
         return np.nan
     if pd.isna(market_cap) or market_cap <= 0:
@@ -1252,6 +1650,7 @@ def ev_ebitda_ratio(market_cap: float, total_debt: float, cash: float, ebitda_tt
         return np.nan
     return enterprise_value / ebitda_ttm
 
+# === HELPER FUNCTIONS ===
 def calculate_book_value_per_share(stockholders_equity: float, shares_outstanding: float) -> float:
     """Calculate book value per share for PB ratio calculation"""
     if pd.isna(stockholders_equity) or pd.isna(shares_outstanding):
@@ -1259,6 +1658,37 @@ def calculate_book_value_per_share(stockholders_equity: float, shares_outstandin
     if shares_outstanding <= 0:
         return np.nan
     return stockholders_equity / shares_outstanding
+
+def calculate_ebitda(operating_income: float, depreciation: float, amortization: float) -> float:
+    """Calculate EBITDA = Operating Income + Depreciation + Amortization"""
+    if pd.isna(operating_income):
+        return np.nan
+    
+    # Handle missing depreciation/amortization (common for some companies)
+    depreciation_val = depreciation if not pd.isna(depreciation) else 0
+    amortization_val = amortization if not pd.isna(amortization) else 0
+    
+    return operating_income + depreciation_val + amortization_val
+
+def calculate_free_cash_flow(operating_cash_flow: float, capital_expenditures: float) -> float:
+    """Calculate Free Cash Flow = Operating Cash Flow - Capital Expenditures"""
+    if pd.isna(operating_cash_flow):
+        return np.nan
+    
+    # Handle missing capex (use 0 if not available)
+    capex = capital_expenditures if not pd.isna(capital_expenditures) else 0
+    
+    return operating_cash_flow - capex
+
+def calculate_revenue_growth(current_revenue: float, previous_revenue: float) -> float:
+    """Calculate Revenue Growth Rate = (Current - Previous) / Previous * 100"""
+    if pd.isna(current_revenue) or pd.isna(previous_revenue):
+        return np.nan
+    if previous_revenue == 0:
+        return np.nan
+    
+    return ((current_revenue - previous_revenue) / abs(previous_revenue)) * 100
+```
 ```
 
 #### 2. Standardized Data Processing
@@ -1268,56 +1698,156 @@ Clean data pipeline that handles all financial statement types:
 class FinancialDataProcessor:
     """Standardize raw yfinance data for ratio calculations"""
     
-    def create_standardized_dataframe(self, raw_data: Dict) -> pd.DataFrame:
+    # Complete yfinance field mapping for Swedish stocks
+    YFINANCE_FIELD_MAPPING = {
+        # Income Statement mappings
+        'income_statement': {
+            'Total Revenue': ['Total Revenue', 'Net Sales', 'Revenue'],
+            'Gross Profit': ['Gross Profit', 'Gross Income'],
+            'Operating Income': ['Operating Income', 'Operating Revenue', 'EBIT'],
+            'EBIT': ['EBIT', 'Operating Income', 'Earnings Before Interest And Taxes'],
+            'Net Income': ['Net Income', 'Net Income Common Stockholders', 'Net Income Available To Common Stockholders'],
+            'Basic EPS': ['Basic EPS', 'Basic Earnings Per Share'],
+            'Tax Provision': ['Tax Provision', 'Tax Rate For Calcs', 'Income Tax Expense'],
+            'Pretax Income': ['Pretax Income', 'Income Before Tax'],
+            'Interest Expense': ['Interest Expense', 'Interest Expense Non Operating'],
+            'Depreciation': ['Depreciation', 'Depreciation And Amortization'],
+            'Amortization': ['Amortization', 'Amortization Of Intangibles']
+        },
+        
+        # Balance Sheet mappings
+        'balance_sheet': {
+            'Total Assets': ['Total Assets'],
+            'Stockholders Equity': ['Stockholders Equity', 'Total Equity Gross Minority Interest', 'Stockholders\' Equity'],
+            'Total Debt': ['Total Debt', 'Total Debt And Capital Lease Obligation'],
+            'Cash And Cash Equivalents': ['Cash And Cash Equivalents', 'Cash Cash Equivalents And Short Term Investments'],
+            'Shares Outstanding': ['Share Issued', 'Ordinary Shares Number'],
+            'Working Capital': ['Working Capital', 'Net Working Capital'],
+            'Inventory': ['Inventory'],
+            'Accounts Receivable': ['Accounts Receivable', 'Receivables'],
+            'Current Assets': ['Current Assets'],
+            'Current Liabilities': ['Current Liabilities']
+        },
+        
+        # Cash Flow Statement mappings
+        'cash_flow': {
+            'Operating Cash Flow': ['Operating Cash Flow', 'Cash Flow From Operating Activities'],
+            'Capital Expenditures': ['Capital Expenditure', 'Capital Expenditures'],
+            'Free Cash Flow': ['Free Cash Flow'],
+            'Financing Cash Flow': ['Cash Flow From Financing Activities'],
+            'Investing Cash Flow': ['Cash Flow From Investing Activities']
+        }
+    }
+    
+    def create_standardized_dataframe(self, raw_data: Dict, price_data: Dict = None) -> pd.DataFrame:
         """Convert raw yfinance data into clean, standardized format"""
+        periods = self._get_available_periods(raw_data)
         combined_data = []
         
-        for period in self._get_available_periods(raw_data):
-            period_data = {
-                # Income Statement
-                'Net Income': self._safe_extract(raw_data['income_statement'], period, 'Net Income'),
-                'Total Revenue': self._safe_extract(raw_data['income_statement'], period, 'Total Revenue'),
-                'Operating Income': self._safe_extract(raw_data['income_statement'], period, 'Operating Income'),
-                'EBIT': self._safe_extract(raw_data['income_statement'], period, 'EBIT'),
-                'Gross Profit': self._safe_extract(raw_data['income_statement'], period, 'Gross Profit'),
+        for period in periods:
+            period_data = {}
+            
+            # Extract financial statement data using field mapping
+            for statement_type, field_mappings in self.YFINANCE_FIELD_MAPPING.items():
+                if statement_type in raw_data:
+                    for standard_field, yf_variations in field_mappings.items():
+                        period_data[standard_field] = self._safe_extract_with_variations(
+                            raw_data[statement_type], period, yf_variations
+                        )
+            
+            # Add calculated fields
+            period_data['EBITDA'] = self._calculate_ebitda_safe(period_data)
+            period_data['Free Cash Flow Calculated'] = self._calculate_free_cash_flow_safe(period_data)
+            period_data['Book Value Per Share'] = self._calculate_book_value_per_share_safe(period_data)
+            
+            # Add current market data (for current valuation ratios)
+            if price_data:
+                current_market = price_data.get('current_market', {})
+                period_data['Current Price'] = current_market.get('current_price', np.nan)
+                period_data['Market Cap'] = current_market.get('market_cap', np.nan)
                 
-                # Balance Sheet
-                'Stockholders Equity': self._safe_extract(raw_data['balance_sheet'], period, 'Stockholders Equity'),
-                'Total Assets': self._safe_extract(raw_data['balance_sheet'], period, 'Total Assets'),
-                'Total Debt': self._safe_extract(raw_data['balance_sheet'], period, 'Total Debt'),
-                
-                # Cash Flow
-                'Operating Cash Flow': self._safe_extract(raw_data['cash_flow'], period, 'Operating Cash Flow'),
-                
-                # Market Data - Current prices (for current valuation calculations)
-                'Current Price': raw_data.get('current_price', np.nan),
-                'Market Cap': raw_data.get('market_cap', np.nan),
-                'Shares Outstanding': raw_data.get('shares_outstanding', np.nan),
-                
-                # Historical Price Data - Quarterly aligned (for trend analysis)
-                'Historical Price': self._get_quarterly_aligned_price(raw_data.get('price_data', {}), period),
-                'Historical Market Cap': self._calculate_historical_market_cap(
-                    raw_data.get('price_data', {}), 
-                    period, 
-                    raw_data.get('shares_outstanding', np.nan)
-                ),
-            }
+                # Add historical price data (for trend analysis)
+                period_key = period.strftime('%Y-Q%q') if hasattr(period, 'strftime') else str(period)
+                quarterly_aligned = price_data.get('quarterly_aligned', {})
+                if period_key in quarterly_aligned:
+                    period_data['Historical Price'] = quarterly_aligned[period_key].get('close_price', np.nan)
+                    period_data['Historical Market Cap'] = self._calculate_historical_market_cap_safe(
+                        quarterly_aligned[period_key].get('close_price', np.nan),
+                        period_data.get('Shares Outstanding', np.nan)
+                    )
+            
             combined_data.append(period_data)
             
         return pd.DataFrame(combined_data, index=periods).fillna(np.nan)
     
-    def _get_quarterly_aligned_price(self, price_data: Dict, period: str) -> float:
-        """Extract quarterly-aligned historical price for specific period"""
-        quarterly_aligned = price_data.get('quarterly_aligned', {})
-        period_data = quarterly_aligned.get(period, {})
-        return period_data.get('close_price', np.nan)
-    
-    def _calculate_historical_market_cap(self, price_data: Dict, period: str, shares_outstanding: float) -> float:
-        """Calculate historical market cap using quarterly-aligned price"""
-        historical_price = self._get_quarterly_aligned_price(price_data, period)
-        if pd.isna(historical_price) or pd.isna(shares_outstanding):
+    def _safe_extract_with_variations(self, statement_data: pd.DataFrame, period: str, field_variations: List[str]) -> float:
+        """Extract data trying multiple field name variations"""
+        if statement_data is None or statement_data.empty:
             return np.nan
-        return historical_price * shares_outstanding
+            
+        for field_name in field_variations:
+            try:
+                if field_name in statement_data.columns and period in statement_data.index:
+                    value = statement_data.loc[period, field_name]
+                    if pd.notna(value):
+                        return float(value)
+            except (KeyError, ValueError, TypeError):
+                continue
+                
+        return np.nan
+    
+    def _calculate_ebitda_safe(self, period_data: Dict) -> float:
+        """Safely calculate EBITDA with fallback methods"""
+        # Method 1: Operating Income + Depreciation + Amortization
+        operating_income = period_data.get('Operating Income', np.nan)
+        depreciation = period_data.get('Depreciation', 0)
+        amortization = period_data.get('Amortization', 0)
+        
+        if pd.notna(operating_income):
+            return operating_income + depreciation + amortization
+            
+        # Method 2: Use EBIT if available
+        ebit = period_data.get('EBIT', np.nan)
+        if pd.notna(ebit):
+            return ebit + depreciation + amortization
+            
+        return np.nan
+    
+    def _calculate_free_cash_flow_safe(self, period_data: Dict) -> float:
+        """Safely calculate Free Cash Flow"""
+        operating_cf = period_data.get('Operating Cash Flow', np.nan)
+        capex = period_data.get('Capital Expenditures', 0)  # Default to 0 if missing
+        
+        if pd.notna(operating_cf):
+            return operating_cf - capex
+            
+        return np.nan
+    
+    def _calculate_book_value_per_share_safe(self, period_data: Dict) -> float:
+        """Safely calculate Book Value Per Share"""
+        equity = period_data.get('Stockholders Equity', np.nan)
+        shares = period_data.get('Shares Outstanding', np.nan)
+        
+        if pd.notna(equity) and pd.notna(shares) and shares > 0:
+            return equity / shares
+            
+        return np.nan
+    
+    def _calculate_historical_market_cap_safe(self, historical_price: float, shares_outstanding: float) -> float:
+        """Safely calculate historical market cap"""
+        if pd.notna(historical_price) and pd.notna(shares_outstanding) and shares_outstanding > 0:
+            return historical_price * shares_outstanding
+        return np.nan
+    
+    def _get_available_periods(self, raw_data: Dict) -> List[str]:
+        """Get list of available quarterly periods from raw data"""
+        periods = set()
+        
+        for statement_type in ['income_statement', 'balance_sheet', 'cash_flow']:
+            if statement_type in raw_data and raw_data[statement_type] is not None:
+                periods.update(raw_data[statement_type].index)
+                
+        return sorted(list(periods), reverse=True)  # Most recent first
 ```
 
 #### 3. Simplified Configuration
@@ -1326,6 +1856,7 @@ Clean YAML configuration without security risks:
 ```yaml
 # ratios_config.yaml
 ratios:
+  # === QUALITY RATIOS (Kvalitet) ===
   ROE:
     function: "roe"
     required_fields: ["Net Income", "Stockholders Equity"]
@@ -1338,14 +1869,61 @@ ratios:
     required_fields: ["EBIT", "Tax Provision", "Pretax Income", "Total Debt", "Stockholders Equity"]
     higher_is_better: true
     category: "Kvalitet"
+    description: "Avkastning på investerat kapital"
     
+  # === PROFITABILITY RATIOS (Lönsamhet) ===
+  Bruttomarginal:
+    function: "bruttomarginal"
+    required_fields: ["Gross Profit", "Total Revenue"]
+    higher_is_better: true
+    category: "Lönsamhet"
+    description: "Bruttomarginal"
+    
+  Rörelsemarginal:
+    function: "rorelsemarginal"
+    required_fields: ["Operating Income", "Total Revenue"]
+    higher_is_better: true
+    category: "Lönsamhet"
+    description: "Rörelsemarginal"
+    
+  Vinstmarginal:
+    function: "vinstmarginal"
+    required_fields: ["Net Income", "Total Revenue"]
+    higher_is_better: true
+    category: "Lönsamhet"
+    description: "Vinstmarginal"
+    
+  # === FINANCIAL HEALTH RATIOS (Finansiell Hälsa) ===
   Soliditet:
-    function: "equity_ratio"
+    function: "soliditet"
     required_fields: ["Stockholders Equity", "Total Assets"]
     higher_is_better: true
     category: "Finansiell Hälsa"
+    description: "Soliditet (eget kapital / totala tillgångar)"
+    
+  Skuldsättningsgrad:
+    function: "skuldsattningsgrad"
+    required_fields: ["Total Debt", "Stockholders Equity"]
+    higher_is_better: false
+    category: "Finansiell Hälsa"
+    description: "Skuldsättningsgrad (skulder / eget kapital)"
+    
+  # === CASH FLOW RATIOS (Kassaflöde) ===
+  Rörelseflödesmarginal:
+    function: "rorelseflodesmarginal"
+    required_fields: ["Operating Cash Flow", "Total Revenue"]
+    higher_is_better: true
+    category: "Kassaflöde"
+    description: "Rörelseflödesmarginal"
+    
+  Kassaflöde_till_Skuld:
+    function: "kassaflode_till_skuld"
+    required_fields: ["Operating Cash Flow", "Total Debt"]
+    higher_is_better: true
+    category: "Kassaflöde"
+    description: "Kassaflöde till skuld"
 
-  # Valuation ratios with dual pricing strategy
+  # === VALUATION RATIOS (Värdering) ===
   PE_tal_current:
     function: "pe_ratio"
     required_fields: ["Current Price", "Basic EPS TTM"]
@@ -1403,14 +1981,16 @@ temporal_perspectives:
     interpretation: "How good is the company right now?"
     
   trend_ttm:
-    description: "TTM performance momentum (average % change per quarter over 8-12 quarters)"
+    description: "TTM performance momentum (average % change per quarter over 12 quarters)"
     calculation: "average_quarterly_percentage_change"
+    calculation_window: "16 quarters collected, 12 quarters displayed (4 quarters for TTM initialization)"
     default_weight: 0.333  # Equal weighting as starting point
     interpretation: "How fast is the company improving/declining?"
     
   stability_ttm:
-    description: "TTM performance consistency (coefficient of variation over 8-12 quarters)"
+    description: "TTM performance consistency (coefficient of variation over 12 quarters)"
     calculation: "inverse_coefficient_of_variation"
+    calculation_window: "16 quarters collected, 12 quarters displayed (4 quarters for TTM initialization)"
     default_weight: 0.334  # Equal weighting as starting point (rounds to 100%)
     interpretation: "How predictable is this company's performance?"
 
@@ -1481,7 +2061,7 @@ class RatioCalculator:
                     results.update(valuation_results)
                 else:
                     # Standard ratio calculation for non-valuation ratios
-                    # Calculate TTM time series (8-12 quarters for trend analysis)
+                    # Calculate TTM time series (16 quarters collected, 12 quarters for analysis)
                     ttm_timeseries = self._calculate_ttm_timeseries(ratio, data_frame)
                     
                     # Three temporal perspectives
@@ -1612,7 +2192,7 @@ class RatioCalculator:
         Calculate three temporal perspectives for TTM analysis
         
         Args:
-            ttm_timeseries: Series of TTM values over 8-12 quarters
+            ttm_timeseries: Series of TTM values over 12 quarters (from 16 quarters collected data)
             
         Returns:
             Dict with current_ttm, trend_ttm, and stability_ttm values
@@ -1796,19 +2376,19 @@ Transform calculated financial ratios into percentile rankings and aggregate the
 #### **1. Current TTM (`current_ttm`) - Performance Level**
 - **What**: Most recent TTM ratio value
 - **Interpretation**: "How good is the company performing right now?"
-- **Weight**: 50% (most important for investment decisions)
+- **Weight**: 33.3% (equal weighting for balanced analysis)
 - **Example**: ROE current_ttm = 18% → Ranks in top 20% of all stocks
 
 #### **2. Trend TTM (`trend_ttm`) - Performance Direction**  
-- **What**: Average quarterly percentage change in TTM values over 8-12 quarters
+- **What**: Average quarterly percentage change in TTM values over 12 quarters
 - **Interpretation**: "How fast is the company improving or declining?"
-- **Weight**: 30% (important for growth assessment)
+- **Weight**: 33.3% (equal weighting for balanced analysis)
 - **Example**: ROE trend_ttm = +5.2% per quarter → Strong improvement momentum
 
 #### **3. Stability TTM (`stability_ttm`) - Performance Consistency**
-- **What**: Inverse coefficient of variation of TTM values over 8-12 quarters
+- **What**: Inverse coefficient of variation of TTM values over 12 quarters
 - **Interpretation**: "How predictable and reliable is this company's performance?"
-- **Weight**: 20% (important for risk assessment)
+- **Weight**: 33.4% (equal weighting for balanced analysis, rounds to 100%)
 - **Example**: ROE stability_ttm = 0.85 → Highly consistent performance
 
 ### Investment Style Applications
@@ -1881,8 +2461,9 @@ Group related ratios into business categories with temporal perspectives:
 ```python
 def calculate_category_rankings(self, individual_rankings: pd.DataFrame) -> pd.DataFrame:
     """Aggregate individual ratios into category averages with three temporal perspectives"""
-    category_rankings = {}
+    category_means = {}
     
+    # First, calculate mean values within each category
     for category, ratios in self.categories.items():
         for perspective in ['current_ttm', 'trend_ttm', 'stability_ttm']:
             ranking_cols = [f"{ratio}_{perspective}_ratioRank" for ratio in ratios]
@@ -1890,9 +2471,20 @@ def calculate_category_rankings(self, individual_rankings: pd.DataFrame) -> pd.D
             
             if available_cols:
                 # Calculate weighted average within category
-                category_rankings[f"{category}_{perspective}_catRank"] = (
+                category_means[f"{category}_{perspective}_catMean"] = (
                     individual_rankings[available_cols].mean(axis=1)
                 )
+    
+    # Convert means to DataFrame for ranking
+    means_df = pd.DataFrame(category_means, index=individual_rankings.index)
+    
+    # Second, rank the mean values across all tickers (100 = best, 0 = worst)
+    category_rankings = {}
+    for col in means_df.columns:
+        if '_catMean' in col:
+            rank_col = col.replace('_catMean', '_catRank')
+            # Higher mean values get higher percentile rankings (100 = best)
+            category_rankings[rank_col] = means_df[col].rank(pct=True) * 100
                 
     return pd.DataFrame(category_rankings, index=individual_rankings.index)
 ```
@@ -1923,9 +2515,9 @@ def calculate_cluster_rankings(self, category_rankings: pd.DataFrame,
             'Värdering': 0.20
         }
     
-    cluster_rankings = {}
+    cluster_scores = {}
     
-    # Calculate perspective-specific cluster rankings
+    # First, calculate perspective-specific weighted averages
     for perspective, weight in perspective_weights.items():
         category_cols = [col for col in category_rankings.columns if f"_{perspective}_catRank" in col]
         
@@ -1941,20 +2533,31 @@ def calculate_cluster_rankings(self, category_rankings: pd.DataFrame,
                     total_weight += cat_weight
             
             if total_weight > 0:
-                cluster_rankings[f"{perspective.replace('_ttm', '').title()}_clusterRank"] = (
+                cluster_scores[f"{perspective.replace('_ttm', '').title()}_clusterScore"] = (
                     perspective_score / total_weight
                 )
     
-    # Overall weighted cluster ranking combining all perspectives
-    if all(f"{perspective.replace('_ttm', '').title()}_clusterRank" in cluster_rankings 
+    # Calculate overall weighted score combining all perspectives
+    if all(f"{perspective.replace('_ttm', '').title()}_clusterScore" in cluster_scores 
            for perspective in perspective_weights.keys()):
         
-        overall_ranking = (
-            cluster_rankings["Current_clusterRank"] * perspective_weights['current_ttm'] +
-            cluster_rankings["Trend_clusterRank"] * perspective_weights['trend_ttm'] +
-            cluster_rankings["Stability_clusterRank"] * perspective_weights['stability_ttm']
+        overall_score = (
+            cluster_scores["Current_clusterScore"] * perspective_weights['current_ttm'] +
+            cluster_scores["Trend_clusterScore"] * perspective_weights['trend_ttm'] +
+            cluster_scores["Stability_clusterScore"] * perspective_weights['stability_ttm']
         )
-        cluster_rankings["Overall_clusterRank"] = overall_ranking
+        cluster_scores["Overall_clusterScore"] = overall_score
+    
+    # Convert scores to DataFrame for ranking
+    scores_df = pd.DataFrame(cluster_scores, index=category_rankings.index)
+    
+    # Second, rank the weighted averages across all tickers (100 = best, 0 = worst)
+    cluster_rankings = {}
+    for col in scores_df.columns:
+        if '_clusterScore' in col:
+            rank_col = col.replace('_clusterScore', '_clusterRank')
+            # Higher weighted averages get higher percentile rankings (100 = best)
+            cluster_rankings[rank_col] = scores_df[col].rank(pct=True) * 100
             
     return pd.DataFrame(cluster_rankings, index=category_rankings.index)
 ```

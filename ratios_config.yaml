@@ -1,0 +1,372 @@
+# =================================================================================
+# RATIOS CONFIGURATION - REDESIGNED PIPELINE
+# Swedish Stock Analysis Platform - Fresh Start Configuration
+# =================================================================================
+# This configuration implements the new TTM-to-TTM comparison approach with
+# three temporal perspectives and dual pricing strategy for comprehensive analysis.
+
+# =================================================================================
+# DATA COLLECTION SETTINGS
+# =================================================================================
+data_collection:
+  # Historical data window
+  quarters_to_collect: 16  # Total quarters (4 years) for comprehensive TTM calculations
+  quarters_for_display: 12  # Quarters displayed after TTM initialization (16-4=12)
+  minimum_quarters: 4      # Minimum quarters required for valid analysis (adjusted for yfinance limitation)
+  
+  # Market specifics for Swedish stocks
+  market_suffix: ".ST"      # Stockholm Exchange suffix
+  currency: "SEK"           # Swedish Krona
+  
+  # Price alignment strategy
+  price_alignment: "quarter_end"  # Price on or right after quarter end date
+  price_fallback_days: 3          # Max days to search for price if exact date unavailable
+
+# =================================================================================
+# TEMPORAL PERSPECTIVES FRAMEWORK
+# =================================================================================
+# Three perspectives for comprehensive TTM analysis with equal weighting
+temporal_perspectives:
+  current_ttm:
+    description: "TTM performance level (most recent TTM value)"
+    calculation: "latest_ttm_value"
+    default_weight: 0.333  # Equal weighting as starting point
+    interpretation: "How good is the company right now?"
+    
+  trend_ttm:
+    description: "TTM performance momentum (average % change per quarter over available quarters)"
+    calculation: "average_quarterly_percentage_change"
+    calculation_window: "3-4 quarters available for Swedish stocks"
+    default_weight: 0.333  # Equal weighting as starting point
+    interpretation: "How fast is the company improving/declining?"
+    
+  stability_ttm:
+    description: "TTM performance consistency (coefficient of variation over available quarters)"
+    calculation: "inverse_coefficient_of_variation"
+    calculation_window: "3-4 quarters available for Swedish stocks"
+    default_weight: 0.334  # Equal weighting as starting point (rounds to 100%)
+    interpretation: "How predictable is this company's performance?"
+
+# =================================================================================
+# RATIO DEFINITIONS - FUNCTION-BASED APPROACH
+# =================================================================================
+# All ratios use secure function calls instead of eval() for safety and performance
+ratio_definitions:
+  # KVALITET - Management Efficiency & Capital Returns (20%)
+  ROE:
+    name: "Avkastning på eget kapital"
+    function: "roe"
+    category: "Kvalitet"
+    required_fields: ["Net Income TTM", "Stockholders Equity"]
+    higher_is_better: true
+    description: "Net Income TTM / Stockholders Equity - Efficiency of capital usage"
+    
+  ROIC:
+    name: "Avkastning på investerat kapital"
+    function: "roic"
+    category: "Kvalitet"
+    required_fields: ["EBIT TTM", "Tax Provision TTM", "Pretax Income TTM", "Total Debt", "Stockholders Equity"]
+    higher_is_better: true
+    description: "(EBIT * (1 - tax_rate)) / (Total Debt + Stockholders Equity) - Capital efficiency"
+
+  # LÖNSAMHET - Profitability & Operational Efficiency (20%)
+  Bruttomarginal:
+    name: "Bruttomarginal"
+    function: "bruttomarginal"
+    category: "Lönsamhet"
+    required_fields: ["Gross Profit TTM", "Total Revenue TTM"]
+    higher_is_better: true
+    description: "Gross Profit TTM / Total Revenue TTM - Production efficiency"
+    
+  Rörelsemarginal:
+    name: "Rörelsemarginal"
+    function: "rorelsemarginal"
+    category: "Lönsamhet"
+    required_fields: ["Operating Income TTM", "Total Revenue TTM"]
+    higher_is_better: true
+    description: "Operating Income TTM / Total Revenue TTM - Operational efficiency"
+    
+  Vinstmarginal:
+    name: "Vinstmarginal"
+    function: "vinstmarginal"
+    category: "Lönsamhet"
+    required_fields: ["Net Income TTM", "Total Revenue TTM"]
+    higher_is_better: true
+    description: "Net Income TTM / Total Revenue TTM - Overall profitability"
+
+  # FINANSIELL HÄLSA - Financial Stability & Debt Management (20%)
+  Soliditet:
+    name: "Soliditet"
+    function: "soliditet"
+    category: "Finansiell Hälsa"
+    required_fields: ["Stockholders Equity", "Total Assets"]
+    higher_is_better: true
+    description: "Stockholders Equity / Total Assets - Financial stability"
+    
+  Skuldsättningsgrad:
+    name: "Skuldsättningsgrad"
+    function: "skuldsattningsgrad"
+    category: "Finansiell Hälsa"
+    required_fields: ["Total Debt", "Stockholders Equity"]
+    higher_is_better: false
+    description: "Total Debt / Stockholders Equity - Debt leverage"
+
+  # KASSAFLÖDE - Cash Generation & Financial Flexibility (20%)
+  Rörelseflödesmarginal:
+    name: "Rörelseflödesmarginal"
+    function: "rorelseflodesmarginal"
+    category: "Kassaflöde"
+    required_fields: ["Operating Cash Flow TTM", "Total Revenue TTM"]
+    higher_is_better: true
+    description: "Operating Cash Flow TTM / Total Revenue TTM - Cash generation efficiency"
+    
+  Kassaflöde_till_Skuld:
+    name: "Kassaflöde till skuld"
+    function: "kassaflode_till_skuld"
+    category: "Kassaflöde"
+    required_fields: ["Operating Cash Flow TTM", "Total Debt"]
+    higher_is_better: true
+    description: "Operating Cash Flow TTM / Total Debt - Debt servicing capability"
+
+  # VÄRDERING - Market Valuation & Investment Attractiveness (20%)
+  # Note: Valuation ratios use dual pricing strategy (current + historical)
+  PE_tal_current:
+    name: "P/E-tal (aktuell)"
+    function: "pe_ratio"
+    category: "Värdering"
+    pricing_method: "current"
+    required_fields: ["Basic EPS TTM"]
+    price_fields: ["current_price"]
+    higher_is_better: false
+    description: "Current Price / Basic EPS TTM - Current market valuation"
+    
+  PE_tal_historical:
+    name: "P/E-tal (historisk)"
+    function: "pe_ratio"
+    category: "Värdering"
+    pricing_method: "historical"
+    required_fields: ["Basic EPS TTM"]
+    price_fields: ["quarterly_aligned_price"]
+    higher_is_better: false
+    description: "Historical Price / Basic EPS TTM - Temporal valuation trend"
+    
+  PB_tal_current:
+    name: "P/B-tal (aktuell)"
+    function: "pb_ratio"
+    category: "Värdering"
+    pricing_method: "current"
+    required_fields: ["Stockholders Equity", "Shares Outstanding"]
+    price_fields: ["current_price"]
+    higher_is_better: false
+    description: "Current Price / Book Value per Share - Current book valuation"
+    
+  PB_tal_historical:
+    name: "P/B-tal (historisk)"
+    function: "pb_ratio"
+    category: "Värdering"
+    pricing_method: "historical"
+    required_fields: ["Stockholders Equity", "Shares Outstanding"]
+    price_fields: ["quarterly_aligned_price"]
+    higher_is_better: false
+    description: "Historical Price / Book Value per Share - Temporal book valuation"
+    
+  EV_EBITDA_current:
+    name: "EV/EBITDA (aktuell)"
+    function: "ev_ebitda_ratio"
+    category: "Värdering"
+    pricing_method: "current"
+    required_fields: ["EBITDA TTM", "Total Debt", "Cash And Cash Equivalents", "Shares Outstanding"]
+    price_fields: ["current_price"]
+    higher_is_better: false
+    description: "Current Enterprise Value / EBITDA TTM - Current operational valuation"
+    
+  EV_EBITDA_historical:
+    name: "EV/EBITDA (historisk)"
+    function: "ev_ebitda_ratio"
+    category: "Värdering"
+    pricing_method: "historical"
+    required_fields: ["EBITDA TTM", "Total Debt", "Cash And Cash Equivalents", "Shares Outstanding"]
+    price_fields: ["quarterly_aligned_price"]
+    higher_is_better: false
+    description: "Historical Enterprise Value / EBITDA TTM - Temporal operational valuation"
+
+# =================================================================================
+# CATEGORY WEIGHTS FOR BUSINESS FOCUS AREAS
+# =================================================================================
+# Equal weights for balanced approach - user customizable in Streamlit interface
+category_weights:
+  Kvalitet: 
+    default_weight: 0.20
+    ratios: ["ROE", "ROIC"]
+    description: "Management efficiency and capital returns"
+    
+  Lönsamhet:
+    default_weight: 0.20
+    ratios: ["Bruttomarginal", "Rörelsemarginal", "Vinstmarginal"]
+    description: "Profitability and operational efficiency"
+    
+  "Finansiell Hälsa":
+    default_weight: 0.20
+    ratios: ["Soliditet", "Skuldsättningsgrad"]
+    description: "Financial stability and debt management"
+    
+  Kassaflöde:
+    default_weight: 0.20
+    ratios: ["Rörelseflödesmarginal", "Kassaflöde_till_Skuld"]
+    description: "Cash generation and financial flexibility"
+    
+  Värdering:
+    default_weight: 0.20
+    ratios: ["PE_tal_current", "PE_tal_historical", "PB_tal_current", "PB_tal_historical", "EV_EBITDA_current", "EV_EBITDA_historical"]
+    description: "Market valuation and investment attractiveness (current & trend analysis)"
+    pricing_strategy: "dual"  # Both current and historical pricing for comprehensive valuation assessment
+
+# =================================================================================
+# USER INTERFACE CUSTOMIZATION
+# =================================================================================
+user_interface:
+  category_weights_customizable: true
+  perspective_weights_customizable: true
+  default_behavior: "equal_weights"
+  streamlit_sliders: "allow_real_time_weight_adjustment"
+
+# =================================================================================
+# RANKING AND SCORING CONFIGURATION
+# =================================================================================
+ranking:
+  decimals: 1                    # Number of decimal places for ranks
+  min_stocks_for_ranking: 50     # Minimum stocks required for valid ranking
+  outlier_handling: "winsorize"  # Method for handling extreme values
+  outlier_percentiles: [0.01, 0.99]  # Winsorization bounds
+
+# =================================================================================
+# DATA QUALITY THRESHOLDS
+# =================================================================================
+data_quality:
+  min_field_completeness: 0.70   # 70% field coverage required
+  min_quarters_for_trend: 3      # Minimum quarters for trend calculation (adjusted for Swedish stocks)
+  min_quarters_for_stability: 3  # Minimum quarters for stability calculation (adjusted for Swedish stocks)
+  max_missing_consecutive: 2     # Max consecutive missing quarters allowed
+
+# =================================================================================
+# DISPLAY NAMES AND DESCRIPTIONS (SWEDISH)
+# =================================================================================
+display_names:
+  # Ratios
+  ROE: "Avkastning på eget kapital"
+  ROIC: "Avkastning på investerat kapital"
+  Soliditet: "Soliditet"
+  Skuldsättningsgrad: "Skuldsättningsgrad"
+  Bruttomarginal: "Bruttomarginal"
+  Rörelsemarginal: "Rörelsemarginal"
+  Vinstmarginal: "Vinstmarginal"
+  PE_tal_current: "P/E-tal (aktuell)"
+  PE_tal_historical: "P/E-tal (historisk)"
+  PB_tal_current: "P/B-tal (aktuell)"
+  PB_tal_historical: "P/B-tal (historisk)"
+  EV_EBITDA_current: "EV/EBITDA (aktuell)"
+  EV_EBITDA_historical: "EV/EBITDA (historisk)"
+  Rörelseflödesmarginal: "Rörelseflödesmarginal"
+  Kassaflöde_till_Skuld: "Kassaflöde/skuld"
+  
+  # Categories
+  Kvalitet: "Kvalitet"
+  Lönsamhet: "Lönsamhet"
+  "Finansiell Hälsa": "Finansiell Hälsa"
+  Kassaflöde: "Kassaflöde"
+  Värdering: "Värdering"
+  
+  # Temporal Perspectives
+  current_ttm: "Aktuell TTM"
+  trend_ttm: "TTM Trend"
+  stability_ttm: "TTM Stabilitet"
+
+# =================================================================================
+# HELP TEXTS FOR USER INTERFACE (SWEDISH)
+# =================================================================================
+ratio_help_texts:
+  # Current TTM explanations
+  ROE_current_ttm: "Avkastning på eget kapital visar hur effektivt bolaget genererar vinst på aktieägarnas kapital under de senaste tolv månaderna. Ett högt ROE indikerar att företaget är framgångsrikt med att skapa vinst från aktieägarnas investerade kapital."
+  
+  ROIC_current_ttm: "Avkastning på investerat kapital mäter hur väl bolaget använder både eget och lånat kapital för att skapa vinst under de senaste tolv månaderna. Ett högt ROIC visar att företaget är effektivt på att generera avkastning på det totala kapitalet."
+  
+  Soliditet_current_ttm: "Soliditet visar hur stor andel av tillgångarna som är finansierade med eget kapital. En hög soliditet innebär stark finansiell ställning och mindre beroende av lån, vilket minskar den finansiella risken."
+  
+  Skuldsättningsgrad_current_ttm: "Skuldsättningsgrad visar förhållandet mellan företagets skulder och eget kapital. En låg skuldsättningsgrad innebär relativt lite skulder jämfört med eget kapital, vilket minskar risken för betalningsproblem."
+  
+  Bruttomarginal_current_ttm: "Bruttomarginal visar hur stor andel av omsättningen som återstår efter produktionskostnader under de senaste tolv månaderna. En hög bruttomarginal indikerar god kontroll över direkta kostnader."
+  
+  Rörelsemarginal_current_ttm: "Rörelsemarginal visar hur stor andel av omsättningen som återstår efter alla rörelsekostnader under de senaste tolv månaderna. En hög rörelsemarginal indikerar effektiv kostnadskontroll."
+  
+  Vinstmarginal_current_ttm: "Vinstmarginal visar hur stor andel av omsättningen som blir vinst efter alla kostnader under de senaste tolv månaderna. En hög vinstmarginal visar bra förmåga att omvandla försäljning till vinst."
+  
+  PE_tal_current_ttm: "P/E-tal visar hur aktien värderas i förhållande till företagets vinst per aktie. Ett lågt P/E-tal kan tyda på att aktien är lågt värderad, men jämför alltid med liknande företag."
+  
+  PB_tal_current_ttm: "P/B-tal visar hur aktien värderas i förhållande till företagets egna kapital per aktie. Ett lågt P/B-tal kan indikera undervärdering, men kontrollera också företagets fundamenta."
+  
+  EV_EBITDA_current_ttm: "EV/EBITDA visar bolagets värdering i förhållande till rörelseresultat före avskrivningar. Ett lågt värde kan tyda på att bolaget är lågt värderat i förhållande till sin intjäningsförmåga."
+  
+  Rörelseflödesmarginal_current_ttm: "Rörelseflödesmarginal visar hur stor andel av omsättningen som omvandlas till kassaflöde från verksamheten. En hög marginal innebär bra kassaflödesgenerering från försäljning."
+  
+  Kassaflöde_till_Skuld_current_ttm: "Kassaflöde till skuld visar företagets förmåga att betala av skulder med kassaflöde från verksamheten. En hög kvot innebär god förmåga att hantera skulder."
+
+# =================================================================================
+# COLOR CODING FOR VISUALIZATION
+# =================================================================================
+color_ranges:
+  - range: [0, 20]
+    color: "#ffcccc"    # Light red - Poor performance
+    description: "Svag prestation"
+  - range: [20, 40]
+    color: "#ffe5cc"    # Light orange - Below average
+    description: "Under genomsnitt"
+  - range: [40, 60]
+    color: "#ffffcc"    # Light yellow - Average
+    description: "Genomsnittlig"
+  - range: [60, 80]
+    color: "#e6ffe6"    # Light green - Above average
+    description: "Över genomsnitt"
+  - range: [80, 100]
+    color: "#ccffcc"    # Green - Excellent
+    description: "Utmärkt prestation"
+
+# =================================================================================
+# API AND PERFORMANCE SETTINGS
+# =================================================================================
+api_settings:
+  delay_between_requests: 0.1    # Seconds between yfinance requests
+  batch_size: 50                 # Tickers per batch
+  max_retries: 3                 # Retry failed requests
+  timeout: 30                    # Request timeout in seconds
+
+# =================================================================================
+# FILE PATHS AND STORAGE CONFIGURATION
+# =================================================================================
+file_paths:
+  # Input files
+  ticker_list: "tickers_lists.csv"
+  
+  # Transient data files (environment-specific: data/local/ or data/remote/)
+  quarterly_data: "raw_financial_data_quarterly.pkl"
+  price_data: "price_data_comprehensive.pkl"
+  calculated_ratios: "calculated_ratios_ttm.csv"
+  
+  # Results files
+  complete_ranks: "complete_ranks_ttm.csv"
+  stock_evaluation: "stock_evaluation_results_ttm.csv"
+  
+  # Persistent database files (always in data/local/)
+  ranking_history_db: "ranking_history.db"
+  ttm_history_db: "ttm_history.db"
+  quarterly_tracking_db: "quarterly_report_tracking.db"
+
+# =================================================================================
+# MIGRATION NOTES
+# =================================================================================
+# This configuration represents a fresh start for the redesigned pipeline:
+# 1. Replaces eval() formulas with secure function calls
+# 2. Implements TTM-to-TTM comparison approach
+# 3. Adds three temporal perspectives framework
+# 4. Introduces dual pricing strategy for valuation ratios
+# 5. Maintains Swedish language interface and market specifics
+# 6. Provides comprehensive error handling and data quality controls

@@ -50,10 +50,10 @@ jobs:
         source .venv/bin/activate
         uv run python scrape_tickers.py > scrape_tickers.log 2>&1
     
-    - name: Run stock analyzer
+    - name: Run redesigned stock analysis pipeline
       run: |
         source .venv/bin/activate
-        uv run python rank.py > rank.log 2>&1
+        uv run python pipeline_runner.py > pipeline_runner.log 2>&1
     
     - name: Commit and push updated data
       run: |

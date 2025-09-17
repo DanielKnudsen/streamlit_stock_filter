@@ -98,9 +98,16 @@ def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") ->
             print(f"Warning: Incomplete data for {ticker}. Skipping.")
             return None
 
-        bs = bs.head(years).copy().infer_objects(copy=False).fillna(0)
-        is_ = is_.head(years).copy().infer_objects(copy=False).fillna(0)
-        cf = cf.head(years).copy().infer_objects(copy=False).fillna(0)
+        # For quarterly data, take all available quarters (not limited by years)
+        # For annual data, limit to specified years
+        if period_type == "quarterly":
+            bs = bs.copy().infer_objects(copy=False).fillna(0)
+            is_ = is_.copy().infer_objects(copy=False).fillna(0)
+            cf = cf.copy().infer_objects(copy=False).fillna(0)
+        else:
+            bs = bs.head(years).copy().infer_objects(copy=False).fillna(0)
+            is_ = is_.head(years).copy().infer_objects(copy=False).fillna(0)
+            cf = cf.head(years).copy().infer_objects(copy=False).fillna(0)
         
         return {
             'balance_sheet': bs,
