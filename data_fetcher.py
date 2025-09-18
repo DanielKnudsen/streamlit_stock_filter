@@ -53,14 +53,12 @@ def get_price_data(
     df_complete.to_csv(price_data_file_path, index=True)
 
 
-def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") -> Optional[Dict]:
+def fetch_yfinance_data(ticker: str) -> Optional[Dict]:
     """
     Fetch financial data for a ticker from Yahoo Finance.
 
     Args:
         ticker (str): Ticker symbol.
-        years (int): Number of years of data to fetch.
-        period_type (str, optional): 'annual' or 'quarterly'. Defaults to 'annual'.
 
     Returns:
         Optional[Dict]: Dictionary of financial data, or None if fetch fails.
@@ -68,21 +66,16 @@ def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") ->
     try:
         yf_ticker = f"{ticker}.ST"
         ticker_obj = yf.Ticker(yf_ticker)
-        if period_type == "quarterly":
-            bs = ticker_obj.quarterly_balance_sheet.transpose()
-            is_ = ticker_obj.quarterly_income_stmt.transpose()
-            cf = ticker_obj.quarterly_cash_flow.transpose()
-            info = ticker_obj.info
-        else:
-            bs = ticker_obj.balance_sheet.transpose()
-            is_ = ticker_obj.income_stmt.transpose()
-            cf = ticker_obj.cash_flow.transpose()
-            info = ticker_obj.info
-            longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
-            dividendRate = info.get('dividendRate', None)
-            lastDividendDate = info.get('lastDividendDate', None)
-            dividends = ticker_obj.dividends
 
+        bs = ticker_obj.quarterly_balance_sheet.transpose()
+        is_ = ticker_obj.quarterly_income_stmt.transpose()
+        cf = ticker_obj.quarterly_cash_flow.transpose()
+        
+        info = ticker_obj.info
+        longBusinessSummary = info.get('longBusinessSummary', 'No summary available')
+        dividendRate = info.get('dividendRate', None)
+        lastDividendDate = info.get('lastDividendDate', None)
+        dividends = ticker_obj.dividends
         shares_outstanding = info.get('sharesOutstanding', None)
         current_price = info.get('currentPrice', None)
         market_cap = info.get('marketCap', None)
@@ -98,16 +91,10 @@ def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") ->
             print(f"Warning: Incomplete data for {ticker}. Skipping.")
             return None
 
-        # For quarterly data, take all available quarters (not limited by years)
-        # For annual data, limit to specified years
-        if period_type == "quarterly":
-            bs = bs.copy().infer_objects(copy=False).fillna(0)
-            is_ = is_.copy().infer_objects(copy=False).fillna(0)
-            cf = cf.copy().infer_objects(copy=False).fillna(0)
-        else:
-            bs = bs.head(years).copy().infer_objects(copy=False).fillna(0)
-            is_ = is_.head(years).copy().infer_objects(copy=False).fillna(0)
-            cf = cf.head(years).copy().infer_objects(copy=False).fillna(0)
+        bs = bs.copy().infer_objects(copy=False).fillna(0)
+        is_ = is_.copy().infer_objects(copy=False).fillna(0)
+        cf = cf.copy().infer_objects(copy=False).fillna(0)
+
         
         return {
             'balance_sheet': bs,
@@ -116,11 +103,11 @@ def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") ->
             'current_price': current_price,
             'shares_outstanding': shares_outstanding,
             'info': info,
-            'dividendRate': dividendRate if period_type == "annual" else None,
-            'lastDividendDate': lastDividendDate if period_type == "annual" else None,
-            'longBusinessSummary': longBusinessSummary if period_type == "annual" else None,
+            'dividendRate': dividendRate ,
+            'lastDividendDate': lastDividendDate ,
+            'longBusinessSummary': longBusinessSummary ,
             'market_cap': market_cap,
-            'dividends': dividends if period_type == "annual" else None,
+            'dividends': dividends,
             'latest_report_date': latest_report_date if latest_report_date else None,
         }
     except Exception as e:

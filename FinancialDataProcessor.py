@@ -203,6 +203,9 @@ class FinancialDataProcessor:
                 logger.warning(f"{ticker}: Failed to calculate TTM values")
                 return None
             
+            # Calculate missing fields from available data
+            ttm_data = self._enhance_missing_fields(ttm_data, quarterly_data)
+            
             # Calculate quarterly TTM time series for temporal analysis
             ttm_time_series = self._calculate_quarterly_ttm_time_series(quarterly_data)
             
@@ -230,6 +233,94 @@ class FinancialDataProcessor:
         except Exception as e:
             logger.error(f"Error processing ticker {ticker}: {e}")
             return None
+    
+    def _enhance_missing_fields(self, ttm_data: Dict[str, float], quarterly_data: List[Dict]) -> Dict[str, float]:
+        """
+        Calculate missing financial fields from available data where possible.
+        Adapted for Swedish companies, especially financial institutions.
+        
+        Args:
+            ttm_data: Current TTM data dictionary
+            quarterly_data: List of quarterly data for additional calculations
+            
+        Returns:
+            Dict: Enhanced TTM data with calculated missing fields
+        """
+        enhanced_data = ttm_data.copy()
+        
+        # 1. For Swedish financial institutions: Estimate Gross Profit as Total Revenue - Operating Expense
+        if pd.isna(enhanced_data.get('Gross Profit TTM', np.nan)):
+            total_revenue = enhanced_data.get('Total Revenue TTM')
+            if total_revenue and not pd.isna(total_revenue):
+                # Calculate Operating Expense TTM
+                operating_expense_ttm = 0.0
+                valid_quarters = 0
+                
+                for quarter in quarterly_data[:4]:
+                    # Operating Expense is available for Swedish companies
+                    expense_val = self._extract_field_value(quarter, 'Operating Expense')
+                    if expense_val is not None and not pd.isna(expense_val):
+                        operating_expense_ttm += float(expense_val)
+                        valid_quarters += 1
+                
+                if valid_quarters >= 3:  # Need at least 3 quarters
+                    # For financial institutions, "Gross Profit" ≈ Total Revenue - Operating Expense
+                    calculated_gross_profit = total_revenue - operating_expense_ttm
+                    enhanced_data['Gross Profit TTM'] = calculated_gross_profit
+                    logger.debug(f"Calculated Gross Profit TTM (Revenue - Op Expense): {calculated_gross_profit}")
+        
+        # 2. Calculate Operating Income: For banks, this is often Net Interest Income + Non-interest Income - Operating Expense
+        if pd.isna(enhanced_data.get('Operating Income TTM', np.nan)):
+            # Method A: Try to use Gross Profit - additional expenses (simplified)
+            gross_profit = enhanced_data.get('Gross Profit TTM')
+            if gross_profit and not pd.isna(gross_profit):
+                # For banks, Operating Income ≈ Gross Profit (since we calculated it as Revenue - Operating Expense)
+                # This is a simplification but reasonable for Swedish banks
+                enhanced_data['Operating Income TTM'] = gross_profit * 0.8  # Conservative estimate
+                logger.debug(f"Estimated Operating Income TTM (80% of Gross Profit): {gross_profit * 0.8}")
+            else:
+                # Method B: Use Pretax Income + Tax Provision as approximation
+                pretax_income = enhanced_data.get('Pretax Income TTM')
+                if pretax_income and not pd.isna(pretax_income):
+                    # Operating Income ≈ Pretax Income (for banks without significant non-operating items)
+                    enhanced_data['Operating Income TTM'] = pretax_income
+                    logger.debug(f"Estimated Operating Income TTM (using Pretax Income): {pretax_income}")
+        
+        # 3. Use Operating Income as EBIT (Earnings Before Interest and Taxes)
+        if pd.isna(enhanced_data.get('EBIT TTM', np.nan)):
+            operating_income = enhanced_data.get('Operating Income TTM')
+            if operating_income and not pd.isna(operating_income):
+                enhanced_data['EBIT TTM'] = operating_income
+                logger.debug(f"Using Operating Income as EBIT TTM: {operating_income}")
+        
+        # 4. Calculate EBITDA from EBIT + Depreciation
+        if pd.isna(enhanced_data.get('EBITDA TTM', np.nan)):
+            ebit = enhanced_data.get('EBIT TTM')
+            if ebit and not pd.isna(ebit):
+                # Calculate Depreciation TTM
+                depreciation_ttm = 0.0
+                valid_quarters = 0
+                
+                for quarter in quarterly_data[:4]:
+                    # Try multiple depreciation field names
+                    for field_name in ['Depreciation Income Statement', 'Depreciation And Amortization In Income Statement', 'Reconciled Depreciation']:
+                        depreciation_val = self._extract_field_value(quarter, field_name)
+                        if depreciation_val is not None and not pd.isna(depreciation_val):
+                            depreciation_ttm += float(depreciation_val)
+                            valid_quarters += 1
+                            break
+                
+                if valid_quarters >= 2:
+                    calculated_ebitda = ebit + depreciation_ttm
+                    enhanced_data['EBITDA TTM'] = calculated_ebitda
+                    logger.debug(f"Calculated EBITDA TTM (EBIT + Depreciation): {calculated_ebitda}")
+                else:
+                    # For banks, depreciation is often minimal, so EBITDA ≈ EBIT + small amount
+                    estimated_ebitda = ebit * 1.05  # Add 5% for estimated depreciation
+                    enhanced_data['EBITDA TTM'] = estimated_ebitda
+                    logger.debug(f"Estimated EBITDA TTM (EBIT * 1.05): {estimated_ebitda}")
+        
+        return enhanced_data
     
     def _extract_quarterly_data(self, ticker_data: Dict) -> List[Dict]:
         """
@@ -377,6 +468,48 @@ class FinancialDataProcessor:
         # Calculate maximum number of TTM periods we can create
         max_ttm_periods = len(quarterly_data) - 3  # Need 4 quarters for each TTM
         
+        # Extract quarter dates for each TTM period
+        quarter_dates = []
+        quarter_labels = []
+        
+        for period_start in range(max_ttm_periods):
+            if period_start < len(quarterly_data):
+                quarter_info = quarterly_data[period_start]
+                quarter_period = quarter_info.get('period')  # Use 'period' instead of 'date'
+                if quarter_period:
+                    try:
+                        # Convert period to datetime if it's a string
+                        if isinstance(quarter_period, str):
+                            quarter_date = pd.to_datetime(quarter_period)
+                        else:
+                            quarter_date = quarter_period
+                        
+                        quarter_dates.append(quarter_date)
+                        
+                        # Convert to quarter label like "Q1-25", "Q2-24", etc.
+                        year_short = str(quarter_date.year)[-2:]  # Get last 2 digits of year
+                        # Determine quarter based on month
+                        if quarter_date.month <= 3:
+                            quarter_num = 1
+                        elif quarter_date.month <= 6:
+                            quarter_num = 2
+                        elif quarter_date.month <= 9:
+                            quarter_num = 3
+                        else:
+                            quarter_num = 4
+                        quarter_labels.append(f"Q{quarter_num}-{year_short}")
+                    except Exception as e:
+                        logger.warning(f"Could not parse quarter period {quarter_period}: {e}")
+                        quarter_dates.append(None)
+                        quarter_labels.append(f"Q{period_start + 1}")
+                else:
+                    quarter_dates.append(None)
+                    quarter_labels.append(f"Q{period_start + 1}")
+        
+        # Store quarter information in the time series
+        ttm_time_series['quarter_dates'] = quarter_dates
+        ttm_time_series['quarter_labels'] = quarter_labels
+        
         for ttm_field, source_field in field_mapping.items():
             ttm_values = []
             
@@ -473,18 +606,34 @@ class FinancialDataProcessor:
             float: EPS TTM value or np.nan
         """
         try:
-            # Method 1: Try to get TTM EPS directly
+            # Method 1: Try to get TTM EPS directly from various field names
             for quarter in quarterly_data[:1]:  # Most recent quarter
-                eps_ttm = self._extract_field_value(quarter, 'Basic EPS TTM')
-                if eps_ttm is not None and not pd.isna(eps_ttm):
-                    return float(eps_ttm)
+                # Try different possible field names
+                for field_name in ['IS_Basic EPS', 'Basic EPS TTM', 'IS_Basic Earnings Per Share']:
+                    eps_ttm = self._extract_field_value(quarter, field_name)
+                    if eps_ttm is not None and not pd.isna(eps_ttm):
+                        return float(eps_ttm)
             
-            # Method 2: Calculate from Net Income TTM and current shares
+            # Method 2: Calculate EPS from quarterly values
+            eps_values = []
+            for quarter in quarterly_data[:4]:  # Last 4 quarters
+                # Try different field names for quarterly EPS
+                for field_name in ['IS_Basic EPS', 'IS_Basic Earnings Per Share', 'IS_Diluted EPS']:
+                    eps_quarter = self._extract_field_value(quarter, field_name)
+                    if eps_quarter is not None and not pd.isna(eps_quarter):
+                        eps_values.append(float(eps_quarter))
+                        break
+            
+            # Sum quarterly EPS for TTM (accounting standard)
+            if len(eps_values) >= 3:  # Need at least 3 quarters
+                return sum(eps_values)
+            
+            # Method 3: Calculate from Net Income TTM and current shares
             net_income_ttm = 0.0
             valid_quarters = 0
             
             for quarter in quarterly_data[:4]:
-                net_income = self._extract_field_value(quarter, 'Net Income TTM')
+                net_income = self._extract_field_value(quarter, 'IS_Net Income')
                 if net_income is not None and not pd.isna(net_income):
                     net_income_ttm += float(net_income)
                     valid_quarters += 1

@@ -200,13 +200,15 @@ class RatioCalculator:
             logger.error(f"Failed to calculate ratios for {ticker}: {e}")
             raise
 
-    def calculate_ratios_from_processed_data(self, ticker: str, processed_data: pd.DataFrame) -> StockAnalysis:
+    def calculate_ratios_from_processed_data(self, ticker: str, processed_data: pd.DataFrame, 
+                                           price_data: Optional[Dict] = None) -> StockAnalysis:
         """
         Calculate all ratios from pre-processed financial data.
         
         Args:
             ticker: Stock ticker symbol
             processed_data: Pre-processed financial data from FinancialDataProcessor
+            price_data: Optional price data dictionary with current_price and historical prices
             
         Returns:
             StockAnalysis object with complete ratio analysis
@@ -214,6 +216,36 @@ class RatioCalculator:
         logger.info(f"Starting ratio calculation for {ticker} from processed data")
         
         try:
+            # Integrate price data if provided
+            if price_data:
+                processed_data = processed_data.copy()
+                
+                # Add current price to the processed data for valuation ratios
+                if 'current_market' in price_data and 'current_price' in price_data['current_market']:
+                    current_price = price_data['current_market']['current_price']
+                    processed_data['current_price'] = current_price
+                    processed_data['Current Price'] = current_price  # For backward compatibility
+                    logger.debug(f"Added current price {current_price} for {ticker}")
+                
+                # Add quarterly aligned prices for historical ratio calculations
+                if 'quarterly_aligned' in price_data and price_data['quarterly_aligned']:
+                    # Get the most recent quarterly price for historical ratios
+                    quarterly_prices = price_data['quarterly_aligned']
+                    if quarterly_prices:
+                        # Sort by quarter to get most recent
+                        sorted_quarters = sorted(quarterly_prices.keys(), reverse=True)
+                        if sorted_quarters:
+                            most_recent_quarter = sorted_quarters[0]
+                            quarterly_price = quarterly_prices[most_recent_quarter]['close_price']
+                            processed_data['quarterly_aligned_price'] = quarterly_price
+                            logger.debug(f"Added quarterly aligned price {quarterly_price} from {most_recent_quarter} for {ticker}")
+                            
+                            # Also store the full quarterly price series for temporal analysis
+                            quarterly_price_series = []
+                            for quarter in sorted_quarters:
+                                quarterly_price_series.append(quarterly_prices[quarter]['close_price'])
+                            processed_data['quarterly_price_series'] = [quarterly_price_series]  # Wrap in list for consistency
+            
             # Validate data quality
             data_quality_score = self._assess_data_quality(processed_data)
             if data_quality_score < self.config['data_quality']['min_field_completeness']:
@@ -315,7 +347,8 @@ class RatioCalculator:
                 if perspective.name == 'current_ttm':
                     # Current perspective: use standard ratio calculation
                     required_fields = ratio_config.get('required_fields', [])
-                    parameters = self._extract_ratio_parameters(perspective_data, required_fields)
+                    price_fields = ratio_config.get('price_fields', [])
+                    parameters = self._extract_ratio_parameters(perspective_data, required_fields, price_fields)
                     
                     if parameters:
                         current_value = ratio_function(**parameters)
@@ -343,7 +376,8 @@ class RatioCalculator:
                 else:
                     # Fallback: try standard calculation for historical perspectives
                     required_fields = ratio_config.get('required_fields', [])
-                    parameters = self._extract_ratio_parameters(perspective_data, required_fields)
+                    price_fields = ratio_config.get('price_fields', [])
+                    parameters = self._extract_ratio_parameters(perspective_data, required_fields, price_fields)
                     
                     if parameters:
                         value = ratio_function(**parameters)
@@ -421,19 +455,32 @@ class RatioCalculator:
             return None
     
     def _extract_ratio_parameters(self, processed_data: pd.DataFrame, 
-                                required_fields: List[str]) -> Dict[str, float]:
+                                required_fields: List[str], price_fields: List[str] = None) -> Dict[str, float]:
         """
         Extract required parameters for ratio calculation from processed data.
         
         Args:
             processed_data: Processed financial data
             required_fields: List of field names required for the ratio
+            price_fields: List of price field names required for the ratio
             
         Returns:
             Dictionary of parameter names and values for ratio function
         """
-        if processed_data.empty or not required_fields:
+        if processed_data.empty:
             return {}
+        
+        # Initialize price_fields if None
+        if price_fields is None:
+            price_fields = []
+        
+        # Combine all required fields
+        all_required_fields = required_fields + price_fields
+        
+        if not all_required_fields:
+            return {}
+        
+        logger.debug(f"Extracting parameters for fields: {all_required_fields}")
         
         # For temporal calculations, use the most recent data point
         latest_data = processed_data.iloc[0] if len(processed_data) > 0 else processed_data
@@ -441,7 +488,7 @@ class RatioCalculator:
         # Create parameter mapping based on field names
         parameters = {}
         field_mapping = {
-            # Direct field mappings
+            # Direct field mappings - updated to match actual processed data column names
             'Net Income TTM': 'net_income_ttm',
             'Stockholders Equity': 'stockholders_equity', 
             'EBIT TTM': 'ebit_ttm',
@@ -454,18 +501,25 @@ class RatioCalculator:
             'Total Assets': 'total_assets',
             'Operating Cash Flow TTM': 'operating_cash_flow_ttm',
             'Free Cash Flow TTM': 'free_cash_flow_ttm',
-            'Current Price': 'current_price',
-            'Historical Price': 'historical_price',
+            'Current Price': 'price',  # Updated for ratio functions
+            'Historical Price': 'price',  # Updated for ratio functions
+            'current_price': 'price',  # For price_fields from config
+            'quarterly_aligned_price': 'price',  # For historical price fields
             'Market Cap': 'market_cap',
             'Enterprise Value': 'enterprise_value',
             'EBITDA TTM': 'ebitda_ttm',
+            'Cash And Cash Equivalents': 'cash_and_equivalents',  # Fixed parameter name
+            'Shares Outstanding': 'shares_outstanding',
         }
         
-        for field in required_fields:
+        for field in all_required_fields:
             if field in latest_data and pd.notna(latest_data[field]):
                 param_name = field_mapping.get(field, field.lower().replace(' ', '_'))
                 parameters[param_name] = float(latest_data[field])
+            else:
+                logger.debug(f"Missing field '{field}' in data columns: {list(latest_data.index)}")
         
+        logger.debug(f"Extracted parameters: {parameters}")
         return parameters
     
     def _calculate_composite_score(self, current_value: Optional[float], 
@@ -1028,7 +1082,7 @@ def main():
         try:
             roe_config = calculator.config['ratio_definitions']['ROE']
             roe_params = calculator._extract_ratio_parameters(
-                sample_processed_data, roe_config['required_fields']
+                sample_processed_data, roe_config['required_fields'], roe_config.get('price_fields', [])
             )
             print(f"ROE parameters: {roe_params}")
             if roe_params:
@@ -1043,7 +1097,7 @@ def main():
         try:
             roic_config = calculator.config['ratio_definitions']['ROIC']
             roic_params = calculator._extract_ratio_parameters(
-                sample_processed_data, roic_config['required_fields']
+                sample_processed_data, roic_config['required_fields'], roic_config.get('price_fields', [])
             )
             print(f"ROIC parameters: {roic_params}")
             if roic_params:
