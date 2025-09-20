@@ -3,19 +3,32 @@ import pandas as pd
 
 def create_ratios_to_ranks(
     calculated_ratios: dict,
-    calculated_ratios_quarterly: dict,
+    calculated_ratios_ttm_trends: dict,
     ratio_definitions: dict,
     category_ratios: dict
 ) -> dict:
     """
-    Calculate percentile ranks for financial ratios (latest, trend, and TTM) for each ticker, aggregate them by category, and compute cluster-level ranks.
+    Calculate percentile ranks for financial ratios and temporal views for each ticker: 
+    - Trend 4 years (from annual reports) - Called trend
+        source: calculated_ratios, keys ending with '_year_trend_ratioValue'
+    - Change prev ttm to last ttm (from 2 latest ttm quarterly reports) - Called ttm
+        source: calculated_ratios_ttm_trends, keys ending with '_quarter_trend_ratioValue'
+    - Last ttm value (from latest ttm report) - Called latest
+        source: calculated_ratios_ttm_trends, keys ending with '_quarter_latest_ratioValue'
 
-    This function processes annual and quarterly calculated ratios for a set of tickers, computes percentile-based ranks for each ratio (higher or lower is better depending on the definition), and aggregates these ranks into category and cluster scores. The output is a nested dictionary with all computed ranks for each ticker.
+    Then aggregate them by category, and compute cluster-level ranks.
+
+    This function computes percentile-based ranks for each ratio (higher or lower is better depending on the definition), 
+    and aggregates these ranks into category and cluster scores. 
+    
+    The output is a nested dictionary with all computed ranks for each ticker.
 
     Args:
         calculated_ratios (dict):
             Dictionary mapping ticker symbols to their annual calculated ratios. Each value is a dict of ratio names to values.
-        calculated_ratios_quarterly (dict):
+        calculated_ratios_quarterly_0 (dict):
+            Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
+        calculated_ratios_quarterly_1 (dict):
             Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
         ratio_definitions (dict):
             Dictionary defining each ratio's properties, including whether a higher value is better (key: 'higher_is_better').
@@ -62,7 +75,7 @@ def create_ratios_to_ranks(
     df.columns = df.columns.str.replace('_trend_ratioValue', '_trend')
 
     # Create DataFrame from calculated_ratios_quarterly
-    df_quarterly = pd.DataFrame.from_dict(calculated_ratios_quarterly, orient='index')
+    df_quarterly = pd.DataFrame.from_dict(calculated_ratios_quarterly_0, orient='index')
     # only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
     df_quarterly = df_quarterly[df_quarterly.columns[df_quarterly.columns.str.endswith('_latest_ratioValue')]]
     df_quarterly.columns = df_quarterly.columns.str.replace('_latest_ratioValue', '_ttm')   
