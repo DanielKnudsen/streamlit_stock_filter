@@ -79,7 +79,7 @@ def calculate_all_ratios(
         latest_price = data.get('current_price')
         if historical_prices:
             # Use the most recent historical price
-            sorted_dates = sorted(historical_prices.keys(), reverse=True)
+            sorted_dates = sorted(historical_prices.keys(), reverse=False)
             if sorted_dates:
                 latest_price = historical_prices[sorted_dates[0]]
         

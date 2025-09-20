@@ -67,16 +67,24 @@ def create_ratios_to_ranks(
     ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
 
     # Create DataFrame from calculated_ratios
-    df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
-    df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
-    # rename columns from '_latest_ratioValue' to '_latest' and '_trend_ratioValue' to '_trend'
-    df.columns = df.columns.str.replace('_latest_ratioValue', '_latest')
-    df.columns = df.columns.str.replace('_trend_ratioValue', '_trend')
+    df_year = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    df_year = df_year[df_year.columns[df_year.columns.str.endswith(('_year_trend_ratioValue'))]]
 
-    # Create DataFrame from calculated_ratios_quarterly
-    df_quarterly = pd.DataFrame.from_dict(calculated_ratios_quarterly_0, orient='index')
-    # only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
+    df_ttm = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
+    df_ttm = df_ttm[df_ttm.columns[df_ttm.columns.str.endswith(('_quarter_latest_ratioValue', '_quarter_trend_ratioValue'))]]
+    
+    # Merge annual and quarterly dataframes on index (Ticker)
+    df_merged = df_year.merge(df_ttm, how='outer', left_index=True, right_index=True, suffixes=('_year', '_quarter'))
+
+    # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
+    # df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
+    # rename columns from '_latest_ratioValue' to '_latest' and '_trend_ratioValue' to '_trend'
+    df_merged.columns = df_merged.columns.str.replace('_quarter_latest_ratioValue', '_latest')
+    df_merged.columns = df_merged.columns.str.replace('_year_trend_ratioValue', '_trend')
+    df_merged.columns = df_merged.columns.str.replace('_quarter_trend_ratioValue', '_ttm')
+
+
+    """# only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
     df_quarterly = df_quarterly[df_quarterly.columns[df_quarterly.columns.str.endswith('_latest_ratioValue')]]
     df_quarterly.columns = df_quarterly.columns.str.replace('_latest_ratioValue', '_ttm')   
 
@@ -96,7 +104,7 @@ def create_ratios_to_ranks(
 
     # drop columns ending with '_ttm' and rename columns ending with '_ttm_diff' to '_ttm' (this is to keep the column names consistent)
     df_merged = df_merged.drop(columns=[col for col in df_merged.columns if col.endswith('_ttm')])
-    df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})
+    df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})"""
 
     for column in df_merged.columns:
         if column.endswith('_latest'):

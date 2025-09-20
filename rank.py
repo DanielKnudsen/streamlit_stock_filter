@@ -67,15 +67,15 @@ def combine_all_results(
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_latest_report_dates = load_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_latest_report_dates_quarterly = load_csv(CSV_PATH / "latest_report_dates_quarterly.csv", index_col='Ticker')
-    df_ttm_values = load_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
+    #df_ttm_values = load_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
     df_last_SMA = load_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = load_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
-    df_calculated_quarterly_long = load_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
-    df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
-    df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
+    #df_calculated_quarterly_long = load_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
+    #df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
+    #df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
     final_df = pd.concat([
-        df_tickers, df_calculated, df_calculated_quarterly, df_complete_ranks, df_last_SMA,
-        df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_ttm_values, df_long_business_summary
+        df_tickers, df_calculated, df_complete_ranks, df_last_SMA,
+        df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_long_business_summary
     ], axis=1)
     return final_df
 
@@ -542,8 +542,8 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     all_ratios = []
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(ratios)
-    for ratio in all_ratios:
-        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])
+    """for ratio in all_ratios:
+        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])"""
     for agr_temp in config['agr_dimensions']:
         agr = agr_temp.replace(" ", "_")
         latest_full_year_value = final_df.apply(
@@ -554,12 +554,12 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     all_ratios = []
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(f"{ratio}_ttm_diff" for ratio in ratios)
-    for col in all_ratios:
+    """for col in all_ratios:
         ratio_name = col.replace('_ttm_diff', '')
         is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
         ranked = final_df[col].rank(pct=True, ascending=is_better) * 100
         ranked = ranked.fillna(50)
-        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)
+        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)"""
         
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -718,8 +718,8 @@ def combine_quarterly_summaries_for_ttm_trends(
                 df_0 = data_0[segment].copy()
                 # Rename index to indicate this is the most recent TTM
                 if len(df_0.index) > 0:
-                    new_index = pd.Timestamp(df_0.index[0]).replace(day=15)  # Use mid-month for TTM
-                    df_0.index = [new_index]
+                    #new_index = pd.Timestamp(df_0.index[0]).replace(day=15)  # Use mid-month for TTM
+                    #df_0.index = [new_index]
                     dfs_to_combine.append(df_0)
             
             # Add data from previous TTM (quarters_back=1) 
@@ -727,8 +727,8 @@ def combine_quarterly_summaries_for_ttm_trends(
                 df_1 = data_1[segment].copy()
                 # Rename index to indicate this is the previous TTM (approximately 3 months earlier)
                 if len(df_1.index) > 0:
-                    new_index = pd.Timestamp(df_1.index[0]).replace(day=15)# - pd.DateOffset(months=3)
-                    df_1.index = [new_index]
+                    #new_index = pd.Timestamp(df_1.index[0]).replace(day=15)# - pd.DateOffset(months=3)
+                    #df_1.index = [new_index]
                     dfs_to_combine.append(df_1)
             
             # Combine the DataFrames
@@ -962,7 +962,6 @@ if __name__ == "__main__":
                 period_type="quarterly"
             )
 
-
             # Create ratios to ranks 
             complete_ranks = create_ratios_to_ranks(
                 calculated_ratios,
@@ -990,9 +989,9 @@ if __name__ == "__main__":
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
             # Step 6: Extract ttm values for agr dimensions
-            filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
+            """filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
                                config['agr_dimensions'],
-                               CSV_PATH / "ttm_values.csv")
+                               CSV_PATH / "ttm_values.csv")"""
 
             # Step 7: Combine all results and save final output
             combined_results = combine_all_results(
