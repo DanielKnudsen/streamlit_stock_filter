@@ -8,6 +8,7 @@ from pathlib import Path
 from rank import load_config
 import datetime
 import time
+import inspect
 import uuid
 import json
 from auth import register_user, login_user, get_current_user, logout_user, check_membership_status_by_email, reset_password, save_portfolio, get_user_portfolios, delete_portfolio
@@ -441,6 +442,7 @@ try:
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights','QuarterDiff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
+    st.write(f"DEBUG: Initial df_filtered_by_sliders (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
 
     # =============================
     # PORTFOLIO FILTER
@@ -464,7 +466,7 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[
             df_filtered_by_sliders.index.str.upper().isin(portfolio_tickers)
         ]
-
+    st.write(f"Totalt antal aktier efter portföljfilter: {len(df_filtered_by_sliders)} (Line {inspect.currentframe().f_lineno})")
     # =============================
     # LOAD RANKING CATEGORIES FROM CONFIG
     # =============================
@@ -602,6 +604,7 @@ try:
             (df_filtered_by_sliders['TTM_clusterRank'] >= ttm_range[0]) &
             (df_filtered_by_sliders['TTM_clusterRank'] <= ttm_range[1])
             ]
+            st.write(f"DEBUG: After cluster rank filters (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
 
             st.markdown("##### Filtrera efter genomsnittlig tillväxt")
             cagr_left, cagr_middle, cagr_right = st.columns(3, gap='medium', border=True)
@@ -623,7 +626,7 @@ try:
                     (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] >= cagr_range_right[0]) &
                     (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] <= cagr_range_right[1])
                 ]
-
+            st.write(f"DEBUG: After CAGR filters (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
             st.markdown("##### Filtrera efter SMA-differenser")
             col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3, gap='medium', border=True)
             with col_diff_long_medium:
@@ -632,15 +635,16 @@ try:
                 diff_short_medium_range = create_slider(df_new_ranks, 'pct_SMA_short_vs_SMA_medium', get_display_name, get_tooltip_text, 1.0, "%d%%")
             with col_diff_price_short:
                 diff_price_short_range = create_slider(df_new_ranks, 'pct_Close_vs_SMA_short', get_display_name, get_tooltip_text, 1.0, "%d%%")
-
+            st.write(f"DEBUG: After SMA filters (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
             df_filtered_by_sliders = df_filtered_by_sliders[
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) &
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
+            (df_filtered_by_sliders['pct_SMA_medium_vs_SMA_long'] >= diff_long_medium_range[0]) &
+            (df_filtered_by_sliders['pct_SMA_medium_vs_SMA_long'] <= diff_long_medium_range[1]) &
             (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) &
             (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
             (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) &
             (df_filtered_by_sliders['pct_Close_vs_SMA_short'] <= diff_price_short_range[1])
             ]
+            st.write(f"DEBUG: After SMA filters (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
             st.write(f"**Aktuella urval:** {df_filtered_by_sliders.shape[0]} aktier")
 
             ticker_input = st.text_input(
@@ -651,6 +655,7 @@ try:
             if ticker_input.strip():
                 tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
                 df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
+            st.write(f"DEBUG: After ticker filter (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
 
         with tab4:
             st.markdown("""
@@ -918,6 +923,7 @@ try:
                         df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Lista'].isin(lista_selected)]
                     else:
                         df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+            st.write(f"DEBUG: After lista filter (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
             with col_sektor:
                 # --- Sektor toggles for bubble plot ---
                 if 'Sektor' in df_filtered_by_sliders.columns:
@@ -935,11 +941,13 @@ try:
                         df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders['Sektor'].isin(sektor_selected)]
                     else:
                         df_filtered_by_sliders = df_filtered_by_sliders.iloc[0:0]  # Show nothing if none selected
+            st.write(f"DEBUG: After sektor filter (Line {inspect.currentframe().f_lineno}): {len(df_filtered_by_sliders)} rows")
 
     # =============================
     # FILTERED RESULTS AND BUBBLE PLOT
     # =============================
     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
+    st.write(f"✅ Data loaded: {df_filtered_by_sliders.shape[0]} aktier, {df_filtered_by_sliders.shape[1]} kolumner")
 
     with st.container(border=True, key="filtered_results"):
         # Get the number of stocks after filtering by sliders
@@ -984,8 +992,8 @@ try:
         # bubble plot
         with st.container(border=True, key="bubble_plot_container"):
             show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
-            if 'marketCap' in df_filtered_by_sliders.columns:
-                df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
+            if 'market_cap' in df_filtered_by_sliders.columns:
+                df_filtered_by_sliders['market_cap_MSEK'] = (df_filtered_by_sliders['market_cap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
             
             if len(df_filtered_by_sliders) > 0:
                 # Assign fixed colors to Lista values using all possible values from the full dataset
@@ -1036,9 +1044,9 @@ try:
                 if 'Lista' in df_filtered_by_sliders.columns:
                     plot_required_cols.append('Lista')
                 plot_df = df_filtered_by_sliders.dropna(subset=plot_required_cols, how='any').copy()
-                # Handle marketCap for size
-                if 'marketCap' in plot_df.columns:
-                    size_raw = plot_df['marketCap'].fillna(20)
+                # Handle market_cap for size
+                if 'market_cap' in plot_df.columns:
+                    size_raw = plot_df['market_cap'].fillna(20)
                     size = size_raw
                 else:
                     size = [20] * len(plot_df)
@@ -1052,7 +1060,7 @@ try:
                         color_discrete_map=color_discrete_map,
                         hover_name=plot_df.index if show_tickers else None,
                         text=plot_df.index if show_tickers else None,
-                        size=size_raw, # if 'marketCap' in plot_df.columns else [20]*len(plot_df),
+                        size=size_raw, # if 'market_cap' in plot_df.columns else [20]*len(plot_df),
                         hover_data={},
                         labels={
                             x_col: get_display_name(x_col),
@@ -1314,7 +1322,7 @@ try:
                     st.write(f"**Ticker:**   \n{selected_stock_ticker}")
                     st.write(f"**Lista:**   \n{selected_stock_lista}")
                     st.write(f"**Sektor:**   \n{selected_stock_sektor}")
-                    st.write(f"**Marknadsvärde:**   \n{human_format(selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A')}")
+                    st.write(f"**Marknadsvärde:**   \n{human_format(selected_stock_dict['market_cap'] if 'market_cap' in selected_stock_dict else 'N/A')}")
                     st.write(f"**Senaste årsrapport:**   \n{selected_stock_dict['LatestReportDate_Y'] if 'LatestReportDate_Y' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Senaste kvartalsrapport:**   \n{selected_stock_dict['LatestReportDate_Q'] if 'LatestReportDate_Q' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Antal kvartalsrapporter efter årsrapport:**   \n{selected_stock_ttm_offset}")
