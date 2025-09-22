@@ -56,6 +56,7 @@ def combine_all_results(valid_tickers: List[str],
         pd.DataFrame: Combined results DataFrame.
     """
     df_calculated = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    df_calculated_ttm_trends = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
     df_complete_ranks = pd.DataFrame.from_dict(complete_ranks, orient='index')
     """df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')"""
@@ -74,7 +75,7 @@ def combine_all_results(valid_tickers: List[str],
     #df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
     df_market_cap = load_csv(CSV_PATH / "market_cap.csv", index_col='Ticker')
     final_df = pd.concat([
-        df_tickers, df_calculated, df_complete_ranks, df_last_SMA,
+        df_tickers, df_calculated, df_calculated_ttm_trends, df_complete_ranks, df_last_SMA,
         df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_long_business_summary, df_market_cap
     ], axis=1)
 
