@@ -88,6 +88,12 @@ with st.container(border=True):
 # Load environment variables
 ENVIRONMENT = st.secrets["ENVIRONMENT"]
 
+# Debug logging control - set to False for production, True for local debugging
+ENABLE_DEBUG_LOGGING = ENVIRONMENT == 'local'
+
+# Authentication control - disable for local testing, enable for production
+ENABLE_AUTHENTICATION = ENVIRONMENT != 'local'
+
 # Load configuration from YAML file
 config = load_config("rank-config.yaml")
 
@@ -101,7 +107,7 @@ show_Ratio_to_Rank =True
 
 user = get_current_user()
 #st.write(f"Current user: {user.email if user else 'None'}")
-if not user:
+if not user and ENABLE_AUTHENTICATION:
     @st.dialog("Logga in eller registrera dig")
     def show_auth_dialog():
         auth_mode = st.radio("Välj inloggningsläge:", ["Logga in", "Registrera", "Återställ lösenord"], horizontal=True)
@@ -222,18 +228,22 @@ else:
             time.sleep(1)
             st.rerun()
     
-    # Check if user has valid subscription for app access
-    is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
-    if not is_valid:
-        st.error(f"Hej {user.email}, tyvärr har du inget giltigt abonnemang. Läs mer på https://indicatum.se/")
-        if st.button("Kontoinformation", type="secondary"):
-            show_account_dialog()
-        st.stop()
+    # Check if user has valid subscription for app access (only when authentication is enabled)
+    if ENABLE_AUTHENTICATION and user:
+        is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
+        if not is_valid:
+            st.error(f"Hej {user.email}, tyvärr har du inget giltigt abonnemang. Läs mer på https://indicatum.se/")
+            if st.button("Kontoinformation", type="secondary"):
+                show_account_dialog()
+            st.stop()
             
 
+# Development mode indicator
+if not ENABLE_AUTHENTICATION:
+    st.info("🔧 **UTVECKLINGSLÄGE** - Autentisering är inaktiverad för lokal testning")
 
-# Add account info and stats buttons after the welcome section
-if user:
+# Add account info and stats buttons after the welcome section (only when authentication is enabled)
+if user and ENABLE_AUTHENTICATION:
     col1, col2, col3 = st.columns([5, 1, 1])
     with col2:
         if st.button("👤 Konto", help="Visa kontoinformation"):
@@ -441,6 +451,12 @@ try:
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights','QuarterDiff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
+    
+    # DEBUG: Check QuarterDiff in original DataFrame
+    if ENABLE_DEBUG_LOGGING:
+        print(f"DEBUG: df_new_ranks QuarterDiff column dtype: {df_new_ranks['QuarterDiff'].dtype}")
+        print(f"DEBUG: df_new_ranks QuarterDiff unique values: {df_new_ranks['QuarterDiff'].unique()}")
+        print(f"DEBUG: df_filtered_by_sliders QuarterDiff unique values: {df_filtered_by_sliders['QuarterDiff'].unique()}")
 
     # =============================
     # PORTFOLIO FILTER
@@ -464,7 +480,7 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[
             df_filtered_by_sliders.index.str.upper().isin(portfolio_tickers)
         ]
-
+    st.write(f"Totalt antal aktier efter portföljfilter: {len(df_filtered_by_sliders)}")
     # =============================
     # LOAD RANKING CATEGORIES FROM CONFIG
     # =============================
@@ -623,7 +639,6 @@ try:
                     (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] >= cagr_range_right[0]) &
                     (df_filtered_by_sliders[allCols_AvgGrowth_Rank[2]] <= cagr_range_right[1])
                 ]
-
             st.markdown("##### Filtrera efter SMA-differenser")
             col_diff_long_medium, col_diff_short_medium, col_diff_price_short = st.columns(3, gap='medium', border=True)
             with col_diff_long_medium:
@@ -632,10 +647,9 @@ try:
                 diff_short_medium_range = create_slider(df_new_ranks, 'pct_SMA_short_vs_SMA_medium', get_display_name, get_tooltip_text, 1.0, "%d%%")
             with col_diff_price_short:
                 diff_price_short_range = create_slider(df_new_ranks, 'pct_Close_vs_SMA_short', get_display_name, get_tooltip_text, 1.0, "%d%%")
-
             df_filtered_by_sliders = df_filtered_by_sliders[
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_long_medium_range[0]) &
-            (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_long_medium_range[1]) &
+            (df_filtered_by_sliders['pct_SMA_medium_vs_SMA_long'] >= diff_long_medium_range[0]) &
+            (df_filtered_by_sliders['pct_SMA_medium_vs_SMA_long'] <= diff_long_medium_range[1]) &
             (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] >= diff_short_medium_range[0]) &
             (df_filtered_by_sliders['pct_SMA_short_vs_SMA_medium'] <= diff_short_medium_range[1]) &
             (df_filtered_by_sliders['pct_Close_vs_SMA_short'] >= diff_price_short_range[0]) &
@@ -940,6 +954,7 @@ try:
     # FILTERED RESULTS AND BUBBLE PLOT
     # =============================
     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
+    st.write(f"✅ Data loaded: {df_filtered_by_sliders.shape[0]} aktier, {df_filtered_by_sliders.shape[1]} kolumner")
 
     with st.container(border=True, key="filtered_results"):
         # Get the number of stocks after filtering by sliders
@@ -984,8 +999,8 @@ try:
         # bubble plot
         with st.container(border=True, key="bubble_plot_container"):
             show_tickers = st.toggle('Visa tickers i bubbelplotten', value=True)
-            if 'marketCap' in df_filtered_by_sliders.columns:
-                df_filtered_by_sliders['marketCap_MSEK'] = (df_filtered_by_sliders['marketCap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
+            if 'market_cap' in df_filtered_by_sliders.columns:
+                df_filtered_by_sliders['market_cap_MSEK'] = (df_filtered_by_sliders['market_cap'] / 1_000_000).round().astype('Int64').map(lambda x: f"{x:,}".replace(",", " ") + " MSEK" if pd.notna(x) else "N/A")
             
             if len(df_filtered_by_sliders) > 0:
                 # Assign fixed colors to Lista values using all possible values from the full dataset
@@ -1036,9 +1051,9 @@ try:
                 if 'Lista' in df_filtered_by_sliders.columns:
                     plot_required_cols.append('Lista')
                 plot_df = df_filtered_by_sliders.dropna(subset=plot_required_cols, how='any').copy()
-                # Handle marketCap for size
-                if 'marketCap' in plot_df.columns:
-                    size_raw = plot_df['marketCap'].fillna(20)
+                # Handle market_cap for size
+                if 'market_cap' in plot_df.columns:
+                    size_raw = plot_df['market_cap'].fillna(20)
                     size = size_raw
                 else:
                     size = [20] * len(plot_df)
@@ -1052,7 +1067,7 @@ try:
                         color_discrete_map=color_discrete_map,
                         hover_name=plot_df.index if show_tickers else None,
                         text=plot_df.index if show_tickers else None,
-                        size=size_raw, # if 'marketCap' in plot_df.columns else [20]*len(plot_df),
+                        size=size_raw, # if 'market_cap' in plot_df.columns else [20]*len(plot_df),
                         hover_data={},
                         labels={
                             x_col: get_display_name(x_col),
@@ -1182,7 +1197,23 @@ try:
             # Create a dict for the selected stock's data for easy access
             selected_stock_dict = None
             if selected_stock_ticker is not None:
-                selected_stock_dict = df_new_ranks.loc[selected_stock_ticker].to_dict()
+                if ENABLE_DEBUG_LOGGING:
+                    print(f"DEBUG: About to create selected_stock_dict for ticker: '{selected_stock_ticker}' (type: {type(selected_stock_ticker)})")
+                try:
+                    selected_stock_dict = df_new_ranks.loc[selected_stock_ticker].to_dict()
+                    # DEBUG: Check QuarterDiff immediately after dict creation
+                    if ENABLE_DEBUG_LOGGING:
+                        print(f"DEBUG: selected_stock_dict created for {selected_stock_ticker}")
+                        print(f"DEBUG: QuarterDiff in dict: {selected_stock_dict.get('QuarterDiff', 'NOT_FOUND')} (type: {type(selected_stock_dict.get('QuarterDiff', None))})")
+                except KeyError as e:
+                    if ENABLE_DEBUG_LOGGING:
+                        print(f"ERROR: selected_stock_ticker '{selected_stock_ticker}' not found in df_new_ranks index: {e}")
+                        print(f"Available tickers: {list(df_new_ranks.index[:5])}...")
+                    selected_stock_dict = None
+                except Exception as e:
+                    if ENABLE_DEBUG_LOGGING:
+                        print(f"ERROR: Failed to create selected_stock_dict for ticker '{selected_stock_ticker}': {e}")
+                    selected_stock_dict = None
             # Logic to handle Shortlist
             shortlisted_stocks = edited_df[edited_df['Shortlist']]
             with st.container(border=True, key="shortlist_container"):
@@ -1307,14 +1338,34 @@ try:
                 #st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
                 selected_stock_lista = selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'
                 selected_stock_sektor = selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'
-                selected_stock_ttm_offset = int(selected_stock_dict['QuarterDiff'] if 'QuarterDiff' in selected_stock_dict else 'N/A')
+                
+                # DEBUG: Check QuarterDiff value before conversion
+                if ENABLE_DEBUG_LOGGING:
+                    quarter_diff_value = selected_stock_dict.get('QuarterDiff', 'N/A')
+                    print(f"DEBUG: QuarterDiff value for {selected_stock_ticker}: {quarter_diff_value} (type: {type(quarter_diff_value)})")
+                
+                # More robust conversion with error handling
+                try:
+                    quarter_diff_value = selected_stock_dict.get('QuarterDiff', 'N/A')
+                    if quarter_diff_value == 'N/A' or quarter_diff_value is None or pd.isna(quarter_diff_value):
+                        selected_stock_ttm_offset = 0
+                    else:
+                        selected_stock_ttm_offset = int(quarter_diff_value)
+                    if ENABLE_DEBUG_LOGGING:
+                        print(f"DEBUG: Successfully converted QuarterDiff to: {selected_stock_ttm_offset}")
+                except (ValueError, TypeError) as e:
+                    if ENABLE_DEBUG_LOGGING:
+                        print(f"ERROR: Failed to convert QuarterDiff '{quarter_diff_value}' to int: {e}")
+                        print(f"ERROR: selected_stock_dict keys: {list(selected_stock_dict.keys())}")
+                        print(f"ERROR: selected_stock_dict QuarterDiff: {selected_stock_dict.get('QuarterDiff', 'NOT_FOUND')}")
+                    selected_stock_ttm_offset = 0
                 left_col, right_col = st.columns([2,3], gap='medium', border=False)
                 with left_col:
                     
                     st.write(f"**Ticker:**   \n{selected_stock_ticker}")
                     st.write(f"**Lista:**   \n{selected_stock_lista}")
                     st.write(f"**Sektor:**   \n{selected_stock_sektor}")
-                    st.write(f"**Marknadsvärde:**   \n{human_format(selected_stock_dict['marketCap'] if 'marketCap' in selected_stock_dict else 'N/A')}")
+                    st.write(f"**Marknadsvärde:**   \n{human_format(selected_stock_dict['market_cap'] if 'market_cap' in selected_stock_dict else 'N/A')}")
                     st.write(f"**Senaste årsrapport:**   \n{selected_stock_dict['LatestReportDate_Y'] if 'LatestReportDate_Y' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Senaste kvartalsrapport:**   \n{selected_stock_dict['LatestReportDate_Q'] if 'LatestReportDate_Q' in selected_stock_dict else 'N/A'}")
                     st.write(f"**Antal kvartalsrapporter efter årsrapport:**   \n{selected_stock_ttm_offset}")
@@ -1356,7 +1407,17 @@ try:
         if selected_stock_ticker is not None:
             with st.popover(f"Datadump av {selected_stock_ticker}", width="stretch"):
                 st.write(f"Datadump av {selected_stock_ticker}")
-                st.dataframe(df_new_ranks.loc[selected_stock_ticker].to_frame())
+                # Convert dataframe to consistent types for display
+                display_df = df_new_ranks.loc[selected_stock_ticker].to_frame()
+                # Convert numeric columns to float, keep others as strings
+                for col in display_df.columns:
+                    if display_df[col].dtype == 'object':
+                        # Try to convert to numeric, keep as string if it fails
+                        try:
+                            display_df[col] = pd.to_numeric(display_df[col], errors='ignore')
+                        except (ValueError, TypeError):
+                            pass
+                st.dataframe(display_df)
         with st.container(border=True, key="cagr_container"):
             st.subheader("📈 Tillväxthistorik senaste 4 åren")
             # Only show the following sections if a stock is selected
@@ -1440,7 +1501,6 @@ try:
                                     showlegend=False
                                 ))
                             if ttm_value is not None and not pd.isna(ttm_value) and ttm_diff_value is not None and not pd.isna(ttm_diff_value):
-                                pct_text = f"{ttm_diff_value:+.2f}"
                                 # Use higher_is_better to determine color
                                 if higher_is_better:
                                     color = "green" if ttm_diff_value >= 0 else "red"
@@ -1773,7 +1833,6 @@ try:
                             st.markdown(f"Ingående Nyckeltal för **{get_display_name(display_cat)}** med Rank för *Trend senaste 4 åren*, *Senaste året* samt *TTM* (om tillgänglig)")
                             cols = st.columns(len(ratios), border=True,gap="small") if ratios else []
                             for idx, ratio in enumerate(ratios):
-                                
                                 base_ratio = ratio.replace('_trend_ratioRank', '')
                                 # Load higher_is_better from config if available
                                 higher_is_better = True
@@ -1781,45 +1840,112 @@ try:
                                     ratio_defs = config.get('ratio_definitions', {})
                                     if base_ratio in ratio_defs and 'higher_is_better' in ratio_defs[base_ratio]:
                                         higher_is_better = ratio_defs[base_ratio]['higher_is_better']
+                                # year cols
                                 year_cols = [col for col in df_new_ranks.columns if col.startswith(base_ratio + '_year_')]
-                                year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col])]
+                                year_cols = [col for col in year_cols if not pd.isna(df_new_ranks.loc[selected_stock_ticker, col]) and col.split('_')[-1].isdigit()]
                                 year_cols_sorted = sorted(year_cols, key=lambda x: int(x.split('_')[-1]), reverse=False)
                                 year_cols_last4 = year_cols_sorted[-4:]
+
+                                # quarter cols - look for columns with quarter pattern
+                                quarter_cols = [col for col in df_new_ranks.columns if '_quarter_2' in col and base_ratio in col]
+                                # Filter for valid quarter columns and non-NaN values
+                                def is_valid_quarter(col):
+                                    last_part = col.split('_')[-1]
+                                    return ('Q' in last_part and any(c.isdigit() for c in last_part) and 
+                                           not pd.isna(df_new_ranks.loc[selected_stock_ticker, col]))
+                                
+                                quarter_cols = [col for col in quarter_cols if is_valid_quarter(col)]
+                                
+                                # Sort quarters chronologically (e.g., 2024Q4, 2025Q1, 2025Q2)
+                                def quarter_sort_key(col):
+                                    last_part = col.split('_')[-1]  # e.g., "2025Q1"
+                                    if 'Q' in last_part:
+                                        year_part = last_part.split('Q')[0]
+                                        quarter_part = last_part.split('Q')[1]
+                                        try:
+                                            return int(year_part), int(quarter_part)
+                                        except ValueError:
+                                            return (0, 0)  # fallback
+                                    return (0, 0)
+                                
+                                quarter_cols_sorted = sorted(quarter_cols, key=quarter_sort_key, reverse=False)
+                                quarter_cols_last2 = quarter_cols_sorted[-2:]
+
                                 latest_rank_col = f"{base_ratio}_latest_ratioRank"
                                 trend_rank_col = f"{base_ratio}_trend_ratioRank"
-                                ttm_col = f"{base_ratio}_ttm_ratioValue"
-                                ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
+                                #ttm_col = f"{base_ratio}_ttm_ratioValue"
+                                #ttm_value = df_new_ranks.loc[selected_stock_ticker, ttm_col] if ttm_col in df_new_ranks.columns else None
                                 ttm_diff = f"{base_ratio}_ttm_diff"
                                 ttm_diff_value = df_new_ranks.loc[selected_stock_ticker, ttm_diff] if ttm_diff in df_new_ranks.columns else None
-                                # st.write("All columns:", df_new_ranks.columns.tolist())
-                                # st.write(f"Looking for ttm_col:{ttm_col}", ttm_col in df_new_ranks.columns)
-                                # st.write("ttm_value:", ttm_value)
-                                # st.write("ttm_diff_value:", ttm_diff_value)
+                                #st.write(f"Looking for ttm_col:{ttm_col}", ttm_col in df_new_ranks.columns)
+                                #st.write("ttm_value:", ttm_value)
+                                #st.write("ttm_diff_value:", ttm_diff_value)
                                 with cols[idx]:
-                                    if year_cols_last4:
-                                        values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
-                                        years = [int(col.split('_')[-1]) for col in year_cols_last4]
-                                        # Prepare bar data: 4 years + ttm if available
-                                        bar_x = [str(x) for x in years]
+                                    if year_cols_last4 and quarter_cols_last2:
+                                        try:
+                                            # get values for the 4 years and then the two most recent quarters
+                                            raw_values = df_new_ranks.loc[selected_stock_ticker, year_cols_last4 + quarter_cols_last2].values
+                                            # Convert to numeric, handling any non-numeric values
+                                            values = pd.to_numeric(raw_values, errors='coerce').astype(float)
+
+                                        except Exception as e:
+                                            values = np.array([])  # Empty array to skip plotting
+                                        # Safely parse year columns (convert to int if possible, else skip)
+                                        years_numeric = []
+                                        years_labels = []
+                                        for col in year_cols_last4:
+                                            try:
+                                                year_val = int(col.split('_')[-1])
+                                                years_numeric.append(year_val)
+                                                years_labels.append(str(year_val))
+                                            except (ValueError, IndexError):
+                                                years_numeric.append(col.split('_')[-1])  # fallback
+                                                years_labels.append(col.split('_')[-1])
+                                        
+                                        # For quarters, convert to numeric values and keep labels
+                                        def quarter_to_numeric(quarter_str):
+                                            if 'Q' in quarter_str:
+                                                try:
+                                                    year = int(quarter_str.split('Q')[0])
+                                                    quarter = int(quarter_str.split('Q')[1])
+                                                    return year + (quarter - 1) / 4.0  # Q1=0, Q2=0.25, Q3=0.5, Q4=0.75
+                                                except (ValueError, IndexError):
+                                                    return quarter_str  # fallback to string
+                                            return quarter_str
+                                        
+                                        for col in quarter_cols_last2:
+                                            quarter_str = col.split('_')[-1]
+                                            years_numeric.append(quarter_to_numeric(quarter_str))
+                                            years_labels.append(quarter_str)
+                                        
+                                        years = years_numeric  # for calculations
+                                        years_display = years_labels  # for display
+                                        
+                                        # Check if we have valid numeric values
+                                        if len(values) == 0 or pd.isna(values).all():
+                                            st.warning(f"Ingen giltig data för {base_ratio}. Hoppar över graf.")
+                                            continue
+                                        
+                                        # Filter out NaN values and corresponding years
+                                        valid_indices = ~pd.isna(values)
+                                        values = values[valid_indices]
+                                        years = [y for y, valid in zip(years, valid_indices) if valid]
+                                        years_display = [y for y, valid in zip(years_display, valid_indices) if valid]
+                                        
+                                        if len(values) == 0:
+                                            st.warning(f"Ingen giltig data för {base_ratio}. Hoppar över graf.")
+                                            continue
+                                        
+                                        bar_colors = (
+                                            ['lightblue'] * (len(year_cols_last4) - 1) +
+                                            ['royalblue'] +
+                                            ['gold'] * len(quarter_cols_last2)
+                                        )[:len(values)]  # Adjust colors to match actual data length
+                                        # Prepare bar data: years + quarters (variable length)
+                                        bar_x = years_display
                                         bar_y = list(values)
-                                        bar_colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
-                                        bar_text = [f"{v:.2f}" for v in bar_y]
+                                        bar_text = [f"{v:.2f}" for v in values]
                                         ttm_label = None  # Ensure ttm_label is always defined
-                                        # Add ttm if available
-                                        if ttm_value is not None and not pd.isna(ttm_value):
-                                            ttm_label = f'ttm (+{selected_stock_ttm_offset}Q)'
-                                            bar_x.append(ttm_label)
-                                            bar_y.append(ttm_value)
-                                            bar_colors.append('gold')
-                                            # Add percent diff to ttm bar text
-                                            if ttm_diff_value is not None and not pd.isna(ttm_diff_value):
-                                                pct_text = f"{ttm_diff_value:+.2f}"
-                                                bar_text.append(f"{ttm_value:.2f}\n({pct_text})") # need to fix per cent calculation to get it right
-                                            else:
-                                                bar_text.append(f"{ttm_value:.2f}")
-                                        # If no ttm, just fill bar_text to match bar_y
-                                        else:
-                                            bar_text = [f"{v:.2f}" for v in bar_y]
                                         # st.write("bar_x:", bar_x)
                                         # st.write("bar_y:", bar_y)
                                         # st.write("bar_colors:", bar_colors)
@@ -1828,27 +1954,31 @@ try:
                                         fig.add_trace(go.Bar(x=bar_x, y=bar_y, marker_color=bar_colors, name=base_ratio, showlegend=False, text=bar_text, textposition='auto'))
                                         # Add trend line (only for the 4 years)
                                         if len(years) > 1:
-                                            coeffs = np.polyfit(years, values, 1)
-                                            trend_vals = np.polyval(coeffs, years)
-                                            trend_x = [str(x) for x in years]
-                                            fig.add_trace(go.Scatter(
-                                                x=trend_x,
-                                                y=trend_vals,
-                                                mode='lines',
-                                                name='Trend',
-                                                line=dict(color='#888888', dash='dot', width=6),
-                                                showlegend=False
-                                            ))
+                                            # Only fit the trend line to the first 4 items (years, not quarters)
+                                            trend_years = years[:4]
+                                            trend_values = values[:4]
+                                            trend_x_display = years_display[:4]
+                                            if len(trend_years) > 1:
+                                                coeffs = np.polyfit(trend_years, trend_values, 1)
+                                                trend_vals = np.polyval(coeffs, trend_years)
+                                                fig.add_trace(go.Scatter(
+                                                    x=trend_x_display,
+                                                    y=trend_vals,
+                                                    mode='lines',
+                                                    name='Trend',
+                                                    line=dict(color='#888888', dash='dot', width=6),
+                                                    showlegend=False
+                                                ))
                                         else:
                                             trend_vals = values
 
-                                        # add trendline between last full year and ttm
-                                        if ttm_label and ttm_value is not None and not pd.isna(ttm_value):
+                                        # add trendline between the last two items (the quarters)
+                                        if len(bar_x) >= 2:
                                             fig.add_trace(go.Scatter(
-                                                x=[years[-1], ttm_label],
-                                                y=[values[-1], ttm_value],
+                                                x=[bar_x[-2], bar_x[-1]],
+                                                y=[bar_y[-2], bar_y[-1]],
                                                 mode='lines',
-                                                name='Trend',
+                                                name='Quarter Trend',
                                                 line=dict(color="#0D0D0D", dash='dot', width=6),
                                                 showlegend=False
                                             ))
@@ -1874,6 +2004,7 @@ try:
                                         st.warning(f"Ingen data för de senaste 4 åren för {base_ratio}. Trend Rank och Latest Rank sätts till 50 (neutral).")
                                     # Bullet plots for the two ranks in two columns: trend (left), latest (right)
                                     #st.write(f"**{ratio}**")
+                                    # Dataframe for the ranks
                                     st.dataframe(
                                         df_ratioRank_merged[df_ratioRank_merged['index_trend'] == ratio][['Trend Rank', 'Latest Rank','TTM Rank']].style.map(color_progress, subset=['Trend Rank', 'Latest Rank','TTM Rank']),
                                         hide_index=True,
@@ -1953,16 +2084,22 @@ try:
                     with col_left:
                         selected_ratio_area = st.radio(
                             "Välj område att visa:",
-                            options=['Trend senaste 4 åren', 'Senaste året'],#, 'Diff ttm mot senaste året'],
+                            options=['Trend senaste 4 åren', 'Senaste ttm', 'Diff senaste ttm mot föregående ttm'],
                             index=0,
                             key="selected_ratio_area"
                         )
-                        temp_map = {
-                            'Trend senaste 4 åren': 'trend',
-                            'Senaste året': 'latest',
-                            'Diff ttm mot senaste året': 'ttm'
+                        ratioValue_map = {
+                            'Trend senaste 4 åren': 'year_trend',
+                            'Senaste ttm': 'quarter_latest',
+                            'Diff senaste ttm mot föregående ttm': 'quarter_trend'
                         }
-                        ratio_to_rank_map_temp = temp_map.get(selected_ratio_area, 'trend')
+                        ratio_to_value_map_temp = ratioValue_map.get(selected_ratio_area, 'quarter_latest')
+                        ratioRank_map = {
+                            'Trend senaste 4 åren': 'trend',
+                            'Senaste ttm': 'latest',
+                            'Diff senaste ttm mot föregående ttm': 'ttm'
+                        }
+                        ratio_to_rank_map_temp = ratioRank_map.get(selected_ratio_area, 'quarter_latest')
                     with col_mid:
                         sektors_all = [selected_stock_sektor, 'Alla']
                         display_stock_sektor_selector = st.radio(
@@ -1990,7 +2127,7 @@ try:
                         "Välj ett nyckeltal att visa detaljerad information om:",
                         options=all_ratios
                     )
-                    display_ratio=f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioValue"
+                    display_ratio=f"{display_ratio_selector}_{ratio_to_value_map_temp}_ratioValue"
                     display_rank = f"{display_ratio_selector}_{ratio_to_rank_map_temp}_ratioRank"
                     col_left, col_right = st.columns(2, gap='medium', border=False)
 
@@ -2010,6 +2147,7 @@ try:
                         color_ranges = config.get('color_ranges', [])
                         x_min = filtered_scatter_df[display_ratio].min()
                         x_max = filtered_scatter_df[display_ratio].max()
+                        st.write(f"X-axel intervall: {x_min:.2f} till {x_max:.2f}")
                         for cr in color_ranges:
                             y0 = cr['range'][0]
                             y1 = cr['range'][1]
