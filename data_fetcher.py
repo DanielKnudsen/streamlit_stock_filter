@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
-from typing import List, Dict, Optional
+from tqdm import tqdm
+from typing import List, Dict, Optional, Tuple, Any
 
 def get_price_data(
     SMA_short: int,
@@ -52,11 +53,128 @@ def get_price_data(
         print("Ingen prisdata hämtad för några tickers.")
     df_complete.to_csv(price_data_file_path, index=True)
 
+def get_raw_financial_data(tickers, years, quarters) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], set]:
+    """
+    Fetch raw financial data for a list of tickers from Yahoo Finance.
+    Makes sure that that there are 'years' of annual data and 'quarters' of quarterly data available, otherwise skips the ticker.
+
+    Args:
+        tickers (List[str]): List of ticker symbols.
+        years (int): Number of years of data to fetch.
+        quarters (int): Number of quarters of data to fetch.
+
+    Returns:
+        Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], set]: Tuple containing raw financial data dictionaries and a set of valid tickers.
+    """
+    raw_financial_data_annual = {}
+    raw_financial_data_quarterly = {}
+    raw_financial_info = {}
+    raw_financial_data_dividends = {}
+
+    for ticker in tqdm(tickers):
+        try:
+            yf_ticker = f"{ticker}.ST"
+            ticker_obj = yf.Ticker(yf_ticker)
+        except Exception as e:
+            print(f"Error fetching data for {ticker}: {e}")
+            continue
+
+        # Get additional info
+        info = ticker_obj.info
+        raw_financial_info[ticker] = info
+
+        # Get dividend info
+        dividends = ticker_obj.dividends
+        dividendRate = info.get('dividendRate', None)
+        lastDividendDate = info.get('lastDividendDate', None)
+        raw_financial_data_dividends[ticker] = {
+            'dividends': dividends,
+            'dividendRate': dividendRate,
+            'lastDividendDate': lastDividendDate
+        }
+
+        # Quarterly data, transposed for easier access
+        bs_quarterly = ticker_obj.quarterly_balance_sheet.transpose()
+        is_quarterly = ticker_obj.quarterly_income_stmt.transpose()
+        cf_quarterly = ticker_obj.quarterly_cash_flow.transpose()
+
+        # Ensure we have enough data, infer better data types and fill NaNs with 0
+        bs_quarterly = bs_quarterly.head(quarters).copy().infer_objects(copy=False).fillna(0)
+        is_quarterly = is_quarterly.head(quarters).copy().infer_objects(copy=False).fillna(0)
+        cf_quarterly = cf_quarterly.head(quarters).copy().infer_objects(copy=False).fillna(0)
+
+        # Get latest report date for quarterly data
+        latest_report_date_quarterly = None
+        if hasattr(bs_quarterly, 'index') and len(bs_quarterly.index) > 0:
+            try:
+                latest_report_date_quarterly = pd.to_datetime(bs_quarterly.index[0])
+            except Exception as e:
+                latest_report_date_quarterly = str(bs_quarterly.index[0])
+
+        shares_outstanding = info.get('sharesOutstanding', None)
+        market_cap = info.get('marketCap', None)
+
+        # Store quarterly data in quarterly dictionary
+        raw_financial_data_quarterly[ticker] = {
+            'balance_sheet': bs_quarterly,
+            'income_statement': is_quarterly,
+            'cash_flow': cf_quarterly,
+            'latest_report_date': latest_report_date_quarterly,
+            'shares_outstanding': shares_outstanding,
+            'market_cap': market_cap
+        }
+
+        # Annual data, transposed for easier access
+        bs_annual = ticker_obj.balance_sheet.transpose()
+        is_annual = ticker_obj.income_stmt.transpose()
+        cf_annual = ticker_obj.cash_flow.transpose()
+
+        # Ensure we have enough data, infer better data types and fill NaNs with 0
+        bs_annual = bs_annual.head(years).copy().infer_objects(copy=False).fillna(0)
+        is_annual = is_annual.head(years).copy().infer_objects(copy=False).fillna(0)
+        cf_annual = cf_annual.head(years).copy().infer_objects(copy=False).fillna(0)
+        
+        # Get latest report date for annual data
+        latest_report_date_annual = None
+        if hasattr(bs_annual, 'index') and len(bs_annual.index) > 0:
+            try:
+                latest_report_date_annual = pd.to_datetime(bs_annual.index[0])
+            except Exception as e:
+                latest_report_date_annual = str(bs_annual.index[0])
+        shares_outstanding = info.get('sharesOutstanding', None)
+        market_cap = info.get('marketCap', None)
+
+        # Store annual data in annual dictionary
+        raw_financial_data_annual[ticker] = {
+            'balance_sheet': bs_annual,
+            'income_statement': is_annual,
+            'cash_flow': cf_annual,
+            'latest_report_date': latest_report_date_annual,
+            'shares_outstanding': shares_outstanding,
+            'market_cap': market_cap
+        }
+
+        # Only keep the ticker if we have enough data
+        if len(bs_annual) < years or len(is_annual) < years or len(cf_annual) < years or len(bs_quarterly) < quarters or len(is_quarterly) < quarters or len(cf_quarterly) < quarters:
+            print(f"Warning: Not enough annual data for {ticker}. Skipping.")
+            del raw_financial_data_annual[ticker]
+            del raw_financial_data_quarterly[ticker]
+            del raw_financial_info[ticker]
+            continue
+
+    # return only the tickers with enough data in all three dictionaries
+    valid_tickers = set(raw_financial_data_annual.keys()) & set(raw_financial_data_quarterly.keys()) & set(raw_financial_info.keys())
+    raw_financial_data_annual = {k: v for k, v in raw_financial_data_annual.items() if k in valid_tickers}
+    raw_financial_data_quarterly = {k: v for k, v in raw_financial_data_quarterly.items() if k in valid_tickers}
+    raw_financial_info = {k: v for k, v in raw_financial_info.items() if k in valid_tickers}
+    raw_financial_data_dividends = {k: v for k, v in raw_financial_data_dividends.items() if k in valid_tickers}
+
+    return raw_financial_data_annual, raw_financial_data_quarterly, raw_financial_info, raw_financial_data_dividends, valid_tickers
 
 def fetch_yfinance_data(ticker: str, years: int, period_type: str = "annual") -> Optional[Dict]:
     """
     Fetch financial data for a ticker from Yahoo Finance.
-
+    TODO: extract all dicts at once instead of individual fields
     Args:
         ticker (str): Ticker symbol.
         years (int): Number of years of data to fetch.

@@ -3,19 +3,32 @@ import pandas as pd
 
 def create_ratios_to_ranks(
     calculated_ratios: dict,
-    calculated_ratios_quarterly: dict,
+    calculated_ratios_ttm_trends: dict,
     ratio_definitions: dict,
     category_ratios: dict
 ) -> dict:
     """
-    Calculate percentile ranks for financial ratios (latest, trend, and TTM) for each ticker, aggregate them by category, and compute cluster-level ranks.
+    Calculate percentile ranks for financial ratios and temporal views for each ticker: 
+    - Trend 4 years (from annual reports) - Called trend
+        source: calculated_ratios, keys ending with '_year_trend_ratioValue'
+    - Change prev ttm to last ttm (from 2 latest ttm quarterly reports) - Called ttm
+        source: calculated_ratios_ttm_trends, keys ending with '_quarter_trend_ratioValue'
+    - Last ttm value (from latest ttm report) - Called latest
+        source: calculated_ratios_ttm_trends, keys ending with '_quarter_latest_ratioValue'
 
-    This function processes annual and quarterly calculated ratios for a set of tickers, computes percentile-based ranks for each ratio (higher or lower is better depending on the definition), and aggregates these ranks into category and cluster scores. The output is a nested dictionary with all computed ranks for each ticker.
+    Then aggregate them by category, and compute cluster-level ranks.
+
+    This function computes percentile-based ranks for each ratio (higher or lower is better depending on the definition), 
+    and aggregates these ranks into category and cluster scores. 
+    
+    The output is a nested dictionary with all computed ranks for each ticker.
 
     Args:
         calculated_ratios (dict):
             Dictionary mapping ticker symbols to their annual calculated ratios. Each value is a dict of ratio names to values.
-        calculated_ratios_quarterly (dict):
+        calculated_ratios_quarterly_0 (dict):
+            Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
+        calculated_ratios_quarterly_1 (dict):
             Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
         ratio_definitions (dict):
             Dictionary defining each ratio's properties, including whether a higher value is better (key: 'higher_is_better').
@@ -54,16 +67,24 @@ def create_ratios_to_ranks(
     ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
 
     # Create DataFrame from calculated_ratios
-    df = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
-    df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
-    # rename columns from '_latest_ratioValue' to '_latest' and '_trend_ratioValue' to '_trend'
-    df.columns = df.columns.str.replace('_latest_ratioValue', '_latest')
-    df.columns = df.columns.str.replace('_trend_ratioValue', '_trend')
+    df_year = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    df_year = df_year[df_year.columns[df_year.columns.str.endswith(('_year_trend_ratioValue'))]]
 
-    # Create DataFrame from calculated_ratios_quarterly
-    df_quarterly = pd.DataFrame.from_dict(calculated_ratios_quarterly, orient='index')
-    # only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
+    df_ttm = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
+    df_ttm = df_ttm[df_ttm.columns[df_ttm.columns.str.endswith(('_quarter_latest_ratioValue', '_quarter_trend_ratioValue'))]]
+    
+    # Merge annual and quarterly dataframes on index (Ticker)
+    df_merged = df_year.merge(df_ttm, how='outer', left_index=True, right_index=True, suffixes=('_year', '_quarter'))
+
+    # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
+    # df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
+    # rename columns from '_latest_ratioValue' to '_latest' and '_trend_ratioValue' to '_trend'
+    df_merged.columns = df_merged.columns.str.replace('_quarter_latest_ratioValue', '_latest')
+    df_merged.columns = df_merged.columns.str.replace('_year_trend_ratioValue', '_trend')
+    df_merged.columns = df_merged.columns.str.replace('_quarter_trend_ratioValue', '_ttm')
+
+
+    """# only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
     df_quarterly = df_quarterly[df_quarterly.columns[df_quarterly.columns.str.endswith('_latest_ratioValue')]]
     df_quarterly.columns = df_quarterly.columns.str.replace('_latest_ratioValue', '_ttm')   
 
@@ -83,7 +104,7 @@ def create_ratios_to_ranks(
 
     # drop columns ending with '_ttm' and rename columns ending with '_ttm_diff' to '_ttm' (this is to keep the column names consistent)
     df_merged = df_merged.drop(columns=[col for col in df_merged.columns if col.endswith('_ttm')])
-    df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})
+    df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})"""
 
     for column in df_merged.columns:
         if column.endswith('_latest'):

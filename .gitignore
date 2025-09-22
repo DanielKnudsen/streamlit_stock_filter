@@ -9,7 +9,8 @@ wheels/
 
 # Data directories - ignore most content but allow specific files  
 data/local/*
-!data/local/ranking_history.db
+!data/local/tickers_list.csv
+data/remote/
 
 .env
 
@@ -30,11 +31,10 @@ quarterly_ranking_report.txt
 *_analysis.txt
 *_report.txt
 
-# Database files (but not the ranking history)
+# Database files
 *.db
 *.sqlite  
 *.sqlite3
-!data/local/ranking_history.db
 
 # Temporary and experimental files
 quarterly_improvements.py

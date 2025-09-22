@@ -5,3 +5,14 @@ lägg till en kategori om utdelningar
 lägg till underliggande data om cagr datan
 
 skapa en dataframe med all data för en viss ticker som ska kunna visas när användaren klickar på en knapp
+
+Ja, Shares Outstanding kan beräknas med hjälp av de två variablerna du angav: Ordinary Shares Number och Treasury Shares Number.
+Shares Outstanding är det totala antalet aktier som är utestående och tillgängliga på marknaden. Detta beräknas genom att ta antalet vanliga aktier (Ordinary Shares Number) och subtrahera antalet egna aktier som företaget äger (Treasury Shares Number).
+Beräkning:
+Shares Outstanding = Ordinary Shares Number - Treasury Shares Number
+Med de angivna värdena:
+
+Ordinary Shares Number = 1 604 491 375
+Treasury Shares Number = 6 050 850
+
+Shares Outstanding = 1 604 491 375 - 6 050 850 = 1 598 440 525
