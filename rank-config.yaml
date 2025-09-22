@@ -1,5 +1,5 @@
 # Inställningar för in- och utdata
-input_ticker_file: "tickers_list_test.csv" # test file ends with "_test.csv" for limited set of tickers
+input_ticker_file: "tickers_list.csv" # test file ends with "_test.csv" for limited set of tickers
 results_file: "stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 
