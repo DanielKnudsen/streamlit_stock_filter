@@ -10,6 +10,7 @@ wheels/
 # Data directories - ignore most content but allow specific files  
 data/local/*
 !data/local/tickers_list.csv
+data/remote/
 
 .env
 
