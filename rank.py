@@ -5,9 +5,8 @@ import os
 from typing import Any, Dict, Optional, List
 from dotenv import load_dotenv
 from pathlib import Path
-from tqdm import tqdm
 from io_utils import load_yaml, load_csv, save_csv, load_pickle, save_pickle
-from data_fetcher import fetch_yfinance_data, read_tickers_from_csv, get_price_data
+from data_fetcher import read_tickers_from_csv, get_price_data, get_raw_financial_data
 from ratios import calculate_all_ratios
 from ranking import create_ratios_to_ranks
 
@@ -40,8 +39,9 @@ def load_config(config_file_path: str) -> Optional[Dict[str, Any]]:
         print(f"Error: The file {config_file_path} was not found.")
         return None
 
-def combine_all_results(
+def combine_all_results(valid_tickers: List[str],
     calculated_ratios: Dict[str, Dict[str, Any]],
+    calculated_ratios_ttm_trends: Dict[str, Dict[str, Any]],
     complete_ranks: Dict[str, Dict[str, Any]]
 ) -> pd.DataFrame:
     """
@@ -49,14 +49,14 @@ def combine_all_results(
 
     Args:
         calculated_ratios (Dict[str, Dict[str, Any]]): Calculated ratios per ticker.
-        ranked_ratios (Dict[str, Dict[str, Any]]): Ranked ratios per ticker.
-        category_scores (Dict[str, Dict[str, Any]]): Category scores per ticker.
-        cluster_ranks (Dict[str, Dict[str, Any]]): Cluster ranks per ticker.
+        calculated_ratios_ttm_trends (Dict[str, Dict[str, Any]]): TTM trends per ticker.
+        complete_ranks (Dict[str, Dict[str, Any]]): Category scores per ticker.
 
     Returns:
         pd.DataFrame: Combined results DataFrame.
     """
     df_calculated = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    df_calculated_ttm_trends = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
     df_complete_ranks = pd.DataFrame.from_dict(complete_ranks, orient='index')
     """df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')"""
@@ -67,17 +67,20 @@ def combine_all_results(
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_latest_report_dates = load_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_latest_report_dates_quarterly = load_csv(CSV_PATH / "latest_report_dates_quarterly.csv", index_col='Ticker')
-    df_ttm_values = load_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
+    #df_ttm_values = load_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
     df_last_SMA = load_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = load_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
-    df_calculated_quarterly_long = load_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
-    df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
-    df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
+    #df_calculated_quarterly_long = load_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
+    #df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
+    #df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
+    df_market_cap = load_csv(CSV_PATH / "market_cap.csv", index_col='Ticker')
     final_df = pd.concat([
-        df_tickers, df_calculated, df_calculated_quarterly, df_complete_ranks, df_last_SMA,
-        df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_ttm_values, df_long_business_summary
+        df_tickers, df_calculated, df_calculated_ttm_trends, df_complete_ranks, df_last_SMA,
+        df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_long_business_summary, df_market_cap
     ], axis=1)
-    return final_df
+
+    # only keep rows for valid tickers
+    return final_df[final_df.index.isin(valid_tickers)]
 
 def save_results_to_csv(results_df: pd.DataFrame, file_path: str) -> None:
     """
@@ -137,6 +140,47 @@ def save_longBusinessSummary_to_csv(raw_data: Dict[str, Any], csv_file_path: str
     
     save_csv(df, csv_file_path, index=False)
 
+def save_market_cap_to_csv(raw_data: Dict[str, Any], csv_file_path: str) -> None:
+    """
+    Save market cap information for each ticker to a CSV file.
+
+    Args:
+        raw_data (Dict[str, Any]): Financial data for each ticker, including market cap info.
+        csv_file_path (str): Path to the output CSV file.
+    """
+    rows = []
+    for ticker, data in raw_data.items():
+        market_cap = None
+
+        if 'market_cap' in raw_data[ticker]:
+            market_cap = raw_data[ticker]['market_cap'] if raw_data[ticker]['market_cap'] is not None else None
+        else:
+            market_cap = None
+
+        rows.append({'Ticker': ticker, 'market_cap': market_cap})
+
+    df = pd.DataFrame(rows)
+    save_csv(df, csv_file_path, index=False)
+
+def save_info_to_csv(raw_data: Dict[str, Any], csv_file_path: str) -> None:
+    """
+    Save long business summaries to a CSV file.
+
+    Args:
+        raw_data (Dict[str, Any]): Raw financial data per ticker.
+        csv_file_path (str): Path to the output CSV file.
+    """
+    df = pd.DataFrame()
+    for ticker, data in raw_data.items():
+        if 'longBusinessSummary' in data:
+            summary = data['longBusinessSummary']
+            df_temp = pd.DataFrame({'Ticker': [ticker], 'LongBusinessSummary': [summary]})
+            df = pd.concat([df, df_temp], ignore_index=True)
+        else:
+            print(f"Warning: No longBusinessSummary for {ticker}. Skipping.")
+    
+    save_csv(df, csv_file_path, index=False)
+
 def save_latest_report_dates_to_csv(raw_data: Dict[str, Any], csv_file_path: str, period_type: str = "Y") -> None:
     """
     Save the latest report dates to a CSV file.
@@ -169,30 +213,37 @@ def save_dividends_to_csv(raw_data: Dict[str, Any], csv_file_path: str) -> None:
     for ticker, data in raw_data.items():
         dividend_last_year = None
         last_dividend_year = None
-        if 'info' in raw_data[ticker]:
-            if 'dividendRate' in raw_data[ticker]['info']:
-                dividend_last_year = raw_data[ticker]['info']['dividendRate'] if raw_data[ticker]['info']['dividendRate'] is not None else None
-            else:
-                dividend_last_year = None
-            if 'lastDividendDate' in raw_data[ticker]['info']:
-                last_dividend_year = int(datetime.datetime.fromtimestamp(raw_data[ticker]['info']['lastDividendDate']).strftime('%Y'))
-            else:
-                last_dividend_year = None
-        if 'dividends' in data:
+
+        if 'dividendRate' in raw_data[ticker]:
+            dividend_last_year = raw_data[ticker]['dividendRate'] if raw_data[ticker]['dividendRate'] is not None else None
+        else:
+            dividend_last_year = None
+        if 'lastDividendDate' in raw_data[ticker]:
+            last_dividend_year = int(datetime.datetime.fromtimestamp(raw_data[ticker]['lastDividendDate']).strftime('%Y')) if raw_data[ticker]['lastDividendDate'] is not None else None
+        else:
+            last_dividend_year = None
+        if 'dividends' in data and len(data['dividends']) > 0:
             dividends = data['dividends']
-            # dividends is a pandas Series: index=date, value=dividend
-            if hasattr(dividends, 'items'):
-                # Build a DataFrame for aggregation
+            # dividends can be a pandas Series, DataFrame, or dict
+            if isinstance(dividends, pd.DataFrame):
+                # Already a DataFrame with Date and Value columns
+                div_df = dividends.copy()
+            elif isinstance(dividends, (pd.Series, dict)):
+                # Convert Series or dict to DataFrame
                 div_df = pd.DataFrame(list(dividends.items()), columns=['Date', 'Value'])
-                div_df['Date'] = pd.to_datetime(div_df['Date'], errors='coerce')
-                div_df['Year'] = div_df['Date'].dt.year
-                # Aggregate by year (sum all dividends for the same year)
-                yearly = div_df.groupby('Year')['Value'].sum().reset_index()
-                for _, row in yearly.iterrows():
-                    if last_dividend_year is not None and int(row['Year']) == last_dividend_year and dividend_last_year is not None:
-                        rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': dividend_last_year})
-                    else:
-                        rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': row['Value']})
+            else:
+                print(f"Warning: Unexpected dividends type for {ticker}: {type(dividends)}")
+                continue
+                
+            div_df['Date'] = pd.to_datetime(div_df['Date'], errors='coerce')
+            div_df['Year'] = div_df['Date'].dt.year
+            # Aggregate by year (sum all dividends for the same year)
+            yearly = div_df.groupby('Year')['Value'].sum().reset_index()
+            for _, row in yearly.iterrows():
+                if last_dividend_year is not None and int(row['Year']) == last_dividend_year and dividend_last_year is not None:
+                    rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': dividend_last_year})
+                else:
+                    rows.append({'Ticker': ticker, 'Year': int(row['Year']), 'Value': row['Value']})
         else:
             print(f"Warning: No dividends for {ticker}. Skipping.")
 
@@ -348,12 +399,15 @@ def filter_metrics_for_agr_dimensions(csv_path: str, agr_dimensions: List[str], 
         save_csv(filtered_pivot, output_path, index=True)
     return filtered
 
-def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly: Dict[str, Any]) -> Dict[str, Any]:
+def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly: Dict[str, Any], quarters_back: int) -> Dict[str, Any]:
     """
-    Summarize quarterly data to yearly by summing or averaging depending on segment.
+    Summarize quarterly data (4 quarters) to yearly by summing or latest depending on segment.
+    Can be any 4 quarters in a row, e.g. last 4, (pos 0,1,2,3) or starting n quarters back and then taking e.g pos 1,2,3,4 
 
     Args:
         raw_financial_data_quarterly (Dict[str, Any]): Quarterly financial data per ticker.
+        quarters_back (int): Number of quarters back for the last data point. E.g 0 for including the most recent one and the three before,
+        1 for omitting the most recent quarter and then getting the 4 quarters before the most recent one.
 
     Returns:
         Dict[str, Any]: Summarized yearly data per ticker.
@@ -386,7 +440,14 @@ def summarize_quarterly_data_to_yearly(raw_financial_data_quarterly: Dict[str, A
             if df is None or df.empty:
                 summarized[segment] = pd.DataFrame()
                 continue
-            df = df.head(4)
+            df = df.sort_index(ascending=False)
+            df = df.iloc[quarters_back:quarters_back + 4]
+            
+            # Check if we have enough data after filtering
+            if df.empty:
+                summarized[segment] = pd.DataFrame()
+                continue
+                
             agg_dict = {}
             for col in df.columns:
                 if col in sum_metrics:
@@ -538,8 +599,9 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     all_ratios = []
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(ratios)
-    for ratio in all_ratios:
-        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])
+    # Calculate difference between most recent ttm value and the ttm value one quarter back TODO
+    """for ratio in all_ratios:
+        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])"""
     for agr_temp in config['agr_dimensions']:
         agr = agr_temp.replace(" ", "_")
         latest_full_year_value = final_df.apply(
@@ -550,12 +612,12 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     all_ratios = []
     for category, ratios in config['kategorier'].items():
         all_ratios.extend(f"{ratio}_ttm_diff" for ratio in ratios)
-    for col in all_ratios:
+    """for col in all_ratios:
         ratio_name = col.replace('_ttm_diff', '')
         is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
         ranked = final_df[col].rank(pct=True, ascending=is_better) * 100
         ranked = ranked.fillna(50)
-        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)
+        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)"""
         
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
@@ -563,6 +625,202 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
         if "Rank" in col:
             final_df[col] = final_df[col].round(rank_decimals)
     return final_df
+
+def add_historical_prices_to_filtered_data(filtered_raw_data: Dict[str, Any], price_data_path: str, days_window: int = 5) -> Dict[str, Any]:
+    """
+    Add historical stock prices around report dates to filtered raw data.
+    
+    For each ticker and each report date found in the financial statements,
+    calculates the average stock price from -days_window to +days_window days
+    around the report date using the price_data.csv file.
+    
+    Args:
+        filtered_raw_data (Dict[str, Any]): Filtered financial data per ticker.
+        price_data_path (str): Path to the price_data.csv file.
+        days_window (int, optional): Number of days before/after report date to average. Defaults to 5.
+    
+    Returns:
+        Dict[str, Any]: Enhanced filtered data with historical prices.
+    """
+    # Load price data
+    try:
+        price_df = load_csv(price_data_path, parse_dates=['Date'])
+        price_df = price_df.set_index('Date')
+        print(f"Loaded price data with {len(price_df)} rows from {len(price_df['Ticker'].unique())} tickers")
+    except Exception as e:
+        print(f"Warning: Could not load price data from {price_data_path}: {e}")
+        return filtered_raw_data
+    
+    enhanced_data = {}
+    
+    for ticker, data in filtered_raw_data.items():
+        if data is None:
+            enhanced_data[ticker] = None
+            continue
+            
+        enhanced_data[ticker] = data.copy()
+        
+        # Get all unique report dates from financial statements
+        report_dates = set()
+        
+        for segment in ['balance_sheet', 'income_statement', 'cash_flow']:
+            if segment in data and hasattr(data[segment], 'index'):
+                # Convert index to datetime if not already
+                try:
+                    dates = pd.to_datetime(data[segment].index, errors='coerce')
+                    # Add 15 days to each date to match TTM convention
+                    # dates = dates + pd.Timedelta(days=15)
+                    valid_dates = dates.dropna()
+                    report_dates.update(valid_dates)
+                except Exception as e:
+                    print(f"Warning: Could not extract dates from {ticker} {segment}: {e}")
+        
+        # Convert to sorted list
+        report_dates = sorted(list(report_dates))
+        
+        if not report_dates:
+            print(f"Warning: No valid report dates found for {ticker}")
+            continue
+            
+        # Filter price data for this ticker
+        ticker_prices = price_df[price_df['Ticker'] == ticker]
+        
+        if ticker_prices.empty:
+            print(f"Warning: No price data found for ticker {ticker}")
+            continue
+            
+        # Calculate average prices around each report date
+        historical_prices = {}
+        
+        for report_date in report_dates:
+            try:
+                # Define the date range
+                start_date = report_date - pd.Timedelta(days=days_window)
+                end_date = report_date + pd.Timedelta(days=days_window)
+                
+                # Get prices within the window
+                price_window = ticker_prices.loc[start_date:end_date]
+                
+                if not price_window.empty and 'Close' in price_window.columns:
+                    avg_price = price_window['Close'].mean()
+                    if not pd.isna(avg_price):
+                        # Format date key (use the same format as in financial statements)
+                        date_key = report_date.strftime('%Y-%m-%d')
+                        historical_prices[date_key] = avg_price
+                        # print(f"Added historical price for {ticker} on {date_key}: {avg_price:.2f}")
+                    else:
+                        print(f"Warning: No valid prices found for {ticker} around {report_date.date()}")
+                else:
+                    print(f"Warning: No price data available for {ticker} around {report_date.date()}")
+                    
+            except Exception as e:
+                print(f"Warning: Error processing price for {ticker} on {report_date.date()}: {e}")
+        
+        # Add historical prices to the ticker data
+        if historical_prices:
+            enhanced_data[ticker]['historical_prices'] = historical_prices
+            # print(f"Added {len(historical_prices)} historical prices for {ticker}")
+        else:
+            enhanced_data[ticker]['historical_prices'] = {}
+            print(f"No historical prices could be calculated for {ticker}")
+    
+    return enhanced_data
+
+def combine_quarterly_summaries_for_ttm_trends(
+    quarterly_summarized_0: Dict[str, Any], 
+    quarterly_summarized_1: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Combine two quarterly summarized dictionaries to create TTM trend data.
+    
+    This function merges the most recent TTM data (quarters_back=0) with the 
+    previous TTM data (quarters_back=1) to enable trend analysis across TTM periods.
+    
+    Args:
+        quarterly_summarized_0 (Dict[str, Any]): Most recent 4 quarters summarized (quarters_back=0)
+        quarterly_summarized_1 (Dict[str, Any]): Previous 4 quarters summarized (quarters_back=1)
+    
+    Returns:
+        Dict[str, Any]: Combined data with multiple TTM periods per ticker
+    """
+    combined_data = {}
+    
+    # Get all unique tickers from both dictionaries
+    all_tickers = set(quarterly_summarized_0.keys()) | set(quarterly_summarized_1.keys())
+    
+    for ticker in all_tickers:
+        data_0 = quarterly_summarized_0.get(ticker)
+        data_1 = quarterly_summarized_1.get(ticker)
+        
+        # Skip if both are None
+        if data_0 is None and data_1 is None:
+            continue
+            
+        # Initialize combined data structure
+        combined_ticker_data = {
+            'balance_sheet': pd.DataFrame(),
+            'income_statement': pd.DataFrame(), 
+            'cash_flow': pd.DataFrame(),
+            'current_price': None,
+            'shares_outstanding': None,
+            'market_cap': None,
+            'info': None
+        }
+        
+        # Process each financial statement segment
+        for segment in ['balance_sheet', 'income_statement', 'cash_flow']:
+            dfs_to_combine = []
+            
+            # Add data from most recent TTM (quarters_back=0)
+            if data_0 is not None and segment in data_0 and data_0[segment] is not None and not data_0[segment].empty:
+                df_0 = data_0[segment].copy()
+                # Rename index to indicate this is the most recent TTM
+                if len(df_0.index) > 0:
+                    #new_index = pd.Timestamp(df_0.index[0]).replace(day=15)  # Use mid-month for TTM
+                    #df_0.index = [new_index]
+                    dfs_to_combine.append(df_0)
+            
+            # Add data from previous TTM (quarters_back=1) 
+            if data_1 is not None and segment in data_1 and data_1[segment] is not None and not data_1[segment].empty:
+                df_1 = data_1[segment].copy()
+                # Rename index to indicate this is the previous TTM (approximately 3 months earlier)
+                if len(df_1.index) > 0:
+                    #new_index = pd.Timestamp(df_1.index[0]).replace(day=15)# - pd.DateOffset(months=3)
+                    #df_1.index = [new_index]
+                    dfs_to_combine.append(df_1)
+            
+            # Combine the DataFrames
+            if dfs_to_combine:
+                combined_segment = pd.concat(dfs_to_combine, sort=False)
+                combined_segment = combined_segment.sort_index()  # Sort by date
+                combined_ticker_data[segment] = combined_segment
+        
+        # Set scalar values (use most recent where available)
+        if data_0 is not None:
+            combined_ticker_data.update({
+                'current_price': data_0.get('current_price'),
+                'shares_outstanding': data_0.get('shares_outstanding'), 
+                'market_cap': data_0.get('market_cap'),
+                'info': data_0.get('info')
+            })
+        elif data_1 is not None:
+            combined_ticker_data.update({
+                'current_price': data_1.get('current_price'),
+                'shares_outstanding': data_1.get('shares_outstanding'),
+                'market_cap': data_1.get('market_cap'),
+                'info': data_1.get('info')
+            })
+        
+        combined_data[ticker] = combined_ticker_data
+        
+        # Debug info
+        bs_rows = len(combined_ticker_data['balance_sheet']) if not combined_ticker_data['balance_sheet'].empty else 0
+        is_rows = len(combined_ticker_data['income_statement']) if not combined_ticker_data['income_statement'].empty else 0
+        cf_rows = len(combined_ticker_data['cash_flow']) if not combined_ticker_data['cash_flow'].empty else 0
+        print(f"Combined {ticker}: BS={bs_rows} rows, IS={is_rows} rows, CF={cf_rows} rows")
+    
+    print(f"Combined TTM data for {len(combined_data)} tickers")
+    return combined_data
 
 def trim_unused_columns(final_results: pd.DataFrame, config: dict) -> pd.DataFrame:
     """
@@ -621,48 +879,46 @@ if __name__ == "__main__":
             tickers = read_tickers_from_csv(CSV_PATH / TICKERS_FILE_NAME)
 
             # Step 1: Fetch financial data for each ticker
-            
             if not tickers:
                 print("No tickers found in the file. Exiting.")
                 exit(1)
 
             if FETCH_DATA == "Yes":
-                raw_financial_data = {}
-                raw_financial_data_quarterly = {}
-                print("Fetching financial data...")
-                for ticker in tqdm(tickers, desc="Fetching financial data", disable=True if ENVIRONMENT == "remote" else False):
-                    raw_financial_data[ticker] = fetch_yfinance_data(ticker, config["data_fetch_years"], period_type="annual")
-                    raw_financial_data_quarterly[ticker] = fetch_yfinance_data(ticker, config["data_fetch_quarterly"], period_type="quarterly")
-                    if ENVIRONMENT == "local":
-                        save_pickle(raw_financial_data, CSV_PATH / "raw_financial_data.pkl")
-                        save_pickle(raw_financial_data_quarterly, CSV_PATH / "raw_financial_data_quarterly.pkl")
+                raw_financial_data, raw_financial_data_quarterly, raw_financial_info, raw_financial_data_dividends, valid_tickers = get_raw_financial_data(tickers, config["data_fetch_years"], config["data_fetch_quarterly"])
+                if ENVIRONMENT == "local":
+                    save_pickle(raw_financial_data, CSV_PATH / "raw_financial_data.pkl")
+                    save_pickle(raw_financial_data_quarterly, CSV_PATH / "raw_financial_data_quarterly.pkl")
+                    save_pickle(raw_financial_info, CSV_PATH / "raw_financial_info.pkl")
+                    save_pickle(raw_financial_data_dividends, CSV_PATH / "raw_financial_data_dividends.pkl")
             else:
                 print("Loading raw financial data from pickles...")
                 try:
                     raw_financial_data = load_pickle(CSV_PATH / "raw_financial_data.pkl")
                     raw_financial_data_quarterly = load_pickle(CSV_PATH / "raw_financial_data_quarterly.pkl")
+                    raw_financial_info = load_pickle(CSV_PATH / "raw_financial_info.pkl")
+                    raw_financial_data_dividends = load_pickle(CSV_PATH / "raw_financial_data_dividends.pkl")
+                    valid_tickers = list(raw_financial_data.keys())
                 except FileNotFoundError:
                     print("No raw financial data found. Please fetch data first.")
                     exit(1)
 
-            # Remove tickers with no data
-            raw_financial_data = {ticker: data for ticker, data in raw_financial_data.items() if data is not None}
-            raw_financial_data_quarterly = {ticker: data for ticker, data in raw_financial_data_quarterly.items() if data is not None}
+            print(f"Fetched data for {len(valid_tickers)} valid tickers out of {len(tickers)} total tickers.")
 
             # Save raw financial data and business summaries
             save_raw_data_to_csv(raw_financial_data, CSV_PATH / "raw_financial_data.csv")
             save_raw_data_to_csv(raw_financial_data_quarterly, CSV_PATH / "raw_financial_data_quarterly.csv")
-            save_longBusinessSummary_to_csv(raw_financial_data, CSV_PATH / "longBusinessSummary.csv")
-            save_dividends_to_csv(raw_financial_data, CSV_PATH / "dividends.csv")
+            # save_info_to_csv(raw_financial_info, CSV_PATH / "raw_financial_info.csv")
+            save_longBusinessSummary_to_csv(raw_financial_info, CSV_PATH / "longBusinessSummary.csv")
+            save_dividends_to_csv(raw_financial_data_dividends, CSV_PATH / "dividends.csv")
             save_latest_report_dates_to_csv(raw_financial_data, CSV_PATH / "latest_report_dates.csv", period_type="Y")
             save_latest_report_dates_to_csv(raw_financial_data_quarterly, CSV_PATH / "latest_report_dates_quarterly.csv", period_type="Q")
-
+            save_market_cap_to_csv(raw_financial_data, CSV_PATH / "market_cap.csv")
             # Step 2: Fetch and process stock price data
             
             if FETCH_DATA == "Yes":
                 print("Fetching stock price data...")
                 get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],
-                           raw_financial_data.keys(),config["price_data_years"],CSV_PATH / config["price_data_file"])
+                           valid_tickers,config["price_data_years"],CSV_PATH / config["price_data_file"])
             
             save_last_SMA_to_csv(
                 read_from=CSV_PATH / config["price_data_file"],
@@ -670,17 +926,73 @@ if __name__ == "__main__":
             )
 
             # Step 3: Calculate ratios and rankings
-            raw_financial_data_quarterly_summarized = summarize_quarterly_data_to_yearly(raw_financial_data_quarterly)
-            save_raw_data_to_csv(raw_financial_data_quarterly_summarized, CSV_PATH / "raw_financial_data_quarterly_summarized.csv")
-
-            calculated_ratios_quarterly = calculate_all_ratios(raw_financial_data_quarterly_summarized, config["ratio_definitions"])
-            save_calculated_ratios_to_csv(calculated_ratios_quarterly, CSV_PATH / "calculated_ratios_quarterly.csv", period_type="quarterly")
-
-            calculated_ratios = calculate_all_ratios(raw_financial_data, config["ratio_definitions"])
+            # Define which keys are needed for ratio calculations
+            ratio_keys = ['balance_sheet', 'income_statement', 'cash_flow', 'shares_outstanding', 'market_cap']
+            
+            # Filter raw_financial_data to only include needed keys
+            filtered_raw_data = {
+                ticker: {key: data[key] for key in ratio_keys if key in data}
+                for ticker, data in raw_financial_data.items()
+            }
+            
+            # Add historical prices around report dates
+            print("Adding historical prices to filtered data...")
+            filtered_raw_data_with_prices = add_historical_prices_to_filtered_data(
+                filtered_raw_data, 
+                CSV_PATH / config["price_data_file"]
+            )
+            
+            # Calculate annual ratios
+            calculated_ratios = calculate_all_ratios(filtered_raw_data_with_prices, config["ratio_definitions"])
             save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv", period_type="annual")
 
+            # Summarize quarterly data to yearly for most recent 4 quarters (0 quarters back)
+            quarters_back=0
+            raw_financial_data_quarterly_summarized_0 = summarize_quarterly_data_to_yearly(raw_financial_data_quarterly,quarters_back)
+            
+            # Summarize quarterly data to yearly for 4 quarters back (1 quarter back)
+            quarters_back=1
+            raw_financial_data_quarterly_summarized_1 = summarize_quarterly_data_to_yearly(raw_financial_data_quarterly,quarters_back)
+            
+            # Combine the two TTM summaries for trend analysis
+            print("Combining TTM summaries for trend analysis...")
+            combined_ttm_data = combine_quarterly_summaries_for_ttm_trends(
+                raw_financial_data_quarterly_summarized_0,
+                raw_financial_data_quarterly_summarized_1
+            )
+            
+            # Filter combined TTM data
+            filtered_combined_ttm = {
+                ticker: {key: data[key] for key in ratio_keys if key in data}
+                for ticker, data in combined_ttm_data.items()
+                if data is not None
+            }
+            
+            # Add historical prices to combined TTM data
+            filtered_combined_ttm_with_prices = add_historical_prices_to_filtered_data(
+                filtered_combined_ttm, 
+                CSV_PATH / config["price_data_file"]
+            )
+            
+            # Calculate TTM trend ratios
+            calculated_ratios_ttm_trends = calculate_all_ratios(
+                filtered_combined_ttm_with_prices, 
+                config["ratio_definitions"],
+                period_type="quarterly"
+            )
+            save_calculated_ratios_to_csv(
+                calculated_ratios_ttm_trends, 
+                CSV_PATH / "calculated_ratios_ttm_trends.csv", 
+                period_type="quarterly"
+            )
+
             # Create ratios to ranks 
-            complete_ranks = create_ratios_to_ranks(calculated_ratios,calculated_ratios_quarterly,config["ratio_definitions"],config["category_ratios"])
+            complete_ranks = create_ratios_to_ranks(
+                calculated_ratios,
+                calculated_ratios_ttm_trends,
+                config["ratio_definitions"],
+                config["category_ratios"]
+            )
             save_dict_of_dicts_to_csv(complete_ranks, CSV_PATH / "complete_ranks.csv")
 
             # Step 5: Calculate AGR results
@@ -690,14 +1002,15 @@ if __name__ == "__main__":
             agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 4))
             save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
 
-            # Step 6: Extract ttm values for agr dimensions
-            filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
+            # Step 6: Extract ttm values for agr dimensions TODO: check if needed
+            """filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
                                config['agr_dimensions'],
-                               CSV_PATH / "ttm_values.csv")
+                               CSV_PATH / "ttm_values.csv")"""
 
             # Step 7: Combine all results and save final output
-            combined_results = combine_all_results(
+            combined_results = combine_all_results(valid_tickers,
                 calculated_ratios,
+                calculated_ratios_ttm_trends,
                 complete_ranks
             )
 
