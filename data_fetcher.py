@@ -79,8 +79,24 @@ def get_raw_financial_data(tickers, years, quarters) -> Tuple[Dict[str, Any], Di
             print(f"Error fetching data for {ticker}: {e}")
             continue
 
-        # Get additional info
-        info = ticker_obj.info
+        # Get additional info with retry logic
+        info = None
+        for retry in range(3):
+            try:
+                info = ticker_obj.info
+                break
+            except Exception as e:
+                print(f"Attempt {retry + 1} failed for {ticker} info: {e}")
+                if retry < 2:
+                    import time
+                    time.sleep(5 * (retry + 1))  # Exponential backoff
+                else:
+                    print(f"Failed to get info for {ticker} after 3 attempts")
+                    continue
+        
+        if info is None:
+            continue
+            
         raw_financial_info[ticker] = info
 
         # Get dividend info
@@ -93,10 +109,25 @@ def get_raw_financial_data(tickers, years, quarters) -> Tuple[Dict[str, Any], Di
             'lastDividendDate': lastDividendDate
         }
 
-        # Quarterly data, transposed for easier access
-        bs_quarterly = ticker_obj.quarterly_balance_sheet.transpose()
-        is_quarterly = ticker_obj.quarterly_income_stmt.transpose()
-        cf_quarterly = ticker_obj.quarterly_cash_flow.transpose()
+        # Quarterly data with retry logic, transposed for easier access
+        bs_quarterly = is_quarterly = cf_quarterly = None
+        for retry in range(3):
+            try:
+                bs_quarterly = ticker_obj.quarterly_balance_sheet.transpose()
+                is_quarterly = ticker_obj.quarterly_income_stmt.transpose()
+                cf_quarterly = ticker_obj.quarterly_cash_flow.transpose()
+                break
+            except Exception as e:
+                print(f"Attempt {retry + 1} failed for {ticker} quarterly data: {e}")
+                if retry < 2:
+                    import time
+                    time.sleep(5 * (retry + 1))
+                else:
+                    print(f"Failed to get quarterly data for {ticker} after 3 attempts")
+                    continue
+        
+        if any(data is None for data in [bs_quarterly, is_quarterly, cf_quarterly]):
+            continue
 
         # Ensure we have enough data, infer better data types and fill NaNs with 0
         bs_quarterly = bs_quarterly.head(quarters).copy().infer_objects(copy=False).fillna(0)
@@ -124,10 +155,25 @@ def get_raw_financial_data(tickers, years, quarters) -> Tuple[Dict[str, Any], Di
             'market_cap': market_cap
         }
 
-        # Annual data, transposed for easier access
-        bs_annual = ticker_obj.balance_sheet.transpose()
-        is_annual = ticker_obj.income_stmt.transpose()
-        cf_annual = ticker_obj.cash_flow.transpose()
+        # Annual data with retry logic, transposed for easier access
+        bs_annual = is_annual = cf_annual = None
+        for retry in range(3):
+            try:
+                bs_annual = ticker_obj.balance_sheet.transpose()
+                is_annual = ticker_obj.income_stmt.transpose()
+                cf_annual = ticker_obj.cash_flow.transpose()
+                break
+            except Exception as e:
+                print(f"Attempt {retry + 1} failed for {ticker} annual data: {e}")
+                if retry < 2:
+                    import time
+                    time.sleep(5 * (retry + 1))
+                else:
+                    print(f"Failed to get annual data for {ticker} after 3 attempts")
+                    continue
+        
+        if any(data is None for data in [bs_annual, is_annual, cf_annual]):
+            continue
 
         # Ensure we have enough data, infer better data types and fill NaNs with 0
         bs_annual = bs_annual.head(years).copy().infer_objects(copy=False).fillna(0)
