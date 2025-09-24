@@ -1095,7 +1095,7 @@ try:
                     bubble_fig.update_traces(marker=dict(opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
                     if show_tickers:
                         bubble_fig.update_traces(textposition='top center')
-                    st.plotly_chart(bubble_fig, config={"displayModeBar": False}, width="stretch")
+                    st.plotly_chart(bubble_fig, config={"displayModeBar": False}, use_container_width=True)
                 else:
                     st.info('No stocks in the selected score range (after removing rows with saknade värden).')
             else:
@@ -1400,7 +1400,7 @@ try:
                                 margin=dict(l=10, r=10, t=40, b=10),
                                 xaxis=dict(type='category')
                             )
-                            st.plotly_chart(fig_div, config={"displayModeBar": False}, width="stretch", key=f"dividends_bar_{selected_stock_ticker}")
+                            st.plotly_chart(fig_div, config={"displayModeBar": False}, use_container_width=True, key=f"dividends_bar_{selected_stock_ticker}")
                         else:
                             st.info(f"Dividend-data saknar nödvändiga kolumner ('Year', 'Value') för {selected_stock_ticker}.")
                     else:
@@ -1463,7 +1463,7 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10),
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
-                    st.plotly_chart(fig_cagr, config={"displayModeBar": False}, width="stretch", key=f"cagr_bar_{selected_stock_ticker}")
+                    st.plotly_chart(fig_cagr, config={"displayModeBar": False}, use_container_width=True, key=f"cagr_bar_{selected_stock_ticker}")
                 with st.expander("**📊 Detaljerade tillväxtgrafer + TTM-signaler** (Klicka för att dölja)", expanded=True):
                     def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, ttm_diff_value,higher_is_better):
                         year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
@@ -1523,7 +1523,7 @@ try:
                                             margin=dict(l=10, r=10, t=30, b=10), 
                                             showlegend=False,
                                             xaxis=dict(type='category'))
-                            st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch", key=f"{key_prefix}_{base_ratio}_cagr_bar")
+                            st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True, key=f"{key_prefix}_{base_ratio}_cagr_bar")
                     left_col, middle_col, right_col = st.columns(3, gap='medium', border=False)
                     base_ratio_left = allCols_AvgGrowth[0].replace("_AvgGrowth", "")  # Use the first column as base for left side
                     base_ratio_middle = allCols_AvgGrowth[1].replace("_AvgGrowth", "")  # Use the second column as base for middle
@@ -1666,7 +1666,7 @@ try:
                     for trace in fig.data:
                         trace.update(hoverinfo="skip", hovertemplate=None)
 
-                    st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
+                    st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
                 else:
                     st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
 
@@ -1695,7 +1695,7 @@ try:
                             margin=dict(l=10, r=10, t=40, b=10),
                             yaxis=dict(ticksuffix="%", tickformat=".0f")
                         )
-                        st.plotly_chart(fig_pct, config={"displayModeBar": False}, width="stretch", key=f"pct_bar_{selected_stock_ticker}")
+                        st.plotly_chart(fig_pct, config={"displayModeBar": False}, use_container_width=True, key=f"pct_bar_{selected_stock_ticker}")
 
             
         with st.container(border=True, key="ratios_container"):
@@ -1998,7 +1998,7 @@ try:
                                                         margin=dict(l=10, r=10, t=30, b=10),
                                                         showlegend=False,
                                                         xaxis=dict(type='category'))
-                                        st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch", key=f"{cat}_{base_ratio}_bar")
+                                        st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True, key=f"{cat}_{base_ratio}_bar")
                                         #latest_rank = df_new_ranks.loc[selected_stock_ticker, latest_rank_col] if latest_rank_col in df_new_ranks.columns else 'N/A'
                                         #trend_rank = df_new_ranks.loc[selected_stock_ticker, trend_rank_col] if trend_rank_col in df_new_ranks.columns else 'N/A'
                                     else:
@@ -2203,7 +2203,7 @@ try:
                             height=400,
                             margin=dict(l=10, r=10, t=40, b=10)
                         )
-                        st.plotly_chart(scatter_fig, config={"displayModeBar": False}, width="stretch", key=f"scatter_{display_ratio}_{display_rank}")
+                        st.plotly_chart(scatter_fig, config={"displayModeBar": False}, use_container_width=True, key=f"scatter_{display_ratio}_{display_rank}")
                         with st.expander(f"🛟 **Hjälp om  {{display_ratio_selector}}_{ratio_to_rank_map_temp}** (Klicka för att visa)"):
                             st.write(get_ratio_help_text(f"{display_ratio_selector}_{ratio_to_rank_map_temp}"))
 
