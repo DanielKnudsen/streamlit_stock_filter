@@ -354,6 +354,13 @@ def color_progress(val):
             return f'background-color: {cr["color"]}'
     return ''
 
+# Instead of storing SMAs, calculate them in the app
+def add_moving_averages(df, short_window=config['SMA_short'], medium_window=config['SMA_medium'], long_window=config['SMA_long']):
+    df['SMA_short'] = df['Close'].rolling(window=short_window).mean()
+    df['SMA_medium'] = df['Close'].rolling(window=medium_window).mean() 
+    df['SMA_long'] = df['Close'].rolling(window=long_window).mean()
+    return df
+
 def create_slider(df, column_name, display_name_func, tooltip_func, step=1.0, format_str="%d%%"):
     """
     Skapar en Streamlit-slider för en given kolumn i en DataFrame.
@@ -1557,7 +1564,7 @@ try:
                     df_price_all = pd.read_csv(price_file_path)
                     df_price = df_price_all[df_price_all['Ticker'] == selected_stock_ticker].copy()
                     df_price['Date'] = pd.to_datetime(df_price['Date']) # Convert 'Date' to datetime object
-
+                    df_price = add_moving_averages(df_price)
                     # PWLF calculation
                     x_hat = None
                     y_hat = None
