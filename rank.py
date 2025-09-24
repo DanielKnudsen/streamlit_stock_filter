@@ -864,6 +864,13 @@ def trim_unused_columns(final_results: pd.DataFrame, config: dict) -> pd.DataFra
     final_result_trimmed = final_results[keep_cols].copy()
     return final_result_trimmed
 
+def reduce_price_data(read_from: str, save_to: str, columns: List[str]):
+    # round price data to only two decimals and keep only necessary columns
+    
+    df = pd.read_csv(read_from, usecols=columns)
+    df = df.round(2)    
+    df.to_csv(save_to, index=False)
+
 # --- Main Execution ---
 
 if __name__ == "__main__":
@@ -918,11 +925,18 @@ if __name__ == "__main__":
             if FETCH_DATA == "Yes":
                 print("Fetching stock price data...")
                 get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],
-                           valid_tickers,config["price_data_years"],CSV_PATH / config["price_data_file"])
+                           valid_tickers,config["price_data_years"],CSV_PATH / config["price_data_file_raw"])
             
             save_last_SMA_to_csv(
-                read_from=CSV_PATH / config["price_data_file"],
+                read_from=CSV_PATH / config["price_data_file_raw"],
                 save_to=CSV_PATH / "last_SMA.csv"
+            )
+
+            # reduce price data to only necessary columns
+            reduce_price_data(
+                read_from=CSV_PATH / config["price_data_file_raw"],
+                save_to=CSV_PATH / config["price_data_file"],
+                columns=['Date','Close','Volume','Ticker']
             )
 
             # Step 3: Calculate ratios and rankings

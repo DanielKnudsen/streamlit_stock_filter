@@ -2,6 +2,7 @@
 input_ticker_file: "tickers_list.csv" # test file ends with "_test.csv" for limited set of tickers
 results_file: "stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
+price_data_file_raw: "price_data_raw.csv"
 
 # Inställningar för datainhämtning
 data_fetch_years: 4 # Antal år av finansiella data som ska hämtas
