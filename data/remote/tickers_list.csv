@@ -247,7 +247,6 @@ KAR,Karnov Group,Industri,MidCap
 MILDEF,MilDef Group,Industri,MidCap
 MMGR-B,Momentum Group B,Industri,MidCap
 NMAN,Nederman Holding,Industri,MidCap
-NOTE,Note,Industri,MidCap
 PCELL,PowerCell Sweden,Industri,MidCap
 REJL-B,Rejlers B,Industri,MidCap
 SDIP-B,Sdiptech B,Industri,MidCap
@@ -258,7 +257,6 @@ XANO-B,XANO Industri B,Industri,MidCap
 ARISE,Arise,Kraft,MidCap
 ARP,Arctic Paper,Råvaror,MidCap
 BEIA-B,Beijer Alma B,Råvaror,MidCap
-NPAPER,Nordic Paper Holding AB,Råvaror,MidCap
 RROS,Rottneros,Råvaror,MidCap
 VISC,Viscaria,Råvaror,MidCap
 ACAD,AcadeMedia,Sällanköpsvaror,MidCap
@@ -291,6 +289,7 @@ ENEA,Enea,Teknik,MidCap
 IAR-B,I.A.R Systems Group B,Teknik,MidCap
 KNOW,Knowit,Teknik,MidCap
 LIME,Lime Technologies,Teknik,MidCap
+NOTE,Note,Teknik,MidCap
 PRIC-B,Pricer B,Teknik,MidCap
 PACT,Proact IT Group,Teknik,MidCap
 HTRO,Hexatronic Group,Telekommunikation,MidCap
@@ -299,7 +298,6 @@ VPLAY-A,Viaplay Group A,Telekommunikation,MidCap
 VPLAY-B,Viaplay Group B,Telekommunikation,MidCap
 MSON-A,Midsona A,Dagligvaror,SmallCap
 MSON-B,Midsona B,Dagligvaror,SmallCap
-CTEK,CTEK,Energi,SmallCap
 MAHA-A,Maha Capital,Energi,SmallCap
 ACRI-A,Acrinova A,Fastigheter,SmallCap
 ACRI-B,Acrinova B,Fastigheter,SmallCap
@@ -349,6 +347,7 @@ BALCO,Balco Group,Industri,SmallCap
 BERNER-B,Berner Industrier B,Industri,SmallCap
 BONG,Bong,Industri,SmallCap
 CNCJO-B,Concejo B,Industri,SmallCap
+CTEK,CTEK,Industri,SmallCap
 ELTEL,Eltel,Industri,SmallCap
 FNM,Ferronordic,Industri,SmallCap
 HAKI-A,HAKI Safety A,Industri,SmallCap
@@ -365,7 +364,6 @@ RAIL,Railcare Group,Industri,SmallCap
 SINT,Sintercast,Industri,SmallCap
 SVIK,Studsvik,Industri,SmallCap
 SVED-B,Svedbergs Group B,Industri,SmallCap
-TRANS,Transtema Group,Industri,SmallCap
 WTW-A,Wall to Wall Group A,Industri,SmallCap
 WISE,Wise Group,Industri,SmallCap
 WBGR-B,Wästbygg,Industri,SmallCap
@@ -406,6 +404,7 @@ TOBII,Tobii,Teknik,SmallCap
 TRAD,TradeDoubler,Teknik,SmallCap
 DORO,Doro,Telekommunikation,SmallCap
 OVZON,Ovzon,Telekommunikation,SmallCap
+TRANS,Transtema Group,Telekommunikation,SmallCap
 LEA,Lea Bank,Bank,FirstNorth
 CHEF,Cheffelo,Dagligvaror,FirstNorth
 VIVA,Viva Wine,Dagligvaror,FirstNorth
@@ -425,8 +424,9 @@ ALZCUR,AlzeCure Pharma,Hälsovård,FirstNorth
 BIOVIC-B,Biovica International B,Hälsovård,FirstNorth
 DVYSR,Devyser Diagnostics,Hälsovård,FirstNorth
 IMP-A-SDB,Implantica,Hälsovård,FirstNorth
-KAN,Kancera,Hälsovård,FirstNorth
+MEDS,Meds Apotek,Hälsovård,FirstNorth
 NANOFS,Nanoform Finland,Hälsovård,FirstNorth
+NOVKAN,Novakand Pharma,Hälsovård,FirstNorth
 PTRK,Physitrack,Hälsovård,FirstNorth
 SPEC,SpectraCure AB,Hälsovård,FirstNorth
 SPRINT,Sprint Bioscience,Hälsovård,FirstNorth
@@ -516,6 +516,7 @@ NAIG-B,Nordic Asia Investment Group 1987,Finansiella tjänster,FirstNorthPremier
 NFGAB,Nordic Flanges Group,Finansiella tjänster,FirstNorthPremier
 SFL,Safello Group,Finansiella tjänster,FirstNorthPremier
 YIELD,SaveLend Group,Finansiella tjänster,FirstNorthPremier
+TEQ,Teqnion,Finansiella tjänster,FirstNorthPremier
 VH,Västra Hamnen Corporate Finance,Finansiella tjänster,FirstNorthPremier
 WRV,Webrock Ventures,Finansiella tjänster,FirstNorthPremier
 2CUREX,2cureX,Hälsovård,FirstNorthPremier
@@ -557,9 +558,7 @@ LNFI,LN Future Invest,Hälsovård,FirstNorthPremier
 LARK,Lärkberget,Hälsovård,FirstNorthPremier
 MAGLE,Magle Chemoswed,Hälsovård,FirstNorthPremier
 MAGNA,Magnasense,Hälsovård,FirstNorthPremier
-MEDHLP,MedHelp Care,Hälsovård,FirstNorthPremier
 MODTX,Modus Therapeutics,Hälsovård,FirstNorthPremier
-MODTX-BTU,Modus Therapeutics Holding AB BTU,Hälsovård,FirstNorthPremier
 NANEXA,Nanexa,Hälsovård,FirstNorthPremier
 NANECH,NanoEcho,Hälsovård,FirstNorthPremier
 NEOLA,Neola Medical,Hälsovård,FirstNorthPremier
@@ -632,7 +631,6 @@ SIBEK,Sibek,Industri,FirstNorthPremier
 SILEON,Sileon,Industri,FirstNorthPremier
 SEYE,Smart Eye,Industri,FirstNorthPremier
 SUMMAS,Summa Defence,Industri,FirstNorthPremier
-TEQ,Teqnion,Industri,FirstNorthPremier
 TERNOR,Terranor Group,Industri,FirstNorthPremier
 TRAIN-B,Train Alliance B,Industri,FirstNorthPremier
 VSSAB-B,Viking Supply Ships B,Industri,FirstNorthPremier
@@ -691,7 +689,6 @@ NBZ,Northbaze Group,Sällanköpsvaror,FirstNorthPremier
 OBAB,Online Brands Nordic,Sällanköpsvaror,FirstNorthPremier
 QIIWI,Qiiwi Games,Sällanköpsvaror,FirstNorthPremier
 REALFI,RealFiction,Sällanköpsvaror,FirstNorthPremier
-REALFI-BTU,Realfiction Holding AB BTU,Sällanköpsvaror,FirstNorthPremier
 REFINE,Refine Group,Sällanköpsvaror,FirstNorthPremier
 SBOK,ScandBook Holding,Sällanköpsvaror,FirstNorthPremier
 SCOUT,Scout Gaming Group,Sällanköpsvaror,FirstNorthPremier
@@ -729,7 +726,6 @@ FLOWS,Flowscape Technology,Teknik,FirstNorthPremier
 FRAM-B,Fram Skandinavien B,Teknik,FirstNorthPremier
 GENI,Generic Sweden,Teknik,FirstNorthPremier
 GREAT,Greater Than,Teknik,FirstNorthPremier
-HDW-B,H&D Wireless Sweden Holding B,Teknik,FirstNorthPremier
 HIFA-B,Hifab B,Teknik,FirstNorthPremier
 INSP,Insplorion,Teknik,FirstNorthPremier
 IRIS,Irisity,Teknik,FirstNorthPremier
@@ -748,7 +744,6 @@ OPTER,Opter,Teknik,FirstNorthPremier
 QLOSR-B,Qlosr Group B,Teknik,FirstNorthPremier
 QCORE,Qlucore,Teknik,FirstNorthPremier
 RPLAN,Ranplan Group,Teknik,FirstNorthPremier
-RIGHTB,RightBridge Ventures Group,Teknik,FirstNorthPremier
 SFTR,Safeture,Teknik,FirstNorthPremier
 SONE,Sonetel,Teknik,FirstNorthPremier
 SPEONE,SpectrumOne,Teknik,FirstNorthPremier
