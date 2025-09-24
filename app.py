@@ -74,7 +74,7 @@ with st.container(border=True):
                 border-radius: 10px; color: white; margin-bottom: 20px;">
         <h1 style="color: white; margin-bottom: 15px;">✨ Välkommen till Indicatum Insights! ✨</h1>
         <h3 style="color: #f0f0f0; font-weight: normal; margin-bottom: 20px;">
-            Hitta morgondagens vinnare innan marknaden gör det
+            Förkorta din research. Förbättra dina edge.
         </h3>
         <p style="font-size: 18px; color: #e0e0e0;">
             Smart filtrering + djup analys = bättre investeringsbeslut
@@ -256,13 +256,7 @@ if user and ENABLE_AUTHENTICATION:
 
 with st.container(border=True):
     
-    # Header section
-    st.markdown("""
-    <div style="text-align: center; padding: 25px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%); 
-                border-radius: 15px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <h3 style="color: #343a40; margin-bottom: 25px; font-weight: 600;">🚀 Din väg till smarta investeringar</h3>
-    </div>
-    """, unsafe_allow_html=True)
+
     
     # Three-step workflow cards using Streamlit columns
     col1, col2, col3 = st.columns(3, gap="medium")
