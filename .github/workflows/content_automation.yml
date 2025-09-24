@@ -28,7 +28,7 @@ jobs:
     - name: Checkout with LFS
       uses: actions/checkout@v4
       with:
-        lfs: true
+        lfs: false
         token: ${{ secrets.PAT }}
     
     - name: Configure Git LFS
