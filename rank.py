@@ -938,6 +938,13 @@ if __name__ == "__main__":
                 save_to=CSV_PATH / config["price_data_file"],
                 columns=['Date','Close','Volume','Ticker']
             )
+            
+            # Clean up: Remove the raw price data file as it's no longer needed
+            import os
+            raw_file_path = CSV_PATH / config["price_data_file_raw"]
+            if raw_file_path.exists():
+                os.remove(raw_file_path)
+                print(f"Cleaned up raw price data file: {raw_file_path}")
 
             # Step 3: Calculate ratios and rankings
             # Define which keys are needed for ratio calculations
