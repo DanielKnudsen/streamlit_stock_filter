@@ -7,6 +7,7 @@ def get_price_data(
     SMA_short: int,
     SMA_medium: int,
     SMA_long: int,
+    SMA_sector: int,
     tickers: List[str],
     data_fetch_years: int,
     price_data_file_path: str
@@ -42,6 +43,8 @@ def get_price_data(
             df_price_data['SMA_short'] = df_price_data['Close'].rolling(window=SMA_short).mean()
             df_price_data['SMA_medium'] = df_price_data['Close'].rolling(window=SMA_medium).mean()
             df_price_data['SMA_long'] = df_price_data['Close'].rolling(window=SMA_long).mean()
+            # Calculate percent change for SMA_sector
+            df_price_data['pct_ch_20_d'] = df_price_data['Close'].pct_change(periods=SMA_sector) * 100
             # Calculate percent differences
             df_price_data['pct_SMA_medium_vs_SMA_long'] = (((df_price_data['SMA_medium'] - df_price_data['SMA_long']) / df_price_data['SMA_long']) * 100).fillna(0)
             df_price_data['pct_SMA_short_vs_SMA_medium'] = (((df_price_data['SMA_short'] - df_price_data['SMA_medium']) / df_price_data['SMA_medium']) * 100).fillna(0)
