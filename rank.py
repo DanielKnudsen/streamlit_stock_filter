@@ -315,7 +315,7 @@ def save_last_SMA_to_csv(read_from: str, save_to: str) -> None:
         df = load_csv(read_from, index_col='Date', parse_dates=True)
         if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns and 'Close' in df.columns:
             # Get the latest row for each ticker
-            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long']]
+            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long','pct_ch_20_d']]
             # Calculate CAGR for each ticker
             cagr_list = []
             for ticker, group in df.groupby('Ticker'):
@@ -583,6 +583,15 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     Returns:
         pd.DataFrame: Post-processed DataFrame.
     """
+    def group_by_sector(column: str) -> pd.Series:
+        """ 
+        Group by sector and calculate mean for the specified column
+        Calculate the difference between each value and the sector mean
+        Return two columns: one with the sector mean and one with the difference
+        """
+        sector_mean = final_df.groupby('Sektor')[column].transform('mean')
+        return sector_mean, final_df[column] - sector_mean
+
     def get_quarter(dt):
         if pd.isnull(dt):
             return None
@@ -621,6 +630,17 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
         
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
+    final_df = final_df.assign(
+        pct_ch_20_d_mean=group_by_sector('pct_ch_20_d')[0],
+        pct_ch_20_d_diff=group_by_sector('pct_ch_20_d')[1],
+        TTM_clusterRank_sector_mean=group_by_sector('TTM_clusterRank')[0],
+        TTM_clusterRank_sector_diff=group_by_sector('TTM_clusterRank')[1],
+        Latest_clusterRank_mean=group_by_sector('Latest_clusterRank')[0],
+        Latest_clusterRank_diff=group_by_sector('Latest_clusterRank')[1]
+    )
+    final_df['TTM_diff_vs_pct_ch_20_d_diff'] = final_df['TTM_clusterRank_sector_diff'] - final_df['pct_ch_20_d_diff']
+    final_df['Latest_diff_vs_pct_ch_20_d_diff'] = final_df['Latest_clusterRank_diff'] - final_df['pct_ch_20_d_diff']
+
     for col in final_df.columns:
         if "Rank" in col:
             final_df[col] = final_df[col].round(rank_decimals)
@@ -924,20 +944,20 @@ if __name__ == "__main__":
             
             if FETCH_DATA == "Yes":
                 print("Fetching stock price data...")
-                get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],
+                get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],config['SMA_sector'],
                            valid_tickers,config["price_data_years"],CSV_PATH / config["price_data_file_raw"])
             
-            save_last_SMA_to_csv(
-                read_from=CSV_PATH / config["price_data_file_raw"],
-                save_to=CSV_PATH / "last_SMA.csv"
-            )
+                save_last_SMA_to_csv(
+                    read_from=CSV_PATH / config["price_data_file_raw"],
+                    save_to=CSV_PATH / "last_SMA.csv"
+                )
 
-            # reduce price data to only necessary columns
-            reduce_price_data(
-                read_from=CSV_PATH / config["price_data_file_raw"],
-                save_to=CSV_PATH / config["price_data_file"],
-                columns=['Date','Close','Volume','Ticker']
-            )
+                # reduce price data to only necessary columns
+                reduce_price_data(
+                    read_from=CSV_PATH / config["price_data_file_raw"],
+                    save_to=CSV_PATH / config["price_data_file"],
+                    columns=['Date','Close','Volume','Ticker']
+                )
             
             # Clean up: Remove the raw price data file as it's no longer needed
             import os

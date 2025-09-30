@@ -14,6 +14,7 @@ rank_decimals: 1
 
 # Inställningar för glidande medelvärden
 SMA_short: 10
+SMA_sector: 20
 SMA_medium: 50
 SMA_long: 200
 
