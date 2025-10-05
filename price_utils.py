@@ -14,7 +14,7 @@ def save_last_SMA_to_csv(read_from: str, save_to: str) -> None:
         df = load_csv(read_from, index_col='Date', parse_dates=True)
         if 'SMA_short' in df.columns and 'SMA_medium' in df.columns and 'SMA_long' in df.columns and 'Ticker' in df.columns and 'Close' in df.columns:
             # Get the latest row for each ticker
-            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long','pct_ch_20_d']]
+            last_rows = df.groupby('Ticker').tail(1)[['Ticker', 'pct_Close_vs_SMA_short', 'pct_SMA_short_vs_SMA_medium', 'pct_SMA_medium_vs_SMA_long','pct_ch_1_m','pct_ch_3_m']]
             # Calculate CAGR for each ticker
             cagr_list = []
             for ticker, group in df.groupby('Ticker'):

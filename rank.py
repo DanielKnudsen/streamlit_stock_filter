@@ -9,7 +9,7 @@ from io_utils import load_yaml, load_csv, save_csv, load_pickle, save_pickle
 from data_fetcher import read_tickers_from_csv, get_price_data, get_raw_financial_data
 from ratios import calculate_all_ratios
 from ranking import create_ratios_to_ranks
-from config_utils import load_config, CSV_PATH, ENVIRONMENT, FETCH_DATA
+from config_utils import load_config, CSV_PATH, ENVIRONMENT, FETCH_PRICE_DATA, FETCH_FUNDAMENTAL_DATA
 from results_processing import combine_all_results,post_processing, trim_unused_columns, summarize_quarterly_data_to_yearly
 from data_io import (save_results_to_csv, save_raw_data_to_csv, 
                      save_longBusinessSummary_to_csv, save_market_cap_to_csv,
@@ -42,7 +42,7 @@ if __name__ == "__main__":
                 print("No tickers found in the file. Exiting.")
                 exit(1)
 
-            if FETCH_DATA == "Yes":
+            if FETCH_FUNDAMENTAL_DATA == "Yes":
                 raw_financial_data, raw_financial_data_quarterly, raw_financial_info, raw_financial_data_dividends, valid_tickers = get_raw_financial_data(tickers, config["data_fetch_years"], config["data_fetch_quarterly"])
                 if ENVIRONMENT == "local":
                     save_pickle(raw_financial_data, CSV_PATH / "raw_financial_data.pkl")
@@ -74,29 +74,12 @@ if __name__ == "__main__":
             save_market_cap_to_csv(raw_financial_data, CSV_PATH / "market_cap.csv")
             # Step 2: Fetch and process stock price data
             
-            if FETCH_DATA == "Yes":
+            if FETCH_PRICE_DATA == "Yes":
                 print("Fetching stock price data...")
-                get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],config['SMA_sector'],
-                           valid_tickers,config["price_data_years"],CSV_PATH / config["price_data_file_raw"])
-            
-                save_last_SMA_to_csv(
-                    read_from=CSV_PATH / config["price_data_file_raw"],
-                    save_to=CSV_PATH / "last_SMA.csv"
-                )
-
-                # reduce price data to only necessary columns
-                reduce_price_data(
-                    read_from=CSV_PATH / config["price_data_file_raw"],
-                    save_to=CSV_PATH / config["price_data_file"],
-                    columns=['Date','Close','Volume','Ticker']
-                )
-            
-                # Clean up: Remove the raw price data file as it's no longer needed
-
-                raw_file_path = CSV_PATH / config["price_data_file_raw"]
-                if raw_file_path.exists():
-                    os.remove(raw_file_path)
-                    print(f"Cleaned up raw price data file: {raw_file_path}")
+                get_price_data(config["SMA_short"],config["SMA_medium"], config["SMA_long"],config['SMA_1_month'],config['SMA_3_month'],
+                           valid_tickers,config["price_data_years"],
+                           CSV_PATH / config["price_data_file_raw"], 
+                           CSV_PATH / config["price_data_file"])
 
             # Step 3: Calculate ratios and rankings
             # Define which keys are needed for ratio calculations
