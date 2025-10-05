@@ -2,15 +2,19 @@ import yfinance as yf
 import pandas as pd
 from tqdm import tqdm
 from typing import List, Dict, Optional, Tuple, Any
+from price_utils import save_last_SMA_to_csv
+from config_utils import CSV_PATH, config
 
 def get_price_data(
     SMA_short: int,
     SMA_medium: int,
     SMA_long: int,
-    SMA_sector: int,
+    SMA_1_month: int,
+    SMA_3_month: int,
     tickers: List[str],
     data_fetch_years: int,
-    price_data_file_path: str
+    price_data_file_raw_file_path: str,
+    price_data_file_path: str,
 ) -> None:
     """
     Fetch and save stock price data and moving averages for a list of tickers.
@@ -43,8 +47,10 @@ def get_price_data(
             df_price_data['SMA_short'] = df_price_data['Close'].rolling(window=SMA_short).mean()
             df_price_data['SMA_medium'] = df_price_data['Close'].rolling(window=SMA_medium).mean()
             df_price_data['SMA_long'] = df_price_data['Close'].rolling(window=SMA_long).mean()
-            # Calculate percent change for SMA_sector
-            df_price_data['pct_ch_20_d'] = df_price_data['Close'].pct_change(periods=SMA_sector) * 100
+
+            # Calculate percent change for SMA_1_month and SMA_3_month
+            df_price_data['pct_ch_1_m'] = df_price_data['Close'].pct_change(periods=SMA_1_month) * 100
+            df_price_data['pct_ch_3_m'] = df_price_data['Close'].pct_change(periods=SMA_3_month) * 100
             # Calculate percent differences
             df_price_data['pct_SMA_medium_vs_SMA_long'] = (((df_price_data['SMA_medium'] - df_price_data['SMA_long']) / df_price_data['SMA_long']) * 100).fillna(0)
             df_price_data['pct_SMA_short_vs_SMA_medium'] = (((df_price_data['SMA_short'] - df_price_data['SMA_medium']) / df_price_data['SMA_medium']) * 100).fillna(0)
@@ -54,7 +60,23 @@ def get_price_data(
             print(f"Fel vid hämtning av data för {yf_ticker}: {str(e)}")
     if df_complete.empty:
         print("Ingen prisdata hämtad för några tickers.")
-    df_complete.to_csv(price_data_file_path, index=True)
+    # save raw complete price data
+    df_complete.to_csv(price_data_file_raw_file_path, index=True)
+
+    save_last_SMA_to_csv(
+                    read_from=CSV_PATH / config["price_data_file_raw"],
+                    save_to=CSV_PATH / "last_SMA.csv"
+                )
+
+    # save reduced price data
+    df_complete.reset_index()[['Date','Close','Volume','Ticker']].to_csv(price_data_file_path, index=True)
+
+    # Clean up: Remove the raw price data file as it's no longer needed
+    raw_file_path = CSV_PATH / config["price_data_file_raw"]
+    if raw_file_path.exists():
+        os.remove(raw_file_path)
+        print(f"Cleaned up raw price data file: {raw_file_path}")
+
 
 def get_raw_financial_data(tickers, years, quarters) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], set]:
     """
