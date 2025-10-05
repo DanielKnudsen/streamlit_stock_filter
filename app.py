@@ -449,7 +449,15 @@ try:
     latest_columns = [col for col in rank_score_columns if "latest" in col.lower()]
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
     ttm_columns = [col for col in rank_score_columns if "ttm" in col.lower()]
-    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights','QuarterDiff','TTM_clusterRank_sector_mean','TTM_clusterRank_sector_diff','pct_ch_20_d','TTM_diff_vs_pct_ch_20_d_diff','Latest_diff_vs_pct_ch_20_d_diff']  # Include total scores
+    rank_score_columns = rank_score_columns + ['Latest_clusterRank', 
+                                               'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights',
+                                               'QuarterDiff',
+                                               'TTM_sector_diffclusterRank',
+                                               'TTM_sector_meanclusterRank','pct_ch_1_m',
+                                               'pct_ch_3_m','TTM_diff_vs_pct_ch_1_m_diff',
+                                               'Latest_diff_vs_pct_ch_1_m_diff',
+                                               'TTM_diff_vs_pct_ch_3_m_diff',
+                                               'Latest_diff_vs_pct_ch_3_m_diff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
     
@@ -1475,7 +1483,7 @@ try:
                             values = df.loc[selected_stock_ticker, year_cols_last4].values.astype(float)
                             years = [int(col.split('_')[-1]) for col in year_cols_last4]
                             fig = go.Figure()
-                            colors = ['lightblue'] * (len(years) - 1) + ['royalblue']
+                            colors = ['royalblue'] * len(years)
                             bar_text = [f"{human_format(v)}" for v in values]
                             if ttm_value is not None:
                                 colors.append('gold')
@@ -1732,6 +1740,7 @@ try:
                 # Merge the trend and latest DataFrames on 'Kategori'
                 df_catRank_merged = pd.merge(df_trend_combined, df_latest_combined, on='Kategori', suffixes=('_trend', '_latest'))
                 df_catRank_merged = pd.merge(df_catRank_merged, df_ttm_combined, on='Kategori', suffixes=('', '_ttm'))
+
                 # -------------------------------------------------------------
                 # PROGRESS BARS: LATEST AND TREND RANKINGS
                 # -------------------------------------------------------------
@@ -1917,7 +1926,7 @@ try:
                                         for col in quarter_cols_last2:
                                             quarter_str = col.split('_')[-1]
                                             years_numeric.append(quarter_to_numeric(quarter_str))
-                                            years_labels.append(quarter_str)
+                                            years_labels.append(quarter_str+'TTM')
                                         
                                         years = years_numeric  # for calculations
                                         years_display = years_labels  # for display
@@ -1938,10 +1947,13 @@ try:
                                             continue
                                         
                                         bar_colors = (
-                                            ['lightblue'] * (len(year_cols_last4) - 1) +
-                                            ['royalblue'] +
-                                            ['gold'] * len(quarter_cols_last2)
-                                        )[:len(values)]  # Adjust colors to match actual data length
+                                            ['royalblue'] * len(year_cols_last4) + ['gold'] * (len(quarter_cols_last2)-1) + ['gold']
+                                        )
+                                        bar_patterns = ['' for _ in range(len(year_cols_last4) + len(quarter_cols_last2))]
+                                        if len(bar_patterns) > 0:
+                                            if len(bar_patterns) >= 2:
+                                                bar_patterns[-2] = '/'
+                                        bar_colors = bar_colors[:len(values)]  # Adjust colors to match actual data length
                                         # Prepare bar data: years + quarters (variable length)
                                         bar_x = years_display
                                         bar_y = list(values)
@@ -1952,7 +1964,7 @@ try:
                                         # st.write("bar_colors:", bar_colors)
                                         fig = go.Figure()
                                         # Add bars for 4 years + ttm (if present)
-                                        fig.add_trace(go.Bar(x=bar_x, y=bar_y, marker_color=bar_colors, name=base_ratio, showlegend=False, text=bar_text, textposition='auto'))
+                                        fig.add_trace(go.Bar(x=bar_x, y=bar_y, marker_color=bar_colors, marker_pattern_shape=bar_patterns, name=base_ratio, showlegend=False, text=bar_text, textposition='auto'))
                                         # Add trend line (only for the 4 years)
                                         if len(years) > 1:
                                             # Only fit the trend line to the first 4 items (years, not quarters)

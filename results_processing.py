@@ -194,15 +194,22 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
     final_df = final_df.assign(
-        pct_ch_20_d_mean=group_by_sector('pct_ch_20_d')[0],
-        pct_ch_20_d_diff=group_by_sector('pct_ch_20_d')[1],
-        TTM_clusterRank_sector_mean=group_by_sector('TTM_clusterRank')[0],
-        TTM_clusterRank_sector_diff=group_by_sector('TTM_clusterRank')[1],
-        Latest_clusterRank_mean=group_by_sector('Latest_clusterRank')[0],
-        Latest_clusterRank_diff=group_by_sector('Latest_clusterRank')[1]
+        pct_ch_1_m_mean=group_by_sector('pct_ch_1_m')[0],
+        pct_ch_1_m_diff=group_by_sector('pct_ch_1_m')[1],
+        pct_ch_3_m_mean=group_by_sector('pct_ch_3_m')[0],
+        pct_ch_3_m_diff=group_by_sector('pct_ch_3_m')[1],
+        TTM_sector_meanclusterRank=group_by_sector('TTM_clusterRank')[0],
+        TTM_sector_diffclusterRank=group_by_sector('TTM_clusterRank')[1],
+        Latest_sector_meanclusterRank=group_by_sector('Latest_clusterRank')[0],
+        Latest_sector_diffclusterRank=group_by_sector('Latest_clusterRank')[1]
     )
-    final_df['TTM_diff_vs_pct_ch_20_d_diff'] = final_df['TTM_clusterRank_sector_diff'] - final_df['pct_ch_20_d_diff']
-    final_df['Latest_diff_vs_pct_ch_20_d_diff'] = final_df['Latest_clusterRank_diff'] - final_df['pct_ch_20_d_diff']
+    # Calculate differences between sector rank and price change 1 month
+    final_df['TTM_diff_vs_pct_ch_1_m_diff'] = final_df['TTM_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
+    final_df['Latest_diff_vs_pct_ch_1_m_diff'] = final_df['Latest_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
+
+    # Calculate differences between sector rank and price change 3 months
+    final_df['TTM_diff_vs_pct_ch_3_m_diff'] = final_df['TTM_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
+    final_df['Latest_diff_vs_pct_ch_3_m_diff'] = final_df['Latest_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
 
     for col in final_df.columns:
         if "Rank" in col:

@@ -19,7 +19,9 @@ def load_config(config_file_path: str) -> Optional[Dict[str, Any]]:
 
 # Bestäm miljön (default till 'local')
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
-FETCH_DATA = os.getenv('FETCH_DATA', 'Yes')
+FETCH_PRICE_DATA = os.getenv('FETCH_PRICE_DATA', 'Yes')
+FETCH_FUNDAMENTAL_DATA = os.getenv('FETCH_FUNDAMENTAL_DATA', 'Yes')
+
 config = load_config("rank-config.yaml")
 # Välj CSV-path
 CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
