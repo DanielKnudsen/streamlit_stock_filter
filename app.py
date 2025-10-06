@@ -450,7 +450,9 @@ try:
     trend_columns = [col for col in rank_score_columns if "trend" in col.lower()]
     ttm_columns = [col for col in rank_score_columns if "ttm" in col.lower()]
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 
-                                               'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights',
+                                               'Trend_clusterRank', 
+                                               'Lista',
+                                               'personal_weights',
                                                'QuarterDiff',
                                                'TTM_clusterRank',
                                                 'TTM_sector_meanclusterRank',
@@ -1150,7 +1152,7 @@ try:
 
             cols = df_display.columns.tolist()
             cols.insert(0, cols.pop(cols.index('Lista')))
-            cols.insert(0, cols.pop(cols.index('Agg. Rank ttm diff')))
+            #cols.insert(0, cols.pop(cols.index('Agg. Rank ttm diff')))
             cols.insert(0, cols.pop(cols.index('Agg. Rank sen. året'))) 
             cols.insert(0, cols.pop(cols.index('Agg. Rank trend 4 år'))) 
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
@@ -1159,7 +1161,6 @@ try:
             df_display = df_display[cols]  # Reorder columns
             # Update rank_score_columns to reflect the new names for shortlist display
             display_rank_score_columns = df_display.columns.tolist()
-
             df_display = df_display[display_rank_score_columns]
             edited_df = st.data_editor(
                 df_display,
@@ -1568,12 +1569,31 @@ try:
                 label = "Antal linjesegment för trendlinje"
                 linjesegments =[1, 2, 3, 4, 5]
                 num_segments = st.segmented_control(label, linjesegments, selection_mode='single', default=1, key="pwlf_slider")
+                label = "Historik (år bakåt i tiden)"
+                linjesegments =[4,1, 0.5, 0.25] # years
+                historik_segments = st.segmented_control(label, linjesegments, selection_mode='single', default=4, key="historik_segments")
                 price_file_path = CSV_PATH / config["price_data_file"]
                 if price_file_path.exists():
                     df_price_all = pd.read_csv(price_file_path)
+                    df_price_all['Date'] = pd.to_datetime(df_price_all['Date']) # Convert 'Date' to datetime object before filtering
                     df_price = df_price_all[df_price_all['Ticker'] == selected_stock_ticker].copy()
-                    df_price['Date'] = pd.to_datetime(df_price['Date']) # Convert 'Date' to datetime object
                     df_price = add_moving_averages(df_price)
+                    # Cap data to historik_segments years back
+                    if not df_price.empty and historik_segments:
+                        max_date = df_price['Date'].max()
+                        # Use days for fractional years to avoid DateOffset ambiguity
+                        try:
+                            years_float = float(historik_segments)
+                            if years_float.is_integer():
+                                min_date = max_date - pd.DateOffset(years=int(years_float))
+                            else:
+                                # Approximate 1 year as 365.25 days
+                                days = int(years_float * 365.25)
+                                min_date = max_date - pd.DateOffset(days=days)
+                        except Exception as e:
+                            min_date = max_date - pd.DateOffset(years=1)  # fallback to 1 year
+                        df_price = df_price[df_price['Date'] >= min_date]
+                    #df_price = add_moving_averages(df_price)
                     # PWLF calculation
                     x_hat = None
                     y_hat = None
