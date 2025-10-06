@@ -452,12 +452,13 @@ try:
     rank_score_columns = rank_score_columns + ['Latest_clusterRank', 
                                                'Trend_clusterRank', 'TTM_clusterRank', 'Lista','personal_weights',
                                                'QuarterDiff',
-                                               'TTM_sector_diffclusterRank',
-                                               'TTM_sector_meanclusterRank','pct_ch_1_m',
-                                               'pct_ch_3_m','TTM_diff_vs_pct_ch_1_m_diff',
-                                               'Latest_diff_vs_pct_ch_1_m_diff',
-                                               'TTM_diff_vs_pct_ch_3_m_diff',
-                                               'Latest_diff_vs_pct_ch_3_m_diff']  # Include total scores
+                                               'TTM_clusterRank',
+                                                'TTM_sector_meanclusterRank',
+                                                'TTM_sector_diffclusterRank',
+                                                'pct_ch_3_m', 
+                                                'pct_ch_3_m_mean', 
+                                                'pct_ch_3_m_diff',
+                                                'TTM_diff_vs_pct_ch_3_m_diff']  # Include total scores
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
     
