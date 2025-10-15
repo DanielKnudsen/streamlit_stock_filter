@@ -96,7 +96,7 @@ SWEC-B,Sweco B,Industri,LargeCap
 SYSR,Systemair,Industri,LargeCap
 8TRA,TRATON SE,Industri,LargeCap
 TREL-B,Trelleborg B,Industri,LargeCap
-VSURE,Verisure,Industri,LargeCap
+VSURE,Verisure (EUR),Industri,LargeCap
 VOLV-A,Volvo A,Industri,LargeCap
 VOLV-B,Volvo B,Industri,LargeCap
 ALLEI,Alleima,Råvaror,LargeCap
@@ -660,6 +660,7 @@ BIOEX,Bioextrax,Råvaror,FirstNorthPremier
 BOTX,Botnia Gold,Råvaror,FirstNorthPremier
 DMXSE-SDB,District Metals Corp SDB,Råvaror,FirstNorthPremier
 FNMC-SDB,First Nordic Metals,Råvaror,FirstNorthPremier
+GULD,Guldbrev Holding,Råvaror,FirstNorthPremier
 LEMSE,Leading Edge Materials Corp.,Råvaror,FirstNorthPremier
 LUC,Lucara Diamond Corp,Råvaror,FirstNorthPremier
 NIO,Nordic Iron Ore,Råvaror,FirstNorthPremier
