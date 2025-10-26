@@ -1,20 +1,23 @@
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 
 def create_ratios_to_ranks(
     calculated_ratios: dict,
     calculated_ratios_ttm_trends: dict,
     ratio_definitions: dict,
-    category_ratios: dict
+    category_ratios: dict,
+    config: dict = None
 ) -> dict:
     """
-    Calculate percentile ranks for financial ratios and temporal views for each ticker: 
-    - Trend 4 years (from annual reports) - Called trend
-        source: calculated_ratios, keys ending with '_year_trend_ratioValue'
-    - Change prev ttm to last ttm (from 2 latest ttm quarterly reports) - Called ttm
-        source: calculated_ratios_ttm_trends, keys ending with '_quarter_trend_ratioValue'
-    - Last ttm value (from latest ttm report) - Called latest
-        source: calculated_ratios_ttm_trends, keys ending with '_quarter_latest_ratioValue'
+    Calculate percentile ranks for financial ratios and temporal views for each ticker based on cluster configuration.
+    
+    Uses config['cluster'] to determine which periods to process:
+    - For data_source: "annual" - processes ratios from calculated_ratios
+    - For data_source: "quarterly" - processes ratios from calculated_ratios_ttm_trends
+    
+    Column naming follows pattern: {ratio}_{period_suffix}_{cluster_period}_ratioValue
+    where period_suffix is 'year' for annual data and 'quarter' for quarterly data.
 
     Then aggregate them by category, and compute cluster-level ranks.
 
@@ -26,116 +29,112 @@ def create_ratios_to_ranks(
     Args:
         calculated_ratios (dict):
             Dictionary mapping ticker symbols to their annual calculated ratios. Each value is a dict of ratio names to values.
-        calculated_ratios_quarterly_0 (dict):
-            Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
-        calculated_ratios_quarterly_1 (dict):
+        calculated_ratios_ttm_trends (dict):
             Dictionary mapping ticker symbols to their quarterly calculated ratios. Each value is a dict of ratio names to values.
         ratio_definitions (dict):
             Dictionary defining each ratio's properties, including whether a higher value is better (key: 'higher_is_better').
         category_ratios (dict):
             Dictionary mapping category names to lists of ratio names that belong to each category.
+        config (dict, optional):
+            Configuration containing cluster definitions. If None, uses legacy behavior.
 
     Returns:
         dict: Nested dictionary where each key is a ticker symbol and each value is a dict containing:
-            - Individual ratio ranks (e.g., 'PE_latest_ratioRank', 'PE_trend_ratioRank', 'PE_ttm_ratioRank')
+            - Individual ratio ranks (e.g., 'ROE_ttm_current_ratioRank', 'ROE_long_trend_ratioRank')
             - Aggregated category average and rank (e.g., 'Profitability_catAvg', 'Profitability_catRank')
-            - Cluster-level average and rank (e.g., 'Latest_clusterAvg', 'Latest_clusterRank')
+            - Cluster-level average and rank (e.g., 'ttm_current_clusterAvg', 'ttm_current_clusterRank')
 
     Example:
         >>> create_ratios_to_ranks(
-                {'AAPL': {'PE_latest_ratioValue': 20, ...}},
-                {'AAPL': {'PE_latest_ratioValue': 22, ...}},
-                {'PE': {'higher_is_better': False}},
-                {'Profitability': ['PE_latest_ratioRank', ...]}
+                {'HM-B': {'ROE_year_long_trend_ratioValue': 0.25, ...}},
+                {'AAK': {'ROE_quarter_ttm_current_ratioValue': 0.18, 'ROE_quarter_ttm_momentum_ratioValue': 0.02, ...}},
+                {'ROE': {'formula': 'Net_Income / Stockholders_Equity', 'higher_is_better': True, ...}},
+                {'Kvalitet_ttm_current_ratioRank': {'ROE_ttm_current_ratioRank': 1}, ...},
+                config
             )
         {'AAPL': {
-            'PE_latest_ratioRank': 80.0,
-            'PE_ttm_ratioRank': 75.0,
+            'ROE_ttm_current_ratioRank': 80.0,
+            'ROE_long_trend_ratioRank': 75.0,
             'Profitability_catAvg': 77.5,
             'Profitability_catRank': 90.0,
-            'Latest_clusterAvg': 77.5,
-            'Latest_clusterRank': 95.0,
+            'ttm_current_clusterAvg': 77.5,
+            'ttm_current_clusterRank': 95.0,
             ...
         }}
 
     Notes:
-        - Percentile ranks are on a 0-100 scale, with 100 being best (unless 'higher_is_better' is False).
-        - TTM (Trailing Twelve Months) values are computed as the difference between quarterly and annual values for each ratio.
+        - Percentile ranks are on a 0-100 scale, with 100 being best and uses 'higher_is_better' to get the ranking calculation correct.
         - NaN values are filled with 50 for ranking purposes.
-        - The function expects ratio keys to follow the naming convention: '<ratio>_latest_ratioValue', '<ratio>_trend_ratioValue', etc.
+        - The function expects ratio keys to follow the naming convention: '{ratio}_{period_suffix}_{cluster_period}_ratioValue'
     """
+    # Get cluster configuration and determine which periods to process
+    cluster_periods = []
+    if config and 'cluster' in config:
+        cluster_config = config['cluster']
+        if isinstance(cluster_config, dict):
+            cluster_periods = list(cluster_config.keys())
+        else:
+            # Legacy list format
+            cluster_periods = cluster_config
+    else:
+        # Fallback to new default period names
+        cluster_periods = ['ttm_current', 'long_trend', 'ttm_momentum']
+    
     ranked_ratios = {ticker: {} for ticker in calculated_ratios.keys()}
 
-    # Create DataFrame from calculated_ratios
-    df_year = pd.DataFrame.from_dict(calculated_ratios, orient='index')
-    df_year = df_year[df_year.columns[df_year.columns.str.endswith(('_year_trend_ratioValue'))]]
-
-    df_ttm = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
-    df_ttm = df_ttm[df_ttm.columns[df_ttm.columns.str.endswith(('_quarter_latest_ratioValue', '_quarter_trend_ratioValue'))]]
+    # Create combined DataFrame with all ratio data
+    df_annual = pd.DataFrame.from_dict(calculated_ratios, orient='index')
+    df_quarterly = pd.DataFrame.from_dict(calculated_ratios_ttm_trends, orient='index')
     
     # Merge annual and quarterly dataframes on index (Ticker)
-    df_merged = df_year.merge(df_ttm, how='outer', left_index=True, right_index=True, suffixes=('_year', '_quarter'))
+    df_merged = df_annual.merge(df_quarterly, how='outer', left_index=True, right_index=True)
 
-    # only keep columns ending with '_latest_ratioValue' or '_trend_ratioValue'
-    # df = df[df.columns[df.columns.str.endswith(('_latest_ratioValue', '_trend_ratioValue'))]]
-    # rename columns from '_latest_ratioValue' to '_latest' and '_trend_ratioValue' to '_trend'
-    df_merged.columns = df_merged.columns.str.replace('_quarter_latest_ratioValue', '_latest')
-    df_merged.columns = df_merged.columns.str.replace('_year_trend_ratioValue', '_trend')
-    df_merged.columns = df_merged.columns.str.replace('_quarter_trend_ratioValue', '_ttm')
-
-
-    """# only keep columns ending with '_latest_ratioValue' and rename to '_ttm'
-    df_quarterly = df_quarterly[df_quarterly.columns[df_quarterly.columns.str.endswith('_latest_ratioValue')]]
-    df_quarterly.columns = df_quarterly.columns.str.replace('_latest_ratioValue', '_ttm')   
-
-    # left join df_quarterly onto df where
-    df_merged = df.merge(df_quarterly, how='left', left_index=True, right_index=True, suffixes=('', '_quarterly'))
-    # sort column names
-    df_merged = df_merged.reindex(sorted(df_merged.columns), axis=1)
-
-    # go through the columns and calculate the diff between columns ending with *'_ttm' and column ending with *'_latest', call them *'_ttm_diff'
-    for col in df_merged.columns:
-        if col.endswith('_latest'):
-            base = col[:-7]  # remove '_latest'
-            ttm_col = base + '_ttm'
-            if ttm_col in df_merged.columns:
-                diff_col = base + '_ttm_diff'
-                df_merged[diff_col] = df_merged[ttm_col] - df_merged[col]
-
-    # drop columns ending with '_ttm' and rename columns ending with '_ttm_diff' to '_ttm' (this is to keep the column names consistent)
-    df_merged = df_merged.drop(columns=[col for col in df_merged.columns if col.endswith('_ttm')])
-    df_merged = df_merged.rename(columns={col: col.replace('_ttm_diff', '_ttm') for col in df_merged.columns if col.endswith('_ttm_diff')})"""
-
-    for column in df_merged.columns:
-        if column.endswith('_latest'):
-            ratio_name = column.replace('_latest', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_latest_ratioRank'] = rank if not pd.isna(rank) else np.nan
-        elif column.endswith('_trend'):
-            ratio_name = column.replace('_trend', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_trend_ratioRank'] = rank if not pd.isna(rank) else np.nan
-        elif column.endswith('_ttm'):
-            ratio_name = column.replace('_ttm', '')
-            is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-            ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
-            ranked = ranked.fillna(50)
-            for ticker, rank in ranked.items():
-                ranked_ratios[ticker][f'{ratio_name}_ttm_ratioRank'] = rank if not pd.isna(rank) else np.nan
+    # Process each cluster period
+    for period_name in cluster_periods:
+        # Find columns that match this cluster period pattern
+        period_columns = [col for col in df_merged.columns if f'_{period_name}_ratioValue' in col]
+        
+        for column in period_columns:
+            # Extract ratio name from column (e.g., 'ROE_year_long_trend_ratioValue' -> 'ROE')
+            if f'_{period_name}_ratioValue' in column:
+                # Remove the suffix to get ratio name
+                ratio_name = column.replace(f'_{period_name}_ratioValue', '')
+                
+                # Get ranking direction from ratio definition
+                is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
+                
+                # Calculate percentile ranks
+                ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
+                ranked = ranked.fillna(50)
+                
+                # Store ranks for each ticker
+                for ticker, rank in ranked.items():
+                    if ticker not in ranked_ratios:
+                        ranked_ratios[ticker] = {}
+                    ranked_ratios[ticker][f'{ratio_name}_{period_name}_ratioRank'] = rank if not pd.isna(rank) else np.nan
 
     aggregated_ranks = aggregate_category_ranks(ranked_ratios, category_ratios)
 
-    cluster_ranks = aggregate_cluster_ranks(aggregated_ranks)
+    cluster_ranks = aggregate_cluster_ranks(aggregated_ranks, cluster_periods)
 
     # combine ranked_ratios, aggregated_ranks and cluster_ranks
     # Merge all dicts per ticker so each ticker has all its data in a single nested dict
     complete_ranks = {}
+    sorted_ranked_ratios = {
+        ticker: OrderedDict(sorted(data.items()))
+        for ticker, data in ranked_ratios.items()
+    }
+    ranked_ratios = sorted_ranked_ratios
+    sorted_aggregated_ranks = {
+        ticker: OrderedDict(sorted(data.items()))
+        for ticker, data in aggregated_ranks.items()
+    }
+    aggregated_ranks = sorted_aggregated_ranks
+    sorted_cluster_ranks = {
+        ticker: OrderedDict(sorted(data.items()))
+        for ticker, data in cluster_ranks.items()
+    }
+    cluster_ranks = sorted_cluster_ranks
     tickers = set(ranked_ratios) | set(aggregated_ranks) | set(cluster_ranks)
     for ticker in tickers:
         complete_ranks[ticker] = {}
@@ -145,6 +144,10 @@ def create_ratios_to_ranks(
             complete_ranks[ticker].update(aggregated_ranks[ticker])
         if ticker in cluster_ranks:
             complete_ranks[ticker].update(cluster_ranks[ticker])
+    """sorted_complete_ranks = {
+        ticker: OrderedDict(sorted(data.items()))
+        for ticker, data in complete_ranks.items()
+    }"""
     return complete_ranks
 
 def aggregate_category_ranks(
@@ -179,21 +182,21 @@ def aggregate_category_ranks(
                 if rank_name in ratios:
                     if not pd.isna(rank_value):
                         category_score += rank_value
-                        num_ratios += ratios[rank_name]
+                        num_ratios += 1  # Count each ratio as 1, not ratios[rank_name]
             cat_avg_name = category.replace('_ratioRank', '')
             if num_ratios > 0:
                 ticker_scores[f'{cat_avg_name}_catAvg'] = category_score / num_ratios if num_ratios > 0 else np.nan
             else:
                 ticker_scores[f'{cat_avg_name}_catAvg'] = np.nan
-            if category.endswith('_latest_ratioRank'):
+            if category.endswith('_ttm_current_ratioRank'):
                 if not pd.isna(ticker_scores[f'{cat_avg_name}_catAvg']):
                     total_latest_score += ticker_scores[f'{cat_avg_name}_catAvg']
                     total_latest_weight += 1
-            elif category.endswith('_trend_ratioRank'):
+            elif category.endswith('_long_trend_ratioRank'):
                 if not pd.isna(ticker_scores[f'{cat_avg_name}_catAvg']):
                     total_trend_score += ticker_scores[f'{cat_avg_name}_catAvg']
                     total_trend_weight += 1
-            elif category.endswith('_ttm_ratioRank'):
+            elif category.endswith('_ttm_momentum_ratioRank'):
                 if not pd.isna(ticker_scores[f'{cat_avg_name}_catAvg']):
                     total_ttm_score += ticker_scores[f'{cat_avg_name}_catAvg']
                     total_ttm_weight += 1
@@ -207,35 +210,45 @@ def aggregate_category_ranks(
             df_agg[col_name] = ranks
     return df_agg.to_dict(orient='index')
 
-def aggregate_cluster_ranks(category_ranks: dict) -> dict:
+def aggregate_cluster_ranks(category_ranks: dict, cluster_periods: list = None) -> dict:
     """
     Aggregate category ranks into cluster ranks.
 
     Args:
         category_ranks (dict): Category ranks per ticker.
+        cluster_periods (list): List of period names from config.
 
     Returns:
         dict: Cluster ranks per ticker.
     """
+    # Default to legacy periods if not provided
+    if cluster_periods is None:
+        cluster_periods = ['ttm_current', 'long_trend', 'ttm_momentum']
+    
     results = []
     for ticker, subdict in category_ranks.items():
-        latest_vals = [v for k, v in subdict.items() if "latest_catRank" in k]
-        trend_vals = [v for k, v in subdict.items() if "trend_catRank" in k]
-        ttm_vals = [v for k, v in subdict.items() if "ttm_catRank" in k]
-        latest_avg = sum(latest_vals) / len(latest_vals) if latest_vals else None
-        trend_avg = sum(trend_vals) / len(trend_vals) if trend_vals else None
-        ttm_avg = sum(ttm_vals) / len(ttm_vals) if ttm_vals else None
-        results.append({
-            "Ticker": ticker,
-            "Latest_clusterAvg": latest_avg,
-            "Trend_clusterAvg": trend_avg,
-            "TTM_clusterAvg": ttm_avg
-        })
+        period_averages = {}
+        
+        # Calculate averages for each configured period
+        for period in cluster_periods:
+            period_vals = [v for k, v in subdict.items() if f"{period}_catRank" in k]
+            period_avg = sum(period_vals) / len(period_vals) if period_vals else None
+            period_averages[f"{period}_clusterAvg"] = period_avg
+        
+        result_row = {"Ticker": ticker}
+        result_row.update(period_averages)
+        results.append(result_row)
+    
     df = pd.DataFrame(results)
+    
+    # Convert averages to ranks
     for col in df.columns:
-        col_name = col.replace('_clusterAvg', '_clusterRank') if col.endswith('_clusterAvg') else col
-        if df[col].dtype in [float, int]:
-            ranks = df[col].rank(pct=True, ascending=True) * 100
-            ranks = ranks.fillna(50)
-            df[col_name] = ranks
+        if col.endswith('_clusterAvg') and col != 'Ticker':
+            period_name = col.replace('_clusterAvg', '')
+            rank_col_name = f'{period_name}_clusterRank'
+            if df[col].dtype in [float, int]:
+                ranks = df[col].rank(pct=True, ascending=True) * 100
+                ranks = ranks.fillna(50)
+                df[rank_col_name] = ranks
+    
     return df.set_index('Ticker').to_dict(orient='index')

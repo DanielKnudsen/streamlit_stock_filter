@@ -110,6 +110,13 @@ Planned automated content creation system (see `planning/to_be_done/`):
 3. Only then proceed with code changes
 4. Focus on maintainable, efficient solutions
 
+**Notebook Cell Editing Rules:**
+- When editing notebook cells, **always preserve existing code** and make only targeted edits
+- **Never rewrite entire cells** unless explicitly asked to replace the whole cell
+- Read the full cell context before making changes
+- Use surgical edits to modify specific lines while keeping the rest intact
+- This ensures no accidental loss of work or context
+
 ## Testing & Debugging
 - Use `quarterly_changes_analysis.txt` for output validation
 - Check `logs/` directory for automated workflow debugging
