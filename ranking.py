@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from collections import OrderedDict
+from config_mappings import ConfigMappings
+
 
 def create_ratios_to_ranks(
     calculated_ratios: dict,
@@ -68,6 +70,7 @@ def create_ratios_to_ranks(
         - The function expects ratio keys to follow the naming convention: '{ratio}_{period_suffix}_{cluster_period}_ratioValue'
     """
     # Get cluster configuration and determine which periods to process
+    mappings = ConfigMappings(config)
     cluster_periods = []
     if config and 'cluster' in config:
         cluster_config = config['cluster']
@@ -117,7 +120,40 @@ def create_ratios_to_ranks(
 
     cluster_ranks = aggregate_cluster_ranks(aggregated_ranks, cluster_periods)
 
-    # combine ranked_ratios, aggregated_ranks and cluster_ranks
+
+    def calc_total_ranks(cluster_ranks: dict, cluster_columns: list) -> dict:
+        """
+        Use the cluster columns from mappings to combine cluster ranks into a total rank for each ticker.
+        Calculates the average of cluster ranks and then converts to percentile rank (0-100 scale).
+        Args:
+            cluster_ranks (dict): Cluster ranks per ticker.
+            cluster_columns (list): List of cluster period names from config.
+        
+        Returns:
+            dict: Nested dictionary with 'totalRank' key for each ticker.
+        """
+        # First, calculate averages
+        total_rank_avgs = {}
+        for ticker, ranks in cluster_ranks.items():
+            total_rank = sum(ranks.get(col, 0) for col in cluster_columns) / len(cluster_columns) if cluster_columns else 0
+            total_rank_avgs[ticker] = total_rank
+        
+        # Convert averages to percentile ranks (0-100 scale)
+        total_ranks_result = {}
+        if total_rank_avgs:
+            df_totals = pd.Series(total_rank_avgs)
+            total_rank_ranks = df_totals.rank(pct=True, ascending=True) * 100
+            total_rank_ranks = total_rank_ranks.fillna(50)
+            
+            # Convert to nested dict format
+            for ticker, rank_value in total_rank_ranks.items():
+                total_ranks_result[ticker] = {'totalRank': rank_value}
+        
+        return total_ranks_result
+
+    total_ranks_dict = calc_total_ranks(cluster_ranks, mappings.cluster_columns)
+
+    # combine ranked_ratios, aggregated_ranks, cluster_ranks and total_ranks
     # Merge all dicts per ticker so each ticker has all its data in a single nested dict
     complete_ranks = {}
     sorted_ranked_ratios = {
@@ -135,7 +171,7 @@ def create_ratios_to_ranks(
         for ticker, data in cluster_ranks.items()
     }
     cluster_ranks = sorted_cluster_ranks
-    tickers = set(ranked_ratios) | set(aggregated_ranks) | set(cluster_ranks)
+    tickers = set(ranked_ratios) | set(aggregated_ranks) | set(cluster_ranks) | set(total_ranks_dict)
     for ticker in tickers:
         complete_ranks[ticker] = {}
         if ticker in ranked_ratios:
@@ -144,6 +180,8 @@ def create_ratios_to_ranks(
             complete_ranks[ticker].update(aggregated_ranks[ticker])
         if ticker in cluster_ranks:
             complete_ranks[ticker].update(cluster_ranks[ticker])
+        if ticker in total_ranks_dict:
+            complete_ranks[ticker].update(total_ranks_dict[ticker])
     """sorted_complete_ranks = {
         ticker: OrderedDict(sorted(data.items()))
         for ticker, data in complete_ranks.items()
