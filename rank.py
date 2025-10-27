@@ -12,6 +12,8 @@ from data_io import (save_results_to_csv, save_raw_data_to_csv,
 from price_utils import add_historical_prices_to_filtered_data
 from ttm_utils import combine_quarterly_summaries_for_ttm_trends
 from avg_growth_rate import process_agr_results
+from config_mappings import ConfigMappings
+
 
 # --- Main Execution ---
 
@@ -19,6 +21,7 @@ if __name__ == "__main__":
     # Load configuration from YAML
     config = load_config("rank-config.yaml")
     if config:
+        mappings = ConfigMappings(config)
         TICKERS_FILE_NAME = config["input_ticker_file"]
         if not TICKERS_FILE_NAME:
             print("No tickers file name found. Please check your CSV file.")
