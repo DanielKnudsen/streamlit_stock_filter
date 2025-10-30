@@ -1,27 +1,19 @@
-import pandas as pd
-import numpy as np
-import datetime
-import os
-from typing import Any, Dict, Optional, List
-from dotenv import load_dotenv
-from pathlib import Path
-from io_utils import load_yaml, load_csv, save_csv, load_pickle, save_pickle
+# rank.py
+from io_utils import load_pickle, save_pickle
 from data_fetcher import read_tickers_from_csv, get_price_data, get_raw_financial_data
 from ratios import calculate_all_ratios
 from ranking import create_ratios_to_ranks
 from config_utils import load_config, CSV_PATH, ENVIRONMENT, FETCH_PRICE_DATA, FETCH_FUNDAMENTAL_DATA
-from results_processing import combine_all_results,post_processing, trim_unused_columns, summarize_quarterly_data_to_yearly
+from results_processing import combine_all_results,post_processing, summarize_quarterly_data_to_yearly
 from data_io import (save_results_to_csv, save_raw_data_to_csv, 
                      save_longBusinessSummary_to_csv, save_market_cap_to_csv,
                      save_latest_report_dates_to_csv, save_dividends_to_csv,save_calculated_ratios_to_csv,
-                     save_dict_of_dicts_to_csv,reduce_price_data)
-from price_utils import save_last_SMA_to_csv, add_historical_prices_to_filtered_data
-from financial_metrics import calculate_agr_for_ticker, calculate_agr_dividend_for_ticker, save_agr_results_to_csv
+                     save_dict_of_dicts_to_csv)
+from price_utils import add_historical_prices_to_filtered_data
 from ttm_utils import combine_quarterly_summaries_for_ttm_trends
+from avg_growth_rate import process_agr_results
+from config_mappings import ConfigMappings
 
-# Ladda .env-filen endast om den finns
-if Path('.env').exists():
-    load_dotenv()
 
 # --- Main Execution ---
 
@@ -29,6 +21,7 @@ if __name__ == "__main__":
     # Load configuration from YAML
     config = load_config("rank-config.yaml")
     if config:
+        mappings = ConfigMappings(config)
         TICKERS_FILE_NAME = config["input_ticker_file"]
         if not TICKERS_FILE_NAME:
             print("No tickers file name found. Please check your CSV file.")
@@ -99,7 +92,7 @@ if __name__ == "__main__":
             )
             
             # Calculate annual ratios
-            calculated_ratios = calculate_all_ratios(filtered_raw_data_with_prices, config["ratio_definitions"])
+            calculated_ratios = calculate_all_ratios(filtered_raw_data_with_prices, config["ratio_definitions"], config=config)
             save_calculated_ratios_to_csv(calculated_ratios, CSV_PATH / "calculated_ratios.csv", period_type="annual")
 
             # Summarize quarterly data to yearly for most recent 4 quarters (0 quarters back)
@@ -116,6 +109,9 @@ if __name__ == "__main__":
                 raw_financial_data_quarterly_summarized_0,
                 raw_financial_data_quarterly_summarized_1
             )
+
+            # save combined TTM data for reference
+            save_raw_data_to_csv(combined_ttm_data, CSV_PATH / "raw_financial_data_ttm_summarized.csv")
             
             # Filter combined TTM data
             filtered_combined_ttm = {
@@ -134,7 +130,8 @@ if __name__ == "__main__":
             calculated_ratios_ttm_trends = calculate_all_ratios(
                 filtered_combined_ttm_with_prices, 
                 config["ratio_definitions"],
-                period_type="quarterly"
+                period_type="quarterly",
+                config=config
             )
             save_calculated_ratios_to_csv(
                 calculated_ratios_ttm_trends, 
@@ -147,21 +144,13 @@ if __name__ == "__main__":
                 calculated_ratios,
                 calculated_ratios_ttm_trends,
                 config["ratio_definitions"],
-                config["category_ratios"]
+                config["category_ratios"],
+                config
             )
             save_dict_of_dicts_to_csv(complete_ranks, CSV_PATH / "complete_ranks.csv")
 
-            # Step 5: Calculate AGR results
-            agr_results = calculate_agr_for_ticker(CSV_PATH / "raw_financial_data.csv", tickers, config['agr_dimensions'])
-            save_agr_results_to_csv(agr_results, CSV_PATH / "agr_results.csv")
-
-            agr_dividend = calculate_agr_dividend_for_ticker(CSV_PATH / "dividends.csv", tickers, config.get('data_fetch_years', 4))
-            save_agr_results_to_csv(agr_dividend, CSV_PATH / "agr_dividend_results.csv")
-
-            # Step 6: Extract ttm values for agr dimensions TODO: check if needed
-            """filter_metrics_for_agr_dimensions(CSV_PATH / "raw_financial_data_quarterly_summarized.csv", 
-                               config['agr_dimensions'],
-                               CSV_PATH / "ttm_values.csv")"""
+            # Step 4: Process AGR results
+            process_agr_results(valid_tickers, config)
 
             # Step 7: Combine all results and save final output
             combined_results = combine_all_results(valid_tickers,

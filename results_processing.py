@@ -87,23 +87,19 @@ def combine_all_results(valid_tickers: List[str],
     df_complete_ranks = pd.DataFrame.from_dict(complete_ranks, orient='index')
     """df_scores = pd.DataFrame.from_dict(category_scores, orient='index')
     df_cluster_ranks = pd.DataFrame.from_dict(cluster_ranks, orient='index')"""
-    df_agr = load_csv(CSV_PATH / "agr_results.csv", index_col=0)
+    df_agr_yearly = load_csv(CSV_PATH / "agr_results_yearly.csv", index_col=0)
+    df_agr_quarterly = load_csv(CSV_PATH / "agr_results_quarterly.csv", index_col=0)
     df_agr_dividends = load_csv(CSV_PATH / "agr_dividend_results.csv", index_col=0)
     tickers_file = CSV_PATH / config.get("input_ticker_file")
     df_tickers = load_csv(tickers_file, index_col='Instrument')
     df_tickers = df_tickers.rename(columns={'Instrument': 'Ticker'})
     df_latest_report_dates = load_csv(CSV_PATH / "latest_report_dates.csv", index_col='Ticker')
     df_latest_report_dates_quarterly = load_csv(CSV_PATH / "latest_report_dates_quarterly.csv", index_col='Ticker')
-    #df_ttm_values = load_csv(CSV_PATH / "ttm_values.csv", index_col='Ticker')
     df_last_SMA = load_csv(CSV_PATH / "last_SMA.csv", index_col='Ticker')
     df_long_business_summary = load_csv(CSV_PATH / "longBusinessSummary.csv", index_col='Ticker')
-    #df_calculated_quarterly_long = load_csv(CSV_PATH / "calculated_ratios_quarterly.csv")
-    #df_calculated_quarterly = df_calculated_quarterly_long.pivot(index='Ticker', columns='Metric', values='Values')
-    #df_calculated_quarterly.index = df_calculated_quarterly.index.astype(str)
     df_market_cap = load_csv(CSV_PATH / "market_cap.csv", index_col='Ticker')
     final_df = pd.concat([
-        df_tickers, df_calculated, df_calculated_ttm_trends, df_complete_ranks, df_last_SMA,
-        df_agr, df_agr_dividends, df_latest_report_dates, df_latest_report_dates_quarterly, df_long_business_summary, df_market_cap
+        df_tickers, df_calculated, df_calculated_ttm_trends, df_agr_yearly, df_agr_quarterly, df_agr_dividends, df_complete_ranks, df_last_SMA, df_latest_report_dates, df_latest_report_dates_quarterly, df_long_business_summary, df_market_cap
     ], axis=1)
 
     # only keep rows for valid tickers
@@ -168,29 +164,7 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     final_df['LatestReportDate_Q'] = pd.to_datetime(final_df['LatestReportDate_Q'], errors='coerce')
     final_df['LatestReportDate_Y'] = pd.to_datetime(final_df['LatestReportDate_Y'], errors='coerce')
     final_df['QuarterDiff'] = final_df.apply(quarter_diff, axis=1)
-    all_ratios = []
-    for category, ratios in config['kategorier'].items():
-        all_ratios.extend(ratios)
-    # Calculate difference between most recent ttm value and the ttm value one quarter back TODO
-    """for ratio in all_ratios:
-        final_df[f'{ratio}_ttm_diff'] = (final_df[f'{ratio}_ttm_ratioValue'] - final_df[f'{ratio}_latest_ratioValue'])"""
-    for agr_temp in config['agr_dimensions']:
-        agr = agr_temp.replace(" ", "_")
-        latest_full_year_value = final_df.apply(
-            lambda row: row.get(f"{agr}_year_{row['LatestReportDate_Y'].year}") if pd.notnull(row['LatestReportDate_Y']) and f"{agr}_year_{row['LatestReportDate_Y'].year}" in final_df.columns else np.nan,
-            axis=1
-        )
-        final_df[f'{agr}_ttm_diff'] = final_df.get(f'{agr}_ttm', pd.Series(np.nan, index=final_df.index)) - latest_full_year_value
-    all_ratios = []
-    for category, ratios in config['kategorier'].items():
-        all_ratios.extend(f"{ratio}_ttm_diff" for ratio in ratios)
-    """for col in all_ratios:
-        ratio_name = col.replace('_ttm_diff', '')
-        is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-        ranked = final_df[col].rank(pct=True, ascending=is_better) * 100
-        ranked = ranked.fillna(50)
-        final_df[f'{ratio_name}_ttm_ratioRank'] = final_df.index.map(ranked)"""
-        
+
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
     final_df = final_df.assign(
@@ -198,18 +172,18 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
         pct_ch_1_m_diff=group_by_sector('pct_ch_1_m')[1],
         pct_ch_3_m_mean=group_by_sector('pct_ch_3_m')[0],
         pct_ch_3_m_diff=group_by_sector('pct_ch_3_m')[1],
-        TTM_sector_meanclusterRank=group_by_sector('TTM_clusterRank')[0],
-        TTM_sector_diffclusterRank=group_by_sector('TTM_clusterRank')[1],
-        Latest_sector_meanclusterRank=group_by_sector('Latest_clusterRank')[0],
-        Latest_sector_diffclusterRank=group_by_sector('Latest_clusterRank')[1]
+        ttm_momentum_sector_meanclusterRank=group_by_sector('ttm_momentum_clusterRank')[0],
+        ttm_momentum_sector_diffclusterRank=group_by_sector('ttm_momentum_clusterRank')[1],
+        ttm_current_sector_meanclusterRank=group_by_sector('ttm_current_clusterRank')[0],
+        ttm_current_sector_diffclusterRank=group_by_sector('ttm_current_clusterRank')[1]
     )
     # Calculate differences between sector rank and price change 1 month
-    final_df['TTM_diff_vs_pct_ch_1_m_diff'] = final_df['TTM_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
-    final_df['Latest_diff_vs_pct_ch_1_m_diff'] = final_df['Latest_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
+    final_df['ttm_momentum_sector_diffclusterRank_vs_pct_ch_1_m_diff'] = final_df['ttm_momentum_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
+    final_df['ttm_current_sector_diffclusterRank_vs_pct_ch_1_m_diff'] = final_df['ttm_current_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
 
     # Calculate differences between sector rank and price change 3 months
-    final_df['TTM_diff_vs_pct_ch_3_m_diff'] = final_df['TTM_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
-    final_df['Latest_diff_vs_pct_ch_3_m_diff'] = final_df['Latest_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
+    final_df['ttm_momentum_sector_diffclusterRank_vs_pct_ch_3_m_diff'] = final_df['ttm_momentum_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
+    final_df['ttm_current_sector_diffclusterRank_vs_pct_ch_3_m_diff'] = final_df['ttm_current_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
 
     for col in final_df.columns:
         if "Rank" in col:

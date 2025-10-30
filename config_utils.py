@@ -1,7 +1,13 @@
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional
+from dotenv import load_dotenv
 from io_utils import load_yaml
+
+# Load .env file at module import time
+env_path = Path(__file__).parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path, override=True)
 
 def load_config(config_file_path: str) -> Optional[Dict[str, Any]]:
     """
