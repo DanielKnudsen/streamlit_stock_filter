@@ -185,11 +185,11 @@ def save_calculated_ratios_to_csv(calculated_ratios: Dict[str, Any], csv_file_pa
     """
     df = pd.DataFrame()
     for ticker, data in calculated_ratios.items():
-        if period_type == "quarterly":
+        """if period_type == "quarterly":
             # Only keep metrics ending with '_latest_ratioValue' and rename to '_ttm'
             filtered_data = {k.replace('_latest_ratioValue', '_ttm_ratioValue'): v for k, v in data.items() if k.endswith('_latest_ratioValue')}
-        else:
-            filtered_data = data
+        else:"""
+        filtered_data = data
         df_metrics = pd.DataFrame(filtered_data, index=[ticker]).T
         df_metrics.columns = ['Values']
         df_temp = df_metrics.reset_index().rename(columns={'index': 'Metric'})
