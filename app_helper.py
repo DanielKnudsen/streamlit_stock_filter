@@ -68,9 +68,12 @@ def plot_ratio_values(df,mappings):
     Create a bar plot from ratio values dataframe.
 
     Args:
-        df: pandas.DataFrame with 1 row and 6 columns (result from get_ratio_values_by_period).
-            First 4 columns: annual values (royalblue).
-            Last 2 columns: TTM values (gold).
+        df: pandas.DataFrame with 1 row and variable columns (result from get_ratio_values_by_period).
+            Expected structure:
+            - First 4 columns: annual values (Year YYYY format) (royalblue).
+            - Last 2 columns: TTM values (TTM YYYYQX format) (gold).
+            - If fewer than 4 annual columns exist, missing years are filled with NaN.
+            - If fewer than 2 TTM columns exist, missing TTM periods are filled with NaN.
         mappings: ConfigMappings instance (object providing ratio metadata and period mappings).
 
     Returns:
@@ -79,12 +82,74 @@ def plot_ratio_values(df,mappings):
     Error Handling:
         - If `df` contains missing or non-numeric values, bars will display 'nan' and trend lines may be omitted.
         - If `mappings.is_higher_better(ratio_name)` returns None, defaults to True.
-        - Function assumes correct DataFrame shape; malformed input may result in plotting errors.
+        - Automatically fills missing year columns with NaN to ensure consistent structure.
     """
     # Get the values and column names
-    values = df.iloc[0].values.astype(float)
     columns = df.columns.tolist()
     ratio_name = df.index[0]
+    
+    # Separate year and TTM columns
+    year_cols = [col for col in columns if col.startswith('Year ')]
+    ttm_cols = [col for col in columns if col.startswith('TTM ')]
+    
+    # Extract years from year columns and sort them
+    year_nums = []
+    for col in year_cols:
+        try:
+            year = int(col.replace('Year ', '').strip())
+            year_nums.append((year, col))
+        except ValueError:
+            pass
+    
+    year_nums.sort(key=lambda x: x[0])
+    years_only = [y[0] for y in year_nums]
+    
+    # Fill missing years between min and max with NaN
+    if years_only:
+        min_year = min(years_only)
+        max_year = max(years_only)
+        all_years = list(range(min_year, max_year + 1))
+        
+        # Create mapping for existing years
+        existing_year_cols = {y[0]: y[1] for y in year_nums}
+        
+        # Build the complete year column list with NaN placeholders
+        complete_year_cols = []
+        for year in all_years:
+            if year in existing_year_cols:
+                complete_year_cols.append(existing_year_cols[year])
+            else:
+                complete_year_cols.append(f'Year {year}')
+        
+        # Take only the last 4 years
+        complete_year_cols = complete_year_cols[-4:]
+    else:
+        complete_year_cols = []
+    
+    # Ensure we have exactly 4 year columns (pad with NaN if needed)
+    while len(complete_year_cols) < 4:
+        complete_year_cols.insert(0, f'Year {min_year - (4 - len(complete_year_cols))}')
+    
+    # Ensure we have exactly 2 TTM columns (pad with NaN if needed)
+    while len(ttm_cols) < 2:
+        ttm_cols.append(f'TTM {len(ttm_cols) + 1}')
+    
+    ttm_cols = ttm_cols[-2:]  # Take only the last 2
+    
+    # Reconstruct the dataframe with the complete column set
+    ordered_columns = complete_year_cols + ttm_cols
+    
+    # Build the values array
+    values = []
+    for col in ordered_columns:
+        if col in df.columns:
+            val = df.iloc[0][col]
+            values.append(float(val) if not pd.isna(val) else np.nan)
+        else:
+            values.append(np.nan)  # Fill missing columns with NaN
+    
+    values = np.array(values)
+    columns = ordered_columns
 
     # get higher_is_better info from mappings (default to True if None)
     hib = mappings.is_higher_better(ratio_name)
@@ -101,14 +166,21 @@ def plot_ratio_values(df,mappings):
     # Create patterns: 5th bar has '/' pattern
     patterns = [''] * 4 + ['\\'] + ['']
     
-    # Create bar plot
+    # Create bar plot with proper handling of NaN values
+    bar_text = []
+    for v in values:
+        if pd.isna(v):
+            bar_text.append('N/A')
+        else:
+            bar_text.append(f"{v:.2f}")
+    
     fig = go.Figure(data=[
         go.Bar(
             x=columns,
-            y=[f"{v:.3f}" for v in values],#values,
+            y=values,  # Use actual values (Plotly handles NaN)
             marker_color=colors,
             marker_pattern_shape=patterns,
-            text=[f"{v:.2f}" for v in values],
+            text=bar_text,
             textposition='auto',
             textfont=dict(size=font_size),
             showlegend=False,
@@ -116,59 +188,75 @@ def plot_ratio_values(df,mappings):
         )
     ])
     
-    # Add linear regression line for first 4 bars
+    # Add linear regression line for first 4 bars (skip NaN values)
     x_indices_1 = np.array([0, 1, 2, 3])
     y_values_1 = values[:4]
-    coeffs_1 = np.polyfit(x_indices_1, y_values_1, 1)
-    y_fit_1 = np.polyval(coeffs_1, x_indices_1)
-
-    annual_diff =  values[3] - values[0]
-    if (annual_diff > 0 and higher_is_better) or (annual_diff < 0 and not higher_is_better):
-        annual_trend_color = trend_color_improving
-    else:
-        annual_trend_color = trend_color_deterioating
     
-    fig.add_trace(go.Scatter(
-        x=columns[:4],
-        y=[f"{v:.3f}" for v in y_fit_1],#y_fit_1,
-        mode='lines',
-        name='Trend (4-year)',
-        line=dict(color=annual_trend_color, width=trend_line_width, dash='dash'),
-        showlegend=False
-    ))
+    # Only calculate trend if we have at least 2 non-NaN values
+    valid_indices_1 = [i for i, v in enumerate(y_values_1) if not pd.isna(v)]
+    if len(valid_indices_1) >= 2:
+        x_valid_1 = x_indices_1[valid_indices_1]
+        y_valid_1 = y_values_1[valid_indices_1]
+        coeffs_1 = np.polyfit(x_valid_1, y_valid_1, 1)
+        y_fit_1 = np.polyval(coeffs_1, x_indices_1)
+        
+        # Determine trend color based on first and last non-NaN values
+        annual_diff = y_values_1[valid_indices_1[-1]] - y_values_1[valid_indices_1[0]]
+        if (annual_diff > 0 and higher_is_better) or (annual_diff < 0 and not higher_is_better):
+            annual_trend_color = trend_color_improving
+        else:
+            annual_trend_color = trend_color_deterioating
+        
+        fig.add_trace(go.Scatter(
+            x=columns[:4],
+            y=y_fit_1,
+            mode='lines',
+            name='Trend (4-year)',
+            line=dict(color=annual_trend_color, width=trend_line_width, dash='dash'),
+            opacity=0.6,
+            showlegend=False
+        ))
 
-    # Add linear regression line for last 2 bars
-    ttm_diff = values[5] - values[4]
-
-    if (ttm_diff > 0 and higher_is_better) or (ttm_diff < 0 and not higher_is_better):
-        ttm_trend_color = trend_color_improving
-    else:
-        ttm_trend_color = trend_color_deterioating
-
+    # Add linear regression line for last 2 bars (skip NaN values)
     x_indices_2 = np.array([0, 1])
     y_values_2 = values[4:6]
-    coeffs_2 = np.polyfit(x_indices_2, y_values_2, 1)
-    y_fit_2 = np.polyval(coeffs_2, x_indices_2)
     
-    fig.add_trace(go.Scatter(
-        x=columns[4:6],
-        y=y_fit_2,
-        mode='lines',
-        name='Trend (TTM)',
-        line=dict(color=ttm_trend_color, width=trend_line_width, dash='dash'),
-        showlegend=False
-    ))
+    # Only calculate trend if we have at least 2 non-NaN values
+    valid_indices_2 = [i for i, v in enumerate(y_values_2) if not pd.isna(v)]
+    if len(valid_indices_2) >= 2:
+        x_valid_2 = x_indices_2[valid_indices_2]
+        y_valid_2 = y_values_2[valid_indices_2]
+        coeffs_2 = np.polyfit(x_valid_2, y_valid_2, 1)
+        y_fit_2 = np.polyval(coeffs_2, x_indices_2)
+        
+        # Determine trend color
+        ttm_diff = y_values_2[valid_indices_2[-1]] - y_values_2[valid_indices_2[0]]
+        if (ttm_diff > 0 and higher_is_better) or (ttm_diff < 0 and not higher_is_better):
+            ttm_trend_color = trend_color_improving
+        else:
+            ttm_trend_color = trend_color_deterioating
 
-    # Add annotation with the difference
-    fig.add_annotation(
-        x=columns[5],
-        y=values[5],
-        text=f"{ttm_diff:+.2g}",
-        font=dict(size=font_size, color=ttm_trend_color),
-        yshift=20,
-        xshift=5,
-        showarrow=False
-    )
+        fig.add_trace(go.Scatter(
+            x=columns[4:6],
+            y=y_fit_2,
+            mode='lines',
+            name='Trend (TTM)',
+            line=dict(color=ttm_trend_color, width=trend_line_width, dash='dash'),
+            opacity=0.6,
+            showlegend=False
+        ))
+        
+        # Add annotation with the difference (only if both values are not NaN)
+        if not pd.isna(y_values_2[1]) and not pd.isna(y_values_2[0]):
+            fig.add_annotation(
+                x=columns[5],
+                y=y_values_2[1],
+                text=f"{ttm_diff:+.2g}",
+                font=dict(size=font_size, color=ttm_trend_color),
+                yshift=20,
+                xshift=5,
+                showarrow=False
+            )
     
     # Add 'Data missing' annotations for each NaN value
     for i, v in enumerate(values):

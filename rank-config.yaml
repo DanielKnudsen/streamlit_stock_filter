@@ -1,5 +1,5 @@
 # Inställningar för in- och utdata
-input_ticker_file: "tickers_list_test.csv" # test file ends with "_test.csv" for limited set of tickers
+input_ticker_file: "tickers_list.csv" # test file ends with "_test.csv" for limited set of tickers
 results_file: "stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 price_data_file_raw: "price_data_raw.csv"
@@ -32,31 +32,26 @@ cagr_dimension:
 # column blocks for result dataframe
 result_columns:
   Bas Data:
-    - "Company Name"
+    - "Name"
     - "Sektor"
     - "Lista"
-    - "Market Cap"
+    - "market_cap"
   Total Rank:
-    - "totalrank"
+    - "totalRank"
   Kluster Rank:
     - "long_trend_clusterRank"
     - "ttm_current_clusterRank"
     - "ttm_momentum_clusterRank"
-  Tillväxt:
-    - "Total_Revenue_year_AvgGrowth"
+  Intäkter:
     - "Total_Revenue_year_AvgGrowth_Rank"
-    - "Total_Revenue_quarterly_AvgGrowth"
     - "Total_Revenue_quarterly_AvgGrowth_Rank"
-    - "Basic_EPS_year_AvgGrowth"
+  Vinst per aktie:
     - "Basic_EPS_year_AvgGrowth_Rank"
-    - "Basic_EPS_quarterly_AvgGrowth"
     - "Basic_EPS_quarterly_AvgGrowth_Rank"
-    - "Dividend_AvgGrowth"
-    - "Dividend_AvgGrowth_Rank"
   Glidande medelvärde:
+    - "pct_Close_vs_SMA_short"
     - "pct_SMA_short_vs_SMA_medium"
     - "pct_SMA_medium_vs_SMA_long"
-    - "pct_Close_vs_SMA_short"
   Kategori Rank:
     - "Kvalitet_long_trend_catRank"
     - "Kvalitet_ttm_current_catRank"
