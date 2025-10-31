@@ -128,7 +128,7 @@ if not ENABLE_AUTHENTICATION:
 if user and ENABLE_AUTHENTICATION:
     render_account_buttons(user, ENABLE_AUTHENTICATION, get_concurrent_users)
 
-with st.container(border=True):
+with st.container(border=False):
     
     # Three-step workflow cards using Streamlit columns
     col1, col2, col3 = st.columns(3, gap="medium")
@@ -437,7 +437,7 @@ try:
     # =============================
     # ENHETLIGT FILTERAVSNITT
     # =============================
-    with st.container(border=True, key="filter_section"):
+    with st.container(border=False, key="filter_section"):
         st.subheader(f"🎯 Aktiefilter – Hitta dina favoriter bland {len(df_filtered_by_sliders)} aktier")
 
         with st.expander("🛟 **Hjälp med Filtrering?**", expanded=False):
@@ -589,7 +589,7 @@ try:
     # =============================
     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
 
-    with st.container(border=True, key="filtered_results"):
+    with st.container(border=False, key="filtered_results"):
 
         st.subheader(f"🎉 Träffar: {df_filtered_by_sliders.shape[0]} aktier som matchar dina filter!")
 
@@ -631,21 +631,8 @@ try:
         # =============================
         # MAIN TABLE DISPLAY
         # =============================
-        with st.container(border=True, key="main_table_container"):
+        with st.container(border=False, key="main_table_container"):
             st.markdown("##### Resultattabell med filtrerade aktier")
-                        # get input from user on how many stocks they like to see
-            num_stocks_options = ["5", "10", "20", "50", "Alla"]
-
-            selected_num_stocks = st.segmented_control(
-                "Här kan du välja att begränsa antal aktier i resultat-tabellen",
-                options=num_stocks_options,
-                selection_mode='single',
-                default="Alla",
-                key="num_stocks_input"
-            )
-            # filter the DataFrame based on the selected number of stocks
-            if selected_num_stocks != "Alla":
-                df_filtered_by_sliders = df_filtered_by_sliders.head(int(selected_num_stocks))
 
             selected_column_keys = st.segmented_control(
                 "Välj kolumner i resultat-tabellen",
@@ -706,13 +693,7 @@ try:
                         default=False,
                         width="small",
                         pinned=True 
-                    ),
-                    "Lista": st.column_config.TextColumn(
-                        "Lista", # Header for the Lista column",
-                        default="",
-                        width="small",
-                        pinned=False
-                    ),
+                    )
                 },
                 key="stock_selection_editor" # Unique key to manage state
             )
@@ -789,7 +770,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True) # Lägger till tre radbrytningar
 
-    with st.container(border=True, key="stock_details_container"):
+    with st.container(border=False, key="stock_details_container"):
         st.subheader("🔍 **Djupdykning i din valda aktie**")
         with st.expander("🛟 **Hjälp om aktieinformation** (Klicka för att visa)", expanded=False):
             st.markdown(
@@ -826,7 +807,7 @@ try:
         if selected_stock_dict is not None and selected_stock_ticker is not None:
             st.subheader(f"**{selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}**")
 
-        with st.container(border=True, key="stock_details"):
+        with st.container(border=False, key="stock_details"):
             if selected_stock_ticker:
                 #st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
                 selected_stock_lista = selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'
@@ -1119,7 +1100,7 @@ try:
                 st.markdown("**Trend senaste 4 åren & Senaste året**")
 
                 for category in mappings.category_bases:
-                    with st.container(border=True):
+                    with st.container(border=False, key=f"category_container_{category}"):
                         st.subheader(category)
                         visualize_dataframe_with_progress(color_progress, df_ranking.loc[[category]], hide_index=True)
                         # get ratios in this category
