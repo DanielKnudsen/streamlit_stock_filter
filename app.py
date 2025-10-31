@@ -280,7 +280,14 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
     )
 
     # Filter the DataFrame based on the slider values
-    return df[(df[column_name] >= slider_values[0]) & (df[column_name] <= slider_values[1])]
+    # Include both rows that match the filter AND rows with NaN values in this column
+    # st.write(f"Number of rows before filtering on {column_name}: {len(df)}")
+    filtered_df = df[
+        ((df[column_name] >= slider_values[0]) & (df[column_name] <= slider_values[1])) | 
+        (df[column_name].isna())
+    ]
+    # st.write(f"Number of rows after filtering on {column_name}: {len(filtered_df)}")
+    return filtered_df
 
 def create_pills_and_filter_df(df, column_name, tooltip_func):
     """
@@ -398,7 +405,7 @@ try:
         df_filtered_by_sliders = df_filtered_by_sliders[
             df_filtered_by_sliders.index.str.upper().isin(portfolio_tickers)
         ]
-    st.write(f"Totalt antal aktier efter portföljfilter: {len(df_filtered_by_sliders)}")
+    # st.write(f"Totalt antal aktier efter portföljfilter: {len(df_filtered_by_sliders)}")
     # =============================
     # LOAD RANKING CATEGORIES FROM CONFIG
     # =============================
@@ -431,7 +438,7 @@ try:
     # ENHETLIGT FILTERAVSNITT
     # =============================
     with st.container(border=True, key="filter_section"):
-        st.subheader("🎯 Aktiefilter – Hitta dina favoriter")
+        st.subheader(f"🎯 Aktiefilter – Hitta dina favoriter bland {len(df_filtered_by_sliders)} aktier")
 
         with st.expander("🛟 **Hjälp med Filtrering?**", expanded=False):
             st.markdown("""
