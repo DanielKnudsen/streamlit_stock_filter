@@ -1130,10 +1130,15 @@ try:
                             with cols[idx]:
                                 st.markdown(f"**{ratio}**")
                                 df_ratio_rank = get_ratio_ranks_by_period(selected_stock_ticker, ratio, df_new_ranks, mappings)
+                                #st.dataframe(df_ratio_rank, hide_index=True)
                                 test_df = get_ratio_values_by_period(selected_stock_ticker, ratio, df_new_ranks)
-                                fig=plot_ratio_values(test_df,mappings=mappings)
-                                # show fig
-                                fig
+                                #st.dataframe(test_df, hide_index=False)
+                                if not test_df.empty:
+                                    fig = plot_ratio_values(test_df, mappings=mappings)
+                                    # show fig
+                                    fig
+                                else:
+                                    st.info(f"Inga data för {ratio} tillgängliga, rank sätts till 50 som standard.")
                                 visualize_dataframe_with_progress(color_progress, df_ratio_rank, hide_index=True)
 
                              

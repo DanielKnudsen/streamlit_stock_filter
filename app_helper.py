@@ -402,7 +402,8 @@ def visualize_dataframe_with_progress(color_progress, df_ranking, hide_index=Fal
                             help="Rankingvärde (0-100)",
                             min_value=0,
                             max_value=100,
-                            format="%.1f"
+                            format="%.1f",
+                            width="small"
                         )
                         for col in df_ranking.columns
                     }
