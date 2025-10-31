@@ -253,14 +253,30 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
     if min_value == max_value:
         max_value += 0.001  # Ensure a valid range if min and max are equal
 
+    # Use session state to persist slider value across reruns
+    # This prevents the slider from resetting when other filters change
+    slider_key = f"slider_{column_name}"
+    
+    # Initialize session state if this slider hasn't been used yet
+    if slider_key not in st.session_state:
+        st.session_state[slider_key] = (min_value, max_value)
+    
+    # Get the current slider value, but clamp it to valid range
+    current_value = st.session_state[slider_key]
+    clamped_value = (
+        max(min_value, min(current_value[0], max_value)),
+        max(min_value, min(current_value[1], max_value))
+    )
+
     slider_values = st.slider(
         label=get_display_name(column_name),
         min_value=min_value,
         max_value=max_value,
-        value=(min_value, max_value),
+        value=clamped_value,
         step=step,
         format=format_str,
-        help=tooltip_func(column_name)
+        help=tooltip_func(column_name),
+        key=slider_key
     )
 
     # Filter the DataFrame based on the slider values
