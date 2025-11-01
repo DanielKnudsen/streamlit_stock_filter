@@ -659,12 +659,20 @@ try:
             df_display.rename(columns=rename_mapping, inplace=True)
 
             # Add a "Välj" column for plotting the graph
-            # Initialize all checkboxes to False
-            df_display['Välj'] = False
+            # Initialize checkbox states in session state if not already present
+            if "checkbox_states" not in st.session_state:
+                st.session_state.checkbox_states = {}
+            
+            # Get or initialize checkbox values for each ticker
+            df_display['Välj'] = df_display.index.map(
+                lambda ticker: st.session_state.checkbox_states.get(f"{ticker}_valj", False)
+            )
 
             # Add a "Shortlist" column to save stocks
-            # Initialize all checkboxes to False
-            df_display['Shortlist'] = False
+            # Get or initialize shortlist values for each ticker
+            df_display['Shortlist'] = df_display.index.map(
+                lambda ticker: st.session_state.checkbox_states.get(f"{ticker}_shortlist", False)
+            )
 
             cols = df_display.columns.tolist()
             cols.insert(0, cols.pop(cols.index('Shortlist'))) 
@@ -697,6 +705,11 @@ try:
                 },
                 key="stock_selection_editor" # Unique key to manage state
             )
+            
+            # Update session state with the new checkbox values from the editor
+            for ticker in edited_df.index:
+                st.session_state.checkbox_states[f"{ticker}_valj"] = edited_df.loc[ticker, 'Välj']
+                st.session_state.checkbox_states[f"{ticker}_shortlist"] = edited_df.loc[ticker, 'Shortlist']
 
             # Logic to handle checkbox selection for plotting
             selected_rows_plot = edited_df[edited_df['Välj']]
@@ -728,20 +741,15 @@ try:
 
                 if not shortlisted_stocks.empty:
                     df_display = shortlisted_stocks.copy()
-                    # Merge with new ranks for additional info (ensure index is Ticker)
-                    df_display = df_display.merge(
-                        df_new_ranks[['Lista', 'Sektor']],
-                        left_index=True, right_index=True, how='left'
-                    )
-                    # Display only Ticker (index) and the renamed rank_Score columns for shortlist
-                    download_columns = ['Lista', 'Sektor'] + [
-                        col for col in display_rank_score_columns if col not in ['Shortlist', 'Välj']
-                    ]
+                    
+                    # Remove ['Shortlist', 'Välj'] columns for download
+                    df_display = df_display.drop(columns=['Shortlist', 'Välj'], errors='ignore')
+                    download_columns = df_display.columns.tolist()
                     # Only keep columns that exist in df_display
                     download_columns = [col for col in download_columns if col in df_display.columns]
 
                     st.dataframe(
-                        df_display[download_columns], # Ticker is already the index
+                        df_display,#[download_columns], # Ticker is already the index
                         hide_index=False,
                         width="stretch"
                     )
@@ -749,7 +757,7 @@ try:
                     current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                     file_name = f"shortlist_{current_time}.csv"
                     
-                    col1, col2 = st.columns([1, 1])
+                    col1, col2, col3 = st.columns([1, 1, 1])
                     with col1:
                         st.download_button(
                             "📥 Ladda ner som CSV",
@@ -762,6 +770,12 @@ try:
                     with col2:
                         if st.button("💾 Spara som portfölj", width="stretch"):
                             st.session_state.show_save_portfolio = True
+                    
+                    with col3:
+                        # Create a comma-separated list of tickers for easy copying
+                        tickers_list = ", ".join(shortlisted_stocks.index.tolist())
+
+                        st.write(f"**📋 Kopiera tickerlista:** {tickers_list}")
                     
                     # Portfolio save dialog
                     handle_portfolio_save_dialog(user, shortlisted_stocks, current_time)
@@ -812,11 +826,6 @@ try:
                 #st.subheader(f"Kort info om: {selected_stock_dict['Name'] if 'Name' in selected_stock_dict else 'N/A'}")
                 selected_stock_lista = selected_stock_dict['Lista'] if 'Lista' in selected_stock_dict else 'N/A'
                 selected_stock_sektor = selected_stock_dict['Sektor'] if 'Sektor' in selected_stock_dict else 'N/A'
-                
-                # DEBUG: Check QuarterDiff value before conversion
-                if ENABLE_DEBUG_LOGGING:
-                    quarter_diff_value = selected_stock_dict.get('QuarterDiff', 'N/A')
-                    print(f"DEBUG: QuarterDiff value for {selected_stock_ticker}: {quarter_diff_value} (type: {type(quarter_diff_value)})")
                 
                 # More robust conversion with error handling
                 try:
