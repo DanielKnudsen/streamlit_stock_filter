@@ -130,7 +130,36 @@ def filter_metrics_for_agr_dimensions(csv_path: str, agr_dimensions: List[str], 
         save_csv(filtered_pivot, output_path, index=True)
     return filtered
 
-def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definitions: Dict[str, Any]) -> pd.DataFrame:
+def calculate_sektor_avg_and_diff(final_df: pd.DataFrame, rank_columns: List[str]) -> pd.DataFrame:
+    """
+    Calculate sector averages and differences for specified rank columns.
+    
+    For each rank column, this function:
+    1. Groups by 'Sektor' and calculates the mean value for that column
+    2. Creates a new column with the sector average
+    3. Creates a new column with the difference (ticker value - sector average)
+
+    Args:
+        final_df (pd.DataFrame): Final results DataFrame.
+        rank_columns (List[str]): List of rank columns to process.
+
+    Returns:
+        pd.DataFrame: DataFrame with added sector average and difference columns.
+    """
+    for col in rank_columns:
+        # Calculate sector mean for this column
+        sector_mean = final_df.groupby('Sektor')[col].transform('mean')
+        
+        # Create new columns for sector average and difference
+        sector_mean_col = f"{col}_Sektor_avg"
+        sector_diff_col = f"{col}_Sektor_diff"
+
+        final_df[sector_mean_col] = sector_mean
+        final_df[sector_diff_col] = final_df[col] - sector_mean
+    
+    return final_df
+
+def post_processing(final_df: pd.DataFrame, rank_decimals: int, cols_to_process: list) -> pd.DataFrame:
     """
     Perform post-processing on the final results DataFrame, including ranking and difference calculations.
 
@@ -142,14 +171,6 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
     Returns:
         pd.DataFrame: Post-processed DataFrame.
     """
-    def group_by_sector(column: str) -> pd.Series:
-        """ 
-        Group by sector and calculate mean for the specified column
-        Calculate the difference between each value and the sector mean
-        Return two columns: one with the sector mean and one with the difference
-        """
-        sector_mean = final_df.groupby('Sektor')[column].transform('mean')
-        return sector_mean, final_df[column] - sector_mean
 
     def get_quarter(dt):
         if pd.isnull(dt):
@@ -167,23 +188,8 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, ratio_definition
 
     final_df.index = final_df.index.astype(str)
     final_df['Name'] = final_df['Name'].astype(str)
-    final_df = final_df.assign(
-        pct_ch_1_m_mean=group_by_sector('pct_ch_1_m')[0],
-        pct_ch_1_m_diff=group_by_sector('pct_ch_1_m')[1],
-        pct_ch_3_m_mean=group_by_sector('pct_ch_3_m')[0],
-        pct_ch_3_m_diff=group_by_sector('pct_ch_3_m')[1],
-        ttm_momentum_sector_meanclusterRank=group_by_sector('ttm_momentum_clusterRank')[0],
-        ttm_momentum_sector_diffclusterRank=group_by_sector('ttm_momentum_clusterRank')[1],
-        ttm_current_sector_meanclusterRank=group_by_sector('ttm_current_clusterRank')[0],
-        ttm_current_sector_diffclusterRank=group_by_sector('ttm_current_clusterRank')[1]
-    )
-    # Calculate differences between sector rank and price change 1 month
-    final_df['ttm_momentum_sector_diffclusterRank_vs_pct_ch_1_m_diff'] = final_df['ttm_momentum_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
-    final_df['ttm_current_sector_diffclusterRank_vs_pct_ch_1_m_diff'] = final_df['ttm_current_sector_diffclusterRank'] - final_df['pct_ch_1_m_diff']
 
-    # Calculate differences between sector rank and price change 3 months
-    final_df['ttm_momentum_sector_diffclusterRank_vs_pct_ch_3_m_diff'] = final_df['ttm_momentum_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
-    final_df['ttm_current_sector_diffclusterRank_vs_pct_ch_3_m_diff'] = final_df['ttm_current_sector_diffclusterRank'] - final_df['pct_ch_3_m_diff']
+    final_df = calculate_sektor_avg_and_diff(final_df, cols_to_process)
 
     for col in final_df.columns:
         if "Rank" in col:
