@@ -10,7 +10,7 @@ Ticker,Growth_Metric,Value
 8TRA,Basic_EPS_quarterly_2025Q1,0.93
 8TRA,Basic_EPS_quarterly_2025Q2,0.93
 8TRA,Basic_EPS_quarterly_AvgGrowth,0.0
-8TRA,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+8TRA,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 8TRA,Total_Revenue_quarterly_2025Q1,46280000000.0
 8TRA,Total_Revenue_quarterly_2025Q2,45991000000.0
 8TRA,Total_Revenue_quarterly_AvgGrowth,-0.006244598098530682
@@ -223,7 +223,7 @@ AGTIRA-B,Total_Revenue_quarterly_AvgGrowth_Rank,92.3076923076923
 AINO,Basic_EPS_quarterly_2025Q1,-0.008803
 AINO,Basic_EPS_quarterly_2025Q2,-0.008803
 AINO,Basic_EPS_quarterly_AvgGrowth,0.0
-AINO,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+AINO,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 AINO,Total_Revenue_quarterly_2025Q1,25326000.0
 AINO,Total_Revenue_quarterly_2025Q2,26561000.0
 AINO,Total_Revenue_quarterly_AvgGrowth,0.048764115928295035
@@ -573,7 +573,7 @@ BALCO,Total_Revenue_quarterly_AvgGrowth_Rank,21.87028657616893
 BALD-B,Basic_EPS_quarterly_2025Q1,5.57
 BALD-B,Basic_EPS_quarterly_2025Q2,5.56
 BALD-B,Basic_EPS_quarterly_AvgGrowth,-0.0017953321364453634
-BALD-B,Basic_EPS_quarterly_AvgGrowth_Rank,45.348837209302324
+BALD-B,Basic_EPS_quarterly_AvgGrowth_Rank,45.20348837209303
 BALD-B,Total_Revenue_quarterly_2025Q1,13163000000.0
 BALD-B,Total_Revenue_quarterly_2025Q2,13385000000.0
 BALD-B,Total_Revenue_quarterly_AvgGrowth,0.016865456202993238
@@ -690,7 +690,7 @@ BILI-A,Total_Revenue_quarterly_AvgGrowth_Rank,47.81297134238311
 BILL,Basic_EPS_quarterly_2025Q1,7.43
 BILL,Basic_EPS_quarterly_2025Q2,7.4
 BILL,Basic_EPS_quarterly_AvgGrowth,-0.00403768506056519
-BILL,Basic_EPS_quarterly_AvgGrowth_Rank,44.912790697674424
+BILL,Basic_EPS_quarterly_AvgGrowth_Rank,44.76744186046512
 BILL,Total_Revenue_quarterly_2025Q1,44131000000.0
 BILL,Total_Revenue_quarterly_2025Q2,43611000000.0
 BILL,Total_Revenue_quarterly_AvgGrowth,-0.011783100314971335
@@ -1000,7 +1000,7 @@ CANTA,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
 CARA,Basic_EPS_quarterly_2025Q1,-0.488851
 CARA,Basic_EPS_quarterly_2025Q2,-0.488851
 CARA,Basic_EPS_quarterly_AvgGrowth,0.0
-CARA,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+CARA,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 CARA,Total_Revenue_quarterly_2025Q1,293583833.308708
 CARA,Total_Revenue_quarterly_2025Q2,310565833.308708
 CARA,Total_Revenue_quarterly_AvgGrowth,0.05784378454566727
@@ -1088,7 +1088,7 @@ CEDER,Total_Revenue_quarterly_AvgGrowth_Rank,85.21870286576168
 CEVI,Basic_EPS_quarterly_2025Q1,6.38
 CEVI,Basic_EPS_quarterly_2025Q2,6.34
 CEVI,Basic_EPS_quarterly_AvgGrowth,-0.006269592476489034
-CEVI,Basic_EPS_quarterly_AvgGrowth_Rank,44.33139534883721
+CEVI,Basic_EPS_quarterly_AvgGrowth_Rank,44.18604651162791
 CEVI,Total_Revenue_quarterly_2025Q1,747939000.0
 CEVI,Total_Revenue_quarterly_2025Q2,751474000.0
 CEVI,Total_Revenue_quarterly_AvgGrowth,0.004726321264167265
@@ -1393,7 +1393,7 @@ DEVP-B,Total_Revenue_quarterly_AvgGrowth_Rank,16.138763197586727
 DIAH,Basic_EPS_quarterly_2025Q1,-0.29
 DIAH,Basic_EPS_quarterly_2025Q2,-0.29
 DIAH,Basic_EPS_quarterly_AvgGrowth,0.0
-DIAH,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+DIAH,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 DIAH,Total_Revenue_quarterly_2025Q1,60068000.0
 DIAH,Total_Revenue_quarterly_2025Q2,54713000.0
 DIAH,Total_Revenue_quarterly_AvgGrowth,-0.08914896450689219
@@ -1413,9 +1413,9 @@ DIOS,Total_Revenue_quarterly_2025Q1,2549000000.0
 DIOS,Total_Revenue_quarterly_2025Q2,2581000000.0
 DIOS,Total_Revenue_quarterly_AvgGrowth,0.012553942722636328
 DIOS,Total_Revenue_quarterly_AvgGrowth_Rank,60.78431372549019
-DIST,Basic_EPS_quarterly_2025Q1,-1.24
-DIST,Basic_EPS_quarterly_2025Q2,-1.97
-DIST,Basic_EPS_quarterly_AvgGrowth,-0.5887096774193549
+DIST,Basic_EPS_quarterly_2025Q1,-0.7736749999999999
+DIST,Basic_EPS_quarterly_2025Q2,-1.229145
+DIST,Basic_EPS_quarterly_AvgGrowth,-0.5887097295375967
 DIST,Basic_EPS_quarterly_AvgGrowth_Rank,7.412790697674419
 DIST,Total_Revenue_quarterly_2025Q1,1500200000.0
 DIST,Total_Revenue_quarterly_2025Q2,1361900000.0
@@ -1440,14 +1440,14 @@ DLAB,Total_Revenue_quarterly_AvgGrowth_Rank,59.276018099547514
 DMXSE-SDB,Basic_EPS_quarterly_2025Q1,-0.013439
 DMXSE-SDB,Basic_EPS_quarterly_2025Q2,-0.013439
 DMXSE-SDB,Basic_EPS_quarterly_AvgGrowth,0.0
-DMXSE-SDB,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+DMXSE-SDB,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 DMXSE-SDB,Total_Revenue_quarterly_2025Q1,0.0
 DMXSE-SDB,Total_Revenue_quarterly_2025Q2,0.0
 DMXSE-SDB,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
 DMYD-B,Basic_EPS_quarterly_2025Q1,-1.198144
 DMYD-B,Basic_EPS_quarterly_2025Q2,-1.198144
 DMYD-B,Basic_EPS_quarterly_AvgGrowth,0.0
-DMYD-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+DMYD-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 DMYD-B,Total_Revenue_quarterly_2025Q1,182000.0
 DMYD-B,Total_Revenue_quarterly_2025Q2,130000.0
 DMYD-B,Total_Revenue_quarterly_AvgGrowth,-0.2857142857142857
@@ -1575,7 +1575,7 @@ EG7,Total_Revenue_quarterly_AvgGrowth_Rank,62.14177978883861
 EGTX,Basic_EPS_quarterly_2025Q1,-1.0
 EGTX,Basic_EPS_quarterly_2025Q2,-1.0
 EGTX,Basic_EPS_quarterly_AvgGrowth,0.0
-EGTX,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+EGTX,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 EGTX,Total_Revenue_quarterly_2025Q1,46800000.0
 EGTX,Total_Revenue_quarterly_2025Q2,47400000.0
 EGTX,Total_Revenue_quarterly_AvgGrowth,0.01282051282051282
@@ -1591,7 +1591,7 @@ EKTA-B,Total_Revenue_quarterly_AvgGrowth_Rank,37.70739064856712
 ELAN-B,Basic_EPS_quarterly_2025Q1,2.35
 ELAN-B,Basic_EPS_quarterly_2025Q2,2.34
 ELAN-B,Basic_EPS_quarterly_AvgGrowth,-0.004255319148936268
-ELAN-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.76744186046512
+ELAN-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.622093023255815
 ELAN-B,Total_Revenue_quarterly_2025Q1,14107000000.0
 ELAN-B,Total_Revenue_quarterly_2025Q2,13648000000.0
 ELAN-B,Total_Revenue_quarterly_AvgGrowth,-0.03253703834975544
@@ -1699,7 +1699,7 @@ ENGCON-B,Total_Revenue_quarterly_AvgGrowth_Rank,78.88386123680242
 ENRO,Basic_EPS_quarterly_2025Q1,0.1
 ENRO,Basic_EPS_quarterly_2025Q2,0.1
 ENRO,Basic_EPS_quarterly_AvgGrowth,0.0
-ENRO,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+ENRO,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 ENRO,Total_Revenue_quarterly_2025Q1,956000000.0
 ENRO,Total_Revenue_quarterly_2025Q2,948000000.0
 ENRO,Total_Revenue_quarterly_AvgGrowth,-0.008368200836820083
@@ -2239,15 +2239,15 @@ GUARD,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
 HAKI-A,Basic_EPS_quarterly_2025Q1,0.88
 HAKI-A,Basic_EPS_quarterly_2025Q2,0.88
 HAKI-A,Basic_EPS_quarterly_AvgGrowth,0.0
-HAKI-A,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+HAKI-A,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 HAKI-A,Total_Revenue_quarterly_2025Q1,1071000000.0
 HAKI-A,Total_Revenue_quarterly_2025Q2,1132000000.0
 HAKI-A,Total_Revenue_quarterly_AvgGrowth,0.05695611577964519
 HAKI-A,Total_Revenue_quarterly_AvgGrowth_Rank,80.76923076923077
-HAKI-B,Basic_EPS_quarterly_2025Q1,0.874861
-HAKI-B,Basic_EPS_quarterly_2025Q2,0.869305
-HAKI-B,Basic_EPS_quarterly_AvgGrowth,-0.006350723143447937
-HAKI-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.18604651162791
+HAKI-B,Basic_EPS_quarterly_2025Q1,0.867778
+HAKI-B,Basic_EPS_quarterly_2025Q2,0.867778
+HAKI-B,Basic_EPS_quarterly_AvgGrowth,0.0
+HAKI-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 HAKI-B,Total_Revenue_quarterly_2025Q1,1071000000.0
 HAKI-B,Total_Revenue_quarterly_2025Q2,1132000000.0
 HAKI-B,Total_Revenue_quarterly_AvgGrowth,0.05695611577964519
@@ -2493,7 +2493,7 @@ ICO,Total_Revenue_quarterly_AvgGrowth_Rank,11.463046757164404
 IDLDX,Basic_EPS_quarterly_2025Q1,-0.19
 IDLDX,Basic_EPS_quarterly_2025Q2,-0.19
 IDLDX,Basic_EPS_quarterly_AvgGrowth,0.0
-IDLDX,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+IDLDX,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 IDLDX,Total_Revenue_quarterly_2025Q1,59940000.0
 IDLDX,Total_Revenue_quarterly_2025Q2,54810000.0
 IDLDX,Total_Revenue_quarterly_AvgGrowth,-0.08558558558558559
@@ -2572,7 +2572,7 @@ INFREA,Total_Revenue_quarterly_AvgGrowth_Rank,69.23076923076923
 INISS-B,Basic_EPS_quarterly_2025Q1,1.69
 INISS-B,Basic_EPS_quarterly_2025Q2,1.69
 INISS-B,Basic_EPS_quarterly_AvgGrowth,0.0
-INISS-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+INISS-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 INISS-B,Total_Revenue_quarterly_2025Q1,2052258000.0
 INISS-B,Total_Revenue_quarterly_2025Q2,2017158000.0
 INISS-B,Total_Revenue_quarterly_AvgGrowth,-0.017103112766523508
@@ -2823,7 +2823,7 @@ KDEV,Total_Revenue_quarterly_AvgGrowth_Rank,14.479638009049776
 KEBNI-B,Basic_EPS_quarterly_2025Q1,0.01
 KEBNI-B,Basic_EPS_quarterly_2025Q2,0.01
 KEBNI-B,Basic_EPS_quarterly_AvgGrowth,0.0
-KEBNI-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+KEBNI-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 KEBNI-B,Total_Revenue_quarterly_2025Q1,134542000.0
 KEBNI-B,Total_Revenue_quarterly_2025Q2,137318000.0
 KEBNI-B,Total_Revenue_quarterly_AvgGrowth,0.02063296219767805
@@ -2934,7 +2934,7 @@ LCLEAN,Total_Revenue_quarterly_AvgGrowth_Rank,36.80241327300151
 LEMSE,Basic_EPS_quarterly_2025Q2,-0.01
 LEMSE,Basic_EPS_quarterly_2025Q3,-0.01
 LEMSE,Basic_EPS_quarterly_AvgGrowth,0.0
-LEMSE,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+LEMSE,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 LEMSE,Total_Revenue_quarterly_2025Q2,0.0
 LEMSE,Total_Revenue_quarterly_2025Q3,0.0
 LEMSE,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
@@ -3035,7 +3035,7 @@ LPGO,Total_Revenue_quarterly_AvgGrowth_Rank,0.7541478129713424
 LUC,Basic_EPS_quarterly_2025Q1,0.0288539999999999
 LUC,Basic_EPS_quarterly_2025Q2,0.0288539999999999
 LUC,Basic_EPS_quarterly_AvgGrowth,0.0
-LUC,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+LUC,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 LUC,Total_Revenue_quarterly_2025Q1,194669000.0
 LUC,Total_Revenue_quarterly_2025Q2,197043000.0
 LUC,Total_Revenue_quarterly_AvgGrowth,0.012195059305795992
@@ -3179,7 +3179,7 @@ MEKO,Total_Revenue_quarterly_AvgGrowth_Rank,39.51734539969834
 MER,Basic_EPS_quarterly_2025Q1,-0.54
 MER,Basic_EPS_quarterly_2025Q2,-0.54
 MER,Basic_EPS_quarterly_AvgGrowth,0.0
-MER,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+MER,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 MER,Total_Revenue_quarterly_2025Q1,76400000.0
 MER,Total_Revenue_quarterly_2025Q2,145700000.0
 MER,Total_Revenue_quarterly_AvgGrowth,0.9070680628272252
@@ -3211,7 +3211,7 @@ MILDEF,Total_Revenue_quarterly_AvgGrowth_Rank,82.35294117647058
 MINEST,Basic_EPS_quarterly_2025Q1,-0.06
 MINEST,Basic_EPS_quarterly_2025Q2,-0.06
 MINEST,Basic_EPS_quarterly_AvgGrowth,0.0
-MINEST,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+MINEST,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 MINEST,Total_Revenue_quarterly_2025Q1,75000.0
 MINEST,Total_Revenue_quarterly_2025Q2,0.0
 MINEST,Total_Revenue_quarterly_AvgGrowth,-1.0
@@ -3227,7 +3227,7 @@ MIPS,Total_Revenue_quarterly_AvgGrowth_Rank,53.54449472096531
 MMGR-B,Basic_EPS_quarterly_2025Q1,3.6
 MMGR-B,Basic_EPS_quarterly_2025Q2,3.6
 MMGR-B,Basic_EPS_quarterly_AvgGrowth,0.0
-MMGR-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+MMGR-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 MMGR-B,Total_Revenue_quarterly_2025Q1,2947000000.0
 MMGR-B,Total_Revenue_quarterly_2025Q2,2998000000.0
 MMGR-B,Total_Revenue_quarterly_AvgGrowth,0.017305734645402103
@@ -3243,7 +3243,7 @@ MNTC,Total_Revenue_quarterly_AvgGrowth_Rank,6.485671191553545
 MOB,Basic_EPS_quarterly_2025Q1,-5.43
 MOB,Basic_EPS_quarterly_2025Q2,-5.46
 MOB,Basic_EPS_quarterly_AvgGrowth,-0.005524861878453084
-MOB,Basic_EPS_quarterly_AvgGrowth_Rank,44.47674418604651
+MOB,Basic_EPS_quarterly_AvgGrowth_Rank,44.33139534883721
 MOB,Total_Revenue_quarterly_2025Q1,12860000.0
 MOB,Total_Revenue_quarterly_2025Q2,12347000.0
 MOB,Total_Revenue_quarterly_AvgGrowth,-0.03989113530326594
@@ -3346,7 +3346,7 @@ NAIG-B,Total_Revenue_quarterly_AvgGrowth_Rank,3.167420814479638
 NANEXA,Basic_EPS_quarterly_2025Q1,-0.22
 NANEXA,Basic_EPS_quarterly_2025Q2,-0.22
 NANEXA,Basic_EPS_quarterly_AvgGrowth,0.0
-NANEXA,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+NANEXA,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 NANEXA,Total_Revenue_quarterly_2025Q1,19485000.0
 NANEXA,Total_Revenue_quarterly_2025Q2,16533000.0
 NANEXA,Total_Revenue_quarterly_AvgGrowth,-0.1515011547344111
@@ -3410,7 +3410,7 @@ NCAB,Total_Revenue_quarterly_AvgGrowth_Rank,48.114630467571644
 NCC-A,Basic_EPS_quarterly_2025Q1,15.64
 NCC-A,Basic_EPS_quarterly_2025Q2,15.58
 NCC-A,Basic_EPS_quarterly_AvgGrowth,-0.003836317135549904
-NCC-A,Basic_EPS_quarterly_AvgGrowth_Rank,45.13081395348838
+NCC-A,Basic_EPS_quarterly_AvgGrowth_Rank,44.98546511627907
 NCC-A,Total_Revenue_quarterly_2025Q1,61125000000.0
 NCC-A,Total_Revenue_quarterly_2025Q2,60220000000.0
 NCC-A,Total_Revenue_quarterly_AvgGrowth,-0.014805725971370143
@@ -3418,7 +3418,7 @@ NCC-A,Total_Revenue_quarterly_AvgGrowth_Rank,31.90045248868778
 NCC-B,Basic_EPS_quarterly_2025Q1,15.64
 NCC-B,Basic_EPS_quarterly_2025Q2,15.58
 NCC-B,Basic_EPS_quarterly_AvgGrowth,-0.003836317135549904
-NCC-B,Basic_EPS_quarterly_AvgGrowth_Rank,45.13081395348838
+NCC-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.98546511627907
 NCC-B,Total_Revenue_quarterly_2025Q1,61125000000.0
 NCC-B,Total_Revenue_quarterly_2025Q2,60220000000.0
 NCC-B,Total_Revenue_quarterly_AvgGrowth,-0.014805725971370143
@@ -3450,7 +3450,7 @@ NEOBO,Total_Revenue_quarterly_AvgGrowth_Rank,58.371040723981906
 NEOLA,Basic_EPS_quarterly_2025Q1,-0.16
 NEOLA,Basic_EPS_quarterly_2025Q2,-0.16
 NEOLA,Basic_EPS_quarterly_AvgGrowth,0.0
-NEOLA,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+NEOLA,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 NEOLA,Total_Revenue_quarterly_2025Q1,0.0
 NEOLA,Total_Revenue_quarterly_2025Q2,0.0
 NEOLA,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
@@ -3624,7 +3624,7 @@ NORION,Total_Revenue_quarterly_AvgGrowth_Rank,57.01357466063348
 NOSA,Basic_EPS_quarterly_2025Q1,-0.04
 NOSA,Basic_EPS_quarterly_2025Q2,-0.04
 NOSA,Basic_EPS_quarterly_AvgGrowth,0.0
-NOSA,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+NOSA,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 NOSA,Total_Revenue_quarterly_2025Q1,17509000.0
 NOSA,Total_Revenue_quarterly_2025Q2,18203000.0
 NOSA,Total_Revenue_quarterly_AvgGrowth,0.03963675823862014
@@ -3965,7 +3965,7 @@ PRCO-B,Total_Revenue_quarterly_AvgGrowth_Rank,29.411764705882355
 PREC,Basic_EPS_quarterly_2025Q1,-0.16
 PREC,Basic_EPS_quarterly_2025Q2,-0.16
 PREC,Basic_EPS_quarterly_AvgGrowth,0.0
-PREC,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+PREC,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 PREC,Total_Revenue_quarterly_2025Q1,85176000.0
 PREC,Total_Revenue_quarterly_2025Q2,85378000.0
 PREC,Total_Revenue_quarterly_AvgGrowth,0.002371560063867756
@@ -4253,7 +4253,7 @@ SANION,Total_Revenue_quarterly_AvgGrowth_Rank,53.242835595776775
 SAVE,Basic_EPS_quarterly_2025Q1,11.25
 SAVE,Basic_EPS_quarterly_2025Q2,11.23
 SAVE,Basic_EPS_quarterly_AvgGrowth,-0.00177777777777774
-SAVE,Basic_EPS_quarterly_AvgGrowth_Rank,45.49418604651162
+SAVE,Basic_EPS_quarterly_AvgGrowth_Rank,45.348837209302324
 SAVE,Total_Revenue_quarterly_2025Q1,5310300000.0
 SAVE,Total_Revenue_quarterly_2025Q2,5311300000.0
 SAVE,Total_Revenue_quarterly_AvgGrowth,0.00018831327796922962
@@ -4309,7 +4309,7 @@ SCA-B,Total_Revenue_quarterly_AvgGrowth_Rank,54.07239819004525
 SCIB,Basic_EPS_quarterly_2025Q1,-0.33
 SCIB,Basic_EPS_quarterly_2025Q2,-0.33
 SCIB,Basic_EPS_quarterly_AvgGrowth,0.0
-SCIB,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+SCIB,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 SCIB,Total_Revenue_quarterly_2025Q1,32503000.0
 SCIB,Total_Revenue_quarterly_2025Q2,34653000.0
 SCIB,Total_Revenue_quarterly_AvgGrowth,0.06614774020859612
@@ -4573,7 +4573,7 @@ SIVE,Total_Revenue_quarterly_AvgGrowth_Rank,85.36953242835595
 SKA-B,Basic_EPS_quarterly_2025Q1,15.09
 SKA-B,Basic_EPS_quarterly_2025Q2,15.01
 SKA-B,Basic_EPS_quarterly_AvgGrowth,-0.005301524188204113
-SKA-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.622093023255815
+SKA-B,Basic_EPS_quarterly_AvgGrowth_Rank,44.47674418604651
 SKA-B,Total_Revenue_quarterly_2025Q1,183555000000.0
 SKA-B,Total_Revenue_quarterly_2025Q2,184662000000.0
 SKA-B,Total_Revenue_quarterly_AvgGrowth,0.006030889924000981
@@ -4637,7 +4637,7 @@ SLP-B,Total_Revenue_quarterly_AvgGrowth_Rank,87.93363499245852
 SNM,Basic_EPS_quarterly_2025Q1,0.03
 SNM,Basic_EPS_quarterly_2025Q2,0.03
 SNM,Basic_EPS_quarterly_AvgGrowth,0.0
-SNM,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+SNM,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 SNM,Total_Revenue_quarterly_2025Q1,122689000.0
 SNM,Total_Revenue_quarterly_2025Q2,135444000.0
 SNM,Total_Revenue_quarterly_AvgGrowth,0.10396205038756531
@@ -4716,7 +4716,7 @@ SPEONE,Total_Revenue_quarterly_AvgGrowth_Rank,5.279034690799397
 SPRINT,Basic_EPS_quarterly_2025Q1,-0.286518
 SPRINT,Basic_EPS_quarterly_2025Q2,-0.286518
 SPRINT,Basic_EPS_quarterly_AvgGrowth,0.0
-SPRINT,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+SPRINT,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 SPRINT,Total_Revenue_quarterly_2025Q1,61879000.0
 SPRINT,Total_Revenue_quarterly_2025Q2,59092000.0
 SPRINT,Total_Revenue_quarterly_AvgGrowth,-0.04503951259716544
@@ -4859,7 +4859,7 @@ SVOL-A,Total_Revenue_quarterly_AvgGrowth_Rank,99.01960784313727
 SVOL-B,Basic_EPS_quarterly_2025Q2,0.9000000000000004
 SVOL-B,Basic_EPS_quarterly_2025Q3,0.9000000000000004
 SVOL-B,Basic_EPS_quarterly_AvgGrowth,0.0
-SVOL-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+SVOL-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 SVOL-B,Total_Revenue_quarterly_2025Q2,-199100000.0
 SVOL-B,Total_Revenue_quarterly_2025Q3,8600000.0
 SVOL-B,Total_Revenue_quarterly_AvgGrowth,1.0431943746860874
@@ -4922,7 +4922,7 @@ TAGM-B,Total_Revenue_quarterly_AvgGrowth_Rank,81.59879336349924
 TALK,Basic_EPS_quarterly_2025Q1,0.15
 TALK,Basic_EPS_quarterly_2025Q2,0.15
 TALK,Basic_EPS_quarterly_AvgGrowth,0.0
-TALK,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+TALK,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 TALK,Total_Revenue_quarterly_2025Q1,16010002.0
 TALK,Total_Revenue_quarterly_2025Q2,16530683.0
 TALK,Total_Revenue_quarterly_AvgGrowth,0.03252223203969618
@@ -4978,7 +4978,7 @@ TEQ,Total_Revenue_quarterly_AvgGrowth_Rank,78.73303167420815
 TERRNT-B,Basic_EPS_quarterly_2025Q1,-0.039331
 TERRNT-B,Basic_EPS_quarterly_2025Q2,-0.039331
 TERRNT-B,Basic_EPS_quarterly_AvgGrowth,0.0
-TERRNT-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+TERRNT-B,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 TERRNT-B,Total_Revenue_quarterly_2025Q1,0.0
 TERRNT-B,Total_Revenue_quarterly_2025Q2,0.0
 TERRNT-B,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
@@ -5277,7 +5277,7 @@ VIVA,Total_Revenue_quarterly_AvgGrowth_Rank,79.78883861236802
 VIVE,Basic_EPS_quarterly_2025Q1,-0.08
 VIVE,Basic_EPS_quarterly_2025Q2,-0.08
 VIVE,Basic_EPS_quarterly_AvgGrowth,0.0
-VIVE,Basic_EPS_quarterly_AvgGrowth_Rank,47.60174418604651
+VIVE,Basic_EPS_quarterly_AvgGrowth_Rank,47.52906976744186
 VIVE,Total_Revenue_quarterly_2025Q1,0.0
 VIVE,Total_Revenue_quarterly_2025Q2,0.0
 VIVE,Total_Revenue_quarterly_AvgGrowth_Rank,50.0
