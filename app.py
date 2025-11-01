@@ -375,10 +375,12 @@ try:
     # Filter columns that contain the string "catRank" for the main table
 
     # get all column groups from config / result_columns
-    result_columns = config.get("result_columns", {})
-    all_column_groups = {key: value for key, value in result_columns.items() if key != "default"}
-
-
+    all_column_groups = config.get("result_columns", {})
+    #st.write("all_column_groups before sektor_avg addition:", all_column_groups)
+    # add sektor_avg as key (take from config, but add two versions to the items, one ending with _Sektor_avg, and one ending with _Sektor_diff)
+    all_column_groups["sektor_avg"] = config.get("sektor_avg", [])
+    all_column_groups["sektor_avg"] = [col + "_Sektor_avg" for col in all_column_groups["sektor_avg"]] + [col + "_Sektor_diff" for col in all_column_groups["sektor_avg"]]
+    #st.write("all_column_groups:", all_column_groups)
     # Initialize a DataFrame that will be filtered by sliders
     df_filtered_by_sliders = df_new_ranks.copy()
 
@@ -706,10 +708,24 @@ try:
                 key="stock_selection_editor" # Unique key to manage state
             )
             
+            # Track if any checkbox state changed
+            state_changed = False
             # Update session state with the new checkbox values from the editor
             for ticker in edited_df.index:
-                st.session_state.checkbox_states[f"{ticker}_valj"] = edited_df.loc[ticker, 'Välj']
-                st.session_state.checkbox_states[f"{ticker}_shortlist"] = edited_df.loc[ticker, 'Shortlist']
+                new_valj = edited_df.loc[ticker, 'Välj']
+                new_shortlist = edited_df.loc[ticker, 'Shortlist']
+                old_valj = st.session_state.checkbox_states.get(f"{ticker}_valj", False)
+                old_shortlist = st.session_state.checkbox_states.get(f"{ticker}_shortlist", False)
+                
+                if new_valj != old_valj or new_shortlist != old_shortlist:
+                    state_changed = True
+                
+                st.session_state.checkbox_states[f"{ticker}_valj"] = new_valj
+                st.session_state.checkbox_states[f"{ticker}_shortlist"] = new_shortlist
+            
+            # Force immediate rerun if state changed to ensure new state loads on next render
+            if state_changed:
+                st.rerun()
 
             # Logic to handle checkbox selection for plotting
             selected_rows_plot = edited_df[edited_df['Välj']]
