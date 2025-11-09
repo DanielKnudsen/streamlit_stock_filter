@@ -2,6 +2,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import streamlit as st
+import plotly.express as px
+
 
 def get_ratio_values_by_period(ticker, ratio, df):
     """
@@ -283,6 +285,31 @@ def plot_ratio_values(df,mappings):
         yaxis=dict(fixedrange=True)
     )
     
+    return fig
+
+def generate_scatter_plot(df_scatter_to_use):
+    fig = px.scatter(df_scatter_to_use, 
+        x='ttm_momentum_clusterRank', 
+        y='pct_ch_3_m', 
+        #color=df_scatter_to_use['is_sektor'].map({True: 'Sector Average', False: 'Individual Stock'}),
+        color=df_scatter_to_use['Lista'],   
+        hover_data=['Sektor'],
+        hover_name=df_scatter_to_use.index)
+
+    # Add vertical and horizontal lines for sector averages
+    sector_data = df_scatter_to_use[df_scatter_to_use['is_sektor']]
+    for idx, row in sector_data.iterrows():
+        x_val = row['ttm_momentum_clusterRank']
+        y_val = row['pct_ch_3_m']
+
+        # Vertical line
+        fig.add_vline(x=x_val, line_dash="dash", line_color="red", opacity=0.5)
+        # Horizontal line
+        fig.add_hline(y=y_val, line_dash="dash", line_color="red", opacity=0.5)
+
+        fig.update_layout(title='TTM Momentum Cluster Rank vs 3-Month Percentage Change',
+                        xaxis_title='TTM Momentum Cluster Rank',
+                        yaxis_title='3-Month Percentage Change')
     return fig
 
 def get_ratio_ranks_by_period(ticker, ratio, df, mappings):

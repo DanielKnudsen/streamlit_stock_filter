@@ -4,7 +4,6 @@ import pandas as pd
 import pwlf
 import plotly.graph_objects as go # Import Plotly
 
-
 def generate_price_chart(config, CSV_PATH, add_moving_averages, get_display_name, selected_stock_ticker, selected_stock_dict):
     if selected_stock_ticker:
                 # Add slider for PWLF

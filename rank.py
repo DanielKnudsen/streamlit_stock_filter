@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 complete_ranks
             )
 
-            final_results = post_processing(combined_results, config["rank_decimals"], config['sektor_avg'])
+            final_results = post_processing(combined_results, config["rank_decimals"], config['sektor_avg'],config['post_processing_diffs'],config['post_processing_sums'])
             #final_results_trimmed = trim_unused_columns(final_results, config)  # Trim unused columns
             save_results_to_csv(final_results, CSV_PATH / config["results_file"])
 
