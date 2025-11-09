@@ -25,10 +25,22 @@ SMA_long: 200
 # pct_diff_long: 200
 
 sektor_avg:
-  - "ttm_current_clusterRank"
   - "ttm_momentum_clusterRank"
-  - "pct_ch_1_m"
   - "pct_ch_3_m"
+
+# Post-processing inställningar
+post_processing_diffs:
+  sektor_avg_diffs:
+    - "ttm_momentum_clusterRank_Sektor_diff"
+    - "pct_ch_3_m_Sektor_diff"
+  clusterRank_diffs:
+    - "ttm_momentum_clusterRank"
+    - "long_trend_clusterRank"
+
+post_processing_sums:
+  clusterRank_sums:
+    - "ttm_momentum_clusterRank"
+    - "long_trend_clusterRank"
 
 # CAGR inställningar
 cagr_dimension:
@@ -48,16 +60,27 @@ result_columns:
     - "long_trend_clusterRank"
     - "ttm_current_clusterRank"
     - "ttm_momentum_clusterRank"
-  Intäkter:
+  Omsättningstillväxt:
     - "Total_Revenue_year_AvgGrowth_Rank"
     - "Total_Revenue_quarterly_AvgGrowth_Rank"
-  Vinst per aktie:
+  Omsättningstillväxt_values:
+    - "Total_Revenue_year_AvgGrowth"
+    - "Total_Revenue_quarterly_AvgGrowth"
+  EPS:
     - "Basic_EPS_year_AvgGrowth_Rank"
     - "Basic_EPS_quarterly_AvgGrowth_Rank"
+  EPS_values:
+    - "Basic_EPS_year_AvgGrowth"
+    - "Basic_EPS_quarterly_AvgGrowth"
   Glidande medelvärde:
     - "pct_Close_vs_SMA_short"
     - "pct_SMA_short_vs_SMA_medium"
     - "pct_SMA_medium_vs_SMA_long"
+  Sektoranalys:
+    - "sektor_avg_diffs"
+    - "clusterRank_diffs"
+  Lång trend + momentum:
+    - "clusterRank_sums"
   Kategori Rank:
     - "Kvalitet_long_trend_catRank"
     - "Kvalitet_ttm_current_catRank"

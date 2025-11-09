@@ -10,7 +10,7 @@ import uuid
 import json
 from auth_ui import handle_authentication, render_account_buttons, handle_portfolio_save_dialog
 from config_mappings import ConfigMappings
-from app_helper import get_ratio_ranks_by_period,get_ratio_values_by_period,plot_ratio_values,get_category_ranks_by_period,visualize_dataframe_with_progress
+from app_helper import get_ratio_ranks_by_period,get_ratio_values_by_period,plot_ratio_values,get_category_ranks_by_period,visualize_dataframe_with_progress,generate_scatter_plot
 from app_generate_price_chart import generate_price_chart
 
 # =====================================================================
@@ -233,7 +233,7 @@ def add_moving_averages(df, short_window=config['SMA_short'], medium_window=conf
     df['SMA_long'] = df['Close'].rolling(window=long_window).mean()
     return df
 
-def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_str="%d%%"):
+def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_str="%d%%", key_suffix=""):
     """
     Skapar en Streamlit-slider för en given kolumn i en DataFrame.
 
@@ -243,25 +243,29 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
         tooltip_func: Funktion som returnerar tooltip-text för kolumnen
         step: Stegstorlek för slidern (default: 1.0)
         format_str: Formatsträng för sliderns värden (default: "%d%%")
+        key_suffix: Valfritt suffix för slider-nyckeln (default: "")
 
     Returnerar:
         filtered_df: Filtrerad DataFrame baserat på slidervärden
     """
-    min_value = float(df[column_name].min())
-    max_value = float(df[column_name].max())
+    slider_key = f"slider_{column_name}{key_suffix}"
+    min_max_key = f"minmax_{column_name}{key_suffix}"  # ← NEW: Store original min/max
+    
+    # Store original min/max on FIRST initialization only
+    if min_max_key not in st.session_state:
+        st.session_state[min_max_key] = (float(df[column_name].min()), float(df[column_name].max()))
+    
+    min_value, max_value = st.session_state[min_max_key]
+    
     # Ensure the slider has a valid range
     if min_value == max_value:
-        max_value += 0.001  # Ensure a valid range if min and max are equal
-
-    # Use session state to persist slider value across reruns
-    # This prevents the slider from resetting when other filters change
-    slider_key = f"slider_{column_name}"
+        max_value += 0.001
     
-    # Initialize session state if this slider hasn't been used yet
+    # Initialize slider value on first use
     if slider_key not in st.session_state:
         st.session_state[slider_key] = (min_value, max_value)
     
-    # Get the current slider value, but clamp it to valid range
+    # Get current slider value and clamp it
     current_value = st.session_state[slider_key]
     clamped_value = (
         max(min_value, min(current_value[0], max_value)),
@@ -279,14 +283,12 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
         key=slider_key
     )
 
-    # Filter the DataFrame based on the slider values
-    # Include both rows that match the filter AND rows with NaN values in this column
-    # st.write(f"Number of rows before filtering on {column_name}: {len(df)}")
+    # Filter using the ORIGINAL dataframe passed in
     filtered_df = df[
         ((df[column_name] >= slider_values[0]) & (df[column_name] <= slider_values[1])) | 
         (df[column_name].isna())
     ]
-    # st.write(f"Number of rows after filtering on {column_name}: {len(filtered_df)}")
+    
     return filtered_df
 
 def create_pills_and_filter_df(df, column_name, tooltip_func):
@@ -346,6 +348,19 @@ def human_format(num):
             return f"{num:.1f}{unit}"
         num /= 1000.0
     return f"{num:.1f} Bnkr"
+
+def prepare_sector_comparison(df):
+    df_sector_avg = df[['Sektor','ttm_momentum_clusterRank_Sektor_avg', 'pct_ch_3_m_Sektor_avg']].drop_duplicates()
+    df_sector_avg['is_sektor'] = True
+    df_sector_avg.rename(columns={
+        'ttm_momentum_clusterRank_Sektor_avg': 'ttm_momentum_clusterRank',
+        'pct_ch_3_m_Sektor_avg': 'pct_ch_3_m'
+    }, inplace=True)
+    df_sector_avg.set_index('Sektor', inplace=True, drop=False)
+    df_sector_avg['Lista'] = df_sector_avg['Sektor'] + ' Genomsnitt'
+    df = df.drop(columns=['ttm_momentum_clusterRank_Sektor_avg', 'pct_ch_3_m_Sektor_avg'])
+    df['is_sektor'] = False
+    return pd.concat([df, df_sector_avg], axis=0)
 
 # =============================
 # LOAD DATA
@@ -506,7 +521,15 @@ try:
             for period, col in zip(time_periods, columns):
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, period, get_tooltip_text, 1.0, "%d")
-
+            
+            cluster_rank_sums_diffs = ['clusterRank_sums','clusterRank_diffs']
+            columns = st.columns(len(cluster_rank_sums_diffs), gap='medium', border=True)
+            for period, col in zip(cluster_rank_sums_diffs, columns):
+                with col:
+                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, period, get_tooltip_text, 1.0, "%d")
+            
+            
+            st.dataframe(df_filtered_by_sliders[time_periods], use_container_width=True)
 
         with st.expander("🎯 **Teknisk analys: SMA-differenser**", expanded=False):
             st.markdown("##### Filtrera efter SMA-differenser")
@@ -518,26 +541,63 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, sma_period, get_tooltip_text, 1.0, "%d")
 
-        with st.expander("🎯 **Försäljningsökning Rank**", expanded=False):
-            st.markdown("##### Filtrera efter Intäkter")
-            revenue_columns = all_column_groups['Intäkter']  # Assume this method exists in ConfigMappings
+        with st.expander("🎯 **Omsättningstillväxt Rank**", expanded=False):
+            st.markdown("##### Filtrera efter Omsättningstillväxt")
+            revenue_columns = all_column_groups['Omsättningstillväxt']  # Assume this method exists in ConfigMappings
             
             # loop through revenue_columns and create sliders
             columns = st.columns(len(revenue_columns), gap='medium', border=True)
             for revenue_col, col in zip(revenue_columns, columns):
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_col, get_tooltip_text, 1.0, "%d")
+            # TODO: Add sliders with actual growth values
+            revenue_growth_columns = all_column_groups['Omsättningstillväxt_values']
+            columns = st.columns(len(revenue_growth_columns), gap='medium', border=True)
+            for revenue_growth_col, col in zip(revenue_growth_columns, columns):
+                with col:
+                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_growth_col, get_tooltip_text, 1.0, "%2.2f")
 
-        with st.expander("🎯 **Vinst per aktie Rank**", expanded=False):
-            st.markdown("##### Filtrera efter Vinst per aktie")
-            eps_columns = all_column_groups['Vinst per aktie']  # Assume this method exists in ConfigMappings
+        with st.expander("🎯 **Vinsttillväxt per aktie Rank**", expanded=False):
+            st.markdown("##### Filtrera efter Vinsttillväxt per aktie")
+            eps_columns = all_column_groups['EPS']  # Assume this method exists in ConfigMappings
 
             # loop through eps_columns and create sliders
             columns = st.columns(len(eps_columns), gap='medium', border=True)
             for eps_col, col in zip(eps_columns, columns):
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_col, get_tooltip_text, 1.0, "%d")
+            # TODO: Add sliders with actual growth values
+            eps_growth_columns = all_column_groups['EPS_values']
+            columns = st.columns(len(eps_growth_columns), gap='medium', border=True)
+            for eps_growth_col, col in zip(eps_growth_columns, columns):
+                with col:
+                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_growth_col, get_tooltip_text, 1.0, "%2.2f")
 
+        with st.expander("🎯 **Sektoranalys**", expanded=False):
+            st.markdown("##### Filtrera efter Sektoranalys")
+            sektor_columns =['ttm_momentum_clusterRank','pct_ch_3_m','sektor_avg_diffs']
+            # loop through sektor_columns and create sliders
+            columns = st.columns(len(sektor_columns), gap='medium', border=True)
+            for sektor_col, col in zip(sektor_columns, columns):
+                with col:
+                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, sektor_col, get_tooltip_text, 1.0, "%d", key_suffix="_sektor")
+            
+            df_scatter_to_use=prepare_sector_comparison(df_filtered_by_sliders[['Lista','Sektor','ttm_momentum_clusterRank','ttm_momentum_clusterRank_Sektor_avg','pct_ch_3_m','pct_ch_3_m_Sektor_avg']])
+            fig = generate_scatter_plot(df_scatter_to_use)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        """with st.expander("🎯 **Lång trend & Momentum trend**", expanded=False):
+            st.markdown("##### Filtrera efter Lång trend & Momentum trend")
+            trend_columns =['ttm_momentum_clusterRank','long_trend_clusterRank','clusterRank_diffs','clusterRank_sums']
+            # loop through trend_columns and create sliders
+            columns = st.columns(len(trend_columns), gap='medium', border=True)
+            for trend_col, col in zip(trend_columns, columns):
+                with col:
+                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, trend_col, get_tooltip_text, 1.0, "%d", key_suffix="_trend")
+            
+            df_scatter_to_use=prepare_sector_comparison(df_filtered_by_sliders[['Lista','Sektor','ttm_momentum_clusterRank','ttm_momentum_clusterRank_Sektor_avg','pct_ch_3_m','pct_ch_3_m_Sektor_avg']])
+            fig = generate_scatter_plot(df_scatter_to_use)
+            st.plotly_chart(fig, use_container_width=True)"""
 
         with st.expander("🎯 **Expertnivå: Detaljerad nyckeltalsfiltrering**", expanded=False):
             st.markdown("""

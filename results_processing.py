@@ -159,7 +159,7 @@ def calculate_sektor_avg_and_diff(final_df: pd.DataFrame, rank_columns: List[str
     
     return final_df
 
-def post_processing(final_df: pd.DataFrame, rank_decimals: int, cols_to_process: list) -> pd.DataFrame:
+def post_processing(final_df: pd.DataFrame, rank_decimals: int, cols_to_process: list, post_processing_diffs: dict, post_processing_sums: dict) -> pd.DataFrame:
     """
     Perform post-processing on the final results DataFrame, including ranking and difference calculations.
 
@@ -171,17 +171,30 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, cols_to_process:
     Returns:
         pd.DataFrame: Post-processed DataFrame.
     """
+    def apply_post_processing_diffs(df: pd.DataFrame, diffs: dict) -> pd.DataFrame:
+        for new_col, (col1, col2) in diffs.items():
+            if col1 in df.columns and col2 in df.columns:
+                df[new_col] = df[col1] - df[col2]
+        return df
+
+    def apply_post_processing_sums(df: pd.DataFrame, sums: dict) -> pd.DataFrame:
+        for new_col, cols in sums.items():
+            if all(col in df.columns for col in cols):
+                df[new_col] = df[cols].sum(axis=1)
+        return df
 
     def get_quarter(dt):
         if pd.isnull(dt):
             return None
         return (dt.month - 1) // 3 + 1
+    
     def quarter_diff(row):
         if pd.isnull(row['LatestReportDate_Q']) or pd.isnull(row['LatestReportDate_Y']):
             return None
         y1, q1 = row['LatestReportDate_Y'].year, get_quarter(row['LatestReportDate_Y'])
         y2, q2 = row['LatestReportDate_Q'].year, get_quarter(row['LatestReportDate_Q'])
         return (y2 - y1) * 4 + (q2 - q1)
+    
     final_df['LatestReportDate_Q'] = pd.to_datetime(final_df['LatestReportDate_Q'], errors='coerce')
     final_df['LatestReportDate_Y'] = pd.to_datetime(final_df['LatestReportDate_Y'], errors='coerce')
     final_df['QuarterDiff'] = final_df.apply(quarter_diff, axis=1)
@@ -190,6 +203,10 @@ def post_processing(final_df: pd.DataFrame, rank_decimals: int, cols_to_process:
     final_df['Name'] = final_df['Name'].astype(str)
 
     final_df = calculate_sektor_avg_and_diff(final_df, cols_to_process)
+
+    final_df = apply_post_processing_diffs(final_df, post_processing_diffs)
+
+    final_df = apply_post_processing_sums(final_df, post_processing_sums)
 
     for col in final_df.columns:
         if "Rank" in col:
