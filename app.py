@@ -550,7 +550,6 @@ try:
             for revenue_col, col in zip(revenue_columns, columns):
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_col, get_tooltip_text, 1.0, "%d")
-            # TODO: Add sliders with actual growth values
             revenue_growth_columns = all_column_groups['Omsättningstillväxt_values']
             columns = st.columns(len(revenue_growth_columns), gap='medium', border=True)
             for revenue_growth_col, col in zip(revenue_growth_columns, columns):
@@ -566,7 +565,6 @@ try:
             for eps_col, col in zip(eps_columns, columns):
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_col, get_tooltip_text, 1.0, "%d")
-            # TODO: Add sliders with actual growth values
             eps_growth_columns = all_column_groups['EPS_values']
             columns = st.columns(len(eps_growth_columns), gap='medium', border=True)
             for eps_growth_col, col in zip(eps_growth_columns, columns):

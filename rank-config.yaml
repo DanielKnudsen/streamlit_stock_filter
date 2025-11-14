@@ -352,8 +352,6 @@ ratio_help_texts:
   Rörelseflödesmarginal_ttm_current: "Rörelseflödesmarginal visar hur stor andel av omsättningen som omvandlas till kassaflöde från den löpande verksamheten under det senaste året. En hög rörelseflödesmarginal för året innebär att företaget har varit bra på att generera kassaflöde från sin försäljning just nu."
   Fritt_Kassaflode_per_Aktie_ttm_current: "Fritt kassaflöde per aktie visar hur mycket kassaflöde som genereras per aktie efter att investeringar har dragits av under det senaste året. Detta nyckeltal är viktigt för att bedöma företagets förmåga att skapa värde för aktieägarna just nu."
   Kassaflöde_till_Skuld_ttm_current: "Kassaflöde till skuld visar företagets förmåga att betala av sina skulder med det kassaflöde som genereras från verksamheten under det senaste året. En hög kvot för året innebär att företaget snabbt kan minska sina skulder just nu."
-
-
   ROE_long_trend: "Avkastning på eget kapital (ROE) visar om bolaget har förbättrat sin förmåga att skapa vinst på aktieägarnas kapital under de senaste fyra åren. Ett högre trendvärde indikerar att ROE har ökat och att bolagets lönsamhet har stärkts över tid."
   ROIC_long_trend: "Avkastning på investerat kapital (ROIC) visar om bolaget har blivit bättre på att använda sitt kapital för att skapa vinst under de senaste fyra åren. Ett högre trendvärde innebär att ROIC har förbättrats och att bolaget har blivit mer effektivt över tid."
   Soliditet_long_trend: "Soliditetstrenden visar om bolaget har ökat andelen eget kapital i förhållande till tillgångarna under de senaste fyra åren. Ett högre trendvärde innebär att bolaget har stärkt sin finansiella ställning och minskat sin risk över tid."
@@ -371,6 +369,8 @@ ratio_help_texts:
 
 
 display_names:
+  clusterRank_diffs: "Trendförändring"
+  clusterRank_sums: "Trendkontinuitet"
   ROE: "Avkastning på eget kapital"
   ROIC: "Avkastning på investerat kapital"
   Soliditet: "Soliditet"
@@ -392,8 +392,8 @@ display_names:
   pct_SMA_short_vs_SMA_medium: "SMA 10 vs 50 (%)"
   pct_Close_vs_SMA_short: "Pris vs SMA 10 (%)"
   long_trend_clusterRank: "Trend 4 år"
-  ttm_current_clusterRank: "Senaste TTM"
-  ttm_momentum_clusterRank: "TTM-momentum"
+  ttm_current_clusterRank: "TTM senaste Q"
+  ttm_momentum_clusterRank: "TTM trend 2Q"
   cagr_close: "CAGR Aktiekurs"
   cagrTotal_Revenue: "CAGR omsättning"
   cagrBasic_EPS: "CAGR vinst/aktie"
@@ -435,12 +435,12 @@ display_names:
   Dividend_AvgGrowth: "Utdelning tillväxt"
 
 tooltip_texts:
+  clusterRank_diffs: "Skillnaden mellan kortsiktig TTM-momentum (senaste 2 kvartaler) och långsiktig trend (4 år). Ett positivt värde indikerar att aktiens kortsiktiga utveckling är starkare än den långsiktiga trenden, vilket kan signalera en potentiell uppgång. Ett negativt värde visar motsatsen – att aktiens kortsiktiga utveckling är svagare än den långsiktiga trenden, vilket kan indikera en potentiell nedgång."
+  clusterRank_sums: "Summan av långsiktig trend (4 år) och kortsiktig TTM-momentum (senaste 2 kvartaler). Ett högt värde indikerar att båda tidsperioderna är starka samtidigt, vilket signalerar **trendkontinuitet** – att aktiens utveckling är konsistent positiv över både kort och lång sikt. Ett lågt värde visar att både långsiktig trend och kortsiktig momentum är svaga, vilket indikerar en övergripande nedåtgående trend."
+  totalRank: "Sammanlagd rankning av aktier baserat på flera nyckeltal och perioder. Skala 0-100, där 100 är bäst och 0 är sämst."
   pct_SMA_medium_vs_SMA_long: "Skillnaden mellan 50-dagars och 200-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde indikerar att den kortare medelvärdesperioden ligger över den längre, vilket ofta ses som ett styrketecken i aktiens trend."
   pct_SMA_short_vs_SMA_medium: "Skillnaden mellan 10-dagars och 50-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde kan tyda på att aktien har en kortsiktig uppåtgående trend."
   pct_Close_vs_SMA_short: "Skillnaden mellan stängningskurs och 10-dagars glidande medelvärde i procent (senaste handelsdagen). Ett positivt värde innebär att aktien handlas över sitt kortsiktiga medelvärde, vilket kan signalera styrka."
-  Long_Trend_clusterRank: "Sammanlagd rankning av aktier baserat på **trenden** från senaste 4 årens finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde indikerar att bolaget har haft en positiv utveckling över tid inom flera nyckeltal."
-  TTM_Current_clusterRank: "Sammanlagd rankning av aktier baserat på **senaste årets** finansiella resultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde visar att bolaget presterar starkt just nu inom flera nyckeltal."
-  TTM_Momentum_clusterRank: "Sammanlagd rankning av aktier baserat på **ttm (trailing twelve months)** finansiella resultat jämfört med senaste årsresultat. Skala 0-100, där 100 är bäst och 0 är sämst. Högre värde indikerar att bolaget har en stark prestation sedan senaste årsrapport."
   cagrTotal_Revenue: "Rankning av omsättningens trend över de senaste 4 åren. Ett högt värde indikerar att bolaget har haft en stabil och positiv tillväxt i omsättningen."
   cagrBasic_EPS: "Rankning av vinst per aktie (EPS) trend över de senaste 4 åren. Ett högt värde visar att bolaget har haft en god och växande lönsamhet per aktie över tid."
   "Total_Revenue_AvgGrowth_Rank": "Rankning av genomsnittlig tillväxttakt för omsättningen över de senaste 4 åren."
@@ -449,7 +449,9 @@ tooltip_texts:
   "Viktning för Trend (%)": "Viktning av **trend över de senaste 4 åren** i den övergripande rankningen."
   "Viktning för Senaste (%)": "Viktning av **senaste årets resultat** i den övergripande rankningen."
   "Viktning för TTM (%)": "Viktning av **TTM-förändring** jämfört med senaste årsresultat i den övergripande rankningen. (Trailing Twelve Months, TTM)"
-
+  "long_trend_clusterRank": "Sammanlagd rankning av en akties nyckeltal baserat på **långsiktig trend** under de senaste 4 årsrapporterna. Skala 0-100, där 100 är bäst och 0 är sämst."
+  "ttm_momentum_clusterRank": "Sammanlagd rankning av akties nyckeltal baserat på **kortsiktig trend** mellan de två senaste TTM kvartalsrapporterna. Skala 0-100, där 100 är bäst och 0 är sämst."
+  "ttm_current_clusterRank": "Sammanlagd rankning av akties nyckeltal baserat på **nuvarande prestation** i form av senaste TTM kvartalsrapport. Skala 0-100, där 100 är bäst och 0 är sämst."
 color_ranges:
   - range: [0, 20]
     color: "#ffcccc"
