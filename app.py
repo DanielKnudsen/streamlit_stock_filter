@@ -10,8 +10,8 @@ import uuid
 import json
 from auth_ui import handle_authentication, render_account_buttons, handle_portfolio_save_dialog
 from config_mappings import ConfigMappings
-from app_helper import get_ratio_ranks_by_period,get_ratio_values_by_period,plot_ratio_values,get_category_ranks_by_period,visualize_dataframe_with_progress,generate_scatter_plot
-from app_generate_price_chart import generate_price_chart
+from app_helper import get_ratio_ranks_by_period,get_ratio_values_by_period,get_category_ranks_by_period,visualize_dataframe_with_progress
+from app_plots import create_trend_momentum_plot, generate_price_chart,plot_ratio_values,generate_scatter_plot
 
 # =====================================================================
 # STREAMLIT STOCK SCREENING APP - SWEDISH MARKETS
@@ -365,6 +365,8 @@ def prepare_sector_comparison(df):
 # =============================
 # LOAD DATA
 # =============================
+
+
 try:
 
     # Load main stock evaluation CSV (index_col=0 sets Ticker as index)
@@ -482,7 +484,7 @@ try:
             • **Kombination:** Använd flera filter samtidigt för laser-precision  
             
             """)
-        with st.expander("🎯 **Välj eller uteslut från sektor eller lista**"):
+        with st.expander(f"🎯 **Välj eller uteslut från sektor eller lista** {len(df_filtered_by_sliders)}"):
             col_lista, col_sektor = st.columns(2, gap='medium', border=True)
             with col_lista:
                 df_filtered_by_sliders = create_pills_and_filter_df(df_filtered_by_sliders, 'Lista', get_tooltip_text)
@@ -490,7 +492,7 @@ try:
             with col_sektor:
                 df_filtered_by_sliders = create_pills_and_filter_df(df_filtered_by_sliders, 'Sektor', get_tooltip_text)
 
-        with st.expander("🎯 **Total Rank**", expanded=False):
+        with st.expander(f"🎯 **Total Rank** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter Total Rank")
             total_rank_columns = all_column_groups['Total Rank'] # ['long_trend_clusterRank','ttm_momentum_clusterRank','ttm_current_clusterRank']
 
@@ -500,7 +502,7 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, total_rank_col, get_tooltip_text, 1.0, "%d")
 
-        with st.expander("🎯 **Periodtyp Rank**", expanded=False):
+        with st.expander(f"🎯 **Periodtyp Rank** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("""
             ### 🎚️ Finjustera med precision – mer kontroll!
 
@@ -528,10 +530,19 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, period, get_tooltip_text, 1.0, "%d")
             
-            
-            st.dataframe(df_filtered_by_sliders[time_periods], use_container_width=True)
+            # scatter plot of ttm_momentum_clusterRank vs long_trend_clusterRank
+            if not df_filtered_by_sliders.empty and all(col in df_filtered_by_sliders.columns for col in time_periods):
+                scatter_df = df_filtered_by_sliders[time_periods + ['Lista']].copy()
+                scatter_df = scatter_df.dropna(subset=['long_trend_clusterRank', 'ttm_momentum_clusterRank', 'ttm_current_clusterRank','Lista'])
+                
+                if not scatter_df.empty:
+                    create_trend_momentum_plot(get_display_name, scatter_df)
+                else:
+                    st.info("Ingen data tillgänglig för scatterplotten efter borttagning av saknade värden.")
+            else:
+                st.warning("De nödvändiga kolumnerna är inte tillgängliga för scatterplotten.")
 
-        with st.expander("🎯 **Teknisk analys: SMA-differenser**", expanded=False):
+        with st.expander(f"🎯 **Teknisk analys: SMA-differenser** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter SMA-differenser")
             sma_periods = all_column_groups['Glidande medelvärde'] # ['long_trend_clusterRank','ttm_momentum_clusterRank','ttm_current_clusterRank']
                         
@@ -541,7 +552,7 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, sma_period, get_tooltip_text, 1.0, "%d")
 
-        with st.expander("🎯 **Omsättningstillväxt Rank**", expanded=False):
+        with st.expander(f"🎯 **Omsättningstillväxt Rank** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter Omsättningstillväxt")
             revenue_columns = all_column_groups['Omsättningstillväxt']  # Assume this method exists in ConfigMappings
             
@@ -556,7 +567,7 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_growth_col, get_tooltip_text, 1.0, "%2.2f")
 
-        with st.expander("🎯 **Vinsttillväxt per aktie Rank**", expanded=False):
+        with st.expander(f"🎯 **Vinsttillväxt per aktie Rank** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter Vinsttillväxt per aktie")
             eps_columns = all_column_groups['EPS']  # Assume this method exists in ConfigMappings
 
@@ -571,7 +582,7 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_growth_col, get_tooltip_text, 1.0, "%2.2f")
 
-        with st.expander("🎯 **Sektoranalys**", expanded=False):
+        with st.expander(f"🎯 **Sektoranalys** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter Sektoranalys")
             sektor_columns =['ttm_momentum_clusterRank','pct_ch_3_m','sektor_avg_diffs']
             # loop through sektor_columns and create sliders
@@ -583,21 +594,8 @@ try:
             df_scatter_to_use=prepare_sector_comparison(df_filtered_by_sliders[['Lista','Sektor','ttm_momentum_clusterRank','ttm_momentum_clusterRank_Sektor_avg','pct_ch_3_m','pct_ch_3_m_Sektor_avg']])
             fig = generate_scatter_plot(df_scatter_to_use)
             st.plotly_chart(fig, use_container_width=True)
-        
-        """with st.expander("🎯 **Lång trend & Momentum trend**", expanded=False):
-            st.markdown("##### Filtrera efter Lång trend & Momentum trend")
-            trend_columns =['ttm_momentum_clusterRank','long_trend_clusterRank','clusterRank_diffs','clusterRank_sums']
-            # loop through trend_columns and create sliders
-            columns = st.columns(len(trend_columns), gap='medium', border=True)
-            for trend_col, col in zip(trend_columns, columns):
-                with col:
-                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, trend_col, get_tooltip_text, 1.0, "%d", key_suffix="_trend")
-            
-            df_scatter_to_use=prepare_sector_comparison(df_filtered_by_sliders[['Lista','Sektor','ttm_momentum_clusterRank','ttm_momentum_clusterRank_Sektor_avg','pct_ch_3_m','pct_ch_3_m_Sektor_avg']])
-            fig = generate_scatter_plot(df_scatter_to_use)
-            st.plotly_chart(fig, use_container_width=True)"""
 
-        with st.expander("🎯 **Expertnivå: Detaljerad nyckeltalsfiltrering**", expanded=False):
+        with st.expander(f"🎯 **Expertnivå: Detaljerad nyckeltalsfiltrering** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("""
             ### 🔬 Expertnivå – full kontroll över varje nyckeltal!
 
