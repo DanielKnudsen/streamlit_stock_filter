@@ -23,7 +23,12 @@ from supabase import create_client
 # Initialize Supabase client (add to your imports)
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY')
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Only create client if environment variables are set
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
 
 def init_user_tracking():
     """Initialize basic user tracking with session management"""
@@ -35,6 +40,9 @@ def init_user_tracking():
 
 def log_user_activity(action, metadata=None):
     """Log user activity to Supabase"""
+    if supabase is None:
+        return  # Skip logging if Supabase not configured
+    
     try:
         activity_data = {
             'user_id': user.id if user else None,
@@ -46,12 +54,15 @@ def log_user_activity(action, metadata=None):
         # Insert into Supabase (synchronous for simplicity)
         supabase.table('user_activity').insert(activity_data).execute()
 
-    except Exception as e:
+    except Exception:
         # Fail silently in production
         pass
 
 def get_concurrent_users():
     """Get concurrent users from Supabase"""
+    if supabase is None:
+        return 0  # Return 0 if Supabase not configured
+    
     try:
         # Query active users in last 5 minutes
         result = supabase.table('user_activity').select('session_id').gte(
@@ -1035,9 +1046,9 @@ try:
                         'sector': selected_stock_dict.get('Sektor', 'Unknown'),
                         'list': selected_stock_dict.get('Lista', 'Unknown')
                     })
-                except KeyError as e:
+                except KeyError:
                     selected_stock_dict = None
-                except Exception as e:
+                except Exception:
                     selected_stock_dict = None
             # Logic to handle Shortlist
             shortlisted_stocks = edited_df[edited_df['Shortlist']]
