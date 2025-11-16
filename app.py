@@ -8,6 +8,7 @@ from rank import load_config
 import datetime
 import uuid
 import json
+import os
 from auth_ui import handle_authentication, render_account_buttons, handle_portfolio_save_dialog
 from config_mappings import ConfigMappings
 from app_helper import get_ratio_ranks_by_period,get_ratio_values_by_period,get_category_ranks_by_period,visualize_dataframe_with_progress
@@ -87,7 +88,7 @@ with st.container(border=True):
 # =============================
 
 # Load environment variables
-ENVIRONMENT = st.secrets["ENVIRONMENT"]
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'remote')
 
 # Debug logging control - set to False for production, True for local debugging
 ENABLE_DEBUG_LOGGING = ENVIRONMENT == 'local'
@@ -766,7 +767,7 @@ try:
                         if ENABLE_AUTHENTICATION and user:
                             # Save to Supabase for authenticated users
                             from auth import save_filter_state
-                            result = save_filter_state(user['id'], filter_name.strip(), filter_data, filter_description)
+                            result = save_filter_state(user.id, filter_name.strip(), filter_data, filter_description)
                             if result:
                                 st.success(f"Filter '{filter_name}' sparat!")
                                 st.rerun()
@@ -798,7 +799,7 @@ try:
                 if ENABLE_AUTHENTICATION and user:
                     # Load from Supabase for authenticated users
                     from auth import get_user_filter_states, delete_filter_state
-                    saved_filters = get_user_filter_states(user['id'])
+                    saved_filters = get_user_filter_states(user.id)
                 else:
                     # Load from session_state for local mode
                     saved_filters = list(st.session_state.get('local_saved_filters', {}).values())
