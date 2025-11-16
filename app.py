@@ -325,6 +325,93 @@ def create_pills_and_filter_df(df, column_name, tooltip_func):
     return df[df[column_name].isin(selected_values)]
 
 
+def extract_filter_state():
+    """Extract current filter state from session_state"""
+    filter_state = {}
+    
+    # Extract slider values (keys starting with 'slider_')
+    for key in st.session_state:
+        if key.startswith('slider_'):
+            filter_state[key] = st.session_state[key]
+    
+    # Extract pill selections (keys starting with 'pills_')  
+    for key in st.session_state:
+        if key.startswith('pills_'):
+            filter_state[key] = st.session_state[key]
+    
+    # Extract ticker input
+    if 'ticker_input' in st.session_state:
+        filter_state['ticker_input'] = st.session_state['ticker_input']
+    
+    return filter_state
+
+
+def apply_filter_state(filter_data):
+    """Apply saved filter state to session_state"""
+    # Store filter data to be applied on next rerun
+    st.session_state.pending_filter_restore = filter_data
+    st.rerun()
+
+
+def generate_filter_description(filter_data, df_new_ranks):
+    """Generate a human-readable description of the current filter state"""
+    description_parts = []
+    
+    # Handle ticker input
+    if 'ticker_input' in filter_data and filter_data['ticker_input'].strip():
+        tickers = [t.strip().upper() for t in filter_data['ticker_input'].split(',') if t.strip()]
+        if tickers:
+            description_parts.append(f"Ticker-filter: {', '.join(tickers)}")
+    
+    # Handle pill selections (Lista and Sektor)
+    pill_descriptions = []
+    for key, value in filter_data.items():
+        if key.startswith('pills_') and isinstance(value, list):
+            column_name = key.replace('pills_', '')
+            if column_name in ['Lista', 'Sektor']:
+                if len(value) < len(df_new_ranks[column_name].dropna().unique()):
+                    # Remove counts from pill labels for description
+                    clean_values = [val.rsplit(' (', 1)[0] for val in value]
+                    pill_descriptions.append(f"**{column_name}**: {', '.join(clean_values)}")
+    
+    if pill_descriptions:
+        description_parts.append("Kategori-filter: " + "; ".join(pill_descriptions))
+    
+    # Handle slider ranges (simplified - show non-default ranges)
+    slider_descriptions = []
+    for key, value in filter_data.items():
+        if key.startswith('slider_') and isinstance(value, (list, tuple)) and len(value) == 2:
+            # Extract column name by removing 'slider_' prefix and known suffixes
+            slider_part = key.replace('slider_', '')
+            # Remove known suffixes
+            for suffix in ['_sektor']:
+                if slider_part.endswith(suffix):
+                    slider_part = slider_part[:-len(suffix)]
+                    break
+            column_name = slider_part
+            
+            min_val, max_val = value
+            # Check if this is a non-default range
+            if column_name in df_new_ranks.columns:
+                col_min = df_new_ranks[column_name].min()
+                col_max = df_new_ranks[column_name].max()
+                # Only show if the range is actually different from the full range
+                if abs(min_val - col_min) > 0.01 or abs(max_val - col_max) > 0.01:
+                    # Format based on the data type
+                    if isinstance(min_val, float) and min_val != int(min_val):
+                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {min_val:.1f}-{max_val:.1f}")
+                    else:
+                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {int(min_val)}-{int(max_val)}")
+    
+    if slider_descriptions:
+        description_parts.append("Värde-filter: " + "; ".join(slider_descriptions))
+    
+    if not description_parts:
+        return "Inga aktiva filter"
+    
+    return " | ".join(description_parts)
+
+
 def get_display_name(var_name):
     # Try to get a pretty name, fallback to a cleaned-up version
     return display_names.get(var_name, var_name.replace("_", " ").title())
@@ -456,6 +543,14 @@ try:
     # =============================
     # ENHETLIGT FILTERAVSNITT
     # =============================
+    
+    # Apply pending filter restore before creating widgets
+    if 'pending_filter_restore' in st.session_state:
+        filter_data = st.session_state.pending_filter_restore
+        for key, value in filter_data.items():
+            st.session_state[key] = value
+        del st.session_state.pending_filter_restore
+    
     with st.container(border=False, key="filter_section"):
         st.subheader(f"🎯 Aktiefilter – Hitta dina favoriter bland {len(df_filtered_by_sliders)} aktier")
 
@@ -636,11 +731,112 @@ try:
             ticker_input = st.text_input(
                 "Filtrera på tickers (kommaseparerade, t.ex. VOLV-A, ERIC-B, ATCO-A):",
                 value="",
+                key="ticker_input",
                 help="Skriv in en eller flera tickers separerade med komma för att endast visa dessa aktier."
                 )
             if ticker_input.strip():
                 tickers_to_keep = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
                 df_filtered_by_sliders = df_filtered_by_sliders[df_filtered_by_sliders.index.str.upper().isin(tickers_to_keep)]
+          
+        # =============================
+        # FILTER STATE MANAGEMENT
+        # =============================
+        # Show filter management in both authenticated and local modes
+        show_filter_management = ENABLE_AUTHENTICATION and user or not ENABLE_AUTHENTICATION
+        
+        if show_filter_management:
+            with st.expander("💾 **Spara/Ladda filterkonfigurationer**", expanded=False):
+                if not ENABLE_AUTHENTICATION:
+                    st.info("🔧 **LOKALT LÄGE** - Filter sparas endast under denna session")
+                
+                st.markdown("##### Hantera dina sparade filter")
+                
+                # Save current filter state
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    filter_name = st.text_input(
+                        "Namn på filterkonfiguration:",
+                        help="Ge ditt filter ett beskrivande namn"
+                    )
+                with col2:
+                    if st.button("💾 Spara filter", disabled=not filter_name.strip()):
+                        filter_data = extract_filter_state()
+                        filter_description = generate_filter_description(filter_data, df_new_ranks)
+                        
+                        if ENABLE_AUTHENTICATION and user:
+                            # Save to Supabase for authenticated users
+                            from auth import save_filter_state
+                            result = save_filter_state(user['id'], filter_name.strip(), filter_data, filter_description)
+                            if result:
+                                st.success(f"Filter '{filter_name}' sparat!")
+                                st.rerun()
+                        else:
+                            # Save to session_state for local mode
+                            if 'local_saved_filters' not in st.session_state:
+                                st.session_state.local_saved_filters = {}
+                            
+                            filter_id = f"local_{len(st.session_state.local_saved_filters)}"
+                            st.session_state.local_saved_filters[filter_id] = {
+                                'id': filter_id,
+                                'name': filter_name.strip(),
+                                'filter_data': filter_data,
+                                'description': filter_description,
+                                'created_at': datetime.datetime.now().isoformat()
+                            }
+                            st.success(f"Filter '{filter_name}' sparat lokalt!")
+                            st.rerun()
+                
+                st.markdown("---")
+                st.markdown("##### Aktuella filter")
+                current_filter_data = extract_filter_state()
+                current_description = generate_filter_description(current_filter_data, df_new_ranks)
+                st.info(f"**Aktiva filter:** {current_description}")
+                
+                st.markdown("---")
+                
+                # Load saved filter states
+                if ENABLE_AUTHENTICATION and user:
+                    # Load from Supabase for authenticated users
+                    from auth import get_user_filter_states, delete_filter_state
+                    saved_filters = get_user_filter_states(user['id'])
+                else:
+                    # Load from session_state for local mode
+                    saved_filters = list(st.session_state.get('local_saved_filters', {}).values())
+                    saved_filters.sort(key=lambda x: x['created_at'], reverse=True)
+                
+                if saved_filters:
+                    st.markdown("##### Dina sparade filter")
+                    
+                    for filter_item in saved_filters:
+                        col1, col2, col3 = st.columns([3, 1, 1])
+                        with col1:
+                            st.write(f"**{filter_item['name']}**")
+                            if 'description' in filter_item:
+                                st.caption(f"{filter_item['description']}")
+                            created_date = filter_item['created_at'][:10] if isinstance(filter_item['created_at'], str) else filter_item['created_at'].strftime('%Y-%m-%d')
+                            st.caption(f"Sparad: {created_date}")
+                        with col2:
+                            if st.button("📂 Ladda", key=f"load_{filter_item['id']}"):
+                                apply_filter_state(filter_item['filter_data'])
+                                st.success(f"Filter '{filter_item['name']}' laddat!")
+                        with col3:
+                            if st.button("🗑️ Ta bort", key=f"delete_{filter_item['id']}"):
+                                if ENABLE_AUTHENTICATION and user:
+                                    # Delete from Supabase
+                                    from auth import delete_filter_state
+                                    if delete_filter_state(filter_item['id']):
+                                        st.success(f"Filter '{filter_item['name']}' borttaget!")
+                                        st.rerun()
+                                    else:
+                                        st.error("Kunde inte ta bort filtret")
+                                else:
+                                    # Delete from session_state
+                                    if 'local_saved_filters' in st.session_state and filter_item['id'] in st.session_state.local_saved_filters:
+                                        del st.session_state.local_saved_filters[filter_item['id']]
+                                        st.success(f"Filter '{filter_item['name']}' borttaget!")
+                                        st.rerun()
+                else:
+                    st.info("Inga sparade filter än. Spara ditt första filter ovan!")
           
     # =============================
     # FILTERED RESULTS AND BUBBLE PLOT

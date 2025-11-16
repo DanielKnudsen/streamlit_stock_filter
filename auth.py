@@ -208,3 +208,65 @@ def update_portfolio(portfolio_id: str, name: str = None, description: str = Non
     except Exception as e:
         st.error(f"Error updating portfolio: {e}")
         return None
+
+
+def save_filter_state(user_id: str, name: str, filter_data: dict, description: str = ""):
+    """Save a filter state for the user"""
+    supabase: Client = get_supabase_client()
+    
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to save filter states")
+        return None
+    
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        response = supabase.table('filter_states').insert({
+            'user_id': user_id,
+            'name': name,
+            'filter_data': filter_data,
+            'description': description
+        }).execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Error saving filter state: {e}")
+        return None
+
+
+def get_user_filter_states(user_id: str):
+    """Get all filter states for the user"""
+    supabase: Client = get_supabase_client()
+    
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to view filter states")
+        return []
+    
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        response = supabase.table('filter_states').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Error fetching filter states: {e}")
+        return []
+
+
+def delete_filter_state(filter_id: str):
+    """Delete a filter state"""
+    supabase: Client = get_supabase_client()
+    
+    session = st.session_state.get("supabase_session", None)
+    if not session:
+        st.error("You must be logged in to delete filter states")
+        return False
+    
+    supabase.auth.set_session(session.access_token, session.refresh_token)
+    
+    try:
+        response = supabase.table('filter_states').delete().eq('id', filter_id).execute()
+        return True
+    except Exception as e:
+        st.error(f"Error deleting filter state: {e}")
+        return False
