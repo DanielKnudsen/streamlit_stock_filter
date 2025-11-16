@@ -549,7 +549,11 @@ try:
     if 'pending_filter_restore' in st.session_state:
         filter_data = st.session_state.pending_filter_restore
         for key, value in filter_data.items():
-            st.session_state[key] = value
+            # Ensure slider values have consistent types (all floats)
+            if key.startswith('slider_') and isinstance(value, (list, tuple)) and len(value) == 2:
+                st.session_state[key] = (float(value[0]), float(value[1]))
+            else:
+                st.session_state[key] = value
         del st.session_state.pending_filter_restore
     
     with st.container(border=False, key="filter_section"):
