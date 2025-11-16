@@ -21,8 +21,8 @@ from app_plots import create_trend_momentum_plot, generate_price_chart,plot_rati
 from supabase import create_client
 
 # Initialize Supabase client (add to your imports)
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_URL = st.secrets.get('SUPABASE_URL') or os.getenv('SUPABASE_URL')
+SUPABASE_KEY = st.secrets.get('SUPABASE_ANON_KEY') or os.getenv('SUPABASE_ANON_KEY')
 
 # Only create client if environment variables are set
 if SUPABASE_URL and SUPABASE_KEY:
