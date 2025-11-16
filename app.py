@@ -7,7 +7,6 @@ from pathlib import Path
 from rank import load_config
 import datetime
 import uuid
-import json
 import os
 from auth_ui import handle_authentication, render_account_buttons, handle_portfolio_save_dialog
 from config_mappings import ConfigMappings
@@ -19,43 +18,49 @@ from app_plots import create_trend_momentum_plot, generate_price_chart,plot_rati
 # =====================================================================
 
 # Basic user tracking
+from supabase import create_client
+
+# Initialize Supabase client (add to your imports)
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY')
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 def init_user_tracking():
-    """Initialize basic user tracking"""
-    if 'user_id' not in st.session_state:
-        st.session_state.user_id = str(uuid.uuid4())
-        st.session_state.session_start = datetime.datetime.now()
-    
-    # Log user activity
+    """Initialize basic user tracking with session management"""
+    if 'session_id' not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+
+    # Log initial page view
+    log_user_activity('page_view')
+
+def log_user_activity(action, metadata=None):
+    """Log user activity to Supabase"""
     try:
-        log_entry = {
-            'user_id': st.session_state.user_id,
-            'timestamp': datetime.datetime.now().isoformat(),
-            'action': 'page_view'
+        activity_data = {
+            'user_id': user.id if user else None,
+            'session_id': st.session_state.session_id,
+            'action': action,
+            'metadata': metadata or {},
         }
-        
-        with open(f'user_logs_{ENVIRONMENT}.jsonl', 'a') as f:
-            f.write(json.dumps(log_entry) + '\n')
-    except Exception:
-        pass  # Fail silently if logging fails
+
+        # Insert into Supabase (synchronous for simplicity)
+        supabase.table('user_activity').insert(activity_data).execute()
+
+    except Exception as e:
+        # Fail silently in production
+        pass
 
 def get_concurrent_users():
-    """Get approximate concurrent users (active in last 5 minutes)"""
+    """Get concurrent users from Supabase"""
     try:
-        from datetime import timedelta
-        active_threshold = datetime.datetime.now() - timedelta(minutes=5)
-        active_users = set()
-        
-        with open(f'user_logs_{ENVIRONMENT}.jsonl', 'r') as f:
-            for line in f.readlines()[-200:]:  # Check last 200 entries
-                try:
-                    log = json.loads(line.strip())
-                    log_time = datetime.datetime.fromisoformat(log['timestamp'])
-                    if log_time > active_threshold:
-                        active_users.add(log['user_id'])
-                except Exception:
-                    continue
-                    
-        return len(active_users)
+        # Query active users in last 5 minutes
+        result = supabase.table('user_activity').select('session_id').gte(
+            'timestamp', 'NOW() - INTERVAL \'5 minutes\''
+        ).execute()
+
+        active_sessions = set(row['session_id'] for row in result.data)
+        return len(active_sessions)
+
     except Exception:
         return 0
 
@@ -289,6 +294,15 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
         ((df[column_name] >= slider_values[0]) & (df[column_name] <= slider_values[1])) | 
         (df[column_name].isna())
     ]
+    
+    # Log filter application if slider values changed
+    if slider_values != (min_value, max_value):  # If user changed the slider
+        log_user_activity('filter_applied', {
+            'column': column_name,
+            'min_value': slider_values[0],
+            'max_value': slider_values[1],
+            'results_count': len(filtered_df)
+        })
     
     return filtered_df
 
@@ -773,6 +787,10 @@ try:
                             from auth import save_filter_state
                             result = save_filter_state(user.id, filter_name.strip(), filter_data, filter_description)
                             if result:
+                                log_user_activity('filter_saved', {
+                                    'filter_name': filter_name.strip(),
+                                    'filter_count': len(filter_data)
+                                })
                                 st.success(f"Filter '{filter_name}' sparat!")
                                 st.rerun()
                         else:
@@ -788,6 +806,11 @@ try:
                                 'description': filter_description,
                                 'created_at': datetime.datetime.now().isoformat()
                             }
+                            log_user_activity('filter_saved', {
+                                'filter_name': filter_name.strip(),
+                                'filter_count': len(filter_data),
+                                'local_mode': True
+                            })
                             st.success(f"Filter '{filter_name}' sparat lokalt!")
                             st.rerun()
                 
@@ -823,6 +846,10 @@ try:
                         with col2:
                             if st.button("📂 Ladda", key=f"load_{filter_item['id']}"):
                                 apply_filter_state(filter_item['filter_data'])
+                                log_user_activity('filter_loaded', {
+                                    'filter_name': filter_item['name'],
+                                    'filter_id': filter_item['id']
+                                })
                                 st.success(f"Filter '{filter_item['name']}' laddat!")
                         with col3:
                             if st.button("🗑️ Ta bort", key=f"delete_{filter_item['id']}"):
@@ -1002,7 +1029,12 @@ try:
                 
                 try:
                     selected_stock_dict = df_new_ranks.loc[selected_stock_ticker].to_dict()
-                    # DEBUG: Check QuarterDiff immediately after dict creation
+                    # Log stock selection
+                    log_user_activity('stock_selected', {
+                        'ticker': selected_stock_ticker,
+                        'sector': selected_stock_dict.get('Sektor', 'Unknown'),
+                        'list': selected_stock_dict.get('Lista', 'Unknown')
+                    })
                 except KeyError as e:
                     selected_stock_dict = None
                 except Exception as e:
