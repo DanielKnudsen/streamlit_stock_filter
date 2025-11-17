@@ -1,0 +1,79 @@
+name: Send Filter-Based Email Notifications
+
+on:
+  schedule:
+    # Daily emails (weekdays at 7 AM UTC)
+    - cron: '0 7 * * 1-5'
+    # Weekly emails (Mondays at 7 AM UTC)
+    - cron: '0 7 * * 1'
+    # Monthly emails (1st of month at 7 AM UTC)
+    - cron: '0 7 1 * *'
+  workflow_dispatch:
+    inputs:
+      frequency:
+        description: 'Email frequency to send'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
+          - monthly
+
+jobs:
+  send-daily-emails:
+    if: github.event.schedule == '0 7 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.frequency == 'daily')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: uv sync
+      - name: Send daily filter emails
+        run: uv run python send_filter_emails.py
+        env:
+          ENVIRONMENT: remote
+          FREQUENCY: daily
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+
+  send-weekly-emails:
+    if: github.event.schedule == '0 7 * * 1' || (github.event_name == 'workflow_dispatch' && inputs.frequency == 'weekly')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: uv sync
+      - name: Send weekly filter emails
+        run: uv run python send_filter_emails.py
+        env:
+          ENVIRONMENT: remote
+          FREQUENCY: weekly
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+
+  send-monthly-emails:
+    if: github.event.schedule == '0 7 1 * *' || (github.event_name == 'workflow_dispatch' && inputs.frequency == 'monthly')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: uv sync
+      - name: Send monthly filter emails
+        run: uv run python send_filter_emails.py
+        env:
+          ENVIRONMENT: remote
+          FREQUENCY: monthly
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}

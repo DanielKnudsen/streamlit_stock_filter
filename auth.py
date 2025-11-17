@@ -210,7 +210,7 @@ def update_portfolio(portfolio_id: str, name: str = None, description: str = Non
         return None
 
 
-def save_filter_state(user_id: str, name: str, filter_data: dict, description: str = ""):
+def save_filter_state(user_id: str, name: str, filter_data: dict, description: str = "", frequency: str = "never"):
     """Save a filter state for the user"""
     supabase: Client = get_supabase_client()
     
@@ -226,7 +226,8 @@ def save_filter_state(user_id: str, name: str, filter_data: dict, description: s
             'user_id': user_id,
             'name': name,
             'filter_data': filter_data,
-            'description': description
+            'description': description,
+            'frequency': frequency
         }).execute()
         return response.data
     except Exception as e:

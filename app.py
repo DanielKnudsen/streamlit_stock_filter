@@ -788,6 +788,22 @@ try:
                         "Namn på filterkonfiguration:",
                         help="Ge ditt filter ett beskrivande namn"
                     )
+                    
+                    # Frequency selection for email notifications
+                    frequency_options = {
+                        'never': 'Aldrig (endast manuell kontroll)',
+                        'monthly': 'Månadsvis',
+                        'weekly': 'Veckovis', 
+                        'daily': 'Dagligen'
+                    }
+                    
+                    selected_frequency = st.radio(
+                        "E-postfrekvens för filterresultat:",
+                        options=list(frequency_options.keys()),
+                        format_func=lambda x: frequency_options[x],
+                        index=0,  # Default to 'never'
+                        help="Hur ofta vill du få e-post med uppdaterade resultat för detta filter?"
+                    )
                 with col2:
                     if st.button("💾 Spara filter", disabled=not filter_name.strip()):
                         filter_data = extract_filter_state()
@@ -796,11 +812,12 @@ try:
                         if ENABLE_AUTHENTICATION and user:
                             # Save to Supabase for authenticated users
                             from auth import save_filter_state
-                            result = save_filter_state(user.id, filter_name.strip(), filter_data, filter_description)
+                            result = save_filter_state(user.id, filter_name.strip(), filter_data, filter_description, selected_frequency)
                             if result:
                                 log_user_activity('filter_saved', {
                                     'filter_name': filter_name.strip(),
-                                    'filter_count': len(filter_data)
+                                    'filter_count': len(filter_data),
+                                    'frequency': selected_frequency
                                 })
                                 st.success(f"Filter '{filter_name}' sparat!")
                                 st.rerun()
@@ -815,6 +832,7 @@ try:
                                 'name': filter_name.strip(),
                                 'filter_data': filter_data,
                                 'description': filter_description,
+                                'frequency': selected_frequency,
                                 'created_at': datetime.datetime.now().isoformat()
                             }
                             log_user_activity('filter_saved', {
@@ -852,6 +870,15 @@ try:
                             st.write(f"**{filter_item['name']}**")
                             if 'description' in filter_item:
                                 st.caption(f"{filter_item['description']}")
+                            # Show frequency if available
+                            frequency_display = {
+                                'never': '📧 Aldrig',
+                                'daily': '📧 Dagligen',
+                                'weekly': '📧 Veckovis',
+                                'monthly': '📧 Månadsvis'
+                            }
+                            frequency = filter_item.get('frequency', 'never')
+                            st.caption(f"E-post: {frequency_display.get(frequency, 'Aldrig')}")
                             created_date = filter_item['created_at'][:10] if isinstance(filter_item['created_at'], str) else filter_item['created_at'].strftime('%Y-%m-%d')
                             st.caption(f"Sparad: {created_date}")
                         with col2:
