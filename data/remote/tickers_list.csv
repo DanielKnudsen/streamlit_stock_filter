@@ -303,6 +303,7 @@ ACRI-A,Acrinova A,Fastigheter,SmallCap
 ACRI-B,Acrinova B,Fastigheter,SmallCap
 ANNE-B,Annehem Fastigheter B,Fastigheter,SmallCap
 FASTAT,Fastator,Fastigheter,SmallCap
+FNOVA-B,Fortinova Fastigheter,Fastigheter,SmallCap
 K2A-B,K2A Knaust & Andersson Fastigheter B,Fastigheter,SmallCap
 K2A-PREF,K2A Knaust & Andersson Fastigheter Pref,Fastigheter,SmallCap
 HAV-B,Havsfrun Investment B,Finansiella tjänster,SmallCap
@@ -411,7 +412,6 @@ CLIME-B,Climeon B,Energi,FirstNorth
 HEXI,Hexicon,Energi,FirstNorth
 MIDS,Midsummer,Energi,FirstNorth
 AGROUP,Arlandastad Group,Fastigheter,FirstNorth
-FNOVA-B,Fortinova Fastigheter,Fastigheter,FirstNorth
 STUDBO,Studentbostäder i Norden,Fastigheter,FirstNorth
 NAVIGO-STAM,Navigo Invest,Finansiella tjänster,FirstNorth
 NAVIGO-PREF,Navigo Invest Pref,Finansiella tjänster,FirstNorth
