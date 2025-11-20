@@ -1,5 +1,5 @@
 # Inställningar för in- och utdata
-input_ticker_file: "tickers_list.csv" # test file ends with "_test.csv" for limited set of tickers
+input_ticker_file: "tickers_list_test.csv" # test file ends with "_test.csv" for limited set of tickers
 results_file: "stock_evaluation_results.csv"
 price_data_file: "price_data.csv"
 price_data_file_raw: "price_data_raw.csv"
@@ -97,6 +97,9 @@ result_columns:
     - "Kassaflöde_long_trend_catRank"
     - "Kassaflöde_ttm_current_catRank"
     - "Kassaflöde_ttm_momentum_catRank"
+    - "Tillväxt_long_trend_catRank"
+    - "Tillväxt_ttm_current_catRank"
+    - "Tillväxt_ttm_momentum_catRank"
   Nyckeltal Rank:
     - "ROE_long_trend_ratioRank"
     - "ROE_ttm_current_ratioRank"
@@ -134,6 +137,12 @@ result_columns:
     - "Kassaflöde_till_Skuld_long_trend_ratioRank"
     - "Kassaflöde_till_Skuld_ttm_current_ratioRank"
     - "Kassaflöde_till_Skuld_ttm_momentum_ratioRank"
+    - "Försäljning_long_trend_ratioRank"
+    - "Försäljning_ttm_current_ratioRank"
+    - "Försäljning_ttm_momentum_ratioRank"
+    - "Vinst_per_Aktie_long_trend_ratioRank"
+    - "Vinst_per_Aktie_ttm_current_ratioRank"
+    - "Vinst_per_Aktie_ttm_momentum_ratioRank"
   Nyckeltal Värde:
     - "ROE_long_trend_ratioValue"
     - "ROE_ttm_current_ratioValue"
@@ -171,6 +180,12 @@ result_columns:
     - "Kassaflöde_till_Skuld_long_trend_ratioValue"
     - "Kassaflöde_till_Skuld_ttm_current_ratioValue"
     - "Kassaflöde_till_Skuld_ttm_momentum_ratioValue"
+    - "Försäljning_long_trend_ratioValue"
+    - "Försäljning_ttm_current_ratioValue"
+    - "Försäljning_ttm_momentum_ratioValue"
+    - "Vinst_per_Aktie_long_trend_ratioValue"
+    - "Vinst_per_Aktie_ttm_current_ratioValue"
+    - "Vinst_per_Aktie_ttm_momentum_ratioValue"
 
 # Definitioner av nyckeltal och deras källor/logik
 ratio_definitions:
@@ -179,19 +194,23 @@ ratio_definitions:
     source_income: ["Net Income"]
     source_bs: ["Stockholders Equity"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   ROIC:
     formula: "(EBIT * (1 - (Tax_Provision / Pretax_Income))) / (Total_Debt + Stockholders_Equity)"
     source_income: ["EBIT", "Tax Provision", "Pretax Income"]
     source_bs: ["Total Debt", "Stockholders Equity"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   Soliditet:
     formula: "Stockholders_Equity / Total_Assets"
     source_bs: ["Stockholders Equity", "Total Assets"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   Skuldsättningsgrad:
     formula: "Total_Debt / Stockholders_Equity"
     source_bs: ["Total Debt", "Stockholders Equity"]
     higher_is_better: False
+    ignore_calculate_rank_ttm_current: False
   #Räntetäckningsgrad:
     #formula: "EBIT / Interest_Expense"
     #source_income: ["EBIT", "Interest Expense"]
@@ -200,35 +219,42 @@ ratio_definitions:
     formula: "Gross_Profit / Total_Revenue"
     source_income: ["Gross Profit", "Total Revenue"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   Rörelsemarginal:
     formula: "Operating_Income / Total_Revenue"
     source_income: ["Operating Income", "Total Revenue"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   Vinstmarginal:
     formula: "Net_Income / Total_Revenue"
     source_income: ["Net Income", "Total Revenue"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   PE_tal:
     formula: "currentPrice / Basic_EPS"
     source_stock: ["currentPrice"]
     source_income: ["Basic EPS"]
     higher_is_better: False
+    ignore_calculate_rank_ttm_current: False
   PB_tal:
     formula: "currentPrice / (Stockholders_Equity / sharesOutstanding)"
     source_stock: ["currentPrice", "sharesOutstanding"]
     source_bs: ["Stockholders Equity"]
     higher_is_better: False
+    ignore_calculate_rank_ttm_current: False
   EV_EBITDA:
     formula: "(currentPrice * sharesOutstanding + Total_Debt - Cash_And_Cash_Equivalents) / EBITDA"
     source_stock: ["currentPrice", "sharesOutstanding"]
     source_bs: ["Total Debt", "Cash And Cash Equivalents"]
     source_income: ["EBITDA"]
     higher_is_better: False
+    ignore_calculate_rank_ttm_current: False
   Rörelseflödesmarginal:
     formula: "Operating_Cash_Flow / Total_Revenue"
     source_cf: ["Operating Cash Flow"]
     source_income: ["Total Revenue"]
     higher_is_better: True
+    ignore_calculate_rank_ttm_current: False
   #Fritt_Kassaflode_per_Aktie:
     #formula: "Free_Cash_Flow / sharesOutstanding"
     #source_cf: ["Free Cash Flow"]
@@ -239,7 +265,17 @@ ratio_definitions:
     source_cf: ["Operating Cash Flow"]
     source_bs: ["Total Debt"]
     higher_is_better: True
-
+    ignore_calculate_rank_ttm_current: False
+  Försäljning:
+    formula: "Total_Revenue"
+    source_income: ["Total Revenue"]
+    higher_is_better: True
+    ignore_calculate_rank_ttm_current: True
+  Vinst_per_Aktie:
+    formula: "Basic_EPS"
+    source_income: ["Basic EPS"]
+    higher_is_better: True
+    ignore_calculate_rank_ttm_current: True
 # Average growhth rate (AGR) inställningar
 agr_dimensions:
   - "Total Revenue"
@@ -263,6 +299,9 @@ kategorier:
   Kassaflöde:
     - Rörelseflödesmarginal
     - Kassaflöde_till_Skuld
+  Tillväxt:
+    - Försäljning
+    - Vinst_per_Aktie
 
 cluster:
   long_trend:
@@ -334,6 +373,15 @@ category_ratios:
   Kassaflöde_ttm_momentum_ratioRank:
     Rörelseflödesmarginal_ttm_momentum_ratioRank: 1
     Kassaflöde_till_Skuld_ttm_momentum_ratioRank: 1
+  Tillväxt_ttm_current_ratioRank:
+    Försäljning_ttm_current_ratioRank: 1
+    Vinst_per_Aktie_ttm_current_ratioRank: 1
+  Tillväxt_long_trend_ratioRank:
+    Försäljning_long_trend_ratioRank: 1
+    Vinst_per_Aktie_long_trend_ratioRank: 1
+  Tillväxt_ttm_momentum_ratioRank:
+    Försäljning_ttm_momentum_ratioRank: 1
+    Vinst_per_Aktie_ttm_momentum_ratioRank: 1
 
 # Hjälptexter för nyckeltal (endast _ttm_current_rank)
 ratio_help_texts:
@@ -417,6 +465,94 @@ display_names:
   Kassaflöde_long_trend_catRank: "Kassaflöde - Trend 4 år"
   Kassaflöde_ttm_current_catRank: "Kassaflöde - Senaste TTM"
   Kassaflöde_ttm_momentum_catRank: "Kassaflöde - TTM-momentum"
+  Tillväxt_long_trend_catRank: "Tillväxt - Trend 4 år"
+  Tillväxt_ttm_current_catRank: "Tillväxt - Senaste TTM"
+  Tillväxt_ttm_momentum_catRank: "Tillväxt - TTM-momentum"
+  ROE_long_trend_ratioRank: "ROE Rank - Trend 4 år"
+  ROE_long_trend_ratioValue: "ROE Value - Trend 4 år"
+  ROE_ttm_current_ratioRank: "ROE Rank - Senaste TTM"
+  ROE_ttm_current_ratioValue: "ROE Value - Senaste TTM"
+  ROE_ttm_momentum_ratioRank: "ROE Rank - TTM-momentum"
+  ROE_ttm_momentum_ratioValue: "ROE Value - TTM-momentum"
+  ROIC_long_trend_ratioRank: "ROIC Rank - Trend 4 år"
+  ROIC_long_trend_ratioValue: "ROIC Value - Trend 4 år"
+  ROIC_ttm_current_ratioRank: "ROIC Rank - Senaste TTM"
+  ROIC_ttm_current_ratioValue: "ROIC Value - Senaste TTM"
+  ROIC_ttm_momentum_ratioRank: "ROIC Rank - TTM-momentum"
+  ROIC_ttm_momentum_ratioValue: "ROIC Value - TTM-momentum"
+  Soliditet_long_trend_ratioRank: "Soliditet Rank - Trend 4 år"
+  Soliditet_long_trend_ratioValue: "Soliditet Value - Trend 4 år"
+  Soliditet_ttm_current_ratioRank: "Soliditet Rank - Senaste TTM"
+  Soliditet_ttm_current_ratioValue: "Soliditet Value - Senaste TTM"
+  Soliditet_ttm_momentum_ratioRank: "Soliditet Rank - TTM-momentum"
+  Soliditet_ttm_momentum_ratioValue: "Soliditet Value - TTM-momentum"
+  Skuldsättningsgrad_long_trend_ratioRank: "Skuldsättningsgrad Rank - Trend 4 år"
+  Skuldsättningsgrad_long_trend_ratioValue: "Skuldsättningsgrad Value - Trend 4 år"
+  Skuldsättningsgrad_ttm_current_ratioRank: "Skuldsättningsgrad Rank - Senaste TTM"
+  Skuldsättningsgrad_ttm_current_ratioValue: "Skuldsättningsgrad Value - Senaste TTM"
+  Skuldsättningsgrad_ttm_momentum_ratioRank: "Skuldsättningsgrad Rank - TTM-momentum"
+  Skuldsättningsgrad_ttm_momentum_ratioValue: "Skuldsättningsgrad Value - TTM-momentum"
+  Bruttomarginal_long_trend_ratioRank: "Bruttomarginal Rank - Trend 4 år"
+  Bruttomarginal_long_trend_ratioValue: "Bruttomarginal Value - Trend 4 år"
+  Bruttomarginal_ttm_current_ratioRank: "Bruttomarginal Rank - Senaste TTM"
+  Bruttomarginal_ttm_current_ratioValue: "Bruttomarginal Value - Senaste TTM"
+  Bruttomarginal_ttm_momentum_ratioRank: "Bruttomarginal Rank - TTM-momentum"
+  Bruttomarginal_ttm_momentum_ratioValue: "Bruttomarginal Value - TTM-momentum"
+  Rörelsemarginal_long_trend_ratioRank: "Rörelsemarginal Rank - Trend 4 år"
+  Rörelsemarginal_long_trend_ratioValue: "Rörelsemarginal Value - Trend 4 år"
+  Rörelsemarginal_ttm_current_ratioRank: "Rörelsemarginal Rank - Senaste TTM"
+  Rörelsemarginal_ttm_current_ratioValue: "Rörelsemarginal Value - Senaste TTM"
+  Rörelsemarginal_ttm_momentum_ratioRank: "Rörelsemarginal Rank - TTM-momentum"
+  Rörelsemarginal_ttm_momentum_ratioValue: "Rörelsemarginal Value - TTM-momentum"
+  Vinstmarginal_long_trend_ratioRank: "Vinstmarginal Rank - Trend 4 år"
+  Vinstmarginal_long_trend_ratioValue: "Vinstmarginal Value - Trend 4 år"
+  Vinstmarginal_ttm_current_ratioRank: "Vinstmarginal Rank - Senaste TTM"
+  Vinstmarginal_ttm_current_ratioValue: "Vinstmarginal Value - Senaste TTM"
+  Vinstmarginal_ttm_momentum_ratioRank: "Vinstmarginal Rank - TTM-momentum"
+  Vinstmarginal_ttm_momentum_ratioValue: "Vinstmarginal Value - TTM-momentum"
+  PE_tal_long_trend_ratioRank: "P/E-tal Rank - Trend 4 år"
+  PE_tal_long_trend_ratioValue: "P/E-tal Value - Trend 4 år"
+  PE_tal_ttm_current_ratioRank: "P/E-tal Rank - Senaste TTM"
+  PE_tal_ttm_current_ratioValue: "P/E-tal Value - Senaste TTM"
+  PE_tal_ttm_momentum_ratioRank: "P/E-tal Rank - TTM-momentum"
+  PE_tal_ttm_momentum_ratioValue: "P/E-tal Value - TTM-momentum"
+  PB_tal_long_trend_ratioRank: "P/B-tal Rank - Trend 4 år"
+  PB_tal_long_trend_ratioValue: "P/B-tal Value - Trend 4 år"
+  PB_tal_ttm_current_ratioRank: "P/B-tal Rank - Senaste TTM"
+  PB_tal_ttm_current_ratioValue: "P/B-tal Value - Senaste TTM"
+  PB_tal_ttm_momentum_ratioRank: "P/B-tal Rank - TTM-momentum"
+  PB_tal_ttm_momentum_ratioValue: "P/B-tal Value - TTM-momentum"
+  EV_EBITDA_long_trend_ratioRank: "EV/EBITDA Rank - Trend 4 år"
+  EV_EBITDA_long_trend_ratioValue: "EV/EBITDA Value - Trend 4 år"
+  EV_EBITDA_ttm_current_ratioRank: "EV/EBITDA Rank - Senaste TTM"
+  EV_EBITDA_ttm_current_ratioValue: "EV/EBITDA Value - Senaste TTM"
+  EV_EBITDA_ttm_momentum_ratioRank: "EV/EBITDA Rank - TTM-momentum"
+  EV_EBITDA_ttm_momentum_ratioValue: "EV/EBITDA Value - TTM-momentum"
+  Rörelseflödesmarginal_long_trend_ratioRank: "Rörelseflödesmarginal Rank - Trend 4 år"
+  Rörelseflödesmarginal_long_trend_ratioValue: "Rörelseflödesmarginal Value - Trend 4 år"
+  Rörelseflödesmarginal_ttm_current_ratioRank: "Rörelseflödesmarginal Rank - Senaste TTM"
+  Rörelseflödesmarginal_ttm_current_ratioValue: "Rörelseflödesmarginal Value - Senaste TTM"
+  Rörelseflödesmarginal_ttm_momentum_ratioRank: "Rörelseflödesmarginal Rank - TTM-momentum"
+  Rörelseflödesmarginal_ttm_momentum_ratioValue: "Rörelseflödesmarginal Value - TTM-momentum"
+  Kassaflöde_till_Skuld_long_trend_ratioRank: "Kassaflöde/skuld Rank - Trend 4 år"
+  Kassaflöde_till_Skuld_long_trend_ratioValue: "Kassaflöde/skuld Value - Trend 4 år"
+  Kassaflöde_till_Skuld_ttm_current_ratioRank: "Kassaflöde/skuld Rank - Senaste TTM"
+  Kassaflöde_till_Skuld_ttm_current_ratioValue: "Kassaflöde/skuld Value - Senaste TTM"
+  Kassaflöde_till_Skuld_ttm_momentum_ratioRank: "Kassaflöde/skuld Rank - TTM-momentum"
+  Kassaflöde_till_Skuld_ttm_momentum_ratioValue: "Kassaflöde/skuld Value - TTM-momentum"
+  Försäljning_long_trend_ratioRank: "Omsättning Rank - Trend 4 år"
+  Försäljning_long_trend_ratioValue: "Omsättning Value - Trend 4 år"
+  Försäljning_ttm_current_ratioRank: "Omsättning Rank - Senaste TTM"
+  Försäljning_ttm_current_ratioValue: "Omsättning Value - Senaste TTM"
+  Försäljning_ttm_momentum_ratioRank: "Omsättning Rank - TTM-momentum"
+  Försäljning_ttm_momentum_ratioValue: "Omsättning Value - TTM-momentum"
+  Vinst_per_Aktie_long_trend_ratioRank: "Vinst/aktie Rank - Trend 4 år"
+  Vinst_per_Aktie_long_trend_ratioValue: "Vinst/aktie Value - Trend 4 år"
+  Vinst_per_Aktie_ttm_current_ratioRank: "Vinst/aktie Rank - Senaste TTM"
+  Vinst_per_Aktie_ttm_current_ratioValue: "Vinst/aktie Value - Senaste TTM"
+  Vinst_per_Aktie_ttm_momentum_ratioRank: "Vinst/aktie Rank - TTM-momentum"
+  Vinst_per_Aktie_ttm_momentum_ratioValue: "Vinst/aktie Value - TTM-momentum"
+  totalRank: "Total Rank"
   Kvalitet: "Kvalitet"
   Halsa: "Hälsa"
   Lonsamhet: "Lönsamhet"
@@ -452,6 +588,24 @@ tooltip_texts:
   "long_trend_clusterRank": "Sammanlagd rankning av en akties nyckeltal baserat på **långsiktig trend** under de senaste 4 årsrapporterna. Skala 0-100, där 100 är bäst och 0 är sämst."
   "ttm_momentum_clusterRank": "Sammanlagd rankning av akties nyckeltal baserat på **kortsiktig trend** mellan de två senaste TTM kvartalsrapporterna. Skala 0-100, där 100 är bäst och 0 är sämst."
   "ttm_current_clusterRank": "Sammanlagd rankning av akties nyckeltal baserat på **nuvarande prestation** i form av senaste TTM kvartalsrapport. Skala 0-100, där 100 är bäst och 0 är sämst."
+  "Kvalitet_long_trend_catRank": "Sammanlagd rankning av kvalitetsnyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Kvalitet_ttm_current_catRank": "Sammanlagd rankning av kvalitetsnyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Kvalitet_ttm_momentum_catRank": "Sammanlagd rankning av kvalitetsnyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
+  "Hälsa_long_trend_catRank": "Sammanlagd rankning av hälsonyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Hälsa_ttm_current_catRank": "Sammanlagd rankning av hälsonyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Hälsa_ttm_momentum_catRank": "Sammanlagd rankning av hälsonyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
+  "Lönsamhet_long_trend_catRank": "Sammanlagd rankning av lönsamhetsnyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Lönsamhet_ttm_current_catRank": "Sammanlagd rankning av lönsamhetsnyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Lönsamhet_ttm_momentum_catRank": "Sammanlagd rankning av lönsamhetsnyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
+  "Värdering_long_trend_catRank": "Sammanlagd rankning av värderingsnyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Värdering_ttm_current_catRank": "Sammanlagd rankning av värderingsnyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Värdering_ttm_momentum_catRank": "Sammanlagd rankning av värderingsnyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
+  "Kassaflöde_long_trend_catRank": "Sammanlagd rankning av kassaflödesnyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Kassaflöde_ttm_current_catRank": "Sammanlagd rankning av kassaflödesnyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Kassaflöde_ttm_momentum_catRank": "Sammanlagd rankning av kassaflödesnyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
+  "Tillväxt_long_trend_catRank": "Sammanlagd rankning av tillväxtnyckeltal baserat på långsiktig trend över de senaste 4 årsrapporterna."
+  "Tillväxt_ttm_current_catRank": "Sammanlagd rankning av tillväxtnyckeltal baserat på nuvarande prestation i senaste TTM kvartalsrapport."
+  "Tillväxt_ttm_momentum_catRank": "Sammanlagd rankning av tillväxtnyckeltal baserat på kortsiktig trend mellan de två senaste TTM kvartalsrapporterna."
 color_ranges:
   - range: [0, 20]
     color: "#ffcccc"

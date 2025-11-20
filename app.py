@@ -266,7 +266,7 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
         filtered_df: Filtrerad DataFrame baserat på slidervärden
     """
     slider_key = f"slider_{column_name}{key_suffix}"
-    min_max_key = f"minmax_{column_name}{key_suffix}"  # ← NEW: Store original min/max
+    min_max_key = f"minmax_{column_name}{key_suffix}"  # ← Store original min/max
     
     # Store original min/max on FIRST initialization only
     if min_max_key not in st.session_state:
@@ -278,28 +278,56 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
     if min_value == max_value:
         max_value += 0.001
     
-    # Initialize slider value on first use
-    if slider_key not in st.session_state:
-        st.session_state[slider_key] = (min_value, max_value)
+    # NEW: Auto-scale for large numbers (detect and scale)
+    scale_factor = 1
+    unit = ""
+    if max_value >= 1e12:  # Trillions
+        scale_factor = 1e12
+        unit = " Bnkr"  # Or "T" for trillion if preferred
+    elif max_value >= 1e9:  # Billions
+        scale_factor = 1e9
+        unit = " Mdkr"  # Billion krona
+    elif max_value >= 1e6:  # Millions
+        scale_factor = 1e6
+        unit = " Mkr"   # Million krona
+    elif max_value >= 1e3:  # Thousands
+        scale_factor = 1e3
+        unit = " t"     # Thousand krona
     
-    # Get current slider value and clamp it
+    # Scale the slider parameters
+    min_value_scaled = min_value / scale_factor
+    max_value_scaled = max_value / scale_factor
+    step_scaled = step / scale_factor
+    
+    # Update format_str to show decimals for scaled values
+    if scale_factor > 1:
+        format_str = "%.1f"  # Show 1 decimal place for scaled numbers
+    
+    # Initialize slider value on first use (use SCALED values now)
+    if slider_key not in st.session_state:
+        st.session_state[slider_key] = (min_value_scaled, max_value_scaled)
+    
+    # Get current slider value (already scaled) and clamp it
     current_value = st.session_state[slider_key]
-    clamped_value = (
-        max(min_value, min(current_value[0], max_value)),
-        max(min_value, min(current_value[1], max_value))
+    clamped_value_scaled = (
+        max(min_value_scaled, min(current_value[0], max_value_scaled)),
+        max(min_value_scaled, min(current_value[1], max_value_scaled))
     )
-
-    slider_values = st.slider(
-        label=get_display_name(column_name),
-        min_value=min_value,
-        max_value=max_value,
-        value=clamped_value,
-        step=step,
+    
+    slider_values_scaled = st.slider(
+        label=get_display_name(column_name) + unit,  # Add unit to label (e.g., "Marknadsvärde Mdkr")
+        min_value=min_value_scaled,
+        max_value=max_value_scaled,
+        value=clamped_value_scaled,
+        step=step_scaled,
         format=format_str,
         help=tooltip_func(column_name),
         key=slider_key
     )
-
+    
+    # Scale back to original values for filtering
+    slider_values = (slider_values_scaled[0] * scale_factor, slider_values_scaled[1] * scale_factor)
+    
     # Filter using the ORIGINAL dataframe passed in
     filtered_df = df[
         ((df[column_name] >= slider_values[0]) & (df[column_name] <= slider_values[1])) | 
@@ -421,13 +449,31 @@ def generate_filter_description(filter_data, df_new_ranks):
             if column_name in df_new_ranks.columns:
                 col_min = df_new_ranks[column_name].min()
                 col_max = df_new_ranks[column_name].max()
+                
+                # Determine scale factor for this column (same logic as create_slider_and_filter_df)
+                scale_factor = 1
+                if col_max >= 1e12:  # Trillions
+                    scale_factor = 1e12
+                elif col_max >= 1e9:  # Billions
+                    scale_factor = 1e9
+                elif col_max >= 1e6:  # Millions
+                    scale_factor = 1e6
+                elif col_max >= 1e3:  # Thousands
+                    scale_factor = 1e3
+                
+                # Scale the comparison values to match the slider values
+                col_min_scaled = col_min / scale_factor
+                col_max_scaled = col_max / scale_factor
+                
                 # Only show if the range is actually different from the full range
-                if abs(min_val - col_min) > 0.01 or abs(max_val - col_max) > 0.01:
-                    # Format based on the data type
-                    if isinstance(min_val, float) and min_val != int(min_val):
-                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {min_val:.1f}-{max_val:.1f}")
+                if abs(min_val - col_min_scaled) > 0.01 or abs(max_val - col_max_scaled) > 0.01:
+                    # Format based on the data type - show original values, not scaled
+                    original_min = min_val * scale_factor
+                    original_max = max_val * scale_factor
+                    if isinstance(original_min, float) and original_min != int(original_min):
+                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {original_min:.1f}-{original_max:.1f}")
                     else:
-                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {int(min_val)}-{int(max_val)}")
+                        slider_descriptions.append(f"**{get_display_name(column_name)}**: {int(original_min)}-{int(original_max)}")
     
     if slider_descriptions:
         description_parts.append("Värde-filter: " + "; ".join(slider_descriptions))
@@ -677,36 +723,6 @@ try:
                 with col:
                     df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, sma_period, get_tooltip_text, 1.0, "%d")
 
-        with st.expander(f"🎯 **Omsättningstillväxt Rank** {len(df_filtered_by_sliders)}", expanded=False):
-            st.markdown("##### Filtrera efter Omsättningstillväxt")
-            revenue_columns = all_column_groups['Omsättningstillväxt']  # Assume this method exists in ConfigMappings
-            
-            # loop through revenue_columns and create sliders
-            columns = st.columns(len(revenue_columns), gap='medium', border=True)
-            for revenue_col, col in zip(revenue_columns, columns):
-                with col:
-                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_col, get_tooltip_text, 1.0, "%d")
-            revenue_growth_columns = all_column_groups['Omsättningstillväxt_values']
-            columns = st.columns(len(revenue_growth_columns), gap='medium', border=True)
-            for revenue_growth_col, col in zip(revenue_growth_columns, columns):
-                with col:
-                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, revenue_growth_col, get_tooltip_text, 1.0, "%2.2f")
-
-        with st.expander(f"🎯 **Vinsttillväxt per aktie Rank** {len(df_filtered_by_sliders)}", expanded=False):
-            st.markdown("##### Filtrera efter Vinsttillväxt per aktie")
-            eps_columns = all_column_groups['EPS']  # Assume this method exists in ConfigMappings
-
-            # loop through eps_columns and create sliders
-            columns = st.columns(len(eps_columns), gap='medium', border=True)
-            for eps_col, col in zip(eps_columns, columns):
-                with col:
-                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_col, get_tooltip_text, 1.0, "%d")
-            eps_growth_columns = all_column_groups['EPS_values']
-            columns = st.columns(len(eps_growth_columns), gap='medium', border=True)
-            for eps_growth_col, col in zip(eps_growth_columns, columns):
-                with col:
-                    df_filtered_by_sliders = create_slider_and_filter_df(df_filtered_by_sliders, eps_growth_col, get_tooltip_text, 1.0, "%2.2f")
-
         with st.expander(f"🎯 **Sektoranalys** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("##### Filtrera efter Sektoranalys")
             sektor_columns =['ttm_momentum_clusterRank','pct_ch_3_m','sektor_avg_diffs']
@@ -746,9 +762,12 @@ try:
                             ratio_rank_columns = mappings.get_underlying_ratios_for_category_rank(category_rank_col)['ratio_rank_columns']
                             # Get underlying ratio_value_columns for this category rank column
                             ratio_value_columns = mappings.get_underlying_ratios_for_category_rank(category_rank_col)['ratio_value_columns']
+                            # modify ratio_rank_columns to only keep the part left of the first underscore
+                            ratio_rank_columns_display = [col.split('_')[0] for col in ratio_rank_columns]
+                            #ratio_value_columns = [col.split('_')[0] + '_ratio_value' for col in ratio_value_columns] 
 
                             # create tabs for each ratio and create one slider for ratio rank and one slider for ratio value
-                            tab_labels = ['Info'] + ratio_rank_columns
+                            tab_labels = ['_'] + ratio_rank_columns_display
                             tabs = st.tabs(tab_labels)
                             for i, ratio_rank in enumerate(ratio_rank_columns):
                                 ratio_value = ratio_value_columns[i]

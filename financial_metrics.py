@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Any, Dict, List
 from data_io import load_csv, save_csv
+from financial_utils import calculate_growth_trend_slope
 
 def calculate_agr_for_ticker(csv_path: str, tickers: List[str], dimensions: List[str], period_type: str = "year") -> Dict[str, Dict[str, Any]]:
     """
@@ -37,18 +38,7 @@ def calculate_agr_for_ticker(csv_path: str, tickers: List[str], dimensions: List
             except KeyError:
                 values = np.array([])
                 years = np.array([])
-            growth_rates = []
-            for i in range(1, len(values)):
-                prev = values[i - 1]
-                curr = values[i]
-                if pd.isna(prev) or pd.isna(curr) or prev == 0:
-                    continue
-                growth = (curr - prev) / abs(prev)
-                growth_rates.append(growth)
-            if growth_rates:
-                agr = np.mean(growth_rates)
-            else:
-                agr = np.nan
+            agr = calculate_growth_trend_slope(values)
             dim_key = dim.replace(" ", "_") + f"_{period_type}_AvgGrowth"
             ticker_agr[dim_key] = agr
             dim_data_key = dim.replace(" ", "_")

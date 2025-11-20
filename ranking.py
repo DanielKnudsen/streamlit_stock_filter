@@ -103,11 +103,16 @@ def create_ratios_to_ranks(
                 # Remove the suffix to get ratio name
                 ratio_name = column.replace(f'_{period_name}_ratioValue', '')
                 
-                # Get ranking direction from ratio definition
+                # Get ranking direction from ratio definition and handle ignore flag for ttm_current that should be skipped
+                # this is because it is not meaningful to calculate ranks for pure values such as Total Revenue
+                # it will just clutter the output with meaningless ranks
                 is_better = ratio_definitions.get(ratio_name, {}).get('higher_is_better', True)
-                
-                # Calculate percentile ranks
-                ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
+                ignore_calculate_rank_ttm_current = ratio_definitions.get(ratio_name, {}).get('ignore_calculate_rank_ttm_current', False)
+                if period_name == 'ttm_current' and ignore_calculate_rank_ttm_current:
+                    ranked = pd.Series([np.nan] * len(df_merged), index=df_merged.index)
+                else:
+                    # Calculate percentile ranks
+                    ranked = df_merged[column].rank(pct=True, ascending=is_better) * 100
                 ranked = ranked.fillna(50)
                 
                 # Store ranks for each ticker

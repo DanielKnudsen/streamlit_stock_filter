@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from financial_utils import calculate_growth_trend_slope
+
 
 def calculate_all_ratios(
     raw_data: dict,
@@ -232,14 +234,7 @@ def calculate_all_ratios(
                             historical_values.append(np.nan)
                             ratios[f'{ratio_name}_{period_suffix}_{periods[-(i+1)]}'] = np.nan
                     
-                    # Calculate trend slope and assign to trend cluster periods
-                    x = np.arange(1, len(periods) + 1)
-                    y = np.array(historical_values)
-                    if np.isinf(y).any() or np.isnan(y).all():
-                        trend_value = np.nan
-                    else:
-                        slope, _ = np.polyfit(x[~np.isnan(y)], y[~np.isnan(y)], 1)
-                        trend_value = slope
+                    trend_value = calculate_growth_trend_slope(historical_values)
                     
                     # Assign trend value to trend cluster periods
                     for cluster_period in cluster_periods_to_generate:
