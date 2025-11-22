@@ -340,7 +340,7 @@ AINO,Basic_EPS_year_2022,-0.067232
 AINO,Basic_EPS_year_2023,-0.084751
 AINO,Basic_EPS_year_2024,-0.1
 AINO,Basic_EPS_year_AvgGrowth,-0.48628170606030374
-AINO,Basic_EPS_year_AvgGrowth_Rank,22.52906976744186
+AINO,Basic_EPS_year_AvgGrowth_Rank,22.38372093023256
 AINO,Total_Revenue_year_2021,23044000.0
 AINO,Total_Revenue_year_2022,19908000.0
 AINO,Total_Revenue_year_2023,23919000.0
@@ -496,7 +496,7 @@ ALZCUR,Basic_EPS_year_2022,-0.993585
 ALZCUR,Basic_EPS_year_2023,-0.570102
 ALZCUR,Basic_EPS_year_2024,-0.437078
 ALZCUR,Basic_EPS_year_AvgGrowth,-0.46217519260016954
-ALZCUR,Basic_EPS_year_AvgGrowth_Rank,23.546511627906977
+ALZCUR,Basic_EPS_year_AvgGrowth_Rank,23.401162790697676
 ALZCUR,Total_Revenue_year_2021,0.0
 ALZCUR,Total_Revenue_year_2022,0.0
 ALZCUR,Total_Revenue_year_2023,0.0
@@ -784,7 +784,7 @@ AXOLOT,Basic_EPS_year_2022,-0.214
 AXOLOT,Basic_EPS_year_2023,-0.11
 AXOLOT,Basic_EPS_year_2024,-0.09
 AXOLOT,Basic_EPS_year_AvgGrowth,-0.46300279252848114
-AXOLOT,Basic_EPS_year_AvgGrowth_Rank,23.401162790697676
+AXOLOT,Basic_EPS_year_AvgGrowth_Rank,23.25581395348837
 AXOLOT,Total_Revenue_year_2021,2958000.0
 AXOLOT,Total_Revenue_year_2022,1559000.0
 AXOLOT,Total_Revenue_year_2023,1648000.0
@@ -1859,7 +1859,7 @@ CMH,Basic_EPS_year_2022,-65.026407
 CMH,Basic_EPS_year_2023,-0.123674
 CMH,Basic_EPS_year_2024,-26.59953
 CMH,Basic_EPS_year_AvgGrowth,-0.4763957108272209
-CMH,Basic_EPS_year_AvgGrowth_Rank,23.11046511627907
+CMH,Basic_EPS_year_AvgGrowth_Rank,22.96511627906977
 CMH,Total_Revenue_year_2021,882046.0
 CMH,Total_Revenue_year_2022,108517.0
 CMH,Total_Revenue_year_2023,976281.0
@@ -2965,7 +2965,7 @@ FLUI,Basic_EPS_year_2022,-71.800768
 FLUI,Basic_EPS_year_2023,-79.40647
 FLUI,Basic_EPS_year_2024,-11.291378
 FLUI,Basic_EPS_year_AvgGrowth,-0.4810379657674615
-FLUI,Basic_EPS_year_AvgGrowth_Rank,22.674418604651162
+FLUI,Basic_EPS_year_AvgGrowth_Rank,22.52906976744186
 FLUI,Total_Revenue_year_2021,2602000.0
 FLUI,Total_Revenue_year_2022,3251000.0
 FLUI,Total_Revenue_year_2023,3338000.0
@@ -3805,7 +3805,7 @@ IMMU,Basic_EPS_year_2022,-14.0
 IMMU,Basic_EPS_year_2023,-4.39
 IMMU,Basic_EPS_year_2024,-2.64
 IMMU,Basic_EPS_year_AvgGrowth,-0.48765450733129956
-IMMU,Basic_EPS_year_AvgGrowth_Rank,22.38372093023256
+IMMU,Basic_EPS_year_AvgGrowth_Rank,22.238372093023255
 IMMU,Total_Revenue_year_2021,0.0
 IMMU,Total_Revenue_year_2022,0.0
 IMMU,Total_Revenue_year_2023,0.0
@@ -3832,9 +3832,9 @@ INCOAX,Basic_EPS_year_AvgGrowth,-0.3867633696502483
 INCOAX,Basic_EPS_year_AvgGrowth_Rank,28.197674418604652
 INCOAX,Total_Revenue_year_2021,20894597.0
 INCOAX,Total_Revenue_year_2022,25922260.0
-INCOAX,Total_Revenue_year_2023,59619447.0
-INCOAX,Total_Revenue_year_2024,74497775.0
-INCOAX,Total_Revenue_year_AvgGrowth,0.4300057171650897
+INCOAX,Total_Revenue_year_2023,59619000.0
+INCOAX,Total_Revenue_year_2024,74498000.0
+INCOAX,Total_Revenue_year_AvgGrowth,0.4300067488198187
 INCOAX,Total_Revenue_year_AvgGrowth_Rank,88.61671469740634
 INDT,Basic_EPS_year_2021,5.76
 INDT,Basic_EPS_year_2022,7.36
@@ -4520,7 +4520,7 @@ LIPUM,Basic_EPS_year_2022,-6.402394
 LIPUM,Basic_EPS_year_2023,-3.842719
 LIPUM,Basic_EPS_year_2024,-2.617144
 LIPUM,Basic_EPS_year_AvgGrowth,-0.495034327862851
-LIPUM,Basic_EPS_year_AvgGrowth_Rank,22.238372093023255
+LIPUM,Basic_EPS_year_AvgGrowth_Rank,22.093023255813954
 LIPUM,Total_Revenue_year_2021,0.0
 LIPUM,Total_Revenue_year_2022,0.0
 LIPUM,Total_Revenue_year_2023,0.0
@@ -6900,10 +6900,10 @@ SKF-B,Total_Revenue_year_AvgGrowth,0.060763557392700195
 SKF-B,Total_Revenue_year_AvgGrowth_Rank,34.79827089337176
 SKIS-B,Basic_EPS_year_2022,8.5
 SKIS-B,Basic_EPS_year_2023,5.28
-SKIS-B,Basic_EPS_year_2024,6.04
+SKIS-B,Basic_EPS_year_2024,7.05
 SKIS-B,Basic_EPS_year_2025,0.0
-SKIS-B,Basic_EPS_year_AvgGrowth,-0.49929364278506516
-SKIS-B,Basic_EPS_year_AvgGrowth_Rank,22.093023255813954
+SKIS-B,Basic_EPS_year_AvgGrowth,-0.45568891022563585
+SKIS-B,Basic_EPS_year_AvgGrowth_Rank,23.837209302325583
 SKIS-B,Total_Revenue_year_2022,4092252000.0
 SKIS-B,Total_Revenue_year_2023,4281497000.0
 SKIS-B,Total_Revenue_year_2024,4679385000.0
@@ -7191,7 +7191,7 @@ STOR-B,Basic_EPS_year_2022,0.86
 STOR-B,Basic_EPS_year_2023,0.47
 STOR-B,Basic_EPS_year_2024,-0.03
 STOR-B,Basic_EPS_year_AvgGrowth,-0.4799999999999999
-STOR-B,Basic_EPS_year_AvgGrowth_Rank,22.819767441860463
+STOR-B,Basic_EPS_year_AvgGrowth_Rank,22.674418604651162
 STOR-B,Total_Revenue_year_2021,17496000000.0
 STOR-B,Total_Revenue_year_2022,34250000000.0
 STOR-B,Total_Revenue_year_2023,36006000000.0
@@ -7455,7 +7455,7 @@ TENEO,Basic_EPS_year_2022,-6.398438
 TENEO,Basic_EPS_year_2023,-0.6
 TENEO,Basic_EPS_year_2024,-0.2
 TENEO,Basic_EPS_year_AvgGrowth,-0.4724267648426873
-TENEO,Basic_EPS_year_AvgGrowth_Rank,23.25581395348837
+TENEO,Basic_EPS_year_AvgGrowth_Rank,23.11046511627907
 TENEO,Total_Revenue_year_2021,38866000.0
 TENEO,Total_Revenue_year_2022,45678000.0
 TENEO,Total_Revenue_year_2023,60534000.0
@@ -7618,7 +7618,7 @@ TRAC-B,Basic_EPS_year_2022,-25.54
 TRAC-B,Basic_EPS_year_2023,18.24
 TRAC-B,Basic_EPS_year_2024,32.26
 TRAC-B,Basic_EPS_year_AvgGrowth,-0.45588463863224205
-TRAC-B,Basic_EPS_year_AvgGrowth_Rank,23.837209302325583
+TRAC-B,Basic_EPS_year_AvgGrowth_Rank,23.691860465116278
 TRAC-B,Total_Revenue_year_2021,1353700000.0
 TRAC-B,Total_Revenue_year_2022,-362100000.0
 TRAC-B,Total_Revenue_year_2023,284400000.0
@@ -7630,7 +7630,7 @@ TRAD,Basic_EPS_year_2022,0.535645
 TRAD,Basic_EPS_year_2023,0.56
 TRAD,Basic_EPS_year_2024,-0.07
 TRAD,Basic_EPS_year_AvgGrowth,-0.4565681759013142
-TRAD,Basic_EPS_year_AvgGrowth_Rank,23.691860465116278
+TRAD,Basic_EPS_year_AvgGrowth_Rank,23.546511627906977
 TRAD,Total_Revenue_year_2021,1423294000.0
 TRAD,Total_Revenue_year_2022,1639550000.0
 TRAD,Total_Revenue_year_2023,1986755000.0
@@ -7858,7 +7858,7 @@ VIMAB,Basic_EPS_year_2022,-1.6
 VIMAB,Basic_EPS_year_2023,-0.3
 VIMAB,Basic_EPS_year_2024,-3.6
 VIMAB,Basic_EPS_year_AvgGrowth,-0.47777777777777763
-VIMAB,Basic_EPS_year_AvgGrowth_Rank,22.96511627906977
+VIMAB,Basic_EPS_year_AvgGrowth_Rank,22.819767441860463
 VIMAB,Total_Revenue_year_2021,203324000.0
 VIMAB,Total_Revenue_year_2022,224829000.0
 VIMAB,Total_Revenue_year_2023,341564000.0
