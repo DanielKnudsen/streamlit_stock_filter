@@ -307,12 +307,15 @@ def create_slider_and_filter_df(df, column_name, tooltip_func, step=1.0, format_
     if slider_key not in st.session_state:
         st.session_state[slider_key] = (min_value_scaled, max_value_scaled)
     
-    # Get current slider value (already scaled) and clamp it
+    # Get current slider value (already scaled) and clamp it to current range
     current_value = st.session_state[slider_key]
     clamped_value_scaled = (
         max(min_value_scaled, min(current_value[0], max_value_scaled)),
         max(min_value_scaled, min(current_value[1], max_value_scaled))
     )
+    
+    # Update session state with clamped values to prevent future out-of-range errors
+    st.session_state[slider_key] = clamped_value_scaled
     
     slider_values_scaled = st.slider(
         label=get_display_name(column_name) + unit,  # Add unit to label (e.g., "Marknadsvärde Mdkr")
