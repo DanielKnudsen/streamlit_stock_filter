@@ -403,8 +403,11 @@ def extract_filter_state():
     return filter_state
 
 
-def apply_filter_state(filter_data):
+def apply_filter_state(filter_item):
     """Apply saved filter state to session_state"""
+    filter_data = filter_item['filter_data']
+    # Store the filter description for display
+    st.session_state.loaded_filter_description = filter_item.get('description', '')
     # Store filter data to be applied on next rerun
     st.session_state.pending_filter_restore = filter_data
     st.rerun()
@@ -909,7 +912,7 @@ try:
                             st.caption(f"Sparad: {created_date}")
                         with col2:
                             if st.button("📂 Ladda", key=f"load_{filter_item['id']}"):
-                                apply_filter_state(filter_item['filter_data'])
+                                apply_filter_state(filter_item)
                                 log_user_activity('filter_loaded', {
                                     'filter_name': filter_item['name'],
                                     'filter_id': filter_item['id']
