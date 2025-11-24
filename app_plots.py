@@ -137,7 +137,7 @@ def generate_price_chart(config, CSV_PATH, add_moving_averages, get_display_name
             for trace in fig.data:
                 trace.update(hoverinfo="skip", hovertemplate=None)
 
-            st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
+            st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
         else:
             st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
 
@@ -409,4 +409,4 @@ def create_trend_momentum_plot(get_display_name, scatter_df):
                         margin=dict(l=10, r=10, t=50, b=10),
                         hovermode='closest'
                     )
-    return st.plotly_chart(fig_scatter, use_container_width=True, key="trend_momentum_scatter")
+    return st.plotly_chart(fig_scatter, width="stretch", key="trend_momentum_scatter")
