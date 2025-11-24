@@ -867,9 +867,13 @@ try:
                 
                 st.markdown("---")
                 st.markdown("##### Aktuella filter")
-                current_filter_data = extract_filter_state()
-                current_description = generate_filter_description(current_filter_data, df_new_ranks)
-                st.info(f"**Aktiva filter:** {current_description}")
+                # Check if a filter description is loaded
+                if 'loaded_filter_description' in st.session_state and st.session_state.loaded_filter_description:
+                    st.info(f"**Aktiva filter:** {st.session_state.loaded_filter_description}")
+                else:
+                    current_filter_data = extract_filter_state()
+                    current_description = generate_filter_description(current_filter_data, df_new_ranks)
+                    st.info(f"**Aktiva filter:** {current_description}")
                 
                 st.markdown("---")
                 
