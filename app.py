@@ -386,10 +386,36 @@ def extract_filter_state():
     """Extract current filter state from session_state"""
     filter_state = {}
     
-    # Extract slider values (keys starting with 'slider_')
+    # Extract slider values (keys starting with 'slider_') - but only if not at full range
     for key in st.session_state:
         if key.startswith('slider_'):
-            filter_state[key] = st.session_state[key]
+            value = st.session_state[key]
+            if isinstance(value, (list, tuple)) and len(value) == 2:
+                min_val, max_val = value
+                # Get current scaled min/max for this slider
+                column_name = key.replace('slider_', '')
+                min_max_key = f"minmax_{column_name}"
+                if min_max_key in st.session_state:
+                    orig_min, orig_max = st.session_state[min_max_key]
+                    
+                    # Calculate scale factor (same logic as create_slider_and_filter_df)
+                    scale_factor = 1
+                    if orig_max >= 1e12:  # Trillions
+                        scale_factor = 1e12
+                    elif orig_max >= 1e9:  # Billions
+                        scale_factor = 1e9
+                    elif orig_max >= 1e6:  # Millions
+                        scale_factor = 1e6
+                    elif orig_max >= 1e3:  # Thousands
+                        scale_factor = 1e3
+                    
+                    # Calculate scaled min/max
+                    min_scaled = orig_min / scale_factor
+                    max_scaled = orig_max / scale_factor
+                    
+                    # Only save if not at full range (with small tolerance for floating point)
+                    if not (abs(min_val - min_scaled) < 0.01 and abs(max_val - max_scaled) < 0.01):
+                        filter_state[key] = value
     
     # Extract pill selections (keys starting with 'pills_')  
     for key in st.session_state:
