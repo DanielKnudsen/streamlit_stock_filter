@@ -129,6 +129,28 @@ CSV_PATH = Path('data') / ('local' if ENVIRONMENT == 'local' else 'remote')
 
 show_Ratio_to_Rank =True
 
+# =============================
+# URL QUERY PARAMETER FILTERING
+# =============================
+# Parse URL query parameters to set filters for blog posts (BEFORE authentication)
+query_params = st.query_params
+if query_params:
+    for param_key, param_value in query_params.items():
+        if param_key.startswith('slider_'):
+            # Slider values: comma-separated scaled min,max (e.g., "20.5,85.3")
+            try:
+                min_val, max_val = map(float, param_value.split(','))
+                st.session_state[param_key] = (min_val, max_val)
+            except (ValueError, TypeError):
+                st.warning(f"Invalid slider parameter: {param_key}={param_value}")
+        elif param_key.startswith('pills_'):
+            # Pill selections: comma-separated values (e.g., "LargeCap,MidCap")
+            st.session_state[param_key] = param_value.split(',')
+        elif param_key == 'ticker_input':
+            # Ticker input: comma-separated tickers (e.g., "VOLV-A,ERIC-B")
+            st.session_state[param_key] = param_value
+        # Add more parameter types as needed (e.g., radio buttons, selects)
+
 
 # --- Authentication Handling ---
 user, should_stop = handle_authentication(ENABLE_AUTHENTICATION)
@@ -577,28 +599,6 @@ try:
     ratio_definitions = config.get('ratio_definitions', {})
     # ConfigMappings handles the ratio-to-rank mapping dynamically
     # No need for manual mapping creation
-    # =============================
-    # URL QUERY PARAMETER FILTERING
-    # =============================
-    # Parse URL query parameters to set filters for blog posts
-    query_params = st.query_params
-    if query_params:
-        for param_key, param_value in query_params.items():
-            if param_key.startswith('slider_'):
-                # Slider values: comma-separated scaled min,max (e.g., "20.5,85.3")
-                try:
-                    min_val, max_val = map(float, param_value.split(','))
-                    st.session_state[param_key] = (min_val, max_val)
-                except (ValueError, TypeError):
-                    st.warning(f"Invalid slider parameter: {param_key}={param_value}")
-            elif param_key.startswith('pills_'):
-                # Pill selections: comma-separated values (e.g., "LargeCap,MidCap")
-                st.session_state[param_key] = param_value.split(',')
-            elif param_key == 'ticker_input':
-                # Ticker input: comma-separated tickers (e.g., "VOLV-A,ERIC-B")
-                st.session_state[param_key] = param_value
-            # Add more parameter types as needed (e.g., radio buttons, selects)
-
     # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
     # =============================
