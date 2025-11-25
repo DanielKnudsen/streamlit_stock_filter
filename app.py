@@ -578,6 +578,28 @@ try:
     # ConfigMappings handles the ratio-to-rank mapping dynamically
     # No need for manual mapping creation
     # =============================
+    # URL QUERY PARAMETER FILTERING
+    # =============================
+    # Parse URL query parameters to set filters for blog posts
+    query_params = st.query_params
+    if query_params:
+        for param_key, param_value in query_params.items():
+            if param_key.startswith('slider_'):
+                # Slider values: comma-separated scaled min,max (e.g., "20.5,85.3")
+                try:
+                    min_val, max_val = map(float, param_value.split(','))
+                    st.session_state[param_key] = (min_val, max_val)
+                except (ValueError, TypeError):
+                    st.warning(f"Invalid slider parameter: {param_key}={param_value}")
+            elif param_key.startswith('pills_'):
+                # Pill selections: comma-separated values (e.g., "LargeCap,MidCap")
+                st.session_state[param_key] = param_value.split(',')
+            elif param_key == 'ticker_input':
+                # Ticker input: comma-separated tickers (e.g., "VOLV-A,ERIC-B")
+                st.session_state[param_key] = param_value
+            # Add more parameter types as needed (e.g., radio buttons, selects)
+
+    # =============================
     # COLUMN SELECTION FOR FILTERING AND DISPLAY
     # =============================
     # Filter columns that contain the string "catRank" for the main table
@@ -766,7 +788,7 @@ try:
             
             df_scatter_to_use=prepare_sector_comparison(df_filtered_by_sliders[['Lista','Sektor','ttm_momentum_clusterRank','ttm_momentum_clusterRank_Sektor_avg','pct_ch_3_m','pct_ch_3_m_Sektor_avg']])
             fig = generate_scatter_plot(df_scatter_to_use)
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, config={"responsive": True})
 
         with st.expander(f"🎯 **Expertnivå: Detaljerad nyckeltalsfiltrering** {len(df_filtered_by_sliders)}", expanded=False):
             st.markdown("""
@@ -906,7 +928,28 @@ try:
                 
                 st.markdown("---")
                 
-                # Load saved filter states
+                # Generate shareable URL with current filters
+                if st.button("🔗 Generera delbar länk"):
+                    base_url = "https://your-app.streamlit.app"  # Replace with your actual app URL
+                    params = []
+                    for key, value in st.session_state.items():
+                        if key.startswith(('slider_', 'pills_')) or key == 'ticker_input':
+                            if isinstance(value, (list, tuple)):
+                                param_value = ','.join(map(str, value))
+                            elif isinstance(value, list):
+                                param_value = ','.join(map(str, value))
+                            else:
+                                param_value = str(value)
+                            params.append(f"{key}={param_value}")
+                    
+                    if params:
+                        shareable_url = base_url + '?' + '&'.join(params)
+                        st.code(shareable_url, language=None)
+                        st.success("Kopiera länken ovan för att dela filtrerade vyer!")
+                    else:
+                        st.info("Inga aktiva filter att dela.")
+                
+                st.markdown("---")
                 if ENABLE_AUTHENTICATION and user:
                     # Load from Supabase for authenticated users
                     from auth import get_user_filter_states, delete_filter_state
@@ -1284,7 +1327,7 @@ try:
                                 margin=dict(l=10, r=10, t=40, b=10),
                                 xaxis=dict(type='category')
                             )
-                            st.plotly_chart(fig_div, config={"displayModeBar": False}, width="stretch", key=f"dividends_bar_{selected_stock_ticker}")
+                            st.plotly_chart(fig_div, config={"displayModeBar": False, "responsive": True}, key=f"dividends_bar_{selected_stock_ticker}")
                         else:
                             st.info(f"Dividend-data saknar nödvändiga kolumner ('Year', 'Value') för {selected_stock_ticker}.")
                     else:
@@ -1294,14 +1337,20 @@ try:
                 st.write(f"Datadump av {selected_stock_ticker}")
                 # Convert dataframe to consistent types for display
                 display_df = df_new_ranks.loc[selected_stock_ticker].to_frame()
-                # Convert numeric columns to float, keep others as strings
+                # Convert columns to consistent types for Arrow compatibility
                 for col in display_df.columns:
-                    if display_df[col].dtype == 'object':
-                        # Try to convert to numeric, keep as string if it fails
-                        try:
-                            display_df[col] = pd.to_numeric(display_df[col], errors='ignore')
-                        except (ValueError, TypeError):
-                            pass
+                    try:
+                        # Try to convert to numeric
+                        numeric_series = pd.to_numeric(display_df[col])
+                        # If conversion succeeds and there are no NaN values, keep as numeric
+                        if not numeric_series.isna().any():
+                            display_df[col] = numeric_series
+                        else:
+                            # If there are NaN values, convert everything to string for consistency
+                            display_df[col] = display_df[col].astype(str)
+                    except (ValueError, TypeError):
+                        # If conversion fails, ensure all values are strings
+                        display_df[col] = display_df[col].astype(str)
                 st.dataframe(display_df)
         with st.container(border=True, key="cagr_container"):
             st.subheader("📈 Tillväxthistorik senaste 4 åren")
@@ -1347,7 +1396,7 @@ try:
                         margin=dict(l=10, r=10, t=40, b=10),
                         yaxis=dict(ticksuffix="%", tickformat=".0f")
                     )
-                    st.plotly_chart(fig_cagr, config={"displayModeBar": False}, width="stretch", key=f"cagr_bar_{selected_stock_ticker}")
+                    st.plotly_chart(fig_cagr, config={"displayModeBar": False, "responsive": True}, key=f"cagr_bar_{selected_stock_ticker}")
                 with st.expander("**📊 Detaljerade tillväxtgrafer + TTM-signaler** (Klicka för att dölja)", expanded=True):
                     def plot_cagr_bar(df, selected_stock_ticker, base_ratio, key_prefix, ttm_q_offset, ttm_value, ttm_diff_value,higher_is_better):
                         year_cols = [col for col in df.columns if col.startswith(base_ratio + '_year_')]
@@ -1407,7 +1456,7 @@ try:
                                             margin=dict(l=10, r=10, t=30, b=10), 
                                             showlegend=False,
                                             xaxis=dict(type='category'))
-                            st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch", key=f"{key_prefix}_{base_ratio}_cagr_bar")
+                            st.plotly_chart(fig, config={"displayModeBar": False, "responsive": True}, key=f"{key_prefix}_{base_ratio}_cagr_bar")
                     
                     # define the three columns for the three ratios
                     left_col,  right_col = st.columns(2, gap='medium', border=False)
@@ -1440,7 +1489,7 @@ try:
                         marker_colors = ['royalblue'] * 4 + ['gold'] * 2
                         fig_tot_rev.update_traces(texttemplate='%{text:.3s}', textposition='inside', marker_color=marker_colors)
                         fig_tot_rev.update_layout(margin=dict(l=10, r=10, t=100, b=40), yaxis_title="SEK", xaxis=dict(type='category'))
-                        st.plotly_chart(fig_tot_rev, config={"displayModeBar": False}, width="stretch", key=f"{cols}_bar_{selected_stock_ticker}")
+                        st.plotly_chart(fig_tot_rev, config={"displayModeBar": False, "responsive": True}, key=f"{cols}_bar_{selected_stock_ticker}")
 
                     with left_col:
                         cols = "Total_Revenue"
@@ -1480,7 +1529,7 @@ try:
                             margin=dict(l=10, r=10, t=40, b=10),
                             yaxis=dict(ticksuffix="%", tickformat=".0f")
                         )
-                        st.plotly_chart(fig_pct, config={"displayModeBar": False}, width="stretch", key=f"pct_bar_{selected_stock_ticker}")
+                        st.plotly_chart(fig_pct, config={"displayModeBar": False, "responsive": True}, key=f"pct_bar_{selected_stock_ticker}")
 
         with st.container(border=True, key="ratios_container"):
 
@@ -1690,7 +1739,7 @@ try:
                             height=400,
                             margin=dict(l=10, r=10, t=40, b=10)
                         )
-                        st.plotly_chart(scatter_fig, config={"displayModeBar": False}, width="stretch", key=f"scatter_{display_ratio}_{display_rank}")
+                        st.plotly_chart(scatter_fig, config={"displayModeBar": False, "responsive": True}, key=f"scatter_{display_ratio}_{display_rank}")
                         with st.expander(f"🛟 **Hjälp om {display_ratio_selector}_{selected_period_type}** (Klicka för att visa)"):
                             st.write(get_ratio_help_text(f"{display_ratio_selector}_{selected_period_type}"))
 

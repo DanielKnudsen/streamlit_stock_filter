@@ -136,6 +136,6 @@ def generate_price_chart(config, CSV_PATH, add_moving_averages, get_display_name
             for trace in fig.data:
                 trace.update(hoverinfo="skip", hovertemplate=None)
 
-            st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
+            st.plotly_chart(fig, config={"displayModeBar": False, "responsive": True})
         else:
             st.warning(f"Prisdatafil saknas: {price_file_path}. Kontrollera att filen finns i mappen '{CSV_PATH}/'.")
