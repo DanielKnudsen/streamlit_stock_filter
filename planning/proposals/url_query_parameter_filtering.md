@@ -164,17 +164,6 @@ Parameters are applied to Streamlit session state, ensuring they work with the e
 2. **Share interesting findings** with colleagues or friends
 3. **Experiment with parameters** to discover new investment ideas
 
-## Troubleshooting
-
-### Common Issues
-- **URL too long:** Some browsers limit URL length; consider using fewer parameters
-- **Filters not applying:** Check parameter names match exactly (case-sensitive)
-- **Invalid ranges:** Ensure min < max for slider parameters
-- **Special characters:** URL-encode special characters if needed
-
-### Parameter Name Reference
-Always use the exact parameter names as shown in the tables above. The app uses internal naming conventions that must be followed precisely.
-
 ## Future Enhancements
 
 Potential improvements to the URL parameter system:

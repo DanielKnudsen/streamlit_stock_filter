@@ -139,30 +139,30 @@ def show_account_dialog():
 def handle_authentication(ENABLE_AUTHENTICATION: bool):
     """
     Main authentication handler for the Streamlit app.
-    
+
     Args:
         ENABLE_AUTHENTICATION: Boolean to enable/disable authentication
-        
+
     Returns:
         tuple: (user, should_stop_execution)
         - user: Current user object or None
         - should_stop_execution: Boolean indicating if app should stop (for auth flow)
     """
     user = get_current_user()
-    
+
     # If authentication is disabled, return None user and continue
     if not ENABLE_AUTHENTICATION:
         return None, False
-    
+
     # If no user and authentication is enabled, show auth dialog
     if not user:
         @st.dialog("Logga in eller registrera dig")
         def show_auth_dialog_wrapper():
             show_auth_dialog()
-        
+
         show_auth_dialog_wrapper()
         return None, True  # Stop execution to show auth dialog
-    
+
     # Check if user has valid subscription
     is_valid, membership_id, membership_name, iso_start_date, iso_end_date = check_membership_status_by_email(user.email)
     if not is_valid:
