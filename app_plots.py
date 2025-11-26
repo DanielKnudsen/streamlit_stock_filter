@@ -250,7 +250,18 @@ def plot_ratio_values(df,mappings):
         if pd.isna(v):
             bar_text.append('N/A')
         else:
-            bar_text.append(f"{v:.2f}")
+            # Smart number formatting for both small and large numbers
+            if abs(v) >= 1e9:  # Billions
+                formatted = f"{v/1e9:.1f}B"
+            elif abs(v) >= 1e6:  # Millions
+                formatted = f"{v/1e6:.1f}M"
+            elif abs(v) >= 1e3:  # Thousands
+                formatted = f"{v/1e3:.1f}K"
+            elif abs(v) >= 10:  # Medium numbers
+                formatted = f"{v:.1f}"
+            else:  # Small numbers (0-10)
+                formatted = f"{v:.2f}"
+            bar_text.append(formatted)
     
     fig = go.Figure(data=[
         go.Bar(
