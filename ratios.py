@@ -121,6 +121,15 @@ def calculate_all_ratios(
         periods_cf = [p for p in periods_cf if p is not None]
         periods = sorted(list(set(periods_is) & set(periods_bs) & set(periods_cf)))
         
+        if period_type == 'quarterly':
+            # reverse order for periods
+            periods = periods[::-1]
+
+        # periods for quarterly data
+        # ['2025Q2', '2025Q3']
+        # periods for annual data
+        # [2021, 2022, 2023, 2024]
+
         ratios = {}
         # Get historical prices if available
         historical_prices = data.get('historical_prices', {})
